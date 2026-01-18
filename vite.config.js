@@ -28,6 +28,13 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      "@components": "/src/common/components",
+      "@utils": "/src/common/utils",
+      "@assets": "/src/assets",
+      "@hooks": "/src/common/hooks",
+      "@modules": "/src/modules",
+      "@": "/src",
+
       "@tabler/icons-react": "@tabler/icons-react/dist/esm/icons/index.mjs",
     },
   },

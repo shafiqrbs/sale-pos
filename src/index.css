@@ -1,68 +1,89 @@
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+  --theme-primary-color-0: var(--mantine-color-blue-0);
+  --theme-primary-color-1: var(--mantine-color-blue-1);
+  --theme-primary-color-2: var(--mantine-color-blue-2);
+  --theme-primary-color-3: var(--mantine-color-blue-3);
+  --theme-primary-color-4: var(--mantine-color-blue-4);
+  --theme-primary-color-5: var(--mantine-color-blue-5);
+  --theme-primary-color-6: var(--mantine-color-blue-6);
+  --theme-primary-color-7: var(--mantine-color-blue-7);
+  --theme-primary-color-8: var(--mantine-color-blue-8);
+  --theme-primary-color-9: var(--mantine-color-blue-9);
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  --theme-secondary-color-0: var(--mantine-color-green-0);
+  --theme-secondary-color-1: var(--mantine-color-green-1);
+  --theme-secondary-color-2: var(--mantine-color-green-2);
+  --theme-secondary-color-3: var(--mantine-color-green-3);
+  --theme-secondary-color-4: var(--mantine-color-green-4);
+  --theme-secondary-color-5: var(--mantine-color-green-5);
+  --theme-secondary-color-6: var(--mantine-color-green-6);
+  --theme-secondary-color-7: var(--mantine-color-green-7);
+  --theme-secondary-color-8: var(--mantine-color-green-8);
+  --theme-secondary-color-9: var(--mantine-color-green-9);
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+  --theme-tertiary-color-0: var(--mantine-color-gray-0);
+  --theme-tertiary-color-1: var(--mantine-color-gray-1);
+  --theme-tertiary-color-2: var(--mantine-color-gray-2);
+  --theme-tertiary-color-3: var(--mantine-color-gray-3);
+  --theme-tertiary-color-4: var(--mantine-color-gray-4);
+  --theme-tertiary-color-5: var(--mantine-color-gray-5);
+  --theme-tertiary-color-6: var(--mantine-color-gray-6);
+  --theme-tertiary-color-7: var(--mantine-color-gray-7);
+  --theme-tertiary-color-8: var(--mantine-color-gray-8);
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
+  --theme-warn-color-0: var(--mantine-color-orange-0);
+  --theme-warn-color-1: var(--mantine-color-orange-1);
+  --theme-warn-color-2: var(--mantine-color-orange-2);
+  --theme-warn-color-3: var(--mantine-color-orange-3);
+  --theme-warn-color-4: var(--mantine-color-orange-4);
+  --theme-warn-color-5: var(--mantine-color-orange-5);
+  --theme-warn-color-6: var(--mantine-color-orange-6);
+  --theme-warn-color-7: var(--mantine-color-orange-7);
+  --theme-warn-color-8: var(--mantine-color-orange-8);
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
+  --theme-success-color: var(--mantine-color-green-6);
+  --theme-remove-color: var(--mantine-color-red-6);
+  --theme-delete-color: var(--mantine-color-red-6);
+  --theme-error-color: var(--mantine-color-red-6);
+  --theme-warning-color: var(--mantine-color-yellow-6);
+  --theme-info-color: var(--mantine-color-blue-6);
+  --theme-notice-color: var(--mantine-color-gray-6);
+  --theme-validation-error-color: var(--mantine-color-red-6);
+  --theme-validation-success-color: var(--mantine-color-blue-6);
+  --theme-tab-save-color: var(--mantine-color-blue-9);
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
+  --theme-reset-btn-color: var(--mantine-color-gray-6);
+  --theme-reset-btn-color-hover: var(--mantine-color-gray-8);
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
+  --theme-hold-btn-color: var(--mantine-color-yellow-8);
+  --theme-hold-btn-color-hover: var(--mantine-color-yellow-9);
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+  --theme-prescription-btn-color: var(--mantine-color-red-6);
+  --theme-prescription-btn-color-hover: var(--mantine-color-red-9);
+
+  --theme-print-btn-color: var(--mantine-color-green-8);
+  --theme-print-btn-color-hover: var(--mantine-color-green-9);
+
+  --theme-pos-btn-color: var(--mantine-color-violet-7);
+  --theme-pos-btn-color-hover: var(--mantine-color-violet-8);
+
+  --theme-save-btn-color: var(--mantine-color-cyan-6);
+  --theme-save-btn-color-hover: var(--mantine-color-cyan-8);
+
+  --theme-submit-btn-color: var(--mantine-color-green-7);
+  --theme-submit-btn-color-hover: var(--mantine-color-green-8);
+
+  --theme-add-btn-color: var(--mantine-color-blue-8);
+  --theme-add-btn-color-hover: var(--mantine-color-blue-9);
+
+  --theme-edit-btn-color: var(--mantine-color-indigo-6);
+  --theme-edit-btn-color-hover: var(--mantine-color-indigo-8);
+
+  --theme-drawer-border-color: var(--mantine-color-blue-4);
+
+  --theme-tooltip-color: var(--mantine-color-gray-6);
+
+  --theme-carousel-item-color: var(--mantine-color-green-8);
+
+  --theme-menu-three-dot: var(--mantine-color-red-6);
 }
