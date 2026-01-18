@@ -1,0 +1,132 @@
+.titleBackground {
+    background-color: #ffc9c91a;
+}
+
+.bodyBackground {
+    background-color:#fffbf459;
+}
+
+.boxBackground {
+    background-color:#fffbf459!important;
+}
+
+.boxBorderBackground {
+    background-color:#fffbf459;
+    border: 1px solid #fffbf459;
+}
+
+.genericBackground{
+    background-color:#fffbf459;
+}
+.genericHighlightedBox{
+    background-color:#edd5af;
+}
+
+.genericSecondaryBg{
+    background-color:#fbf7ef;
+}
+
+.genericPrimaryBg{
+    background-color: #905a23;
+}
+.genericPrimaryFontColor{
+    color: #29190a;
+}
+
+._cardTitle_sz11i_29::after {
+    content: '';
+    display: block;
+    background-color: #905a23;
+    width: calc(2.8125rem * var(--mantine-scale));
+    height: calc(0.125rem * var(--mantine-scale));
+    margin-top: var(--mantine-spacing-sm);
+}
+
+
+.borderTop,.borderBottom,.borderLeft,.borderRight{
+    border: 1px solid #fffbf459;
+}
+
+.border-radius{
+    border-radius:4px;
+}
+
+
+
+input:focus {
+    border: 1px solid darkgray;
+}
+
+.track {
+    width: rem(40px);
+    height: rem(6px);
+    overflow: visible;
+}
+
+.thumb {
+    width: rem(20px);
+    height: rem(20px);
+    left: rem(-2px);
+    transition:
+            background-color 100ms ease,
+            left 100ms ease;
+
+input:checked + * > & {
+    background-color: var(--mantine-color-blue-filled);
+    left: calc(100% - rem(12px));
+}
+}
+
+.invoiceAdd{
+    background-color:#905a23 !important;
+    @mixin hover {
+        background-color: rgba(144, 90, 35, 0.88);
+    }
+}
+
+.invoiceSave{
+    background-color:#4c3a02 !important;
+    @mixin hover {
+        background-color: rgba(76, 58, 2, 0.85);
+    }
+}
+.invoicePos{
+    background-color:#977304 !important;
+    @mixin hover {
+        background-color: rgba(151, 115, 4, 0.88);
+    }
+
+}
+
+.invoicePrint{
+    background-color:#7b4c1e !important;
+    @mixin hover {
+        background-color: rgba(123, 76, 30, 0.87);
+    }
+
+}
+
+.invoiceHold{
+    background-color:#e3ad05 !important;
+    @mixin hover {
+        background-color: rgba(227, 173, 5, 0.85);
+    }
+
+}
+
+.invoiceReset{
+    background-color:#e1bb7e !important;
+    @mixin hover {
+        background-color: rgba(225, 187, 126, 0.84);
+    }
+
+}
+
+.invoiceEdit{
+    background-color: #dbcdb7 !important;
+    @mixin hover {
+        background-color: rgba(219, 205, 183, 0.87);
+    }
+
+}
+

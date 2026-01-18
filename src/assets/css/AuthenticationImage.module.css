@@ -1,0 +1,36 @@
+.wrapper {
+  min-height: 100vh;
+  background-size: cover;
+  display: flex;
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    form {
+      width: 100%;
+    }
+  }
+}
+
+.wrapperImage {
+  min-height: 100vh;
+  width: 100%;
+  background-size: cover;
+  background-image: url("/src/assets/images/sandra_cover.jpeg");
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    display: none;
+  }
+}
+
+.form {
+  border-right: rem(1px) solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-7));
+  width: rem(450px);
+  padding-top: rem(80px);
+  @media (max-width: $mantine-breakpoint-sm) {
+    width: 100%;
+  }
+}
+
+.title {
+  color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
+  font-family: Greycliff CF, var(--mantine-font-family);
+}
