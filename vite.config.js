@@ -29,6 +29,8 @@ export default defineConfig({
   resolve: {
     alias: {
       "@components": "/src/common/components",
+      "@services": "/src/services",
+      "@constants": "/src/constants",
       "@utils": "/src/common/utils",
       "@assets": "/src/assets",
       "@hooks": "/src/common/hooks",

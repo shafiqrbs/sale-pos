@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from "react-router";
+import "./i18n.js";
 import '@mantine/core/styles.css';
 import "@mantine/dates/styles.css";
 import "@mantine/notifications/styles.css";
@@ -8,15 +9,41 @@ import "@mantine/charts/styles.css";
 import 'mantine-datatable/styles.layer.css';
 import './index.css'
 
-import App from './App.jsx'
-import { MantineProvider } from '@mantine/core';
+import App from './app/App.jsx'
+import { createTheme, MantineProvider } from '@mantine/core';
+import { Notifications } from '@mantine/notifications';
+import { Provider } from 'react-redux';
+import { store } from './app/store';
+
+const theme = createTheme({
+  primaryColor: "indigo",
+  fontFamily: "Open Sans, sans-serif",
+  fontSizes: {
+    "2xs": "10px",
+    "3xs": "8px",
+    "4xs": "6px",
+    les: "4px",
+    es: "2px",
+  },
+  spacing: {
+    "2xs": "10px",
+    "3xs": "8px",
+    "4xs": "6px",
+    les: "4px",
+    mes: "2px",
+    es: "1px",
+  },
+});
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <BrowserRouter>
-      <MantineProvider>
-        <App />
-      </MantineProvider>
-    </BrowserRouter>
+    <Provider store={store}>
+      <BrowserRouter>
+        <MantineProvider theme={theme} withNormalizeCSS withGlobalStyles>
+          <Notifications />
+          <App />
+        </MantineProvider>
+      </BrowserRouter>
+    </Provider>
   </StrictMode>,
 )

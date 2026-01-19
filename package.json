@@ -34,6 +34,7 @@
     "@mantine/modals": "^8.3.12",
     "@mantine/notifications": "^8.3.12",
     "@reduxjs/toolkit": "^2.11.2",
+    "axios": "^1.13.2",
     "better-sqlite3": "^12.6.2",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.19",
