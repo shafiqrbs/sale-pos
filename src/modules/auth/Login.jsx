@@ -28,6 +28,7 @@ import { useTranslation } from "react-i18next";
 import axios from "axios";
 import orderProcessDropdownLocalDataStore from "@utils/local-storage/orderProcessDropdownLocalDataStore.js";
 import commonDataStoreIntoLocalStorage from "@utils/local-storage/commonDataStoreIntoLocalStorage.js";
+import { APP_NAVLINKS, MASTER_APIS } from "@/routes/routes";
 
 export default function Login() {
 	const [ user, setUser ] = useState(null);
@@ -46,7 +47,7 @@ export default function Login() {
 				const res = await window.dbAPI.getDataFromTable("users");
 				setUser(res);
 				if (res?.id) {
-					navigate("/pos/bakery", { replace: true });
+					navigate(APP_NAVLINKS.BAKERY, { replace: true });
 				}
 			} catch (error) {
 				console.error("Auth check error:", error);
@@ -85,7 +86,7 @@ export default function Login() {
 	}
 
 	if (!activated?.is_activated) {
-		return <Navigate replace to="/activate" />;
+		return <Navigate replace to={APP_NAVLINKS.ACTIVATE} />;
 	}
 
 	// if already authenticated, don't render the login form
@@ -100,14 +101,14 @@ export default function Login() {
 		try {
 			const response = await axios({
 				method: "POST",
-				url: `${import.meta.env.VITE_API_GATEWAY_URL}user-login`,
+				url: MASTER_APIS.LOGIN,
 				headers: {
 					Accept: "application/json",
 					"Content-Type": "application/json",
 					"Access-Control-Allow-Origin": "*",
 					"X-Api-Key": import.meta.env.VITE_API_KEY,
 				},
-				data: data,
+				data,
 			});
 
 			if (response.data.status === 200) {
@@ -115,7 +116,7 @@ export default function Login() {
 				orderProcessDropdownLocalDataStore(response.data?.data?.id);
 
 				await commonDataStoreIntoLocalStorage(response.data?.data?.id);
-				navigate("/pos/bakery", { replace: true });
+				navigate(APP_NAVLINKS.BAKERY, { replace: true });
 			} else {
 				setErrorMessage(response.data.message);
 			}
@@ -142,7 +143,7 @@ export default function Login() {
 			onCancel: () => console.log("Cancel"),
 			onConfirm: async () => {
 				await window.dbAPI.resetDatabase();
-				navigate("/activate");
+				navigate(APP_NAVLINKS.ACTIVATE);
 			},
 		});
 	};

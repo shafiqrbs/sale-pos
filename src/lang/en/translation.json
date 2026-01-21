@@ -1154,5 +1154,13 @@
 	"PartialAmount": "Partial Amount",
 	"SplitPayment": "Split Payment",
 	"Payment": "Payment",
-	"SalesComplete": "Sales Complete"
+	"SalesComplete": "Sales Complete",
+	"ActiveYourAccount": "Activate Your Account",
+	"EnterLicenseKey": "Enter License Key",
+	"LicenseKeyMustBe11Characters": "License key must be 11 characters",
+	"ActivationKeyMustBe10Characters": "Activation key must be 10 characters",
+	"EnterLicenseDetails": "Enter your license details to activate your account",
+	"ActivateAccount": "Activate Account",
+	"ActivationKey": "Activation Key",
+	"AccountActivationFailed": "Account activation failed"
 }

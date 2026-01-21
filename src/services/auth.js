@@ -1,4 +1,4 @@
-import { apiSlice } from "@services/api";
+import { apiSlice } from "@services/api.mjs";
 
 export const extendedApiSlice = apiSlice.injectEndpoints({
 	endpoints: (builder) => ({
@@ -10,7 +10,7 @@ export const extendedApiSlice = apiSlice.injectEndpoints({
 					body,
 				};
 			},
-			providesTags: ["User"],
+			providesTags: [ "User" ],
 		}),
 
 		login: builder.mutation({
@@ -19,7 +19,7 @@ export const extendedApiSlice = apiSlice.injectEndpoints({
 				method: "POST",
 				body,
 			}),
-			invalidatesTags: ["Profile", "PendingReceive", "Review", "Dashboard"],
+			invalidatesTags: [ "Profile", "PendingReceive", "Review", "Dashboard" ],
 		}),
 
 		logout: builder.mutation({
@@ -28,7 +28,7 @@ export const extendedApiSlice = apiSlice.injectEndpoints({
 				method: "POST",
 				body,
 			}),
-			invalidatesTags: ["Profile"],
+			invalidatesTags: [ "Profile" ],
 		}),
 
 		resetPassword: builder.mutation({
@@ -37,7 +37,7 @@ export const extendedApiSlice = apiSlice.injectEndpoints({
 				method: "POST",
 				body,
 			}),
-			invalidatesTags: ["Profile"],
+			invalidatesTags: [ "Profile" ],
 		}),
 	}),
 });

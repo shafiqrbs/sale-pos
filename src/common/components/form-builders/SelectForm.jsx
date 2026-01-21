@@ -1,6 +1,6 @@
 import { forwardRef } from "react";
 import { Tooltip, Select } from "@mantine/core";
-import { showNotificationComponent } from "../core-component/showNotificationComponent.jsx";
+import { showNotification } from "@components/ShowNotificationComponent.jsx";
 import { useDispatch } from "react-redux";
 import { storeEntityData } from "../../store/core/crudSlice.js";
 import inputCss from "../../assets/css/InputField.module.css";
@@ -51,7 +51,7 @@ const SelectForm = forwardRef((props, ref) => {
 					const resultAction = await dispatch(storeEntityData(updateDetails));
 
 					if (resultAction.payload?.status !== 200) {
-						showNotificationComponent(
+						showNotification(
 							resultAction.payload?.message || "Error updating invoice",
 							"red",
 							"",
@@ -68,7 +68,7 @@ const SelectForm = forwardRef((props, ref) => {
 					});
 				}
 			} catch (error) {
-				showNotificationComponent("Request failed. Please try again.", "red", "", "", true);
+				showNotification("Request failed. Please try again.", "red", "", "", true);
 				console.error("Error updating invoice:", error);
 			}
 		}
@@ -79,7 +79,7 @@ const SelectForm = forwardRef((props, ref) => {
 			{form && (
 				<Tooltip
 					label={tooltip}
-					opened={name in form.errors && !!form.errors[name]}
+					opened={name in form.errors && !!form.errors[ name ]}
 					px={16}
 					py={2}
 					position={position && position ? position : "top-end"}

@@ -18,6 +18,8 @@ import { IconKey, IconCheck, IconInfoCircle } from "@tabler/icons-react";
 import axios from "axios";
 import { useNavigate } from "react-router";
 import { useEffect, useState } from "react";
+import { MASTER_APIS } from "@/routes/routes";
+import { useTranslation } from "react-i18next";
 
 const dataMap = {
 	core_customers: "customers",
@@ -29,6 +31,7 @@ const dataMap = {
 };
 
 export default function Activate() {
+	const { t } = useTranslation();
 	const [ spinner, setSpinner ] = useState(false);
 	const [ errorMessage, setErrorMessage ] = useState("");
 	const navigate = useNavigate();
@@ -38,9 +41,9 @@ export default function Activate() {
 			activeKey: "",
 		},
 		validate: {
-			licenseKey: (value) => (value.length < 11 ? "License key must be 11 characters" : null),
+			licenseKey: (value) => (value.length < 11 ? t("LicenseKeyMustBe11Characters") : null),
 			activeKey: (value) =>
-				value.length < 10 ? "Activation key must be 10 characters" : null,
+				value.length < 10 ? t("ActivationKeyMustBe10Characters") : null,
 		},
 	});
 
@@ -50,12 +53,7 @@ export default function Activate() {
 
 		try {
 			const response = await axios({
-				method: "GET",
-				url: `${import.meta.env.VITE_API_GATEWAY_URL}core/splash-info?license_key=${values.licenseKey
-					}&active_key=${values.activeKey}`,
-				headers: {
-					"Content-Type": "application/json",
-				},
+				url: `${MASTER_APIS.SPLASH}?license_key=${values.licenseKey}&active_key=${values.activeKey}`
 			});
 
 			if (response.data.status === 200) {
@@ -81,7 +79,6 @@ export default function Activate() {
 				});
 
 				await Promise.all(operations);
-				// await commonDataStoreIntoLocalStorage(response.data?.data?.domain_config?.id);
 
 				navigate("/login", { replace: true });
 			} else {
@@ -128,10 +125,10 @@ export default function Activate() {
 					<Stack spacing="lg">
 						<Box ta="center" mb="md">
 							<Title order={2} fw={700} c="red.7">
-								Activate Your Account
+								{t("ActivateYourAccount")}
 							</Title>
 							<Text c="gray.7" size="sm" mt="xs">
-								Enter your license details to activate your account
+								{t("EnterLicenseDetails")}
 							</Text>
 						</Box>
 
@@ -162,7 +159,7 @@ export default function Activate() {
 									}}
 								>
 									<TextInput
-										label="License Key"
+										label={t("EnterLicenseKey")}
 										placeholder="XXX-XXXXX-XXX"
 										icon={<IconKey size={16} />}
 										withAsterisk
@@ -175,7 +172,7 @@ export default function Activate() {
 
 								<Box>
 									<Text fw={500} mb={5} c="dark">
-										Activation Key{" "}
+										{t("ActivationKey")} {" "}
 										<Box component="span" c="red">
 											*
 										</Box>
@@ -223,10 +220,10 @@ export default function Activate() {
 									radius="md"
 									mt="md"
 									leftIcon={<IconCheck size={18} />}
-									gradient={{ from: "green.6", to: "green.8", deg: 160 }}
+									gradient={{ from: "var(--theme-secondary-color-6)", to: "var(--theme-secondary-color-8)", deg: 160 }}
 									variant="gradient"
 								>
-									Activate Account
+									{t("ActivateAccount")}
 								</Button>
 							</Stack>
 						</Box>

@@ -2,7 +2,7 @@ import { notifications } from "@mantine/notifications";
 import { rem } from "@mantine/core";
 import { IconCheck } from "@tabler/icons-react";
 
-export const showNotificationComponent = (
+export const showNotification = (
 	title,
 	color,
 	backgroundColor,
