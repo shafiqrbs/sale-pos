@@ -87,3 +87,7 @@
 
   --theme-menu-three-dot: var(--mantine-color-red-6);
 }
+
+.cursor-pointer {
+  cursor: pointer !important;
+}

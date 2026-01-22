@@ -3,6 +3,7 @@ import Activate from '@modules/auth/Activate'
 import Login from '@modules/auth/Login'
 import Layout from '@components/layout/Layout'
 import NotFound from '@components/NotFound'
+import BakeryIndex from '@modules/pos/bakery'
 
 export default function AppRoutes() {
     return (
@@ -26,7 +27,7 @@ export default function AppRoutes() {
                     <Route path="stock" element={<StockIndex />} /> */}
                 </Route>
                 <Route path="pos">
-                    {/* <Route path="bakery" element={<BakeryIndex />} /> */}
+                    <Route path="bakery" element={<BakeryIndex />} />
                 </Route>
             </Route>
             <Route path="*" element={<NotFound />} />

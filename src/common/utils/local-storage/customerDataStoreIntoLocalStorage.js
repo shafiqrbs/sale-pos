@@ -1,3 +1,4 @@
+import { BASE_URL } from "@/routes/routes";
 import axios from "axios";
 
 const customerDataStoreIntoLocalStorage = async () => {
@@ -6,7 +7,7 @@ const customerDataStoreIntoLocalStorage = async () => {
 		const userId = user ? user.id : null;
 
 		const response = await axios.get(
-			`${import.meta.env.VITE_API_GATEWAY_URL}core/customer/local-storage`,
+			`${BASE_URL}/core/customer/local-storage`,
 			{
 				headers: {
 					Accept: "application/json",

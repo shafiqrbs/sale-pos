@@ -82,7 +82,6 @@ const Layout = () => {
 		return <Navigate replace to={APP_NAVLINKS.LOGIN} />;
 	}
 
-	// =============== redirect to bakery pos when at root and user is authenticated and activated ================
 	if (paramPath === "/") {
 		return <Navigate replace to={APP_NAVLINKS.BAKERY} />;
 	}
@@ -97,7 +96,7 @@ const Layout = () => {
 			<AppShell.Header height={headerHeight} bg="gray.0">
 				<Header isOnline={isOnline} toggleNetwork={toggleNetwork} configData={configData} />
 			</AppShell.Header>
-			<AppShell.Main>
+			<AppShell.Main py="44px" h="calc(100vh - 90px)">
 				<Outlet context={{ isOnline, toggleNetwork, mainAreaHeight, user }} />
 			</AppShell.Main>
 			<AppShell.Footer height={footerHeight}>

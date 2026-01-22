@@ -1,7 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from "react-router";
-import "./i18n.js";
+import { HashRouter } from "react-router";
+import "./lang/i18next.js";
 import '@mantine/core/styles.css';
 import "@mantine/dates/styles.css";
 import "@mantine/notifications/styles.css";
@@ -38,12 +38,12 @@ const theme = createTheme({
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Provider store={store}>
-      <BrowserRouter>
+      <HashRouter>
         <MantineProvider theme={theme} withNormalizeCSS withGlobalStyles>
           <Notifications />
           <App />
         </MantineProvider>
-      </BrowserRouter>
+      </HashRouter>
     </Provider>
   </StrictMode>,
 )

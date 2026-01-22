@@ -1,14 +1,15 @@
+import { BASE_URL } from "@/routes/routes";
 import axios from "axios";
 
 const transactionModeDataStoreIntoLocalStorage = async (user_id) => {
-	const apiBackendRoutes = ["accounting/transaction-mode/local-storage"];
-	const localStorageKeys = ["accounting-transaction-mode"];
+	const apiBackendRoutes = [ "accounting/transaction-mode/local-storage" ];
+	const localStorageKeys = [ "accounting-transaction-mode" ];
 
 	for (let i = 0; i < apiBackendRoutes.length; i++) {
 		try {
 			const response = await axios({
 				method: "get",
-				url: `${import.meta.env.VITE_API_GATEWAY_URL + apiBackendRoutes[i]}`,
+				url: `${BASE_URL}/${apiBackendRoutes[ i ]}`,
 				headers: {
 					Accept: `application/json`,
 					"Content-Type": `application/json`,
@@ -19,7 +20,7 @@ const transactionModeDataStoreIntoLocalStorage = async (user_id) => {
 			});
 			if (response.data.data) {
 				await window.dbAPI.upsertData(
-					localStorageKeys[i],
+					localStorageKeys[ i ],
 					JSON.stringify(response.data.data)
 				);
 			}

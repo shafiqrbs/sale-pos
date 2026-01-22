@@ -4,7 +4,7 @@ export const apiSlice = createApi({
 	reducerPath: "api",
 	baseQuery: fetchBaseQuery({
 		baseUrl: import.meta.env.VITE_API_GATEWAY_URL,
-		credentials: "include",
+
 		prepareHeaders: async (headers) => {
 			headers.set("Accept", "application/json");
 			headers.set("Content-Type", "application/json");

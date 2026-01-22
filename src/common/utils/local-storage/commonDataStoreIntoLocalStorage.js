@@ -1,3 +1,4 @@
+import { BASE_URL } from "@/routes/routes";
 import axios from "axios";
 
 const tableMap = {
@@ -13,11 +14,11 @@ const tableMap = {
 };
 
 const commonDataStoreIntoLocalStorage = async (user_id) => {
-	const requests = Object.entries(tableMap).map(async ([route, table]) => {
+	const requests = Object.entries(tableMap).map(async ([ route, table ]) => {
 		try {
 			const response = await axios({
 				method: "get",
-				url: `${import.meta.env.VITE_API_GATEWAY_URL + route}`,
+				url: `${BASE_URL}/${route}`,
 				headers: {
 					Accept: `application/json`,
 					"Content-Type": `application/json`,
@@ -30,7 +31,7 @@ const commonDataStoreIntoLocalStorage = async (user_id) => {
 			if (response.data.data) {
 				const dataList = Array.isArray(response.data.data)
 					? response.data.data
-					: [response.data.data];
+					: [ response.data.data ];
 
 				for (const data of dataList) {
 					// insert only if data is new or different

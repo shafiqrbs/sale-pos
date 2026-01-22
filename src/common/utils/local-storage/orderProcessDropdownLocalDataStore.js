@@ -1,3 +1,4 @@
+import { BASE_URL } from "@/routes/routes";
 import axios from "axios";
 
 const orderProcessDropdownLocalDataStore = async (user_id) => {
@@ -6,7 +7,7 @@ const orderProcessDropdownLocalDataStore = async (user_id) => {
 	try {
 		const response = await axios({
 			method: "get",
-			url: `${import.meta.env.VITE_API_GATEWAY_URL}utility/select/setting`,
+			url: `${BASE_URL}/utility/select/setting`,
 			headers: {
 				Accept: `application/json`,
 				"Content-Type": `application/json`,
