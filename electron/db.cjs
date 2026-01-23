@@ -68,7 +68,9 @@ db.prepare(
 	`
 	CREATE TABLE IF NOT EXISTS config_data (
 		id INTEGER PRIMARY KEY,
-		data TEXT
+		data TEXT,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);
 	`
 ).run();
@@ -523,8 +525,24 @@ const destroyTableData = (table = "users") => {
 
 const resetDatabase = async () => {
 	try {
-		await fs.rm(userDataPath, { recursive: true, force: true });
-		app.quit();
+		const tableNames = db
+			.prepare(
+				"SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'"
+			)
+			.all()
+			.map((row) => row.name);
+
+		db.prepare("PRAGMA foreign_keys = OFF").run();
+
+		const resetTransaction = db.transaction((tableNamesToReset) => {
+			for (const tableName of tableNamesToReset) {
+				destroyTableData(tableName);
+			}
+		});
+
+		resetTransaction(tableNames);
+
+		db.prepare("PRAGMA foreign_keys = ON").run();
 	} catch (error) {
 		console.error("Error in resetDatabase:", error);
 	}

@@ -17,5 +17,8 @@ export const APP_APIS = {
     REGISTER: "/auth/register",
     LOGOUT: "/auth/logout",
     RESET_PASSWORD: "/auth/reset-password",
-    SYNC_POS: "/inventory/pos/data-process"
+    SYNC_POS: "/inventory/pos/data-process",
+    CATEGORIES: "/inventory/select/category",
+    INVOICE_MODE: "/inventory/pos/check/invoice-mode",
+    INVOICE_DETAILS: "/inventory/pos/invoice-details"
 }

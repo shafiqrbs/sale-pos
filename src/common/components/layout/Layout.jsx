@@ -5,7 +5,6 @@ import { AppShell, Center, Loader } from "@mantine/core";
 import Header from "./Header";
 import Footer from "./Footer";
 import { useNetwork } from "@mantine/hooks";
-import useConfigData from "@hooks/useConfigData.js";
 import { notifications } from "@mantine/notifications";
 import { APP_NAVLINKS } from "@/routes/routes";
 
@@ -18,7 +17,6 @@ const Layout = () => {
 	const [ isLoading, setIsLoading ] = useState(true);
 	const [ activated, setActivated ] = useState({ is_activated: false });
 	const [ user, setUser ] = useState({});
-	const { configData } = useConfigData();
 
 	useEffect(() => {
 		const initializeData = async () => {
@@ -94,7 +92,7 @@ const Layout = () => {
 	return (
 		<AppShell padding={padding}>
 			<AppShell.Header height={headerHeight} bg="gray.0">
-				<Header isOnline={isOnline} toggleNetwork={toggleNetwork} configData={configData} />
+				<Header isOnline={isOnline} toggleNetwork={toggleNetwork} />
 			</AppShell.Header>
 			<AppShell.Main py="44px" h="calc(100vh - 90px)">
 				<Outlet context={{ isOnline, toggleNetwork, mainAreaHeight, user }} />

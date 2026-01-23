@@ -27,6 +27,9 @@ import {
 	IconWifi,
 	IconRefresh,
 	IconPrinter,
+	IconDashboard,
+	IconMoneybag,
+	IconStack,
 } from "@tabler/icons-react";
 import { useNavigate } from "react-router";
 import LanguagePickerStyle from "@assets/css/LanguagePicker.module.css";
@@ -36,8 +39,10 @@ import { useTranslation } from "react-i18next";
 import { CHARACTER_SET, LANGUAGES, LINE_CHARACTER } from "@/constants";
 import SyncDrawer from "@components/modals/SyncDrawer.jsx";
 import { APP_NAVLINKS } from "@/routes/routes.js";
+import useConfigData from "@hooks/useConfigData";
 
-export default function Header({ isOnline, toggleNetwork, configData }) {
+export default function Header({ isOnline, toggleNetwork }) {
+	const { configData } = useConfigData({ offlineFetch: !isOnline });
 	const [ openedPrinter, { open: openPrinter, close: closePrinter } ] = useDisclosure(false);
 	const { t, i18n } = useTranslation();
 	const navigate = useNavigate();
@@ -52,6 +57,12 @@ export default function Header({ isOnline, toggleNetwork, configData }) {
 		characterSet: "PC437_USA",
 		lineCharacter: "-",
 	});
+
+	const modalLinks = [
+		{ label: "Dashboard", icon: <IconDashboard size={18} />, action: () => { } },
+		{ label: "Sales", icon: <IconMoneybag size={18} />, action: () => { } },
+		{ label: "Stock", icon: <IconStack size={18} />, action: () => { } },
+	]
 
 	useEffect(() => {
 		const checkPrinterData = async () => {
@@ -98,15 +109,25 @@ export default function Header({ isOnline, toggleNetwork, configData }) {
 		<>
 			<Box bg="var(--theme-primary-color-6)" mb={"2"} pos={`relative`}>
 				<Flex align="center" justify="space-between">
-					<Box
-						c={"white"}
-						fw={"800"}
-						className="cursor-pointer"
-						onClick={() => navigate("/")}
-						pl="lg"
-					>
-						{configData?.data?.domain?.company_name}
-					</Box>
+					<Flex gap="sm">
+						<Box
+							c={"white"}
+							fw={"800"}
+							className="cursor-pointer"
+							onClick={() => navigate("/")}
+							pl="lg"
+						>
+							{configData?.domain?.company_name}
+						</Box>
+						<Flex ml="60px" gap="lg" align="center">
+							{modalLinks.map((link) => (
+								<Flex className="cursor-pointer" onClick={link.action} c="white" key={link.label} align="center" gap="les">
+									{link.icon}
+									<Text size="sm">{link.label}</Text>
+								</Flex>
+							))}
+						</Flex>
+					</Flex>
 
 					<Flex
 						gap="sm"

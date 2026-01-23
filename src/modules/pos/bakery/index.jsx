@@ -1,10 +1,56 @@
-import React from 'react'
-import { useTranslation } from 'react-i18next'
-import { Box } from '@mantine/core'
+import React, { useMemo } from 'react'
+import { Box, Grid } from '@mantine/core'
+import { useOutletContext } from 'react-router'
+import useGetInvoiceType from '@hooks/useGetInvoiceType'
+import Tables from '@components/pos-items/Tables'
+import ProductList from '@components/pos-items/ProductList'
+
+const getParticularName = (mode, item) => {
+    switch (mode) {
+        case "table":
+            return item.particular_name ?? "Unnamed Table";
+        case "user":
+            return item.username ?? "Unknown User";
+        case "customer":
+            return item.customer_name ?? "Unknown Customer";
+        default:
+            return "Unknown";
+    }
+};
 
 export default function BakeryIndex() {
-    const { t } = useTranslation()
+    const { isOnline } = useOutletContext()
+    const { invoiceType } = useGetInvoiceType({ offlineFetch: !isOnline })
+
+    const invoiceMode = invoiceType?.[ 0 ]?.invoice_mode || "table"
+
+    const transformedTables = useMemo(() => {
+        if (!Array.isArray(invoiceType)) return [];
+
+        return invoiceType.map((item) => ({
+            id: item.id,
+            status: item.is_active,
+            statusHistory: [],
+            currentStatusStartTime: null,
+            elapsedTime: "00:00:00",
+            value: getParticularName(invoiceMode, item),
+            customer_id: item.customer_id ?? null,
+            table_id: item.table_id ?? null,
+            user_id: item.user_id ?? null,
+        }));
+    }, [ invoiceType, invoiceMode ]);
+
+    console.log(transformedTables)
+
     return (
-        <Box>{t('ManageUser')}</Box>
+        <Box>
+            {/* configData?.inventory_config?.is_pos && invoiceMode === "table" */}
+            <Tables />
+            <Grid columns={12}>
+                <Grid.Col span={8}>
+                    <ProductList />
+                </Grid.Col>
+            </Grid>
+        </Box>
     )
 }

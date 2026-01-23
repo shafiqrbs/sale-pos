@@ -11,6 +11,7 @@ import './index.css'
 
 import App from './app/App.jsx'
 import { createTheme, MantineProvider } from '@mantine/core';
+import { ModalsProvider } from '@mantine/modals';
 import { Notifications } from '@mantine/notifications';
 import { Provider } from 'react-redux';
 import { store } from './app/store';
@@ -38,12 +39,14 @@ const theme = createTheme({
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Provider store={store}>
-      <HashRouter>
-        <MantineProvider theme={theme} withNormalizeCSS withGlobalStyles>
-          <Notifications />
-          <App />
-        </MantineProvider>
-      </HashRouter>
+      <MantineProvider theme={theme} withNormalizeCSS withGlobalStyles>
+        <HashRouter>
+          <ModalsProvider>
+            <App />
+            <Notifications />
+          </ModalsProvider>
+        </HashRouter>
+      </MantineProvider>
     </Provider>
   </StrictMode>,
 )

@@ -229,7 +229,7 @@ export default function Login() {
 						<Button
 							fullWidth
 							mt="xl"
-							bg="yellow.2"
+							bg="red.5"
 							size="md"
 							type="button"
 							className={LoginPage.control}
@@ -241,7 +241,7 @@ export default function Login() {
 						<Button
 							fullWidth
 							mt="xl"
-							bg="red.5"
+							bg="var(--theme-primary-color-6)"
 							size="md"
 							type="submit"
 							id="LoginSubmit"

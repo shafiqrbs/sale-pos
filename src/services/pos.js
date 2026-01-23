@@ -11,11 +11,42 @@ export const extendedPosApiSlice = apiSlice.injectEndpoints({
                     body,
                 };
             },
-            providesTags: [ "POS" ],
+        }),
+        getCategories: builder.query({
+            query: () => {
+                return {
+                    url: APP_APIS.CATEGORIES,
+                    method: "GET",
+                };
+            },
+            providesTags: [ "Categories" ],
+        }),
+        getInvoiceMode: builder.query({
+            query: () => {
+                return {
+                    url: APP_APIS.INVOICE_MODE,
+                    method: "GET",
+                };
+            },
+            providesTags: [ "InvoiceMode" ],
+        }),
+        getInvoiceDetails: builder.query({
+            query: (params) => {
+                return {
+                    url: APP_APIS.INVOICE_DETAILS,
+                    method: "GET",
+                    params: {
+                        invoice_id: params.invoice_id,
+                    },
+                };
+            },
         }),
     }),
 });
 
 export const {
-    useSyncPosMutation
+    useSyncPosMutation,
+    useGetCategoriesQuery,
+    useGetInvoiceModeQuery,
+    useGetInvoiceDetailsQuery
 } = extendedPosApiSlice;

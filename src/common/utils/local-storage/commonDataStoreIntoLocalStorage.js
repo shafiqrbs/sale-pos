@@ -7,6 +7,7 @@ const tableMap = {
 	// "core/customer/local-storage": "core_customers",
 	// "core/vendor/local-storage": "core_vendors",
 	// "core/user/local-storage": "core_users",
+	"inventory/select/category": "categories",
 	"inventory/pos/check/invoice-mode": "invoice_table",
 	"accounting/transaction-mode/local-storage": "accounting_transaction_mode",
 	"inventory/sales": "sales",
