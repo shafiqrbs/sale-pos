@@ -4,6 +4,7 @@ import { useOutletContext } from 'react-router'
 import useGetInvoiceType from '@hooks/useGetInvoiceType'
 import Tables from '@components/pos-items/Tables'
 import ProductList from '@components/pos-items/ProductList'
+import Checkout from '@components/pos-items/Checkout'
 
 const getParticularName = (mode, item) => {
     switch (mode) {
@@ -46,9 +47,12 @@ export default function BakeryIndex() {
         <Box>
             {/* configData?.inventory_config?.is_pos && invoiceMode === "table" */}
             <Tables />
-            <Grid columns={12}>
+            <Grid columns={12} gutter="4xs">
                 <Grid.Col span={8}>
                     <ProductList />
+                </Grid.Col>
+                <Grid.Col span={4}>
+                    <Checkout />
                 </Grid.Col>
             </Grid>
         </Box>

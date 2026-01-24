@@ -1,10 +1,6 @@
 import { forwardRef } from "react";
 import { Tooltip, Select } from "@mantine/core";
-import { showNotification } from "@components/ShowNotificationComponent.jsx";
-import { useDispatch } from "react-redux";
-import { storeEntityData } from "../../store/core/crudSlice.js";
-import inputCss from "../../assets/css/InputField.module.css";
-import { useOutletContext } from "react-router";
+import inputCss from "@assets/css/InputField.module.css";
 
 const SelectForm = forwardRef((props, ref) => {
 	const {
@@ -26,12 +22,8 @@ const SelectForm = forwardRef((props, ref) => {
 		style = {},
 		clearable = true,
 		allowDeselect = true,
-		inlineUpdate = false,
-		updateDetails = null,
 		pt,
 	} = props;
-	const dispatch = useDispatch();
-	const { isOnline } = useOutletContext();
 
 	const handleChange = async (e) => {
 		changeValue(e);
@@ -43,34 +35,6 @@ const SelectForm = forwardRef((props, ref) => {
 					nextElement.focus();
 				}
 			}, 0);
-		}
-		if (inlineUpdate) {
-			updateDetails.data.value = e;
-			try {
-				if (isOnline) {
-					const resultAction = await dispatch(storeEntityData(updateDetails));
-
-					if (resultAction.payload?.status !== 200) {
-						showNotification(
-							resultAction.payload?.message || "Error updating invoice",
-							"red",
-							"",
-							"",
-							true
-						);
-					}
-				} else {
-					await window.dbAPI.updateDataInTable("invoice_table", {
-						id: updateDetails.data.invoice_id,
-						data: {
-							sales_by_id: e,
-						},
-					});
-				}
-			} catch (error) {
-				showNotification("Request failed. Please try again.", "red", "", "", true);
-				console.error("Error updating invoice:", error);
-			}
 		}
 	};
 
