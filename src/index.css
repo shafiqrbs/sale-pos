@@ -91,3 +91,11 @@
 .cursor-pointer {
   cursor: pointer !important;
 }
+
+.user-none {
+  user-select: none !important;
+}
+
+.overflow-hidden {
+  overflow: hidden !important;
+}

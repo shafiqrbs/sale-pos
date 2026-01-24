@@ -2,14 +2,28 @@ import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next';
 import { IconBarcode, IconBaselineDensitySmall, IconInfoCircle, IconLayoutGrid, IconListDetails, IconSearch, IconX } from '@tabler/icons-react'
 import { ActionIcon, Center, Grid, SegmentedControl, TextInput, Tooltip } from '@mantine/core';
+import { useDebouncedCallback } from '@mantine/hooks';
 
-export default function ProductFilters() {
+export default function ProductFilters({ filter, setFilter }) {
+    const [ searchInputKey, setSearchInputKey ] = useState(0)
     const { t } = useTranslation()
     const [ isValidBarcode, setIsValidBarcode ] = useState(true)
-    const [ barcode, setBarcode ] = useState("")
-    const [ searchValue, setSearchValue ] = useState("")
-    const [ value, setValue ] = useState("grid")
-    const [ filterList, setFilterList ] = useState([])
+    const [ barcodeInputValue, setBarcodeInputValue ] = useState(filter.barcode ?? "")
+    const [ searchInputValue, setSearchInputValue ] = useState(filter.search ?? "")
+
+    const debouncedBarcodeFilterUpdate = useDebouncedCallback((nextBarcodeValue) => {
+        setFilter((previousFilter) => ({
+            ...previousFilter,
+            barcode: nextBarcodeValue,
+        }))
+    }, 300)
+
+    const debouncedSearchFilterUpdate = useDebouncedCallback((nextSearchValue) => {
+        setFilter((previousFilter) => ({
+            ...previousFilter,
+            search: nextSearchValue,
+        }))
+    }, 300)
 
     return (
         <Grid gutter={{ base: 4 }} align="center" mt={4}>
@@ -37,19 +51,21 @@ export default function ProductFilters() {
                         size="md"
                         label=""
                         placeholder={t("Barcode")}
-                        value={barcode}
+                        value={barcodeInputValue}
                         onChange={(event) => {
-                            setBarcode(event.target.value);
+                            const nextBarcodeValue = event.target.value
+                            setBarcodeInputValue(nextBarcodeValue)
+                            debouncedBarcodeFilterUpdate(nextBarcodeValue)
                         }}
-                        // onKeyPress={(e) => {
-                        //     if (e.key === "Enter" && barcode) {
-                        //         handleBarcodeSearch(barcode);
-                        //     }
-                        // }}
+                        onKeyDown={(event) => {
+                            if (event.key === "Enter" && barcodeInputValue) {
+                                console.log(barcodeInputValue)
+                            }
+                        }}
                         autoComplete="off"
                         leftSection={<IconBarcode size={16} opacity={0.5} />}
                         rightSection={
-                            barcode ? (
+                            barcodeInputValue ? (
                                 <Tooltip
                                     label={t("Clear")}
                                     withArrow
@@ -60,7 +76,11 @@ export default function ProductFilters() {
                                         size="sm"
                                         variant="transparent"
                                         onClick={() => {
-                                            setBarcode("");
+                                            setBarcodeInputValue("")
+                                            setFilter((previousFilter) => ({
+                                                ...previousFilter,
+                                                barcode: "",
+                                            }))
                                             setIsValidBarcode(true);
                                         }}
                                     >
@@ -90,12 +110,13 @@ export default function ProductFilters() {
             </Grid.Col>
             <Grid.Col span={6}>
                 <TextInput
+                    key={searchInputKey}
                     radius="sm"
                     leftSection={<IconSearch size={16} opacity={0.5} />}
                     size="md"
                     placeholder={t("SearchFood")}
                     rightSection={
-                        searchValue ? (
+                        searchInputValue ? (
                             <Tooltip label="Clear" withArrow position="top" bg="red.1" c="red.3">
                                 <IconX
                                     color="red"
@@ -103,8 +124,12 @@ export default function ProductFilters() {
                                     opacity={0.5}
                                     className='cursor-pointer'
                                     onClick={() => {
-                                        setSearchValue("");
-                                        filterList("");
+                                        setSearchInputValue("")
+                                        setFilter((previousFilter) => ({
+                                            ...previousFilter,
+                                            search: "",
+                                        }))
+                                        setSearchInputKey(searchInputKey + 1)
                                     }}
                                 />
                             </Tooltip>
@@ -120,8 +145,9 @@ export default function ProductFilters() {
                         )
                     }
                     onChange={(event) => {
-                        setSearchValue(event.target.value);
-                        filterList(event.target.value);
+                        const nextSearchValue = event.target.value
+                        setSearchInputValue(nextSearchValue)
+                        debouncedSearchFilterUpdate(nextSearchValue)
                     }}
                 />
             </Grid.Col>
@@ -132,12 +158,14 @@ export default function ProductFilters() {
                         label: { color: "white", paddingBlock: "5px" },
                         indicator: { paddingBlock: "17px" }
                     }}
-                    bg={"green.6"}
+                    bg="green.6"
                     withItemsBorders={false}
                     fullWidth
                     color="green.4"
-                    value={value}
-                    onChange={setValue}
+                    value={filter.view}
+                    onChange={(value) => {
+                        setFilter({ ...filter, view: value });
+                    }}
                     h="100%"
                     data={[
                         {

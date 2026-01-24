@@ -1,13 +1,14 @@
 import SelectForm from '@components/form-builders/SelectForm';
-import { ActionIcon, Box, Button, Flex, Grid, Group, Image, ScrollArea, Stack, Text, TextInput, Tooltip } from '@mantine/core';
-import { IconChefHat, IconChevronLeft, IconChevronRight, IconDeviceFloppy, IconPlusMinus, IconPrinter, IconScissors, IconTicket, IconUserPlus } from '@tabler/icons-react';
-import React from 'react'
+import { ActionIcon, Box, Button, Grid, Group, Stack, Text, TextInput, Tooltip } from '@mantine/core';
+import { IconChefHat, IconDeviceFloppy, IconPlusMinus, IconPrinter, IconTicket, IconUserPlus } from '@tabler/icons-react';
+import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next';
 import TransactionInformation from './TransactionInformation';
 
 export default function Transaction({ form, transactionModeData, invoiceData }) {
     const { t } = useTranslation();
     const discountType = "Flat";
+    const [ coreUsers, setCoreUsers ] = useState([])
 
     const isThisTableSplitPaymentActive = false;
     const handleClick = () => { };
@@ -19,8 +20,16 @@ export default function Transaction({ form, transactionModeData, invoiceData }) 
     const setEnableCoupon = () => { };
     const salesDiscountAmount = 0;
 
+    useEffect(() => {
+        async function fetchCoreUsers() {
+            const data = await window.dbAPI.getDataFromTable("core_users");
+            setCoreUsers(data);
+        }
+        fetchCoreUsers();
+    }, []);
+
     return (
-        <Stack align="stretch" justify={"center"} mt={6} gap={4} pl={4} pr={2} mb={0}>
+        <Stack bg="gray.0" align="stretch" justify="center" mt={6} gap={4} pl={4} pr={2} mb={0}>
             <TransactionInformation form={form} transactionModeData={transactionModeData} invoiceData={invoiceData} />
             <Group gap={6} mb={4} preventGrowOverflow={false} grow align="center" wrap="nowrap">
                 <SelectForm
@@ -30,23 +39,12 @@ export default function Transaction({ form, transactionModeData, invoiceData }) 
                     placeholder={t("OrderTakenBy")}
                     name="sales_by_id"
                     form={form}
-                    // dropdownValue={salesByDropdownData}
+                    dropdownValue={coreUsers.map((user) => ({ label: user.name, value: user.id?.toString() }))}
                     id="sales_by_id"
                     searchable={true}
-                    // value={salesByUser}
-                    // changeValue={setSalesByUser}
                     color="orange.8"
                     position="top-start"
                     inlineUpdate={true}
-                    // updateDetails={{
-                    //     url: "inventory/pos/inline-update",
-                    //     data: {
-                    //         invoice_id: tableId,
-                    //         field_name: "sales_by_id",
-                    //         value: salesByUser,
-                    //     },
-                    //     module: "pos",
-                    // }}
                     style={{ width: "100%" }}
                 />
                 {enableTable && (

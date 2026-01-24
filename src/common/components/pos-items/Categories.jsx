@@ -1,11 +1,18 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useOutletContext } from 'react-router'
-import useGetCategories from '@hooks/useGetCategories'
 import { ScrollArea, Box, Text } from '@mantine/core'
 
-export default function Categories({ id }) {
-  const { isOnline, mainAreaHeight } = useOutletContext()
-  const { categories } = useGetCategories({ offlineFetch: !isOnline })
+export default function Categories({ filter, setFilter }) {
+  const { mainAreaHeight } = useOutletContext()
+  const [ categories, setCategories ] = useState([])
+
+  useEffect(() => {
+    async function fetchCategories() {
+      const categories = await window.dbAPI.getDataFromTable("categories")
+      setCategories(categories)
+    }
+    fetchCategories()
+  }, [])
 
   return (
     <ScrollArea
@@ -13,29 +20,37 @@ export default function Categories({ id }) {
       type="never"
       scrollbars="y"
     >
-      {categories?.map((data) => (
+      {categories?.map((category) => (
         <Box
-          style={{
-            borderRadius: 4,
-          }}
+          bdrs={4}
           mih={40}
-          className='cursor-pointer'
-          mt={"4"}
+          className='cursor-pointer user-none'
+          mt="4"
           variant="default"
-          key={data.id}
-          // onClick={() => {
-          //     filterProductsbyCategory(data.value);
-          // }}
-          bg={data.id === id ? "green.8" : "gray.8"}
+          key={category.id}
+          onClick={() => {
+            setFilter((previousFilter) => {
+              const isCategorySelected = previousFilter?.categories?.includes(category.id);
+              const updatedCategoryIds = isCategorySelected
+                ? previousFilter?.categories?.filter((categoryId) => categoryId !== category.id)
+                : [ ...previousFilter?.categories || [], category.id ];
+
+              return {
+                ...previousFilter,
+                categories: updatedCategoryIds,
+              };
+            });
+          }}
+          bg={filter?.categories?.includes(category.id) ? "green.8" : "gray.8"}
         >
           <Text
-            size={"md"}
+            size="md"
             pl={14}
             pt="3xs"
             fw={500}
             c="white"
           >
-            {data.name}
+            {category.name}
           </Text>
         </Box>
       ))}
