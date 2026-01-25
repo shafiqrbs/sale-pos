@@ -5,9 +5,11 @@ import useConfigData from '@hooks/useConfigData'
 import Categories from './Categories';
 import ProductFilters from './ProductFilters'
 import ProductTable from './ProductTable';
+import useCartOperation from '@hooks/useCartOperation';
 
 export default function ProductList() {
     const [ allProducts, setAllProducts ] = useState([])
+    const { increment } = useCartOperation();
     const { mainAreaHeight, isOnline } = useOutletContext();
     const [ filter, setFilter ] = useState({
         categories: [],
@@ -16,7 +18,6 @@ export default function ProductList() {
         view: "grid", // grid | list | minimal
     })
     const { configData } = useConfigData({ offlineFetch: !isOnline })
-
     useEffect(() => {
         async function fetchProducts() {
             const fetchedProducts = await window.dbAPI.getDataFromTable("core_products")
@@ -81,6 +82,7 @@ export default function ProductList() {
                                                         transition: "transform 0.5s ease-in-out",
                                                     },
                                                 })}
+                                                onClick={() => increment(product)}
                                             >
                                                 <Image
                                                     radius="sm"

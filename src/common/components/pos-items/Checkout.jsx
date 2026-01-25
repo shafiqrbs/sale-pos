@@ -1,4 +1,4 @@
-import useGetInvoiceDetails from '@hooks/useGetInvoiceDetails';
+// import useGetInvoiceDetails from '@hooks/useGetInvoiceDetails';
 import { Box, Group, Text } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import React, { useEffect, useState } from 'react'
@@ -8,13 +8,14 @@ import { useTranslation } from 'react-i18next';
 import useConfigData from '@hooks/useConfigData';
 import { IconSum } from '@tabler/icons-react';
 import Transaction from './Transaction';
+import useCartOperation from '@hooks/useCartOperation';
 
 export default function Checkout({ tableId }) {
     const { t } = useTranslation();
 
     const { isOnline } = useOutletContext();
     const { configData } = useConfigData({ offlineFetch: !isOnline });
-    const { invoiceData } = useGetInvoiceDetails(tableId, { offlineFetch: !isOnline })
+    const { invoiceData } = useCartOperation()
     const [ returnOrDueText, setReturnOrDueText ] = useState(
         invoiceData?.sub_total > invoiceData?.payment ? "Return" : "Due"
     );
@@ -54,13 +55,13 @@ export default function Checkout({ tableId }) {
 
     return (
         <Box pr="3xs">
-            <CheckoutTable invoiceData={invoiceData} />
+            <CheckoutTable />
             <Group
                 h={34}
                 justify="space-between"
                 align="center"
                 pt={0}
-                bg={"gray.4"}
+                bg="gray.4"
                 style={{
                     borderTop: "2px solid var(--mantine-color-gray-4)",
                 }}

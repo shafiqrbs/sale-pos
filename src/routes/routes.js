@@ -20,5 +20,6 @@ export const APP_APIS = {
     SYNC_POS: "/inventory/pos/data-process",
     CATEGORIES: "/inventory/select/category",
     INVOICE_MODE: "/inventory/pos/check/invoice-mode",
-    INVOICE_DETAILS: "/inventory/pos/invoice-details"
+    INVOICE_DETAILS: "/inventory/pos/invoice-details",
+    INLINE_UPDATE: "/inventory/pos/inline-update"
 }

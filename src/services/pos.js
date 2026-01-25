@@ -41,6 +41,15 @@ export const extendedPosApiSlice = apiSlice.injectEndpoints({
                 };
             },
         }),
+        inlineUpdate: builder.mutation({
+            query: (body) => {
+                return {
+                    url: APP_APIS.INLINE_UPDATE,
+                    method: "POST",
+                    body,
+                };
+            },
+        }),
     }),
 });
 
@@ -48,5 +57,6 @@ export const {
     useSyncPosMutation,
     useGetCategoriesQuery,
     useGetInvoiceModeQuery,
-    useGetInvoiceDetailsQuery
+    useGetInvoiceDetailsQuery,
+    useInlineUpdateMutation,
 } = extendedPosApiSlice;

@@ -7,14 +7,16 @@ import { useTranslation } from 'react-i18next';
 import { useOutletContext } from 'react-router';
 import useCartOperation from '@hooks/useCartOperation';
 
-export default function CheckoutTable({ invoiceData }) {
+export default function CheckoutTable() {
     const { mainAreaHeight } = useOutletContext()
     const { t } = useTranslation();
-    const { increment, decrement, remove } = useCartOperation()
+    const { invoiceData, increment, decrement, remove } = useCartOperation()
 
     const handleClick = () => {
         console.log("handleClick")
     }
+
+    console.log("invoiceData: ", invoiceData)
 
     return (
         <DataTable
@@ -25,7 +27,7 @@ export default function CheckoutTable({ invoiceData }) {
                 footer: tableCss.footer,
                 pagination: tableCss.pagination,
             }}
-            records={invoiceData?.invoice_items || []}
+            records={invoiceData || []}
             columns={[
                 {
                     accessor: "id",
@@ -72,30 +74,28 @@ export default function CheckoutTable({ invoiceData }) {
                     title: t("Qty"),
                     textAlign: "center",
                     render: (data) => (
-                        <>
-                            <Group gap={8} justify="center">
-                                <ActionIcon
-                                    size={"sm"}
-                                    bg={"gray.7"}
-                                    disabled={data.quantity === 1}
-                                    onClick={() => increment(data.stock_item_id)}
-                                >
-                                    <IconMinus height={"12"} width={"12"} />
-                                </ActionIcon>
-                                <Text size="sm" ta={"center"} fw={600} maw={30} miw={30}>
-                                    {data.quantity}
-                                </Text>
-                                <ActionIcon
-                                    size={"sm"}
-                                    bg={"gray.7"}
-                                    onClick={() => {
-                                        decrement(data.stock_item_id);
-                                    }}
-                                >
-                                    <IconPlus height={"12"} width={"12"} />
-                                </ActionIcon>
-                            </Group>
-                        </>
+                        <Group miw={100} gap={4} justify="center">
+                            <ActionIcon
+                                size={"sm"}
+                                bg={"gray.7"}
+                                disabled={data.quantity === 1}
+                                onClick={() => increment(data.stock_item_id)}
+                            >
+                                <IconMinus height={"12"} width={"12"} />
+                            </ActionIcon>
+                            <Text size="sm" ta={"center"} fw={600} maw={30} miw={30}>
+                                {data.quantity}
+                            </Text>
+                            <ActionIcon
+                                size={"sm"}
+                                bg={"gray.7"}
+                                onClick={() => {
+                                    decrement(data.stock_item_id);
+                                }}
+                            >
+                                <IconPlus height={"12"} width={"12"} />
+                            </ActionIcon>
+                        </Group>
                     ),
                 },
                 {
