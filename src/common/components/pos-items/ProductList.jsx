@@ -92,7 +92,7 @@ export default function ProductList() {
                                                     src={`${import.meta.env.VITE_IMAGE_GATEWAY_URL
                                                         }/uploads/inventory/product/feature_image/${product.feature_image
                                                         }`}
-                                                    fallbackSrc="/no-image.png"
+                                                    fallbackSrc="./no-image.png"
                                                 />
                                                 <Text
                                                     fw={600}
@@ -123,7 +123,7 @@ export default function ProductList() {
                                         </Grid.Col>
                                     )) : (
                                         <Flex bdrs="4px" className='overflow-hidden' w="100%" align="center" justify="center" bg="#ECF0F3" h={mainAreaHeight - 58}>
-                                            <Image src="/not-found.webp" w="100%" h="100%" fit="contain" />
+                                            <Image src="./not-found.webp" w="100%" h="100%" fit="contain" />
                                         </Flex>
                                     )}
                                 </> : (

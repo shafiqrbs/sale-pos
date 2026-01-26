@@ -4,12 +4,26 @@ import { IconChefHat, IconDeviceFloppy, IconPlusMinus, IconPrinter, IconTicket, 
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next';
 import TransactionInformation from './TransactionInformation';
+import useCartOperation from '@hooks/useCartOperation';
+import { showNotification } from '@components/ShowNotificationComponent';
+import { useOutletContext } from 'react-router';
+import useConfigData from '@hooks/useConfigData';
+import { formatDateTime, generateInvoiceId, withInvoiceId } from '@utils/index';
+import { useInlineUpdateMutation, useSalesCompleteMutation } from '@services/pos';
 
-export default function Transaction({ form, transactionModeData, invoiceData }) {
+export default function Transaction({ form, transactionModeData, tableId = null }) {
     const { t } = useTranslation();
-    const discountType = "Flat";
+    const { isOnline } = useOutletContext();
+    const { configData } = useConfigData({ offlineFetch: !isOnline });
     const [ coreUsers, setCoreUsers ] = useState([])
+    const { invoiceData, getCartTotal } = useCartOperation();
+    const [ isLoading, setIsLoading ] = useState({ saveAll: false, save: false, print: false })
+    const [ inlineUpdate ] = useInlineUpdateMutation();
+    const [ salesComplete ] = useSalesCompleteMutation();
+    const [ customersDropdownData, setCustomersDropdownData ] = useState([]);
 
+    // ============= wreckage start =============
+    const discountType = "Flat";
     const isThisTableSplitPaymentActive = false;
     const handleClick = () => { };
     const enableTable = false;
@@ -19,6 +33,8 @@ export default function Transaction({ form, transactionModeData, invoiceData }) 
     const enableCoupon = "Coupon";
     const setEnableCoupon = () => { };
     const salesDiscountAmount = 0;
+    const isSplitPaymentActive = false;
+    // ============= wreckage stop =============
 
     useEffect(() => {
         async function fetchCoreUsers() {
@@ -28,9 +44,185 @@ export default function Transaction({ form, transactionModeData, invoiceData }) 
         fetchCoreUsers();
     }, []);
 
+    useEffect(() => {
+        form.setFieldValue("receive_amount", getCartTotal());
+    }, [ getCartTotal() ]);
+
+    useEffect(() => {
+        async function fetchCustomers() {
+            const data = await window.dbAPI.getDataFromTable("core_customers");
+            setCustomersDropdownData(data);
+        }
+        fetchCustomers();
+    }, []);
+
+    const handleSave = async ({ withPos = false }) => {
+        // Validation checks
+        if (!invoiceData?.length) {
+            showNotification(t("NoProductAdded"), "red", "", "", true, 1000, true);
+            return;
+        }
+
+        // if (!salesByUser || salesByUser === "undefined") {
+        // 	showNotificationComponent(t("ChooseUser"), "red", "", "", true, 1000, true);
+        // 	return;
+        // }
+
+        // if (!invoiceData.transaction_mode_id && !isSplitPaymentActive) {
+        // 	showNotificationComponent(t("ChooseTransactionMode"), "red", "", "", true, 1000, true);
+        // 	return;
+        // }
+
+        // if (!invoiceData.payment && !isSplitPaymentActive) {
+        //     showNotificationComponent(t("PaymentAmount"), "red", "", "", true, 1000, true);
+        //     return;
+        // }
+
+        setIsLoading({ ...isLoading, save: true });
+
+        try {
+            const fullAmount = form.values.receive_amount;
+
+            if (isOnline) {
+                await handleOnlineSave(fullAmount);
+            } else {
+                await handleOfflineSave(fullAmount);
+            }
+
+            showNotification(t("SalesComplete"), "blue", "", "", true, 1000, true);
+            if (withPos) {
+                const setup = await window.dbAPI.getDataFromTable("printer");
+                if (!setup?.printer_name) {
+                    return showNotification(t("PrinterNotSetup"), "red", "", "", true, 1000, true);
+                }
+                const status = await window.deviceAPI.thermalPrint({
+                    configData,
+                    salesItems: invoiceData,
+                    salesViewData: {},
+                    setup,
+                });
+
+                if (!status?.success) {
+                    showNotification(t("PrintingFailed"), "red", "", "", true, 1000, true);
+                    return;
+                }
+            }
+        } catch (err) {
+            console.error("Error saving sale:", err);
+        } finally {
+            setIsLoading({ ...isLoading, save: false });
+        }
+    };
+
+    const handleOnlineSave = async (fullAmount) => {
+        if (isSplitPaymentActive) {
+            inlineUpdate({
+                ...withInvoiceId(tableId),
+                field_name: "amount",
+                value: fullAmount,
+            })
+        }
+
+        const resultAction = await salesComplete({
+            invoice_id: invoiceData.id,
+        });
+
+        if (resultAction.error) {
+            showNotification(t("FailedToCompleteOnlineSale"), "red", "", "", true, 1000, true);
+            return;
+        }
+    };
+
+    const handleOfflineSave = async (fullAmount) => {
+        const customerInfo = customersDropdownData.find((d) => d.value == form.values.customer_id);
+        const invoiceId = generateInvoiceId();
+
+        const userItem = await window.dbAPI.getDataFromTable("users");
+
+        // Insert sale record
+        await window.dbAPI.upsertIntoTable("sales", {
+            invoice: invoiceId,
+            sub_total: getCartTotal(),
+            total: getCartTotal(),
+            approved_by_id: form.values.created_by_id,
+            payment: fullAmount,
+            discount: null,
+            discount_calculation: null,
+            discount_type: form.values.discount_type,
+            customerId: form.values.customer_id,
+            customerName: customerInfo?.label?.split(" -- ")[ 1 ] || userItem?.name,
+            customerMobile: customerInfo?.label?.split(" -- ")[ 0 ] || userItem?.mobile,
+            createdByUser: "sandra",
+            createdById: form.values.created_by_id,
+            salesById: form.values.sales_by_id,
+            salesByUser: "sandra",
+            salesByName: null,
+            process: "approved",
+            mode_name: form.values.transaction_mode_name,
+            created: formatDateTime(new Date()),
+            sales_items: JSON.stringify(invoiceData),
+            multi_transaction: isSplitPaymentActive ? 1 : 0,
+        });
+
+        // Handle transactions
+        // if (isSplitPaymentActive) {
+        //     const splitPayments = tableSplitPaymentMap[ tableId || "general" ] || [];
+        //     for (const payment of splitPayments) {
+        //         await window.dbAPI.upsertIntoTable("sales_transactions", {
+        //             transaction_mode_id: payment.transaction_mode_id,
+        //             invoice_id: invoiceId,
+        //             amount: payment.partial_amount,
+        //             remarks: payment.remarks || "",
+        //         });
+        //     }
+        // } else {
+        //     await window.dbAPI.upsertIntoTable("sales_transactions", {
+        //         transaction_mode_id: transactionModeId,
+        //         invoice_id: invoiceId,
+        //         amount: fullAmount,
+        //         remarks: "",
+        //     });
+        // }
+
+        // Clear invoice table
+        await window.dbAPI.updateDataInTable("invoice_table", {
+            id: tableId,
+            data: {
+                sales_by_id: null,
+                transaction_mode_id: null,
+                customer_id: null,
+                is_active: 0,
+                sub_total: null,
+                payment: null,
+            },
+        });
+
+        // Delete invoice items
+        for (const item of invoiceData) {
+            window.dbAPI.deleteDataFromTable("invoice_table_item", item.id);
+        }
+    };
+
+    const handlePrintAll = async () => {
+        // =============== first save the sale ================
+        await handleSave({ withPos: false });
+
+        // =============== then handle kitchen printing ================
+        // if (invoiceData?.invoice_items?.length > 0) {
+        //     // =============== determine kitchen products based on category or product type ================
+        //     const kitchenProducts = getKitchenProducts(invoiceData.invoice_items);
+
+        //     if (kitchenProducts.length > 0) {
+        //         // =============== trigger kitchen print ================
+        //         // =============== this will open the kitchen print drawer ================
+        //         handleClick({ currentTarget: { name: "kitchen" } });
+        //     }
+        // }
+    };
+
     return (
         <Stack bg="gray.0" align="stretch" justify="center" mt={6} gap={4} pl={4} pr={2} mb={0}>
-            <TransactionInformation form={form} transactionModeData={transactionModeData} invoiceData={invoiceData} />
+            <TransactionInformation form={form} transactionModeData={transactionModeData} />
             <Group gap={6} mb={4} preventGrowOverflow={false} grow align="center" wrap="nowrap">
                 <SelectForm
                     pt="4"
@@ -41,10 +233,9 @@ export default function Transaction({ form, transactionModeData, invoiceData }) 
                     form={form}
                     dropdownValue={coreUsers.map((user) => ({ label: user.name, value: user.id?.toString() }))}
                     id="sales_by_id"
-                    searchable={true}
+                    searchable
                     color="orange.8"
                     position="top-start"
-                    inlineUpdate={true}
                     style={{ width: "100%" }}
                 />
                 {enableTable && (
@@ -151,7 +342,7 @@ export default function Transaction({ form, transactionModeData, invoiceData }) 
                             </Button>
                         </Tooltip>
                     </Grid.Col>
-                    <Grid.Col span={6} bg={"red.3"}>
+                    <Grid.Col span={6} bg="red.3">
                         {enableCoupon === "Coupon" ? (
                             <TextInput
                                 type="text"
@@ -228,7 +419,7 @@ export default function Transaction({ form, transactionModeData, invoiceData }) 
                             </Tooltip>
                         )}
                     </Grid.Col>
-                    <Grid.Col span={6} bg={"green"}>
+                    <Grid.Col span={6} bg="green">
                         <Tooltip
                             label={t("ReceiveAmountValidateMessage")}
                             opened={!!form.errors.receive_amount}
@@ -248,14 +439,14 @@ export default function Transaction({ form, transactionModeData, invoiceData }) 
                             <TextInput
                                 type="number"
                                 placeholder={isThisTableSplitPaymentActive ? t("SplitPaymentActive") : t("Amount")}
-                                // value={currentPaymentInput}
+                                value={form.values.receive_amount}
                                 error={form.errors.receive_amount}
                                 size={"sm"}
                                 disabled={isThisTableSplitPaymentActive}
                                 leftSection={<IconPlusMinus size={16} opacity={0.5} />}
-                            // classNames={{ input: classes.input }}
-                            // onChange={handlePaymentChange}
-                            // onBlur={handlePaymentBlur}
+                                onChange={(event) => {
+                                    form.setFieldValue("receive_amount", event.target.value);
+                                }}
                             />
                         </Tooltip>
                     </Grid.Col>
@@ -283,7 +474,7 @@ export default function Transaction({ form, transactionModeData, invoiceData }) 
                             color="gray"
                             size={"lg"}
                             fullWidth={true}
-                        // onClick={handlePrintAll}
+                            onClick={handlePrintAll}
                         >
                             <Text size="md">{t("AllPrint")}</Text>
                         </Button>
@@ -297,7 +488,7 @@ export default function Transaction({ form, transactionModeData, invoiceData }) 
                         size={"lg"}
                         fullWidth={true}
                         leftSection={<IconPrinter />}
-                    // onClick={() => handleSave({ withPos: true })}
+                        onClick={() => handleSave({ withPos: true })}
                     >
                         {t("Pos")}
                     </Button>
@@ -309,7 +500,7 @@ export default function Transaction({ form, transactionModeData, invoiceData }) 
                         bg={"#38b000"}
                         fullWidth={true}
                         leftSection={<IconDeviceFloppy />}
-                    // onClick={() => handleSave({ withPos: false })}
+                        onClick={() => handleSave({ withPos: false })}
                     >
                         {t("Save")}
                     </Button>

@@ -21,5 +21,6 @@ export const APP_APIS = {
     CATEGORIES: "/inventory/select/category",
     INVOICE_MODE: "/inventory/pos/check/invoice-mode",
     INVOICE_DETAILS: "/inventory/pos/invoice-details",
-    INLINE_UPDATE: "/inventory/pos/inline-update"
+    INLINE_UPDATE: "/inventory/pos/inline-update",
+    SALES_COMPLETE: "/inventory/pos/sales-complete"
 }

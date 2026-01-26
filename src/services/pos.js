@@ -50,6 +50,15 @@ export const extendedPosApiSlice = apiSlice.injectEndpoints({
                 };
             },
         }),
+        salesComplete: builder.mutation({
+            query: (body) => {
+                return {
+                    url: APP_APIS.SALES_COMPLETE,
+                    method: "POST",
+                    body,
+                };
+            },
+        }),
     }),
 });
 
@@ -59,4 +68,5 @@ export const {
     useGetInvoiceModeQuery,
     useGetInvoiceDetailsQuery,
     useInlineUpdateMutation,
+    useSalesCompleteMutation,
 } = extendedPosApiSlice;

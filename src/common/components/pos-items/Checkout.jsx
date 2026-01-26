@@ -10,15 +10,13 @@ import { IconSum } from '@tabler/icons-react';
 import Transaction from './Transaction';
 import useCartOperation from '@hooks/useCartOperation';
 
-export default function Checkout({ tableId }) {
+export default function Checkout() {
     const { t } = useTranslation();
 
     const { isOnline } = useOutletContext();
     const { configData } = useConfigData({ offlineFetch: !isOnline });
-    const { invoiceData } = useCartOperation()
-    const [ returnOrDueText, setReturnOrDueText ] = useState(
-        invoiceData?.sub_total > invoiceData?.payment ? "Return" : "Due"
-    );
+    const { invoiceData, getCartTotal } = useCartOperation()
+
     const [ transactionModeData, setTransactionModeData ] = useState([]);
 
     const isSplitPaymentActive = !!invoiceData?.split_payment;
@@ -28,14 +26,19 @@ export default function Checkout({ tableId }) {
         initialValues: {
             customer_id: "",
             transaction_mode_id: "",
+            transaction_mode_name: "",
             sales_by_id: "",
-            receive_amount: "",
-            discount: "",
+            receive_amount: null,
+            discount: 0,
             coupon_code: "",
+            created_by_id: "",
         },
         validate: {
             transaction_mode_id: (value) => {
                 if (isSplitPaymentActive) return null;
+                return !value || value === "" ? true : null;
+            },
+            receive_amount: (value) => {
                 return !value || value === "" ? true : null;
             },
             sales_by_id: (value) => (!value ? true : null),
@@ -49,6 +52,11 @@ export default function Checkout({ tableId }) {
         async function fetchTransactionData() {
             const data = await window.dbAPI.getDataFromTable("accounting_transaction_mode");
             setTransactionModeData(data);
+
+            if (data.length) {
+                form.setFieldValue("transaction_mode_id", data[ 0 ]?.id);
+                form.setFieldValue("transaction_mode_name", data[ 0 ]?.name);
+            }
         }
         fetchTransactionData();
     }, []);
@@ -73,11 +81,11 @@ export default function Checkout({ tableId }) {
                     <IconSum size="16" style={{ color: "black" }} />
                     <Text fw="bold" fz="sm" c="black">
                         {configData?.inventory_config?.currency?.symbol}{" "}
-                        {(100.23).toFixed(2)}
+                        {getCartTotal()?.toFixed(2)}
                     </Text>
                 </Group>
             </Group>
-            <Transaction form={form} transactionModeData={transactionModeData} invoiceData={invoiceData} />
+            <Transaction form={form} transactionModeData={transactionModeData} />
         </Box>
     )
 }

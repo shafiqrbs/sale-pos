@@ -74,3 +74,5 @@ export const calculateVATAmount = (vatPrice, vatConfig) => {
 
 	return vatPrice?.toFixed(2);
 };
+
+export const withInvoiceId = (tableId) => (tableId ? { invoice_id: tableId } : {});

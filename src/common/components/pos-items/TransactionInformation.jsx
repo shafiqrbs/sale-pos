@@ -5,19 +5,28 @@ import { IconChevronLeft, IconChevronRight, IconScissors, IconX } from '@tabler/
 import { calculateVATAmount } from '@utils/index';
 import { useTranslation } from 'react-i18next';
 import { useOutletContext } from 'react-router';
+import useCartOperation from '@hooks/useCartOperation';
 
-export default function TransactionInformation({ form, transactionModeData, invoiceData }) {
-
+export default function TransactionInformation({ form, transactionModeData }) {
+    const { invoiceData, getCartTotal } = useCartOperation();
     const { isOnline } = useOutletContext();
     const { configData } = useConfigData({ offlineFetch: !isOnline });
     const { t } = useTranslation();
+    const returnOrDueText = getCartTotal() < form.values.receive_amount ? "Return" : "Due";
+
+    // ========= wreckages start =============
     const discountType = "Flat";
     const showLeftArrow = true;
     const showRightArrow = true;
-
-    const isThisTableSplitPaymentActive = true;
+    const isThisTableSplitPaymentActive = false;
     const clearTableSplitPayment = () => { };
     const handleClick = () => { };
+    // ========= wreckages stop =============
+
+    const handleTransactionModel = (id, name) => {
+        form.setFieldValue("transaction_mode_id", id);
+        form.setFieldValue("transaction_mode_name", name);
+    };
 
     return (
         <>
@@ -29,8 +38,8 @@ export default function TransactionInformation({ form, transactionModeData, invo
                 pb={4}
                 bg={"gray.1"}
             >
-                <Grid.Col span={7} pl={4} pr={4}>
-                    <Grid bg={"gray.1"} pl={4} pr={4}>
+                <Grid.Col span={7} px={4}>
+                    <Grid bg={"gray.1"} px={4}>
                         <Grid.Col span={6}>
                             <Stack gap={0}>
                                 <Group justify="space-between" gap={0}>
@@ -56,7 +65,7 @@ export default function TransactionInformation({ form, transactionModeData, invo
                                 <Text fz={"sm"} fw={500} c={"black"}>
                                     {t("VAT")} {configData?.inventory_config?.config_vat?.vat_percent}%
                                 </Text>
-                                <Text fz={"sm"} fw={800} c={"black"}>
+                                <Text fz="sm" fw={800} c="black">
                                     {calculateVATAmount(
                                         10,
                                         configData?.inventory_config?.config_vat
@@ -79,16 +88,15 @@ export default function TransactionInformation({ form, transactionModeData, invo
                         gap={0}
                         align="center"
                         justify="center"
-                        bg={"gray.8"}
-                        pt={4}
-                        pb={4}
+                        bg="gray.8"
+                        py={4}
                         bdrs={4}
                     >
-                        <Text fw={800} c={"white"} size={"lg"}>
+                        <Text fw={800} c="white" size="lg">
                             {configData?.currency?.symbol}{" "}
-                            {(12.33).toFixed(2)}
+                            {getCartTotal()?.toFixed(2)}
                         </Text>
-                        <Text fw={500} c={"white"} size={"md"}>
+                        <Text fw={500} c="white" size="md">
                             {t("Total")}
                         </Text>
                     </Stack>
@@ -98,17 +106,16 @@ export default function TransactionInformation({ form, transactionModeData, invo
                         gap={0}
                         align="center"
                         justify="center"
-                        bg={"red"}
-                        pt={4}
-                        pb={4}
+                        bg="red"
+                        py={4}
                         bdrs={4}
                     >
-                        <Text fw={800} c={"white"} size={"lg"}>
+                        <Text fw={800} c="white" size="lg">
                             {configData?.currency?.symbol}{" "}
-                            {(12.33).toFixed(2)}
+                            {(Math.abs(getCartTotal() - form.values.receive_amount))?.toFixed(2)}
                         </Text>
                         <Text fw={500} c="white" size="md">
-                            {t("Due")}
+                            {returnOrDueText}
                         </Text>
                     </Stack>
                 </Grid.Col>
@@ -151,9 +158,9 @@ export default function TransactionInformation({ form, transactionModeData, invo
                                 <Group m={0} py={8} justify="flex-start" align="flex-start" gap="0" wrap="nowrap">
                                     {transactionModeData?.map((mode, index) => (
                                         <Box
-                                            // onClick={() => {
-                                            //     handleTransactionModel(mode.id, mode.name);
-                                            // }}
+                                            onClick={() => {
+                                                handleTransactionModel(mode.id, mode.name);
+                                            }}
                                             key={index}
                                             p={4}
                                             style={{
@@ -162,7 +169,7 @@ export default function TransactionInformation({ form, transactionModeData, invo
                                             }}
                                         >
                                             <Flex
-                                                bg={mode.id === "transactionModeId" ? "green.8" : "white"}
+                                                bg={mode.id === form.values.transaction_mode_id ? "green.8" : "white"}
                                                 direction="column"
                                                 align="center"
                                                 justify="center"
@@ -209,7 +216,7 @@ export default function TransactionInformation({ form, transactionModeData, invo
                                 w={24}
                                 style={{
                                     position: "absolute",
-                                    left: 5,
+                                    left: -5,
                                     top: "50%",
                                     transform: "translateY(-50%)",
                                 }}
@@ -258,7 +265,6 @@ export default function TransactionInformation({ form, transactionModeData, invo
                             size="xl"
                             bg={isThisTableSplitPaymentActive ? "red.6" : "gray.8"}
                             variant="filled"
-                            aria-label="Settings"
                             onClick={(e) => {
                                 if (isThisTableSplitPaymentActive) {
                                     clearTableSplitPayment("currentTableKey");
