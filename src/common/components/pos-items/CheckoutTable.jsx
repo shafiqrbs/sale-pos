@@ -79,7 +79,7 @@ export default function CheckoutTable() {
                                 size={"sm"}
                                 bg={"gray.7"}
                                 disabled={data.quantity === 1}
-                                onClick={() => increment(data.stock_item_id)}
+                                onClick={() => decrement(data)}
                             >
                                 <IconMinus height={"12"} width={"12"} />
                             </ActionIcon>
@@ -89,9 +89,7 @@ export default function CheckoutTable() {
                             <ActionIcon
                                 size={"sm"}
                                 bg={"gray.7"}
-                                onClick={() => {
-                                    decrement(data.stock_item_id);
-                                }}
+                                onClick={() => increment(data)}
                             >
                                 <IconPlus height={"12"} width={"12"} />
                             </ActionIcon>
@@ -121,7 +119,7 @@ export default function CheckoutTable() {
                             color="red.8"
                             aria-label="delete"
                             onClick={() => {
-                                remove(data.stock_item_id);
+                                remove(data);
                             }}
                         >
                             <IconTrash height={20} width={20} stroke={1.5} />
