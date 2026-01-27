@@ -100,41 +100,44 @@ export default function SalesIndex() {
     }, [ activeTab, salesData ]);
 
     return (
-        <Grid columns={24} gutter={{ base: 8 }}>
-            <Grid.Col span={4}>
-                <p>Sales Overview</p>
-                <Box mt={8} mb={18} h={2} w="56px" bg="red" />
-                {/* =============== mantine tabs with custom style ================ */}
-                <Tabs
-                    color="#f8eedf"
-                    value={activeTab}
-                    onChange={setActiveTab}
-                    variant="pills"
-                    keepMounted={false}
-                    orientation="vertical"
-                    w="100%"
-                    styles={{
-                        tab: {
-                            background: "#f1f3f5",
-                        },
-                    }}
-                    classNames={{
-                        tab: tabCss.tab,
-                    }}
-                >
-                    <Tabs.List w="100%">
-                        {TAB_OPTIONS.map((tab) => (
-                            <Tabs.Tab key={tab.key} value={tab.key} h={40} w="100%">
-                                {tab.label}
-                            </Tabs.Tab>
-                        ))}
-                    </Tabs.List>
-                </Tabs>
-                {/* =============== sales table for selected tab ================ */}
-            </Grid.Col>
-            <Grid.Col span={20}>
-                <Table salesData={filteredData} fetching={isLoading} />
-            </Grid.Col>
-        </Grid>
+        <Box p="xs">
+            <Grid columns={24} gutter={{ base: 8 }}>
+                <Grid.Col span={4}>
+                    <Box>
+                        <p>Sales Overview</p>
+                        <Box mt={8} mb={18} h={2} w="56px" bg="red" />
+                        {/* =============== mantine tabs with custom style ================ */}
+                        <Tabs
+                            color="#f8eedf"
+                            value={activeTab}
+                            onChange={setActiveTab}
+                            variant="pills"
+                            keepMounted={false}
+                            orientation="vertical"
+                            w="100%"
+                            styles={{
+                                tab: {
+                                    background: "#f1f3f5",
+                                },
+                            }}
+                            classNames={{
+                                tab: tabCss.tab,
+                            }}
+                        >
+                            <Tabs.List w="100%">
+                                {TAB_OPTIONS.map((tab) => (
+                                    <Tabs.Tab key={tab.key} value={tab.key} h={40} w="100%">
+                                        {tab.label}
+                                    </Tabs.Tab>
+                                ))}
+                            </Tabs.List>
+                        </Tabs>
+                    </Box>
+                </Grid.Col>
+                <Grid.Col span={20}>
+                    <Table salesData={filteredData} fetching={isLoading} />
+                </Grid.Col>
+            </Grid>
+        </Box>
     );
 }
