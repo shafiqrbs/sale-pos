@@ -5,6 +5,8 @@ import useGetInvoiceType from '@hooks/useGetInvoiceType'
 import Tables from '@modules/pos/common/Tables'
 import ProductList from '@modules/pos/common/ProductList'
 import Checkout from '@modules/pos/common/Checkout'
+import useLoadingProgress from '@hooks/useLoadingProgress'
+import BakerySkeleton from '@components/skeletons/BakerySkeleton'
 
 const getParticularName = (mode, item) => {
     switch (mode) {
@@ -20,6 +22,7 @@ const getParticularName = (mode, item) => {
 };
 
 export default function BakeryIndex() {
+    const progress = useLoadingProgress()
     const { isOnline } = useOutletContext()
     const { invoiceType } = useGetInvoiceType({ offlineFetch: !isOnline })
 
@@ -42,17 +45,21 @@ export default function BakeryIndex() {
     }, [ invoiceType, invoiceMode ]);
 
     return (
-        <Box>
-            {/* configData?.inventory_config?.is_pos && invoiceMode === "table" */}
-            <Tables />
-            <Grid columns={12} gutter="4xs">
-                <Grid.Col span={8}>
-                    <ProductList />
-                </Grid.Col>
-                <Grid.Col span={4}>
-                    <Checkout />
-                </Grid.Col>
-            </Grid>
-        </Box>
+        <>
+            {progress !== 100 && <BakerySkeleton />}
+            <Box>
+                {/* configData?.inventory_config?.is_pos && invoiceMode === "table" */}
+                <Tables />
+                <Grid columns={12} gutter="4xs">
+                    <Grid.Col span={8}>
+                        <ProductList />
+                    </Grid.Col>
+                    <Grid.Col span={4}>
+                        <Checkout />
+                    </Grid.Col>
+                </Grid>
+            </Box>
+        </>
+
     )
 }
