@@ -35,6 +35,7 @@ export default function Activate() {
 	const [ spinner, setSpinner ] = useState(false);
 	const [ errorMessage, setErrorMessage ] = useState("");
 	const navigate = useNavigate();
+
 	const form = useForm({
 		initialValues: {
 			licenseKey: "",

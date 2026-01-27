@@ -1,4 +1,9 @@
 export const formatDate = (date) => {
+	if (!date) return "";
+	if (typeof date === "string") {
+		date = new Date(date);
+	}
+
 	const formattedDate = new Intl.DateTimeFormat("en-GB", {
 		day: "2-digit",
 		month: "2-digit",

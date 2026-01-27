@@ -13,10 +13,8 @@ export default function CheckoutTable() {
     const { invoiceData, increment, decrement, remove } = useCartOperation()
 
     const handleClick = () => {
-        console.log("handleClick")
+        console.info("handleClick")
     }
-
-    console.log("invoiceData: ", invoiceData)
 
     return (
         <DataTable

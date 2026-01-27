@@ -47,7 +47,7 @@ export default function TransactionInformation({ form, transactionModeData }) {
                                         {t("DIS.")}
                                     </Text>
                                     <Text fz={"sm"} fw={800} c={"black"}>
-                                        {configData?.currency?.symbol} {invoiceData?.discount || 0}
+                                        {configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol} {invoiceData?.discount || 0}
                                     </Text>
                                 </Group>
                                 <Group justify="space-between">
@@ -77,7 +77,7 @@ export default function TransactionInformation({ form, transactionModeData }) {
                                     {t("SD")}
                                 </Text>
                                 <Text fz={"sm"} fw={800} c={"black"}>
-                                    {configData?.currency?.symbol} 0
+                                    {configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol} 0
                                 </Text>
                             </Group>
                         </Grid.Col>
@@ -93,7 +93,7 @@ export default function TransactionInformation({ form, transactionModeData }) {
                         bdrs={4}
                     >
                         <Text fw={800} c="white" size="lg">
-                            {configData?.currency?.symbol}{" "}
+                            {configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol}{" "}
                             {getCartTotal()?.toFixed(2)}
                         </Text>
                         <Text fw={500} c="white" size="md">
@@ -111,7 +111,7 @@ export default function TransactionInformation({ form, transactionModeData }) {
                         bdrs={4}
                     >
                         <Text fw={800} c="white" size="lg">
-                            {configData?.currency?.symbol}{" "}
+                            {configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol}{" "}
                             {(Math.abs(getCartTotal() - form.values.receive_amount))?.toFixed(2)}
                         </Text>
                         <Text fw={500} c="white" size="md">

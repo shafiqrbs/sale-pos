@@ -38,7 +38,7 @@ export default function ProductTable({ products }) {
                     textAlign: "center",
                     render: (data) => (
                         <>
-                            {configData?.currency?.symbol}{" "}
+                            {configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol}{" "}
                             {data.sales_price}
                         </>
                     ),

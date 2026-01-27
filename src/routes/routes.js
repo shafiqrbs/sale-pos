@@ -7,8 +7,11 @@ export const MASTER_APIS = {
 
 export const APP_NAVLINKS = {
     BAKERY: "/pos/bakery",
+    SALES: "/inventory/sales",
+    STOCK: "/inventory/stock",
     ACTIVATE: "/activate",
     LOGIN: "/login",
+    DASHBOARD: "/dashboard",
 }
 
 export const APP_APIS = {
@@ -22,5 +25,6 @@ export const APP_APIS = {
     INVOICE_MODE: "/inventory/pos/check/invoice-mode",
     INVOICE_DETAILS: "/inventory/pos/invoice-details",
     INLINE_UPDATE: "/inventory/pos/inline-update",
-    SALES_COMPLETE: "/inventory/pos/sales-complete"
+    SALES_COMPLETE: "/inventory/pos/sales-complete",
+    SALES: "/inventory/sales"
 }

@@ -134,13 +134,12 @@ export default function Login() {
 			children: (
 				<Text size="sm">
 					Are you sure you want to reset your local data? This action is destructive and
-					you will lose all of your local data which aren&apos;t synced yet. The app will
-					be closed after reset.
+					you will lose all of your local data which aren&apos;t synced yet.
 				</Text>
 			),
 			labels: { confirm: "Reset now", cancel: "No don't reset it" },
 			confirmProps: { color: "red" },
-			onCancel: () => console.log("Cancel"),
+			onCancel: () => console.info("Cancel"),
 			onConfirm: async () => {
 				await window.dbAPI.resetDatabase();
 				navigate(APP_NAVLINKS.ACTIVATE);

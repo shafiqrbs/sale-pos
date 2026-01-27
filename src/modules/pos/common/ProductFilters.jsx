@@ -59,7 +59,7 @@ export default function ProductFilters({ filter, setFilter }) {
                         }}
                         onKeyDown={(event) => {
                             if (event.key === "Enter" && barcodeInputValue) {
-                                console.log(barcodeInputValue)
+                                console.info(barcodeInputValue)
                             }
                         }}
                         autoComplete="off"

@@ -41,7 +41,7 @@ export default function BakeryIndex() {
         }));
     }, [ invoiceType, invoiceMode ]);
 
-    console.log(transformedTables)
+    console.info(transformedTables)
 
     return (
         <Box>

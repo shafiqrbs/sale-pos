@@ -7,11 +7,9 @@ import {
 	Image,
 	ActionIcon,
 	Tooltip,
-	Kbd,
 	Menu,
 	Modal,
 	Flex,
-	Grid,
 	Select,
 	TextInput,
 } from "@mantine/core";
@@ -20,7 +18,6 @@ import { useDisclosure, useFullscreen } from "@mantine/hooks";
 import {
 	IconChevronDown,
 	IconLogout,
-	IconSearch,
 	IconWindowMaximize,
 	IconWindowMinimize,
 	IconWifiOff,
@@ -28,7 +25,6 @@ import {
 	IconRefresh,
 	IconPrinter,
 	IconDashboard,
-	IconMoneybag,
 	IconStack,
 	IconCashBanknote,
 } from "@tabler/icons-react";
@@ -61,9 +57,9 @@ export default function Header({ isOnline, toggleNetwork }) {
 	});
 
 	const modalLinks = [
-		{ label: "Dashboard", icon: <IconDashboard size={18} />, pathname: "/dashboard" },
-		{ label: "Sales", icon: <IconCashBanknote size={18} />, pathname: "/inventory/sales" },
-		{ label: "Stock", icon: <IconStack size={18} />, pathname: "/inventory/stock" },
+		{ label: "Dashboard", icon: <IconDashboard size={18} />, pathname: APP_NAVLINKS.DASHBOARD },
+		{ label: "Sales", icon: <IconCashBanknote size={18} />, pathname: APP_NAVLINKS.SALES },
+		{ label: "Stock", icon: <IconStack size={18} />, pathname: APP_NAVLINKS.STOCK },
 	]
 
 	useEffect(() => {
@@ -113,17 +109,17 @@ export default function Header({ isOnline, toggleNetwork }) {
 				<Flex align="center" justify="space-between">
 					<Flex gap="sm">
 						<Box
-							c={"white"}
-							fw={"800"}
+							c="white"
+							fw="800"
 							className="cursor-pointer"
-							onClick={() => navigate("/")}
+							onClick={() => navigate(APP_NAVLINKS.BAKERY)}
 							pl="lg"
 						>
-							{configData?.domain?.company_name}
+							{configData?.domain?.company_name || configData?.company_name}
 						</Box>
 						<Flex ml="60px" gap="sm" align="center">
 							{modalLinks.map((link) => {
-								const isActive = link.pathname === location.pathname;
+								const isActive = link.pathname === location?.pathname;
 
 								return (
 									<NavLink style={{ textDecoration: "none", display: "inline-block" }} to={link.pathname}>

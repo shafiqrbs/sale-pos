@@ -11,13 +11,14 @@ export default function ProductList() {
     const [ allProducts, setAllProducts ] = useState([])
     const { increment } = useCartOperation();
     const { mainAreaHeight, isOnline } = useOutletContext();
+    const { configData } = useConfigData({ offlineFetch: !isOnline })
     const [ filter, setFilter ] = useState({
         categories: [],
         search: "",
         barcode: "",
         view: "grid", // grid | list | minimal
     })
-    const { configData } = useConfigData({ offlineFetch: !isOnline })
+
     useEffect(() => {
         async function fetchProducts() {
             const fetchedProducts = await window.dbAPI.getDataFromTable("core_products")
@@ -116,7 +117,7 @@ export default function ProductList() {
                                                     size="md"
                                                     c="green.9"
                                                 >
-                                                    {configData?.currency?.symbol}{" "}
+                                                    {configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol}{" "}
                                                     {product.sales_price}
                                                 </Text>
                                             </Card>
