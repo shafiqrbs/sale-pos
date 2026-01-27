@@ -39,6 +39,15 @@ ipcMain.handle("delete-data-from-table", async (event, table, id, property) => {
 	}
 });
 
+ipcMain.handle("delete-many-from-table", async (event, table, ids, property) => {
+	try {
+		return dbModule.deleteManyFromTable(table, ids, property);
+	} catch (error) {
+		console.error(`Error deleting many data from ${table}:`, error);
+		throw error;
+	}
+});
+
 ipcMain.handle("destroy-table-data", async (event, table) => {
 	try {
 		return dbModule.destroyTableData(table);

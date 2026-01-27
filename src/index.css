@@ -99,3 +99,14 @@
 .overflow-hidden {
   overflow: hidden !important;
 }
+
+.nav-link {
+  padding-inline: 10px !important;
+  padding-block: 2px !important;
+}
+
+.active-navbar-link {
+  color: var(--theme-primary-color-6) !important;
+  background-color: white !important;
+  border-radius: 4px;
+}

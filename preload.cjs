@@ -20,6 +20,9 @@ try {
 		deleteDataFromTable: (table, id, property) => {
 			return ipcRenderer.invoke("delete-data-from-table", table, id, property);
 		},
+		deleteManyFromTable: (table, ids, property) => {
+			return ipcRenderer.invoke("delete-many-from-table", table, ids, property);
+		},
 		destroyTableData: (table) => {
 			console.log("Calling destroyTableData...");
 			return ipcRenderer.invoke("destroy-table-data", table);

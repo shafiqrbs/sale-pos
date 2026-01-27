@@ -229,6 +229,7 @@ export default function useCartOperation(tableId = null) {
         decrement,
         remove,
         clear,
+        refetchInvoice,
         getCartTotal,
         getCartTotalQuantity,
     };

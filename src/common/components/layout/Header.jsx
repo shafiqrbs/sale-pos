@@ -30,8 +30,9 @@ import {
 	IconDashboard,
 	IconMoneybag,
 	IconStack,
+	IconCashBanknote,
 } from "@tabler/icons-react";
-import { useNavigate } from "react-router";
+import { NavLink, useLocation, useNavigate } from "react-router";
 import LanguagePickerStyle from "@assets/css/LanguagePicker.module.css";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -46,6 +47,7 @@ export default function Header({ isOnline, toggleNetwork }) {
 	const [ openedPrinter, { open: openPrinter, close: closePrinter } ] = useDisclosure(false);
 	const { t, i18n } = useTranslation();
 	const navigate = useNavigate();
+	const location = useLocation()
 	const { toggle, fullscreen } = useFullscreen();
 	const [ syncPanelOpen, setSyncPanelOpen ] = useState(false);
 	const [ languageOpened, setLanguageOpened ] = useState(false);
@@ -59,9 +61,9 @@ export default function Header({ isOnline, toggleNetwork }) {
 	});
 
 	const modalLinks = [
-		{ label: "Dashboard", icon: <IconDashboard size={18} />, action: () => { } },
-		{ label: "Sales", icon: <IconMoneybag size={18} />, action: () => { } },
-		{ label: "Stock", icon: <IconStack size={18} />, action: () => { } },
+		{ label: "Dashboard", icon: <IconDashboard size={18} />, pathname: "/dashboard" },
+		{ label: "Sales", icon: <IconCashBanknote size={18} />, pathname: "/inventory/sales" },
+		{ label: "Stock", icon: <IconStack size={18} />, pathname: "/inventory/stock" },
 	]
 
 	useEffect(() => {
@@ -119,13 +121,20 @@ export default function Header({ isOnline, toggleNetwork }) {
 						>
 							{configData?.domain?.company_name}
 						</Box>
-						<Flex ml="60px" gap="lg" align="center">
-							{modalLinks.map((link) => (
-								<Flex className="cursor-pointer" onClick={link.action} c="white" key={link.label} align="center" gap="les">
-									{link.icon}
-									<Text size="sm">{link.label}</Text>
-								</Flex>
-							))}
+						<Flex ml="60px" gap="sm" align="center">
+							{modalLinks.map((link) => {
+								const isActive = link.pathname === location.pathname;
+
+								return (
+									<NavLink style={{ textDecoration: "none", display: "inline-block" }} to={link.pathname}>
+										<Flex className={`cursor-pointer nav-link ${isActive ? "active-navbar-link" : ""}`} c="white" key={link.label} align="center" gap="es">
+											{link.icon}
+											<Text size="sm">{link.label}</Text>
+										</Flex>
+									</NavLink>
+								)
+							})}
+
 						</Flex>
 					</Flex>
 

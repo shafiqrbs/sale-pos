@@ -31,7 +31,6 @@ export default function Checkout() {
             receive_amount: null,
             discount: 0,
             coupon_code: "",
-            created_by_id: "",
         },
         validate: {
             transaction_mode_id: (value) => {
@@ -64,6 +63,7 @@ export default function Checkout() {
     return (
         <Box pr="3xs">
             <CheckoutTable />
+
             <Group
                 h={34}
                 justify="space-between"
@@ -85,6 +85,7 @@ export default function Checkout() {
                     </Text>
                 </Group>
             </Group>
+
             <Transaction form={form} transactionModeData={transactionModeData} />
         </Box>
     )

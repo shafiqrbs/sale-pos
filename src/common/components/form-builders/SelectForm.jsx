@@ -26,7 +26,10 @@ const SelectForm = forwardRef((props, ref) => {
 	} = props;
 
 	const handleChange = async (e) => {
-		changeValue(e);
+		if (changeValue) {
+			changeValue(e);
+		}
+
 		form.setFieldValue(name, e);
 		if (nextField) {
 			setTimeout(() => {

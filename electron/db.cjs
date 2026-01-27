@@ -1,4 +1,3 @@
-const fs = require("fs");
 const path = require("path");
 const { app } = require("electron");
 const Database = require("better-sqlite3");
@@ -518,6 +517,21 @@ const deleteDataFromTable = (table, idOrConditions = 1, property = "id") => {
 	}
 };
 
+const deleteManyFromTable = (table, ids = [], property = "id") => {
+	if (!Array.isArray(ids) || ids.length === 0) return;
+
+	table = convertTableName(table);
+
+	// Create ?,?,? placeholders dynamically
+	const placeholders = ids.map(() => "?").join(",");
+
+	const stmt = db.prepare(
+		`DELETE FROM ${table} WHERE ${property} IN (${placeholders})`
+	);
+
+	return stmt.run(...ids);
+};
+
 const destroyTableData = (table = "users") => {
 	const stmt = db.prepare(`DELETE FROM ${table}`);
 	stmt.run();
@@ -637,6 +651,7 @@ module.exports = {
 	getDataFromTable,
 	updateDataInTable,
 	deleteDataFromTable,
+	deleteManyFromTable,
 	destroyTableData,
 	resetDatabase,
 	getJoinedTableData,

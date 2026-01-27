@@ -2,9 +2,9 @@ import React, { useMemo } from 'react'
 import { Box, Grid } from '@mantine/core'
 import { useOutletContext } from 'react-router'
 import useGetInvoiceType from '@hooks/useGetInvoiceType'
-import Tables from '@components/pos-items/Tables'
-import ProductList from '@components/pos-items/ProductList'
-import Checkout from '@components/pos-items/Checkout'
+import Tables from '@modules/pos/common/Tables'
+import ProductList from '@modules/pos/common/ProductList'
+import Checkout from '@modules/pos/common/Checkout'
 
 const getParticularName = (mode, item) => {
     switch (mode) {

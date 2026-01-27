@@ -189,8 +189,6 @@ export default function TransactionInformation({ form, transactionModeData }) {
                                                     color="red"
                                                 >
                                                     <Image
-                                                        mih={48}
-                                                        mah={48}
                                                         w={56}
                                                         h={48}
                                                         fit="fit"
@@ -246,13 +244,13 @@ export default function TransactionInformation({ form, transactionModeData }) {
                         )}
                     </Box>
                 </Grid.Col>
-                <Grid.Col span={3} style={{ textAlign: "right" }} pr={"8"}>
+                <Grid.Col span={3} style={{ textAlign: "right" }} pr="8">
                     <Tooltip
                         label={t("TransactionMode")}
                         px={16}
                         py={2}
-                        bg={"gry.8"}
-                        c={"white"}
+                        bg="gry.8"
+                        c="white"
                         withArrow
                         zIndex={999}
                         transitionProps={{

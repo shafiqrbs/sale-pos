@@ -16,7 +16,7 @@ export default function Transaction({ form, transactionModeData, tableId = null 
     const { isOnline } = useOutletContext();
     const { configData } = useConfigData({ offlineFetch: !isOnline });
     const [ coreUsers, setCoreUsers ] = useState([])
-    const { invoiceData, getCartTotal } = useCartOperation();
+    const { invoiceData, getCartTotal, refetchInvoice } = useCartOperation();
     const [ isLoading, setIsLoading ] = useState({ saveAll: false, save: false, print: false })
     const [ inlineUpdate ] = useInlineUpdateMutation();
     const [ salesComplete ] = useSalesCompleteMutation();
@@ -90,6 +90,7 @@ export default function Transaction({ form, transactionModeData, tableId = null 
             }
 
             showNotification(t("SalesComplete"), "blue", "", "", true, 1000, true);
+
             if (withPos) {
                 const setup = await window.dbAPI.getDataFromTable("printer");
                 if (!setup?.printer_name) {
@@ -136,33 +137,34 @@ export default function Transaction({ form, transactionModeData, tableId = null 
     const handleOfflineSave = async (fullAmount) => {
         const customerInfo = customersDropdownData.find((d) => d.value == form.values.customer_id);
         const invoiceId = generateInvoiceId();
+        const salesBy = coreUsers.find((user) => user.id == form.values.sales_by_id);
 
-        const userItem = await window.dbAPI.getDataFromTable("users");
-
-        // Insert sale record
-        await window.dbAPI.upsertIntoTable("sales", {
+        const salesData = {
             invoice: invoiceId,
             sub_total: getCartTotal(),
             total: getCartTotal(),
-            approved_by_id: form.values.created_by_id,
+            approved_by_id: form.values.sales_by_id,
             payment: fullAmount,
-            discount: null,
-            discount_calculation: null,
+            discount: 0,
+            discount_calculation: 0,
             discount_type: form.values.discount_type,
             customerId: form.values.customer_id,
-            customerName: customerInfo?.label?.split(" -- ")[ 1 ] || userItem?.name,
-            customerMobile: customerInfo?.label?.split(" -- ")[ 0 ] || userItem?.mobile,
+            customerName: customerInfo?.label?.split(" -- ")[ 1 ],
+            customerMobile: customerInfo?.label?.split(" -- ")[ 0 ],
             createdByUser: "sandra",
-            createdById: form.values.created_by_id,
+            createdById: form.values.sales_by_id,
             salesById: form.values.sales_by_id,
-            salesByUser: "sandra",
-            salesByName: null,
+            salesByUser: salesBy?.username,
+            salesByName: salesBy?.name,
             process: "approved",
             mode_name: form.values.transaction_mode_name,
             created: formatDateTime(new Date()),
             sales_items: JSON.stringify(invoiceData),
             multi_transaction: isSplitPaymentActive ? 1 : 0,
-        });
+        }
+
+        // Insert sale record
+        await window.dbAPI.upsertIntoTable("sales", salesData);
 
         // Handle transactions
         // if (isSplitPaymentActive) {
@@ -198,9 +200,11 @@ export default function Transaction({ form, transactionModeData, tableId = null 
         });
 
         // Delete invoice items
-        for (const item of invoiceData) {
-            window.dbAPI.deleteDataFromTable("invoice_table_item", item.id);
-        }
+        const ids = invoiceData.map(item => item.id);
+        await window.dbAPI.deleteManyFromTable("invoice_table_item", ids);
+
+        // reset invoice redux store
+        refetchInvoice();
     };
 
     const handlePrintAll = async () => {
