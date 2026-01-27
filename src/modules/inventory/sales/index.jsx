@@ -5,7 +5,6 @@ import tabCss from "@assets/css/Tab.module.css";
 import { useOutletContext } from "react-router";
 import useSalesList from "@hooks/useSalesList";
 
-// =============== static tab options for sales views ================
 const TAB_OPTIONS = [
     { key: "all", label: "All Sales" },
     { key: "today", label: "Today" },
@@ -19,8 +18,8 @@ export default function SalesIndex() {
     const { isOnline } = useOutletContext();
     const [ activeTab, setActiveTab ] = useState("all");
     const { sales: salesData, isLoading } = useSalesList({ params: { term: "", customer_id: "", start_date: "", end_date: "", page: 1, offset: 50 }, offlineFetch: !isOnline });
+    const { mainAreaHeight } = useOutletContext();
 
-    // =============== filter logic for each tab ================
     const filteredData = useMemo(() => {
         if (!salesData?.data.length) return { ...salesData, data: [] };
 
@@ -42,7 +41,6 @@ export default function SalesIndex() {
                     );
                 }),
             };
-            console.info(result);
             return result;
         }
         if (activeTab === "week") {
@@ -63,7 +61,6 @@ export default function SalesIndex() {
                     return itemDate >= startOfWeek && itemDate <= endOfWeek;
                 }),
             };
-            console.info(result);
             return result;
         }
         if (activeTab === "month") {
@@ -76,7 +73,6 @@ export default function SalesIndex() {
                     return itemDate.getMonth() === now.getMonth() && itemDate.getFullYear() === now.getFullYear();
                 }),
             };
-            console.info(result);
             return result;
         }
         if (activeTab === "cash") {
@@ -84,7 +80,6 @@ export default function SalesIndex() {
                 ...salesData,
                 data: sales.filter((item) => item.mode_name?.toLowerCase() === "cash"),
             };
-            console.info(result);
             return result;
         }
         if (activeTab === "discount_type") {
@@ -92,7 +87,6 @@ export default function SalesIndex() {
                 ...salesData,
                 data: sales.filter((item) => item.discount_type?.toLowerCase() === "flat"),
             };
-            console.info(result);
             return result;
         }
         // default: all
@@ -102,11 +96,10 @@ export default function SalesIndex() {
     return (
         <Box p="xs">
             <Grid columns={24} gutter={{ base: 8 }}>
-                <Grid.Col span={4}>
-                    <Box>
+                <Grid.Col span={3}>
+                    <Box h={mainAreaHeight - 2} p="3xs" className="borderRadiusAll" bg="white" bd="1px solid #e6e6e6">
                         <p>Sales Overview</p>
                         <Box mt={8} mb={18} h={2} w="56px" bg="red" />
-                        {/* =============== mantine tabs with custom style ================ */}
                         <Tabs
                             color="#f8eedf"
                             value={activeTab}
@@ -134,7 +127,7 @@ export default function SalesIndex() {
                         </Tabs>
                     </Box>
                 </Grid.Col>
-                <Grid.Col span={20}>
+                <Grid.Col span={21}>
                     <Table salesData={filteredData} fetching={isLoading} />
                 </Grid.Col>
             </Grid>

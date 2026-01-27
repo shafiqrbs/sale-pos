@@ -110,3 +110,7 @@
   background-color: white !important;
   border-radius: 4px;
 }
+
+.sales-details-table tr th {
+  background-color: var(--theme-primary-color-0);
+}

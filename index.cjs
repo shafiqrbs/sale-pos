@@ -105,9 +105,6 @@ let splash;
 // run this as early in the main process as possible
 if (require("electron-squirrel-startup")) app.quit();
 
-// enable serial port
-app.commandLine.appendSwitch("enable-features", "Serial");
-
 app.whenReady().then(() => {
 	// Create Splash Screen
 	splash = new BrowserWindow({
@@ -131,51 +128,12 @@ app.whenReady().then(() => {
 		webPreferences: {
 			nodeIntegration: false,
 			contextIsolation: true,
-			enableBlinkFeatures: "Serial",
-			experimentalFeatures: true,
 			preload: path.join(__dirname, "preload.cjs"),
 			// for debugging purpose only
 			devTools: true,
 			sandbox: false,
 		},
 		autoHideMenuBar: true,
-	});
-	mainWindow.webContents.session.on(
-		"select-serial-port",
-		(event, portList, webContents, callback) => {
-			mainWindow.webContents.session.on("serial-port-added", (event, port) => {
-				console.log("serial-port-added FIRED WITH", port);
-			});
-
-			mainWindow.webContents.session.on("serial-port-removed", (event, port) => {
-				console.log("serial-port-removed FIRED WITH", port);
-			});
-
-			event.preventDefault();
-			if (portList && portList.length > 0) {
-				callback(portList[ 0 ].portId);
-			} else {
-				callback("");
-			}
-		}
-	);
-
-	mainWindow.webContents.session.setPermissionCheckHandler(
-		(webContents, permission, requestingOrigin, details) => {
-			if (permission === "serial") {
-				return true;
-			}
-
-			return false;
-		}
-	);
-
-	mainWindow.webContents.session.setDevicePermissionHandler((details) => {
-		if (details.deviceType === "serial") {
-			return true;
-		}
-
-		return false;
 	});
 
 	// Load Main App after splash screen

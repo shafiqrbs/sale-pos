@@ -41,8 +41,6 @@ export default function BakeryIndex() {
         }));
     }, [ invoiceType, invoiceMode ]);
 
-    console.info(transformedTables)
-
     return (
         <Box>
             {/* configData?.inventory_config?.is_pos && invoiceMode === "table" */}

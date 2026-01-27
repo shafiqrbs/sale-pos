@@ -122,15 +122,14 @@ export default function Header({ isOnline, toggleNetwork }) {
 								const isActive = link.pathname === location?.pathname;
 
 								return (
-									<NavLink style={{ textDecoration: "none", display: "inline-block" }} to={link.pathname}>
-										<Flex className={`cursor-pointer nav-link ${isActive ? "active-navbar-link" : ""}`} c="white" key={link.label} align="center" gap="es">
+									<NavLink key={link.label} style={{ textDecoration: "none", display: "inline-block" }} to={link.pathname}>
+										<Flex className={`cursor-pointer nav-link ${isActive ? "active-navbar-link" : ""}`} c="white" key={link.label} align="center" gap="les">
 											{link.icon}
 											<Text size="sm">{link.label}</Text>
 										</Flex>
 									</NavLink>
 								)
 							})}
-
 						</Flex>
 					</Flex>
 
