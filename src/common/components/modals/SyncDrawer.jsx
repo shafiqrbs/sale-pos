@@ -4,8 +4,94 @@ import { SYNC_DATA } from "@/constants";
 import { showNotification } from "@components/ShowNotificationComponent";
 import { useSyncPosMutation } from "@services/pos";
 
-export default function SyncDrawer({ syncPanelOpen, setSyncPanelOpen }) {
+export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen }) {
 	const [ syncPos ] = useSyncPosMutation();
+
+	const buildSalesPayload = ({ salesData }) => {
+		console.log(salesData)
+		// return;
+		return {
+			device_id: configData?.deviceId ?? "123",
+			sync_batch_id: new Date().toISOString().slice(0, 10).replace(/-/g, "") + "-001",
+
+			content: salesData.map((sale) => ({
+				id: sale?.id ?? null,
+				created: sale?.created ?? "",
+				invoice: sale?.invoice ?? "",
+
+				sub_total: sale?.sub_total ?? null,
+				total: sale?.total ?? null,
+				approved_by_id: sale?.approved_by_id || null,
+
+				payment: sale?.payment ?? null,
+				discount: sale?.discount ?? null,
+				is_domain_sales_completed: sale?.is_domain_sales_completed ?? null,
+
+				discount_calculation: sale?.discount_calculation ?? null,
+				discount_type: sale?.discount_type ?? null,
+
+				invoice_batch_id: sale?.invoice_batch_id ?? null,
+
+				customerId: sale?.customerId ?? "",
+				customerName:
+					sale?.customerName ??
+					configData?.domain?.name ??
+					"",
+
+				customerMobile: sale?.customerMobile ?? null,
+
+				createdByUser: sale?.createdByUser ?? "",
+				createdByName: sale?.createdByName ?? null,
+				createdById: sale?.createdById || null,
+
+				salesById: sale?.salesById || null,
+				salesByUser: sale?.salesByUser ?? "",
+				salesByName: sale?.salesByName ?? null,
+
+				process: sale?.process ?? "",
+				mode_name: sale?.mode_name ?? "",
+
+				customer_address: sale?.customer_address ?? null,
+				customer_group: sale?.customer_group ?? null,
+				balance: sale?.balance ?? null,
+
+				sales_items: Array.isArray(JSON.parse(sale?.sales_items || "[]"))
+					? JSON.parse(sale?.sales_items || "[]")?.map((item) => ({
+						id: item?.id ?? null,
+						stock_item_id: item?.stock_item_id ?? null,
+						invoice_id: item?.invoice_id ?? null,
+
+						display_name: item?.display_name ?? "",
+						quantity: item?.quantity ?? 0,
+
+						purchase_price: item?.purchase_price ?? 0,
+						sales_price: item?.sales_price ?? 0,
+						custom_price: item?.custom_price ?? 0,
+
+						is_print: item?.is_print ?? 0,
+						sub_total: item?.sub_total ?? 0,
+
+						crated_at: item?.crated_at ?? "",
+						updated_at: item?.updated_at ?? ""
+					}))
+					: [],
+
+				multi_transaction: sale?.multi_transaction ?? 0,
+
+				splitPayment: Array.isArray(sale?.splitPayment)
+					? sale.splitPayment.map((p) => ({
+						id: p?.id ?? null,
+						transaction_mode_id: p?.transaction_mode_id ?? null,
+						invoice_id: p?.invoice_id ?? "",
+						amount: p?.amount ?? 0,
+						created_at: p?.created_at ?? "",
+						updated_at: p?.updated_at ?? ""
+					}))
+					: []
+			}))
+		};
+	};
+
 
 	const handleSync = async (syncOption) => {
 		try {
@@ -13,27 +99,11 @@ export default function SyncDrawer({ syncPanelOpen, setSyncPanelOpen }) {
 				case "sales": {
 					const salesData = await window.dbAPI.getDataFromTable("sales");
 
-					const salesWithTransactions = await Promise.all(
-						salesData.map(async (sale) => ({
-							...sale,
-							sales_items: JSON.parse(sale.sales_items || "[]"),
-							splitPayment:
-								(await window.dbAPI.getDataFromTable("sales_transactions", {
-									invoice_id: sale.invoice,
-								})) || [],
-						}))
-					);
+					const response = await syncPos(buildSalesPayload({ salesData })).unwrap();
 
-					const output = {
-						created_by: await window.dbAPI.getDataFromTable("users"),
-						content: salesWithTransactions,
-					};
-
-					const resultAction = await syncPos(output);
-
-					if (resultAction.payload?.status !== 200) {
+					if (response?.status === "error") {
 						showNotification(
-							resultAction.payload?.message || "Error syncing sales data",
+							response.payload?.message || "Error syncing sales data",
 							"red",
 							"",
 							"",
@@ -41,13 +111,15 @@ export default function SyncDrawer({ syncPanelOpen, setSyncPanelOpen }) {
 						);
 					} else {
 						showNotification(
-							resultAction.payload?.message || "Sales data synced successfully",
+							response.payload?.message || "Sales data synced successfully",
 							"teal",
 							"lightgray",
 							"",
 							"",
 							true
 						);
+
+						window.dbAPI.destroyTableData("sales");
 					}
 					break;
 				}

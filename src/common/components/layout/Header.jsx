@@ -319,7 +319,7 @@ export default function Header({ isOnline, toggleNetwork }) {
 				</form>
 			</Modal>
 			{/* ----------- sync information ----------- */}
-			<SyncDrawer syncPanelOpen={syncPanelOpen} setSyncPanelOpen={setSyncPanelOpen} />
+			<SyncDrawer syncPanelOpen={syncPanelOpen} configData={configData} setSyncPanelOpen={setSyncPanelOpen} />
 		</>
 	);
 }
