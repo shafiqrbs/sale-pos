@@ -23,8 +23,6 @@ const TABLE_MAPPING = {
 	vendors: "vendors"
 };
 
-
-
 export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen }) {
 	const [ syncPos ] = useSyncPosMutation();
 	const [ syncRecords, setSyncRecords ] = useState(() => getSyncRecordsFromLocalStorage());

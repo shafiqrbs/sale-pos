@@ -11,7 +11,6 @@ export const extendedSalesApiSlice = apiSlice.injectEndpoints({
           params,
         };
       },
-      // =============== critical for pagination: insert/delete shifts pages, so LIST must invalidate all ================
       providesTags: (result) =>
         result?.data
           ? [
