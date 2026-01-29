@@ -124,7 +124,8 @@ db.prepare(
 		created_at TEXT NOT NULL,
 		debit REAL NOT NULL,
 		credit REAL NOT NULL,
-		balance REAL NOT NULL
+		balance REAL NOT NULL,
+		is_new INTEGER DEFAULT 0
 	);
   	`
 ).run();

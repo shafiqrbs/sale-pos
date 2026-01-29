@@ -81,3 +81,16 @@ export const calculateVATAmount = (vatPrice, vatConfig) => {
 };
 
 export const withInvoiceId = (tableId) => (tableId ? { invoice_id: tableId } : {});
+
+export const generateSlug = (name) => {
+	if (!name) return '';
+
+	const slugName = name
+		.toLowerCase()
+		.trim()
+		.replace(/[^\w\s-]/g, '')
+		.replace(/[\s_-]+/g, '-')
+		.replace(/^-+|-+$/g, '');
+
+	return `${slugName}-${Date.now().toString()}`;
+};

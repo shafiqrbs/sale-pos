@@ -10,6 +10,8 @@ import { useOutletContext } from 'react-router';
 import useConfigData from '@hooks/useConfigData';
 import { formatDateTime, generateInvoiceId, withInvoiceId } from '@utils/index';
 import { useInlineUpdateMutation, useSalesCompleteMutation } from '@services/pos';
+import CustomerDrawer from '@components/modals/CustomerDrawer';
+import { useDisclosure } from '@mantine/hooks';
 
 export default function Transaction({ form, transactionModeData, tableId = null }) {
     const { t } = useTranslation();
@@ -21,6 +23,8 @@ export default function Transaction({ form, transactionModeData, tableId = null 
     const [ inlineUpdate ] = useInlineUpdateMutation();
     const [ salesComplete ] = useSalesCompleteMutation();
     const [ customersDropdownData, setCustomersDropdownData ] = useState([]);
+    const [ customerDrawerOpened, { open: customerDrawerOpen, close: customerDrawerClose } ] = useDisclosure(false);
+    const [ customerObject, setCustomerObject ] = useState(null);
 
     // ============= wreckage start =============
     const discountType = "Flat";
@@ -28,8 +32,7 @@ export default function Transaction({ form, transactionModeData, tableId = null 
     const handleClick = () => { };
     const enableTable = false;
     const salesByUser = "";
-    const customerObject = {};
-    const handleCustomerAdd = () => { };
+
     const enableCoupon = "Coupon";
     const setEnableCoupon = () => { };
     const salesDiscountAmount = 0;
@@ -44,8 +47,12 @@ export default function Transaction({ form, transactionModeData, tableId = null 
         fetchCoreUsers();
     }, []);
 
+
+
     useEffect(() => {
-        form.setFieldValue("receive_amount", getCartTotal());
+        const cartTotal = getCartTotal();
+        form.setFieldValue("receive_amount", cartTotal);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ getCartTotal() ]);
 
     useEffect(() => {
@@ -56,6 +63,29 @@ export default function Transaction({ form, transactionModeData, tableId = null 
         fetchCustomers();
     }, []);
 
+    // =============== refresh customers when drawer closes ================
+    useEffect(() => {
+        if (!customerDrawerOpened) {
+            async function refreshCustomers() {
+                const data = await window.dbAPI.getDataFromTable("core_customers");
+                setCustomersDropdownData(data);
+            }
+            refreshCustomers();
+        }
+    }, [ customerDrawerOpened ]);
+
+    // =============== handle customer selection from drawer ================
+    const handleCustomerSelect = (customer) => {
+        if (customer) {
+            setCustomerObject(customer);
+        } else {
+            setCustomerObject(null);
+        }
+    };
+
+    const handleCustomerAdd = () => {
+        customerDrawerOpen();
+    };
     const handleSave = async ({ withPos = false }) => {
         // Validation checks
         if (!invoiceData?.length) {
@@ -135,7 +165,8 @@ export default function Transaction({ form, transactionModeData, tableId = null 
     };
 
     const handleOfflineSave = async (fullAmount) => {
-        const customerInfo = customersDropdownData.find((d) => d.value == form.values.customer_id);
+        // =============== get customer info from database or customerObject ================
+        const customerInfo = customerObject || customersDropdownData.find((d) => d.id?.toString() == form.values.customer_id);
         const invoiceId = generateInvoiceId();
         const salesBy = coreUsers.find((user) => user.id == form.values.sales_by_id);
 
@@ -149,8 +180,8 @@ export default function Transaction({ form, transactionModeData, tableId = null 
             discount_calculation: 0,
             discount_type: form.values.discount_type,
             customerId: form.values.customer_id,
-            customerName: customerInfo?.label?.split(" -- ")[ 1 ],
-            customerMobile: customerInfo?.label?.split(" -- ")[ 0 ],
+            customerName: customerInfo?.name || customerInfo?.label?.split(" -- ")[ 1 ],
+            customerMobile: customerInfo?.mobile || customerInfo?.label?.split(" -- ")[ 0 ],
             createdByUser: "sandra",
             createdById: form.values.sales_by_id,
             salesById: form.values.sales_by_id,
@@ -510,6 +541,15 @@ export default function Transaction({ form, transactionModeData, tableId = null 
                     </Button>
                 </Grid.Col>
             </Grid>
+
+            {/* =============== customer drawer ================ */}
+            <CustomerDrawer
+                opened={customerDrawerOpened}
+                onClose={customerDrawerClose}
+                form={form}
+                customersDropdownData={customersDropdownData}
+                onCustomerSelect={handleCustomerSelect}
+            />
         </Stack>
     )
 }
