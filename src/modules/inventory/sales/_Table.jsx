@@ -1,6 +1,6 @@
 import { Box, Grid, Text, ActionIcon, Group, Menu, Flex } from '@mantine/core';
 import { IconDotsVertical, IconEye } from '@tabler/icons-react';
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useOutletContext } from 'react-router'
 import { DataTable } from 'mantine-datatable';
 import tableCss from "@assets/css/Table.module.css";
@@ -16,7 +16,11 @@ export default function Table({ salesData, fetching }) {
     const [ selectedRow, setSelectedRow ] = useState(null);
     const [ loading, setLoading ] = useState(false);
     const [ salesViewData, setSalesViewData ] = useState(null);
-    const { mainAreaHeight } = useOutletContext()
+    const { mainAreaHeight, isOnline } = useOutletContext();
+
+    useEffect(() => {
+        setShowDetails(prev => (prev ? false : prev));
+    }, [ isOnline ]);
 
     const handleShowDetails = (item) => {
         setLoading(true);
@@ -41,13 +45,16 @@ export default function Table({ salesData, fetching }) {
                             footer: tableCss.footer,
                             pagination: tableCss.pagination,
                         }}
+                        onRowClick={(rowData) => {
+                            handleShowDetails(rowData.record);
+                        }}
                         records={salesData?.data}
                         columns={[
                             {
                                 accessor: "created",
                                 title: t("Created"),
                                 render: (item) => (
-                                    <Text component="a" size="sm" variant="subtle" c="red.6">
+                                    <Text component="a" size="sm" variant="subtle" c="var(--theme-primary-color-6)">
                                         {item?.created}
                                     </Text>
                                 ),
@@ -60,12 +67,7 @@ export default function Table({ salesData, fetching }) {
                                         component="a"
                                         size="sm"
                                         variant="subtle"
-                                        c="red.6"
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            handleShowDetails(item);
-                                        }}
-                                        className='cursor-pointer'
+                                        c="var(--theme-primary-color-6)"
                                     >
                                         {item.invoice}
                                     </Text>
@@ -120,9 +122,10 @@ export default function Table({ salesData, fetching }) {
                                                 <ActionIcon
                                                     size="sm"
                                                     variant="outline"
-                                                    color="red"
+                                                    color="var(--theme-primary-color-6)"
                                                     radius="xl"
                                                     aria-label="Settings"
+                                                    onClick={(e) => e.preventDefault()}
                                                 >
                                                     <IconDotsVertical
                                                         height="18"
@@ -133,7 +136,8 @@ export default function Table({ salesData, fetching }) {
                                             </Menu.Target>
                                             <Menu.Dropdown>
                                                 <Menu.Item
-                                                    onClick={() => {
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
                                                         handleShowDetails(data);
                                                     }}
                                                     w="140"

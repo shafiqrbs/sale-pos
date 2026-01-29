@@ -46,6 +46,8 @@ export default function SalesDetails({ loading, salesViewData }) {
       </Table.Tr>
     ));
 
+  const dueOrReturnValue = Number(salesViewData.total) - Number(salesViewData.payment);
+
   return (
     <>
       <Box bd="1px solid #dee2e6" bg="white" p="3xs" className="borderRadiusAll" ref={printRef} pos="relative">
@@ -257,10 +259,10 @@ export default function SalesDetails({ loading, salesViewData }) {
                 </Table.Tr>
                 <Table.Tr>
                   <Table.Th colSpan="5" ta="right" fz="xs" w="100">
-                    {t("Due")}
+                    {dueOrReturnValue >= 0 ? t("Due") : t("Return")}
                   </Table.Th>
                   <Table.Th ta="right" fz="xs" w="100">
-                    {Number(salesViewData.total) - Number(salesViewData.payment)}
+                    {Math.abs(dueOrReturnValue)}
                   </Table.Th>
                 </Table.Tr>
               </Table.Tfoot>

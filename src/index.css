@@ -114,3 +114,21 @@
 .sales-details-table tr th {
   background-color: var(--theme-primary-color-0);
 }
+
+button[data-active='true'].mantine-focus-auto.mantine-active.mantine-datatable-pagination-pages-control {
+  background-color: var(--theme-primary-color-6) !important;
+}
+
+.capitalize {
+  text-transform: capitalize !important;
+}
+
+.mantine-TextInput-error,
+.mantine-Textarea-error,
+.mantine-DateInput-error {
+  display: none !important;
+}
+
+[data-error=true].mantine-Input-wrapper {
+  margin-bottom: 0;
+}

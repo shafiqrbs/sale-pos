@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { Drawer, Stack, Select, TextInput, Button, Divider, Group, Text, rem } from '@mantine/core';
+import { Stack, Select, TextInput, Button, Divider, Group, Text, rem, Box } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useTranslation } from 'react-i18next';
 import { formatDate, formatDateTime, generateSlug } from '@utils/index';
 import { showNotification } from '@components/ShowNotificationComponent';
+import GlobalDrawer from './GlobalDrawer';
+import FormValidationWrapper from '@components/form-builders/FormValidationWrapper';
+import { useOutletContext } from 'react-router';
+import { IconDeviceFloppy, IconX } from '@tabler/icons-react';
 
 export default function CustomerDrawer({ opened, onClose, form, customersDropdownData, onCustomerSelect }) {
+    const { mainAreaHeight } = useOutletContext();
     const { t } = useTranslation();
     const [ selectedCustomerId, setSelectedCustomerId ] = useState(null);
     const [ isLoading, setIsLoading ] = useState(false);
 
-    const newCustomerForm = useForm({
+    const customerForm = useForm({
         initialValues: {
             name: '',
             mobile: '',
@@ -19,7 +24,15 @@ export default function CustomerDrawer({ opened, onClose, form, customersDropdow
         },
         validate: {
             name: (value) => (!value || value.trim() === '' ? t('NameIsRequired') || 'Name is required' : null),
-            mobile: (value) => (!value || value.trim() === '' ? t('MobileIsRequired') || 'Mobile is required' : null),
+            mobile: (value) => {
+                if (!value || value.trim() === '') {
+                    return t('MobileIsRequired') || 'Mobile is required';
+                }
+                if (value.trim().length < 11) {
+                    return t('MobileLengthMustBeAtLeast11') || 'Mobile length must be at least 11';
+                }
+                return null;
+            },
         },
     });
 
@@ -27,7 +40,7 @@ export default function CustomerDrawer({ opened, onClose, form, customersDropdow
     useEffect(() => {
         if (!opened) {
             setSelectedCustomerId(null);
-            newCustomerForm.reset();
+            customerForm.reset();
         } else {
             if (form.values.customer_id) {
                 setSelectedCustomerId(form.values.customer_id);
@@ -76,11 +89,11 @@ export default function CustomerDrawer({ opened, onClose, form, customersDropdow
 
     // =============== handle save new customer ================
     const handleSaveNewCustomer = async () => {
-        const validation = newCustomerForm.validate();
+        const validation = customerForm.validate();
         if (!validation.hasErrors) {
             setIsLoading(true);
             try {
-                const customerData = newCustomerForm.values;
+                const customerData = customerForm.values;
 
                 const newCustomerRecord = {
                     name: customerData.name.trim(),
@@ -143,92 +156,97 @@ export default function CustomerDrawer({ opened, onClose, form, customersDropdow
     }));
 
     return (
-        <Drawer
-            position="right"
+        <GlobalDrawer
             opened={opened}
             onClose={onClose}
-            padding="lg"
-            size="md"
-            overlayProps={{
-                backgroundOpacity: 0.55,
-            }}
-            title={t('SelectCustomer') || 'Select Customer'}
+            title={t('SelectCustomer')}
             styles={{
                 title: { fontWeight: 600, fontSize: rem(20), color: '#626262' },
             }}
         >
             <Divider mb="md" />
 
-            <Stack gap="md">
-                <Select
-                    label={t('SelectExistingCustomer') || 'Select Existing Customer'}
-                    placeholder={t('ChooseCustomer') || 'Choose Customer'}
-                    data={dropdownOptions}
-                    searchable
-                    clearable
-                    value={selectedCustomerId}
-                    onChange={handleCustomerDropdownChange}
-                    size="sm"
-                />
-
-                <Divider label={t('Or') || 'OR'} labelPosition="center" />
-
-                <Stack gap="sm">
-                    <Text fw={600} size="sm">
-                        {t('AddNewCustomer')}
-                    </Text>
-
-                    <TextInput
-                        label={t('CustomerName')}
-                        placeholder={t('EnterCustomerName') || 'Enter customer name'}
-                        required
+            <Stack gap="md" h={mainAreaHeight - 20} justify="space-between">
+                <Box>
+                    <Select
+                        label={t('SelectExistingCustomer')}
+                        placeholder={t('ChooseCustomer')}
+                        data={dropdownOptions}
+                        searchable
+                        clearable
+                        value={selectedCustomerId}
+                        onChange={handleCustomerDropdownChange}
                         size="sm"
-                        disabled={!!selectedCustomerId}
-                        {...newCustomerForm.getInputProps('name')}
                     />
 
-                    <TextInput
-                        label={t('Mobile') || 'Mobile'}
-                        placeholder={t('EnterMobileNumber') || 'Enter mobile number'}
-                        required
-                        size="sm"
-                        disabled={!!selectedCustomerId}
-                        {...newCustomerForm.getInputProps('mobile')}
-                    />
+                    <Divider mb="md" mt="lg" label={t('Or')} labelPosition="center" />
 
-                    <TextInput
-                        label={t('Address')}
-                        placeholder={t('EnterAddress') || 'Enter address (optional)'}
-                        size="sm"
-                        disabled={!!selectedCustomerId}
-                        {...newCustomerForm.getInputProps('address')}
-                    />
+                    <Stack gap="sm">
+                        <Text fw={600} size="sm">
+                            {t('AddNewCustomer')}
+                        </Text>
 
-                    <TextInput
-                        label={t('Email')}
-                        placeholder={t('EnterEmail')}
-                        type="email"
-                        size="sm"
-                        disabled={!!selectedCustomerId}
-                        {...newCustomerForm.getInputProps('email')}
-                    />
-                </Stack>
+                        <TextInput
+                            label={t('CustomerName')}
+                            placeholder={t('EnterCustomerName')}
+                            required
+                            size="sm"
+                            disabled={!!selectedCustomerId}
+                            {...customerForm.getInputProps('name')}
+                        />
+
+                        <FormValidationWrapper
+                            errorMessage={customerForm.errors.mobile}
+                            opened={!!customerForm.errors.mobile}
+                            position="top-end"
+                        >
+                            <TextInput
+                                label={t('Mobile')}
+                                placeholder={t('EnterMobileNumber')}
+                                required
+                                size="sm"
+                                disabled={!!selectedCustomerId}
+                                {...customerForm.getInputProps('mobile')}
+                            />
+                        </FormValidationWrapper>
+
+                        <TextInput
+                            label={t('Address')}
+                            placeholder={t('EnterAddress')}
+                            size="sm"
+                            disabled={!!selectedCustomerId}
+                            {...customerForm.getInputProps('address')}
+                        />
+
+                        <TextInput
+                            label={t('Email')}
+                            placeholder={t('EnterEmail')}
+                            type="email"
+                            size="sm"
+                            disabled={!!selectedCustomerId}
+                            {...customerForm.getInputProps('email')}
+                        />
+                    </Stack>
+                </Box>
 
                 {/* =============== action buttons ================ */}
                 <Group justify="flex-end" mt="md">
-                    <Button variant="outline" onClick={onClose} size="sm">
+                    <Button variant="outline" onClick={onClose} size="sm" leftSection={<IconX size={16} />}>
                         {t('Cancel')}
                     </Button>
                     <Button
                         onClick={handleSave}
                         size="sm"
+                        bg="var(--theme-primary-color-6)"
+                        c="white"
+                        leftSection={<IconDeviceFloppy size={16} />}
                         loading={isLoading}
-                        disabled={!selectedCustomerId && (!newCustomerForm.values.name || !newCustomerForm.values.mobile)}
+                        disabled={!selectedCustomerId && (!customerForm.values.name || customerForm.values.mobile.trim().length < 11)}
                     >
                         {t('Save')}
                     </Button>
                 </Group>
             </Stack>
-        </Drawer>
+        </GlobalDrawer>
     );
 }

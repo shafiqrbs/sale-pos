@@ -1,8 +1,9 @@
-import { Drawer, Divider, Stack, Paper, Group, Text, ActionIcon, rem } from "@mantine/core";
+import { Divider, Stack, Paper, Group, Text, ActionIcon, rem } from "@mantine/core";
 import { IconRefresh } from "@tabler/icons-react";
 import { SYNC_DATA } from "@/constants";
 import { showNotification } from "@components/ShowNotificationComponent";
 import { useSyncPosMutation } from "@services/pos";
+import GlobalDrawer from "./GlobalDrawer";
 
 export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen }) {
 	const [ syncPos ] = useSyncPosMutation();
@@ -133,15 +134,9 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 	};
 
 	return (
-		<Drawer
-			position="right"
+		<GlobalDrawer
 			opened={syncPanelOpen}
 			onClose={() => setSyncPanelOpen(false)}
-			padding="lg"
-			size="md"
-			overlayProps={{
-				backgroundOpacity: 0.55,
-			}}
 			title="Syncing Information"
 			styles={{
 				title: { fontWeight: 600, fontSize: rem(20), color: "#626262" },
@@ -179,6 +174,6 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 			<Text size="xs" c="dimmed" mt="xl" ta="center">
 				Last synchronized: Today at {new Date().toLocaleTimeString()}
 			</Text>
-		</Drawer>
+		</GlobalDrawer>
 	);
 }

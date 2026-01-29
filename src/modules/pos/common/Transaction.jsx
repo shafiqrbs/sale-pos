@@ -12,6 +12,7 @@ import { formatDateTime, generateInvoiceId, withInvoiceId } from '@utils/index';
 import { useInlineUpdateMutation, useSalesCompleteMutation } from '@services/pos';
 import CustomerDrawer from '@components/modals/CustomerDrawer';
 import { useDisclosure } from '@mantine/hooks';
+import FormValidationWrapper from '@components/form-builders/FormValidationWrapper';
 
 export default function Transaction({ form, transactionModeData, tableId = null }) {
     const { t } = useTranslation();
@@ -32,7 +33,6 @@ export default function Transaction({ form, transactionModeData, tableId = null 
     const handleClick = () => { };
     const enableTable = false;
     const salesByUser = "";
-
     const enableCoupon = "Coupon";
     const setEnableCoupon = () => { };
     const salesDiscountAmount = 0;
@@ -47,30 +47,24 @@ export default function Transaction({ form, transactionModeData, tableId = null 
         fetchCoreUsers();
     }, []);
 
-
+    async function fetchCustomers() {
+        const data = await window.dbAPI.getDataFromTable("core_customers");
+        setCustomersDropdownData(data);
+    }
 
     useEffect(() => {
         const cartTotal = getCartTotal();
         form.setFieldValue("receive_amount", cartTotal);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ getCartTotal() ]);
 
     useEffect(() => {
-        async function fetchCustomers() {
-            const data = await window.dbAPI.getDataFromTable("core_customers");
-            setCustomersDropdownData(data);
-        }
         fetchCustomers();
     }, []);
 
     // =============== refresh customers when drawer closes ================
     useEffect(() => {
         if (!customerDrawerOpened) {
-            async function refreshCustomers() {
-                const data = await window.dbAPI.getDataFromTable("core_customers");
-                setCustomersDropdownData(data);
-            }
-            refreshCustomers();
+            fetchCustomers();
         }
     }, [ customerDrawerOpened ]);
 
@@ -120,6 +114,10 @@ export default function Transaction({ form, transactionModeData, tableId = null 
             }
 
             showNotification(t("SalesComplete"), "blue", "", "", true, 1000, true);
+            setCustomerObject(null);
+            form.reset();
+            form.setFieldValue("transaction_mode_id", transactionModeData[ 0 ]?.id ?? "");
+            form.setFieldValue("transaction_mode_name", transactionModeData[ 0 ]?.name ?? "");
 
             if (withPos) {
                 const setup = await window.dbAPI.getDataFromTable("printer");
@@ -182,7 +180,8 @@ export default function Transaction({ form, transactionModeData, tableId = null 
             customerId: form.values.customer_id,
             customerName: customerInfo?.name || customerInfo?.label?.split(" -- ")[ 1 ],
             customerMobile: customerInfo?.mobile || customerInfo?.label?.split(" -- ")[ 0 ],
-            createdByUser: "sandra",
+            customer_address: customerInfo?.address || "",
+            createdByUser: "Sandra",
             createdById: form.values.sales_by_id,
             salesById: form.values.sales_by_id,
             salesByUser: salesBy?.username,
@@ -274,16 +273,9 @@ export default function Transaction({ form, transactionModeData, tableId = null 
                     style={{ width: "100%" }}
                 />
                 {enableTable && (
-                    <Tooltip
-                        disabled={!(invoiceData?.invoice_items?.length === 0 || !salesByUser)}
-                        color="red.6"
-                        withArrow
-                        px={16}
-                        py={2}
-                        offset={2}
-                        zIndex={999}
-                        position="top-end"
-                        label={t("SelectProductandUser")}
+                    <FormValidationWrapper
+                        errorMessage={t("SelectProductandUser")}
+                        opened={!!form.errors.sales_by_id}
                     >
                         <Button
                             disabled={invoiceData?.invoice_items?.length === 0 || !salesByUser}
@@ -301,34 +293,22 @@ export default function Transaction({ form, transactionModeData, tableId = null 
                                 {t("Kitchen")}
                             </Text>
                         </Button>
-                    </Tooltip>
+                    </FormValidationWrapper>
                 )}
             </Group>
             <Box m={0} mb={"12"}>
                 <Grid columns={24} gutter={{ base: 8 }} pr={"2"} align="center" justify="center">
                     <Grid.Col span={6}>
-                        <Tooltip
-                            label={t("ChooseCustomer")}
+                        <FormValidationWrapper
+                            errorMessage={t("ChooseCustomer")}
                             opened={!!form.errors.customer_id}
-                            bg={"orange.8"}
-                            c={"white"}
-                            withArrow
-                            px={16}
-                            py={2}
-                            offset={2}
-                            zIndex={999}
-                            transitionProps={{
-                                transition: "pop-bottom-left",
-                                duration: 500,
-                            }}
                         >
                             <Button
-                                disabled={!"tableId"}
                                 fullWidth
                                 size="sm"
                                 color="#0077b6"
                                 leftSection={
-                                    customerObject && customerObject.name ? (
+                                    customerObject?.name ? (
                                         <></>
                                     ) : (
                                         <IconUserPlus height={14} width={14} stroke={2} />
@@ -338,28 +318,17 @@ export default function Transaction({ form, transactionModeData, tableId = null 
                             >
                                 <Stack gap={0}>
                                     <Text fw={600} size="xs">
-                                        {customerObject && customerObject.name ? customerObject.name : t("Customer")}
+                                        {customerObject?.name ? customerObject?.name : t("Customer")}
                                     </Text>
-                                    <Text size="xs">{customerObject && customerObject.mobile}</Text>
+                                    <Text size="xs">{customerObject?.mobile}</Text>
                                 </Stack>
                             </Button>
-                        </Tooltip>
+                        </FormValidationWrapper>
                     </Grid.Col>
                     <Grid.Col span={6}>
-                        <Tooltip
-                            label={t("ClickRightButtonForPercentFlat")}
-                            px={16}
-                            py={2}
-                            position="top"
-                            bg={"red.4"}
-                            c={"white"}
-                            withArrow
-                            offset={2}
-                            zIndex={999}
-                            transitionProps={{
-                                transition: "pop-bottom-left",
-                                duration: 500,
-                            }}
+                        <FormValidationWrapper
+                            errorMessage={t("ClickRightButtonForPercentFlat")}
+                            opened={!!form.errors.coupon_code}
                         >
                             <Button
                                 fullWidth={true}
@@ -375,7 +344,7 @@ export default function Transaction({ form, transactionModeData, tableId = null 
                             >
                                 {enableCoupon === "Coupon" ? t("Coupon") : t("Discount")}
                             </Button>
-                        </Tooltip>
+                        </FormValidationWrapper>
                     </Grid.Col>
                     <Grid.Col span={6} bg="red.3">
                         {enableCoupon === "Coupon" ? (
@@ -390,39 +359,21 @@ export default function Transaction({ form, transactionModeData, tableId = null 
                                 }}
                                 rightSection={
                                     <>
-                                        <Tooltip
-                                            label={t("CouponCode")}
-                                            px={16}
-                                            py={2}
-                                            withArrow
-                                            position={"left"}
-                                            c={"black"}
-                                            bg={`gray.1`}
-                                            transitionProps={{
-                                                transition: "pop-bottom-left",
-                                                duration: 500,
-                                            }}
+                                        <FormValidationWrapper
+                                            errorMessage={t("CouponCode")}
+                                            opened={!!form.errors.coupon_code}
+                                            position="left"
                                         >
                                             <IconTicket size={16} opacity={0.5} />
-                                        </Tooltip>
+                                        </FormValidationWrapper>
                                     </>
                                 }
                             />
                         ) : (
-                            <Tooltip
-                                label={t("ClickRightButtonForPercentFlat")}
-                                px={16}
-                                py={2}
-                                position="top"
-                                bg={"red.4"}
-                                c={"white"}
-                                withArrow
-                                offset={2}
-                                zIndex={999}
-                                transitionProps={{
-                                    transition: "pop-bottom-left",
-                                    duration: 500,
-                                }}
+                            <FormValidationWrapper
+                                errorMessage={t("ClickRightButtonForPercentFlat")}
+                                opened={!!form.errors.coupon_code}
+                                position="left"
                             >
                                 <TextInput
                                     type="number"
@@ -451,25 +402,13 @@ export default function Transaction({ form, transactionModeData, tableId = null 
                                         </ActionIcon>
                                     }
                                 />
-                            </Tooltip>
+                            </FormValidationWrapper>
                         )}
                     </Grid.Col>
                     <Grid.Col span={6} bg="green">
-                        <Tooltip
-                            label={t("ReceiveAmountValidateMessage")}
+                        <FormValidationWrapper
+                            errorMessage={t("ReceiveAmountValidateMessage")}
                             opened={!!form.errors.receive_amount}
-                            px={16}
-                            py={2}
-                            position="top-end"
-                            bg="#90e0ef"
-                            c="white"
-                            withArrow
-                            offset={2}
-                            zIndex={999}
-                            transitionProps={{
-                                transition: "pop-bottom-left",
-                                duration: 500,
-                            }}
                         >
                             <TextInput
                                 type="number"
@@ -483,24 +422,15 @@ export default function Transaction({ form, transactionModeData, tableId = null 
                                     form.setFieldValue("receive_amount", event.target.value);
                                 }}
                             />
-                        </Tooltip>
+                        </FormValidationWrapper>
                     </Grid.Col>
                 </Grid>
             </Box>
             <Grid columns={12} gutter={{ base: 2 }}>
                 <Grid.Col span={4}>
-                    <Tooltip
-                        label={t("PrintAll")}
-                        px={16}
-                        py={2}
-                        color="red"
-                        withArrow
-                        offset={2}
-                        zIndex={100}
-                        transitionProps={{
-                            transition: "pop-bottom-left",
-                            duration: 2000,
-                        }}
+                    <FormValidationWrapper
+                        errorMessage={t("PrintAll")}
+                        opened={!!form.errors.print_all}
                     >
                         <Button
                             bg={"white"}
@@ -513,7 +443,7 @@ export default function Transaction({ form, transactionModeData, tableId = null 
                         >
                             <Text size="md">{t("AllPrint")}</Text>
                         </Button>
-                    </Tooltip>
+                    </FormValidationWrapper>
                 </Grid.Col>
                 <Grid.Col span={4}>
                     <Button

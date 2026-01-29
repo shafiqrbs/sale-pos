@@ -99,7 +99,7 @@ export default function SalesIndex() {
                 <Grid.Col span={3}>
                     <Box h={mainAreaHeight - 2} p="3xs" className="borderRadiusAll" bg="white" bd="1px solid #e6e6e6">
                         <p>Sales Overview</p>
-                        <Box mt={8} mb={18} h={2} w="56px" bg="red" />
+                        <Box mt={8} mb={18} h={2} w="56px" bg="var(--theme-primary-color-6)" />
                         <Tabs
                             color="#f8eedf"
                             value={activeTab}

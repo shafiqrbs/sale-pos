@@ -10,8 +10,6 @@ const tableMap = {
 	"inventory/select/category": "categories",
 	"inventory/pos/check/invoice-mode": "invoice_table",
 	"accounting/transaction-mode/local-storage": "accounting_transaction_mode",
-	"inventory/sales": "sales",
-	"inventory/purchase": "purchase",
 };
 
 const commonDataStoreIntoLocalStorage = async (user_id) => {

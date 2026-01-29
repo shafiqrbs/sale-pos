@@ -19,7 +19,9 @@ db.prepare(
 		license_key TEXT,
 		active_key TEXT,
 		is_activated INTEGER,
-		activated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		activated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	)
 	`
 ).run();
@@ -37,7 +39,8 @@ db.prepare(
 		domain_id INTEGER,
 		access_control_role TEXT,
 		android_control_role TEXT,
-		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	)
 	`
 ).run();
@@ -57,7 +60,9 @@ db.prepare(
 		authorized_name TEXT,
 		account_type_name TEXT,
 		method_name TEXT,
-		method_slug TEXT
+		method_slug TEXT,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	)
   	`
 ).run();
@@ -93,7 +98,9 @@ db.prepare(
 		sales_price REAL NOT NULL,
 		barcode TEXT,
 		unit_name TEXT NOT NULL,
-		feature_image TEXT
+		feature_image TEXT,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);
 	`
 ).run();
@@ -122,6 +129,7 @@ db.prepare(
 		location_name TEXT,
 		created_date TEXT NOT NULL,
 		created_at TEXT NOT NULL,
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		debit REAL NOT NULL,
 		credit REAL NOT NULL,
 		balance REAL NOT NULL,
@@ -147,7 +155,8 @@ db.prepare(
 		sub_domain_id INTEGER,
 		customer_id INTEGER,
 		created_date DATE NOT NULL,
-		created_at TIMESTAMP NOT NULL
+		created_at TIMESTAMP NOT NULL,
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);
   	`
 ).run();
@@ -163,6 +172,7 @@ db.prepare(
 		mobile VARCHAR(20),
 		created_date DATE NOT NULL,
 		created_at TIMESTAMP NOT NULL,
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		access_control_role JSON,
 		android_control_role JSON
 	);
@@ -175,7 +185,9 @@ db.prepare(
 	CREATE TABLE IF NOT EXISTS order_process (
 		id INTEGER PRIMARY KEY,
 		label VARCHAR(255) NOT NULL,
-		value INTEGER NOT NULL
+		value INTEGER NOT NULL,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);
   	`
 ).run();
@@ -211,7 +223,9 @@ db.prepare(
 		customer_group TEXT,
 		balance REAL,
 		sales_items TEXT,
-		multi_transaction INTEGER DEFAULT 0
+		multi_transaction INTEGER DEFAULT 0,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);
   	`
 ).run();
@@ -240,7 +254,9 @@ db.prepare(
 		mode_name TEXT,
 		customer_address TEXT,
 		balance REAL,
-		purchase_items TEXT
+		purchase_items TEXT,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);
   	`
 ).run();
@@ -288,7 +304,9 @@ db.prepare(
 	CREATE TABLE IF NOT EXISTS categories (
 		id INTEGER PRIMARY KEY,
 		name TEXT NOT NULL,
-		slug TEXT NOT NULL
+		slug TEXT NOT NULL,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	)
 	`
 ).run();
@@ -307,7 +325,7 @@ db.prepare(
 		custom_price INTEGER NOT NULL,
 		is_print INTEGER NOT NULL,
 		sub_total REAL NOT NULL,
-		crated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	)`
 ).run();
@@ -330,7 +348,9 @@ db.prepare(
 		unit_id INTEGER,
 		warehouse_id INTEGER,
 		warehouse_name TEXT,
-		bonus_quantity REAL
+		bonus_quantity REAL,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	)`
 ).run();
 
@@ -348,7 +368,9 @@ db.prepare(
 		sales_price REAL,
 		warehouse_id INTEGER,
 		warehouse_name TEXT,
-		bonus_quantity REAL
+		bonus_quantity REAL,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	)`
 ).run();
 
@@ -406,14 +428,18 @@ const upsertIntoTable = (table, data) => {
 				return obj;
 			}, {});
 
+		if (columns.includes("updated_at") && validData.updated_at === undefined) {
+			validData.updated_at = new Date().toISOString();
+		}
+
 		const keys = Object.keys(validData);
 		const placeholders = keys.map(() => "?").join(", ");
-		const updatePlaceholders = keys.map((key) => `${key} = excluded.${key}`).join(", ");
+		const updateSetAssignments = keys.map((key) => `${key} = excluded.${key}`).join(", ");
 
 		const stmt = db.prepare(
 			`INSERT INTO ${table} (${keys.join(", ")}) 
 			VALUES (${placeholders})
-			ON CONFLICT(id) DO UPDATE SET ${updatePlaceholders}`
+			ON CONFLICT(id) DO UPDATE SET ${updateSetAssignments}`
 		);
 
 		const existingRow = db.prepare(`SELECT id FROM ${table} WHERE id = ?`).get(validData.id);
@@ -462,14 +488,26 @@ const getDataFromTable = (table, idOrConditions, property = "id") => {
 		const conditions = keys.map((key) => `${key} = ?`).join(" AND ");
 		const values = keys.map((key) => idOrConditions[ key ]);
 
-		stmt = db.prepare(`SELECT * FROM ${table} WHERE ${conditions}`);
-		result = useGet ? stmt.get(...values) : stmt.all(...values);
+		if (useGet) {
+			stmt = db.prepare(
+				`SELECT * FROM ${table} WHERE ${conditions} ORDER BY created_at DESC LIMIT 1`
+			);
+			result = stmt.get(...values);
+		} else {
+			stmt = db.prepare(`SELECT * FROM ${table} WHERE ${conditions} ORDER BY created_at DESC`);
+			result = stmt.all(...values);
+		}
 	} else if (idOrConditions) {
 		stmt = db.prepare(`SELECT * FROM ${table} WHERE ${property} = ?`);
 		result = stmt.get(idOrConditions);
 	} else {
-		stmt = db.prepare(`SELECT * FROM ${table}`);
-		result = useGet ? stmt.get() : stmt.all();
+		if (useGet) {
+			stmt = db.prepare(`SELECT * FROM ${table} ORDER BY created_at DESC LIMIT 1`);
+			result = stmt.get();
+		} else {
+			stmt = db.prepare(`SELECT * FROM ${table} ORDER BY created_at DESC`);
+			result = stmt.all();
+		}
 	}
 
 	return result;
@@ -477,10 +515,17 @@ const getDataFromTable = (table, idOrConditions, property = "id") => {
 
 const updateDataInTable = (table, { id, data, condition = {}, property = "id" }) => {
 	table = convertTableName(table);
+	const columns = getTableColumns(table);
+	const updatePayload = { ...data };
+
+	if (columns.includes("updated_at") && updatePayload.updated_at === undefined) {
+		updatePayload.updated_at = new Date().toISOString();
+	}
+
 	// build SET clause
-	const setKeys = Object.keys(data);
+	const setKeys = Object.keys(updatePayload);
 	const setClause = setKeys.map((key) => `${key} = ?`).join(", ");
-	const setValues = setKeys.map((key) => data[ key ]);
+	const setValues = setKeys.map((key) => updatePayload[ key ]);
 
 	// build WHERE clause
 	let whereClause = "";

@@ -53,14 +53,17 @@ export default function Activate() {
 		setErrorMessage("");
 
 		try {
+			const licenseKey = values.licenseKey?.toString().trim();
+			const activeKey = values.activeKey?.toString().trim();
+
 			const response = await axios({
-				url: `${MASTER_APIS.SPLASH}?license_key=${values.licenseKey}&active_key=${values.activeKey}`
+				url: `${MASTER_APIS.SPLASH}?license_key=${licenseKey}&active_key=${activeKey}`
 			});
 
 			if (response.data.status === 200) {
 				window.dbAPI.upsertIntoTable("license_activate", {
-					license_key: values.licenseKey,
-					active_key: values.activeKey,
+					license_key: licenseKey,
+					active_key: activeKey,
 					is_activated: 1,
 				});
 
