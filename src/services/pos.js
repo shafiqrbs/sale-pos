@@ -11,6 +11,37 @@ export const extendedPosApiSlice = apiSlice.injectEndpoints({
                     body,
                 };
             },
+            invalidatesTags: (result, error, { syncType }) => {
+                const tags = [];
+
+                switch (syncType) {
+                    case "sales":
+                        tags.push({ type: "Sales", id: "LIST" });
+                        break;
+                    case "purchases":
+                        tags.push({ type: "Purchases", id: "LIST" });
+                        break;
+                    case "products":
+                        tags.push({ type: "Product", id: "LIST" });
+                        tags.push({ type: "Categories", id: "LIST" });
+                        break;
+                    case "customers":
+                        tags.push({ type: "Customers", id: "LIST" });
+                        break;
+                    case "vendors":
+                        tags.push({ type: "Vendors", id: "LIST" });
+                        break;
+                    default:
+                        // =============== default tags for backward compatibility ================
+                        tags.push(
+                            { type: "Categories", id: "LIST" },
+                            { type: "InvoiceMode", id: "LIST" },
+                            { type: "Product", id: "LIST" }
+                        );
+                }
+
+                return tags;
+            },
         }),
         getCategories: builder.query({
             query: () => {
@@ -19,7 +50,16 @@ export const extendedPosApiSlice = apiSlice.injectEndpoints({
                     method: "GET",
                 };
             },
-            providesTags: [ "Categories" ],
+            providesTags: (result) =>
+                result?.data
+                    ? [
+                        { type: "Categories", id: "LIST" },
+                        ...result.data.map((category) => ({
+                            type: "Categories",
+                            id: category.id,
+                        })),
+                    ]
+                    : [ { type: "Categories", id: "LIST" } ],
         }),
         getInvoiceMode: builder.query({
             query: () => {
@@ -28,7 +68,16 @@ export const extendedPosApiSlice = apiSlice.injectEndpoints({
                     method: "GET",
                 };
             },
-            providesTags: [ "InvoiceMode" ],
+            providesTags: (result) =>
+                result?.data
+                    ? [
+                        { type: "InvoiceMode", id: "LIST" },
+                        ...result.data.map((mode) => ({
+                            type: "InvoiceMode",
+                            id: mode.id,
+                        })),
+                    ]
+                    : [ { type: "InvoiceMode", id: "LIST" } ],
         }),
         getInvoiceDetails: builder.query({
             query: (params) => {
@@ -40,6 +89,9 @@ export const extendedPosApiSlice = apiSlice.injectEndpoints({
                     },
                 };
             },
+            providesTags: (result, error, params) => [
+                { type: "Sales", id: params.invoice_id },
+            ],
         }),
         inlineUpdate: builder.mutation({
             query: (body) => {
@@ -49,6 +101,9 @@ export const extendedPosApiSlice = apiSlice.injectEndpoints({
                     body,
                 };
             },
+            invalidatesTags: (result, error, body) => [
+                { type: "Sales", id: body.invoice_id },
+            ],
         }),
         salesComplete: builder.mutation({
             query: (body) => {
@@ -58,6 +113,10 @@ export const extendedPosApiSlice = apiSlice.injectEndpoints({
                     body,
                 };
             },
+            invalidatesTags: (result, error, body) => [
+                { type: "Sales", id: body.invoice_id },
+                { type: "Sales", id: "LIST" },
+            ],
         }),
     }),
 });

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import { Box, Grid } from '@mantine/core'
 import { useOutletContext } from 'react-router'
 import useGetInvoiceType from '@hooks/useGetInvoiceType'
@@ -22,7 +22,7 @@ const getParticularName = (mode, item) => {
 };
 
 export default function BakeryIndex() {
-    const progress = useLoadingProgress()
+    const { isProgressing } = useLoadingProgress({ ms: 400 })
     const { isOnline } = useOutletContext()
     const { invoiceType } = useGetInvoiceType({ offlineFetch: !isOnline })
 
@@ -46,7 +46,7 @@ export default function BakeryIndex() {
 
     return (
         <>
-            {progress !== 100 && <BakerySkeleton />}
+            {isProgressing && <BakerySkeleton />}
             <Box>
                 {/* configData?.inventory_config?.is_pos && invoiceMode === "table" */}
                 <Tables />

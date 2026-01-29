@@ -34,8 +34,8 @@
 
     &[data-active] {
         z-index: 1;
-        background-color: #f8eedf !important;
-        color: #222;
+        background-color: var(--theme-primary-color-6) !important;
+        color: white !important;
 
         @mixin hover {
             background-color: rgba(226, 194, 194, 0.39);

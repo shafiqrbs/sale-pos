@@ -94,3 +94,59 @@ export const generateSlug = (name) => {
 
 	return `${slugName}-${Date.now().toString()}`;
 };
+
+export const generateUniqueId = () => {
+	if (typeof crypto?.randomUUID === "function") {
+		return crypto.randomUUID();
+	}
+
+	return (
+		Date.now().toString(36) +
+		"-" +
+		Math.random().toString(36).slice(2, 10)
+	);
+};
+
+// =============== local storage sync records utilities ================
+const LOCAL_STORAGE_SYNC_RECORDS_KEY = "sale-pos:sync-records:v1";
+
+const safeJsonParse = (value) => {
+	if (!value) return null;
+	try {
+		return JSON.parse(value);
+	} catch {
+		return null;
+	}
+};
+
+export const getSyncRecordsFromLocalStorage = () => {
+	if (typeof window === "undefined" || !window?.localStorage) return [];
+
+	const rawValue = window.localStorage.getItem(LOCAL_STORAGE_SYNC_RECORDS_KEY);
+	const parsedValue = safeJsonParse(rawValue);
+
+	if (!Array.isArray(parsedValue)) return [];
+	return parsedValue
+		.filter((record) => record && typeof record === "object")
+		.filter((record) => typeof record?.mode === "string" && typeof record?.syncedAt === "string");
+};
+
+export const saveSyncRecordToLocalStorage = (syncRecord) => {
+	if (typeof window === "undefined" || !window?.localStorage) return [];
+
+	const existingRecords = getSyncRecordsFromLocalStorage();
+	const nextRecords = [ syncRecord, ...existingRecords ].slice(0, 200);
+
+	window.localStorage.setItem(LOCAL_STORAGE_SYNC_RECORDS_KEY, JSON.stringify(nextRecords));
+	return nextRecords;
+};
+
+export const getLastSyncRecord = (syncRecords) => {
+	if (!Array.isArray(syncRecords) || syncRecords.length === 0) return null;
+	return syncRecords[0] ?? null;
+};
+
+export const getLastSyncRecordByMode = (syncRecords, mode) => {
+	if (!Array.isArray(syncRecords) || !mode) return null;
+	return syncRecords.find((record) => record?.mode === mode) ?? null;
+};

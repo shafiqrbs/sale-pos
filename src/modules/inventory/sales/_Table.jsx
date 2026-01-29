@@ -1,15 +1,16 @@
 import { Box, Grid, Text, ActionIcon, Group, Menu, Flex } from '@mantine/core';
 import { IconDotsVertical, IconEye } from '@tabler/icons-react';
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useOutletContext } from 'react-router'
 import { DataTable } from 'mantine-datatable';
 import tableCss from "@assets/css/Table.module.css";
 import { useTranslation } from 'react-i18next';
 import SalesDetails from './__SalesDetails';
+import useSalesList from '@hooks/useSalesList';
 
 const PER_PAGE = 25;
 
-export default function Table({ salesData, fetching }) {
+export default function Table({ activeTab }) {
     const { t } = useTranslation();
     const [ showDetails, setShowDetails ] = useState(false);
     const [ page, setPage ] = useState(1);
@@ -17,8 +18,21 @@ export default function Table({ salesData, fetching }) {
     const [ loading, setLoading ] = useState(false);
     const [ salesViewData, setSalesViewData ] = useState(null);
     const { mainAreaHeight, isOnline } = useOutletContext();
+    const { sales: salesData, isLoading } = useSalesList({
+        params: {
+            term: "",
+            customer_id: "",
+            start_date: "",
+            end_date: "",
+            page,
+            offset: PER_PAGE
+        },
+        offlineFetch: !isOnline,
+        activeTab,
+    });
 
     useEffect(() => {
+        // disableeslint-disable-next-line react-hooks/exhaustive-deps
         setShowDetails(prev => (prev ? false : prev));
     }, [ isOnline ]);
 
@@ -153,15 +167,15 @@ export default function Table({ salesData, fetching }) {
                                 ),
                             },
                         ]}
-                        fetching={fetching}
-                        totalRecords={salesData?.total}
+                        fetching={isLoading}
+                        totalRecords={salesData?.total || 0}
                         recordsPerPage={PER_PAGE}
+                        loaderSize="xs"
+                        loaderColor="grape"
                         page={page}
                         onPageChange={(p) => {
                             setPage(p);
                         }}
-                        loaderSize="xs"
-                        loaderColor="grape"
                         height={mainAreaHeight}
                         scrollAreaProps={{ type: "never" }}
                         rowStyle={(item) =>

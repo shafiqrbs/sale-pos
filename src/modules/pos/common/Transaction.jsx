@@ -8,7 +8,7 @@ import useCartOperation from '@hooks/useCartOperation';
 import { showNotification } from '@components/ShowNotificationComponent';
 import { useOutletContext } from 'react-router';
 import useConfigData from '@hooks/useConfigData';
-import { formatDateTime, generateInvoiceId, withInvoiceId } from '@utils/index';
+import { formatDate, generateInvoiceId, withInvoiceId } from '@utils/index';
 import { useInlineUpdateMutation, useSalesCompleteMutation } from '@services/pos';
 import CustomerDrawer from '@components/modals/CustomerDrawer';
 import { useDisclosure } from '@mantine/hooks';
@@ -188,7 +188,7 @@ export default function Transaction({ form, transactionModeData, tableId = null 
             salesByName: salesBy?.name,
             process: "approved",
             mode_name: form.values.transaction_mode_name,
-            created: formatDateTime(new Date()),
+            created: formatDate(new Date()),
             sales_items: JSON.stringify(invoiceData),
             multi_transaction: isSplitPaymentActive ? 1 : 0,
         }

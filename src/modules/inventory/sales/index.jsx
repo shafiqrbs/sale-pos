@@ -1,9 +1,8 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { Box, Grid, Tabs } from "@mantine/core";
 import Table from "./_Table";
 import tabCss from "@assets/css/Tab.module.css";
 import { useOutletContext } from "react-router";
-import useSalesList from "@hooks/useSalesList";
 
 const TAB_OPTIONS = [
     { key: "all", label: "All Sales" },
@@ -15,83 +14,8 @@ const TAB_OPTIONS = [
 ];
 
 export default function SalesIndex() {
-    const { isOnline } = useOutletContext();
     const [ activeTab, setActiveTab ] = useState("all");
-    const { sales: salesData, isLoading } = useSalesList({ params: { term: "", customer_id: "", start_date: "", end_date: "", page: 1, offset: 50 }, offlineFetch: !isOnline });
     const { mainAreaHeight } = useOutletContext();
-
-    const filteredData = useMemo(() => {
-        if (!salesData?.data.length) return { ...salesData, data: [] };
-
-        const sales = salesData.data;
-        const now = new Date();
-
-        if (activeTab === "today") {
-            const result = {
-                ...salesData,
-                data: sales.filter((item) => {
-                    if (!item.created) return false;
-
-                    const [ day, month, year ] = item.created.split("-");
-                    const itemDate = new Date(Number(year), Number(month) - 1, Number(day));
-                    return (
-                        itemDate.getDate() === now.getDate() &&
-                        itemDate.getMonth() === now.getMonth() &&
-                        itemDate.getFullYear() === now.getFullYear()
-                    );
-                }),
-            };
-            return result;
-        }
-        if (activeTab === "week") {
-            const startOfWeek = new Date(now);
-            startOfWeek.setDate(now.getDate() - now.getDay());
-            startOfWeek.setHours(0, 0, 0, 0);
-
-            const endOfWeek = new Date(startOfWeek);
-            endOfWeek.setDate(startOfWeek.getDate() + 6);
-            endOfWeek.setHours(23, 59, 59, 999);
-
-            const result = {
-                ...salesData,
-                data: sales.filter((item) => {
-                    if (!item.created) return false;
-                    const [ day, month, year ] = item.created.split("-");
-                    const itemDate = new Date(Number(year), Number(month) - 1, Number(day));
-                    return itemDate >= startOfWeek && itemDate <= endOfWeek;
-                }),
-            };
-            return result;
-        }
-        if (activeTab === "month") {
-            const result = {
-                ...salesData,
-                data: sales.filter((item) => {
-                    if (!item.created) return false;
-                    const [ day, month, year ] = item.created.split("-");
-                    const itemDate = new Date(Number(year), Number(month) - 1, Number(day));
-                    return itemDate.getMonth() === now.getMonth() && itemDate.getFullYear() === now.getFullYear();
-                }),
-            };
-            return result;
-        }
-        if (activeTab === "cash") {
-            const result = {
-                ...salesData,
-                data: sales.filter((item) => item.mode_name?.toLowerCase() === "cash"),
-            };
-            return result;
-        }
-        if (activeTab === "discount_type") {
-            const result = {
-                ...salesData,
-                data: sales.filter((item) => item.discount_type?.toLowerCase() === "flat"),
-            };
-            return result;
-        }
-        // default: all
-        return salesData;
-    }, [ activeTab, salesData ]);
 
     return (
         <Box p="xs">
@@ -128,7 +52,7 @@ export default function SalesIndex() {
                     </Box>
                 </Grid.Col>
                 <Grid.Col span={21}>
-                    <Table salesData={filteredData} fetching={isLoading} />
+                    <Table activeTab={activeTab} />
                 </Grid.Col>
             </Grid>
         </Box>

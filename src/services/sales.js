@@ -11,7 +11,17 @@ export const extendedSalesApiSlice = apiSlice.injectEndpoints({
           params,
         };
       },
-      providesTags: [ "Sales" ],
+      // =============== critical for pagination: insert/delete shifts pages, so LIST must invalidate all ================
+      providesTags: (result) =>
+        result?.data
+          ? [
+            { type: "Sales", id: "LIST" },
+            ...result.data.map((sale) => ({
+              type: "Sales",
+              id: sale.invoice,
+            })),
+          ]
+          : [ { type: "Sales", id: "LIST" } ],
     }),
 
     addSales: builder.mutation({
@@ -22,7 +32,7 @@ export const extendedSalesApiSlice = apiSlice.injectEndpoints({
           body,
         };
       },
-      invalidatesTags: [ "Sales" ],
+      invalidatesTags: [ { type: "Sales", id: "LIST" } ],
     }),
 
     updateSales: builder.mutation({
@@ -33,7 +43,10 @@ export const extendedSalesApiSlice = apiSlice.injectEndpoints({
           body,
         };
       },
-      invalidatesTags: [ "Sales" ],
+      invalidatesTags: (result, error, body) => [
+        { type: "Sales", id: body.invoice },
+        { type: "Sales", id: "LIST" },
+      ],
     }),
 
     deleteSales: builder.mutation({
@@ -44,7 +57,7 @@ export const extendedSalesApiSlice = apiSlice.injectEndpoints({
           id,
         };
       },
-      invalidatesTags: [ "Sales" ],
+      invalidatesTags: [ { type: "Sales", id: "LIST" } ],
     }),
 
     getSalesById: builder.query({
@@ -54,7 +67,7 @@ export const extendedSalesApiSlice = apiSlice.injectEndpoints({
           method: "GET",
         };
       },
-      providesTags: [ "Sales" ],
+      providesTags: (result, error, id) => [ { type: "Sales", id } ],
     }),
   }),
 });

@@ -132,3 +132,17 @@ button[data-active='true'].mantine-focus-auto.mantine-active.mantine-datatable-p
 [data-error=true].mantine-Input-wrapper {
   margin-bottom: 0;
 }
+
+.spin {
+  animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}

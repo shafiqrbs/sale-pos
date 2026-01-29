@@ -1,15 +1,15 @@
 import { useState, useEffect } from "react";
 
-export default function useLoadingProgress() {
-    const [ progress, setProgress ] = useState(0);
+export default function useLoadingProgress({ ms = 100 } = {}) {
+    const [ isProgressing, setIsProgressing ] = useState(true);
 
     useEffect(() => {
-        const timer = setInterval(() => {
-            setProgress((oldProgress) => Math.min(oldProgress + 15, 100));
-        }, 100);
+        const timer = setTimeout(() => {
+            setIsProgressing(false);
+        }, ms);
 
-        return () => clearInterval(timer);
-    }, []);
+        return () => clearTimeout(timer);
+    }, [ ms ]);
 
-    return progress;
+    return { isProgressing, isProgressed: !isProgressing };
 }
