@@ -226,7 +226,7 @@ export default function SalesPrintA4({ salesViewData, setPrintA4, salesItems, co
                         {index + 1}
                       </td>
                       <td className={classes[ "invoice-body-table-td" ]}>
-                        {element?.name}
+                        {element?.display_name}
                         {element?.sku && (
                           <>
                             <br />

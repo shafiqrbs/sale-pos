@@ -128,6 +128,7 @@ export default function ProductTable({ products }) {
                 close={closeBatchModal}
                 purchaseItems={JSON.parse(selectedProduct?.purchase_item_for_sales || "[]")}
                 currentBatches={selectedProduct?.currentBatches || []}
+                productName={selectedProduct?.display_name}
                 onBatchSelect={handleBatchSelect}
             />
         </>

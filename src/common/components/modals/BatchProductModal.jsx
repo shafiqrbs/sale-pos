@@ -2,7 +2,7 @@ import { Modal, Text, Box, Group, ActionIcon, Button, ScrollArea, Divider } from
 import { IconPlus, IconMinus } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
 
-export default function BatchProductModal({ opened, close, purchaseItems, currentBatches, onBatchSelect }) {
+export default function BatchProductModal({ opened, close, purchaseItems, currentBatches, productName, onBatchSelect }) {
     const [ selectedBatches, setSelectedBatches ] = useState({});
 
     // =============== initialize with current batches from cart ================
@@ -54,13 +54,13 @@ export default function BatchProductModal({ opened, close, purchaseItems, curren
         <Modal
             opened={opened}
             onClose={handleCancel}
-            title="Select from Batch"
+            title={`Select from: ${productName || 'Batch'}`}
             size="lg"
             centered
         >
             <ScrollArea h={400}>
                 <Box>
-                    {purchaseItems && purchaseItems.length > 0 ? (
+                    {purchaseItems?.length > 0 ? (
                         purchaseItems.map((item, index) => (
                             <Box key={item.purchase_item_id || index}>
                                 <Group justify="space-between" py="md">

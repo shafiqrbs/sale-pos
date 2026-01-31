@@ -57,7 +57,6 @@ export default function ProductList() {
             setSelectedProduct({ ...product, currentBatches });
             openBatchModal();
         } else {
-            // =============== directly add to cart ================
             increment(product);
         }
     };
@@ -186,6 +185,7 @@ export default function ProductList() {
                 close={closeBatchModal}
                 purchaseItems={JSON.parse(selectedProduct?.purchase_item_for_sales || "[]")}
                 currentBatches={selectedProduct?.currentBatches || []}
+                productName={selectedProduct?.display_name}
                 onBatchSelect={handleBatchSelect}
             />
         </Box >
