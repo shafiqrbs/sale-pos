@@ -88,7 +88,7 @@ export default function BatchProductModal({ opened, close, purchaseItems, curren
                                         <ActionIcon
                                             size="md"
                                             variant="filled"
-                                            color="blue.6"
+                                            color="gray.7"
                                             disabled={(selectedBatches[ item.purchase_item_id ] || 0) >= item.remain_quantity}
                                             onClick={() => handleQuantityChange(item.purchase_item_id, 1)}
                                         >

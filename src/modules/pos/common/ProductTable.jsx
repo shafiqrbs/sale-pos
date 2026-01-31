@@ -21,11 +21,11 @@ export default function ProductTable({ products }) {
     // =============== handle add button click ================
     const handleAddClick = async (product) => {
         let purchaseItems = [];
-        
+
         // =============== parse purchase_item_for_sales ================
         try {
-            purchaseItems = product.purchase_item_for_sales 
-                ? JSON.parse(product.purchase_item_for_sales) 
+            purchaseItems = product.purchase_item_for_sales
+                ? JSON.parse(product.purchase_item_for_sales)
                 : [];
         } catch (error) {
             console.error('Error parsing purchase_item_for_sales:', error);
@@ -39,18 +39,18 @@ export default function ProductTable({ products }) {
                 stock_item_id: product.stock_item_id || product.stock_id,
             };
             const cartItems = await window.dbAPI.getDataFromTable("invoice_table_item", itemCondition);
-            
+
             let currentBatches = [];
             if (cartItems && cartItems.length > 0) {
                 try {
-                    currentBatches = typeof cartItems[0].batches === 'string' 
-                        ? JSON.parse(cartItems[0].batches) 
-                        : (Array.isArray(cartItems[0].batches) ? cartItems[0].batches : []);
+                    currentBatches = typeof cartItems[ 0 ].batches === 'string'
+                        ? JSON.parse(cartItems[ 0 ].batches)
+                        : (Array.isArray(cartItems[ 0 ].batches) ? cartItems[ 0 ].batches : []);
                 } catch {
                     currentBatches = [];
                 }
             }
-            
+
             setSelectedProduct({ ...product, currentBatches });
             openBatchModal();
         } else {
@@ -108,7 +108,7 @@ export default function ProductTable({ products }) {
                             <Button
                                 leftSection={<IconPlus height={14} width={14} stroke={2} />}
                                 size='compact-xs'
-                                bg="var(--theme-primary-color-6)"
+                                bg="gray.7"
                                 onClick={() => handleAddClick(data)}
                             >
                                 Add
