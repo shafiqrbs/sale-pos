@@ -90,6 +90,7 @@ db.prepare(
 		name TEXT NOT NULL,
 		product_nature TEXT NOT NULL,
 		display_name TEXT NOT NULL,
+		purchase_item_for_sales TEXT DEFAULT '[]',
 		slug TEXT NOT NULL,
 		category_id INTEGER,
 		unit_id INTEGER NOT NULL,
@@ -325,6 +326,7 @@ db.prepare(
 		custom_price INTEGER NOT NULL,
 		is_print INTEGER NOT NULL,
 		sub_total REAL NOT NULL,
+		batches TEXT DEFAULT '[]',
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	)`
@@ -585,24 +587,29 @@ const destroyTableData = (table = "users") => {
 
 const resetDatabase = async () => {
 	try {
-		const tableNames = db
-			.prepare(
-				"SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'"
-			)
+		const tables = db
+			.prepare(`
+			SELECT name
+			FROM sqlite_master
+			WHERE type='table'
+			AND name NOT LIKE 'sqlite_%'
+		`)
 			.all()
-			.map((row) => row.name);
+			.map(row => row.name);
 
 		db.prepare("PRAGMA foreign_keys = OFF").run();
 
-		const resetTransaction = db.transaction((tableNamesToReset) => {
-			for (const tableName of tableNamesToReset) {
-				destroyTableData(tableName);
+		const dropTxn = db.transaction((tableNames) => {
+			for (const table of tableNames) {
+				db.prepare(`DROP TABLE IF EXISTS "${table}"`).run();
 			}
 		});
 
-		resetTransaction(tableNames);
+		dropTxn(tables);
 
 		db.prepare("PRAGMA foreign_keys = ON").run();
+
+		console.log("All tables dropped successfully");
 	} catch (error) {
 		console.error("Error in resetDatabase:", error);
 	}
@@ -692,6 +699,10 @@ const getJoinedTableData = ({
 	}
 };
 
+const close = () => {
+	db.close();
+};
+
 module.exports = {
 	upsertIntoTable,
 	getDataFromTable,
@@ -701,4 +712,5 @@ module.exports = {
 	destroyTableData,
 	resetDatabase,
 	getJoinedTableData,
+	close,
 };

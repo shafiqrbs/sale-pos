@@ -142,7 +142,7 @@ export default function Login() {
 			onCancel: () => console.info("Cancel"),
 			onConfirm: async () => {
 				await window.dbAPI.resetDatabase();
-				navigate(APP_NAVLINKS.ACTIVATE);
+				await window.dbAPI.relaunchApp();
 			},
 		});
 	};

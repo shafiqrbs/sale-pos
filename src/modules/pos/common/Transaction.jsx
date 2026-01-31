@@ -37,7 +37,7 @@ export default function Transaction({ form, transactionModeData, tableId = null 
     const setEnableCoupon = () => { };
     const salesDiscountAmount = 0;
     const isSplitPaymentActive = false;
-    // ============= wreckage stop =============
+    // ============= wreckage stop ==============
 
     useEffect(() => {
         async function fetchCoreUsers() {
@@ -381,7 +381,7 @@ export default function Transaction({ form, transactionModeData, tableId = null 
                                     placeholder={t("Discount")}
                                     value={salesDiscountAmount}
                                     error={form.errors.discount}
-                                    size={"sm"}
+                                    size="sm"
                                     onChange={(event) => {
                                         form.setFieldValue("discount", event.target.value);
                                         const newValue = event.target.value;
@@ -392,7 +392,6 @@ export default function Transaction({ form, transactionModeData, tableId = null 
                                             size={32}
                                             bg={"red.5"}
                                             variant="filled"
-                                        // onClick={handleDiscount}
                                         >
                                             {discountType === "Flat" ? (
                                                 <IconCurrencyTaka size={16} />

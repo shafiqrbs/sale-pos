@@ -23,7 +23,7 @@ export default function useCartOperation(tableId = null) {
         refetchInvoice();
     }, []);
 
-    const increment = async (product) => {
+    const increment = async (product, selectedBatches = null, isUpdate = false) => {
         const vatConfig = configData?.inventory_config?.config_vat;
 
         try {
@@ -54,9 +54,15 @@ export default function useCartOperation(tableId = null) {
             ]);
 
             let deltaSubTotal = 0;
+            let totalQuantityToAdd = 1;
+
+            // =============== calculate total quantity from selected batches ================
+            if (selectedBatches && Array.isArray(selectedBatches)) {
+                totalQuantityToAdd = selectedBatches.reduce((sum, batch) => sum + batch.quantity, 0);
+            }
 
             if (items?.length) {
-                const updatedQuantity = items[ 0 ].quantity + 1;
+                const updatedQuantity = isUpdate ? totalQuantityToAdd : items[ 0 ].quantity + totalQuantityToAdd;
                 const updatedSubTotal = calculateSubTotalWithVAT(
                     product.sales_price,
                     updatedQuantity,
@@ -64,6 +70,37 @@ export default function useCartOperation(tableId = null) {
                 );
 
                 deltaSubTotal = updatedSubTotal - items[ 0 ].sub_total;
+
+                // =============== handle batches ================
+                let updatedBatches = [];
+
+                if (isUpdate) {
+                    // =============== update mode: replace batches completely ================
+                    updatedBatches = selectedBatches || [];
+                } else {
+                    // =============== add mode: merge batches ================
+                    let existingBatches = [];
+                    try {
+                        existingBatches = typeof items[ 0 ].batches === 'string'
+                            ? JSON.parse(items[ 0 ].batches)
+                            : (Array.isArray(items[ 0 ].batches) ? items[ 0 ].batches : []);
+                    } catch {
+                        existingBatches = [];
+                    }
+
+                    updatedBatches = [ ...existingBatches ];
+
+                    if (selectedBatches && Array.isArray(selectedBatches)) {
+                        selectedBatches.forEach(newBatch => {
+                            const existingBatchIndex = updatedBatches.findIndex(batch => batch.id === newBatch.id);
+                            if (existingBatchIndex !== -1) {
+                                updatedBatches[ existingBatchIndex ].quantity += newBatch.quantity;
+                            } else {
+                                updatedBatches.push(newBatch);
+                            }
+                        });
+                    }
+                }
 
                 await window.dbAPI.updateDataInTable("invoice_table_item", {
                     condition: itemCondition,
@@ -74,21 +111,28 @@ export default function useCartOperation(tableId = null) {
                         sales_price: product.sales_price,
                         sub_total: updatedSubTotal,
                         display_name: product.display_name,
+                        batches: JSON.stringify(updatedBatches),
                     },
                 });
             } else {
-                const subTotal = calculateSubTotalWithVAT(product.sales_price, 1, vatConfig);
+                const subTotal = calculateSubTotalWithVAT(product.sales_price, totalQuantityToAdd, vatConfig);
                 deltaSubTotal = subTotal;
+
+                // =============== prepare batches for new item ================
+                const batchesData = selectedBatches && Array.isArray(selectedBatches)
+                    ? JSON.stringify(selectedBatches)
+                    : JSON.stringify([]);
 
                 await window.dbAPI.upsertIntoTable("invoice_table_item", {
                     stock_item_id: product.stock_item_id || product.stock_id,
-                    quantity: 1,
+                    quantity: totalQuantityToAdd,
                     purchase_price: 0,
                     sales_price: product.sales_price,
                     custom_price: 0,
                     is_print: 0,
                     sub_total: subTotal,
                     display_name: product.display_name,
+                    batches: batchesData,
                     ...withInvoiceId(tableId),
                 });
             }
@@ -148,6 +192,29 @@ export default function useCartOperation(tableId = null) {
 
             const deltaSubTotal = updatedSubTotal - items[ 0 ].sub_total;
 
+            // =============== handle batch decrement ================
+            let existingBatches = [];
+            try {
+                existingBatches = typeof items[ 0 ].batches === 'string'
+                    ? JSON.parse(items[ 0 ].batches)
+                    : (Array.isArray(items[ 0 ].batches) ? items[ 0 ].batches : []);
+            } catch {
+                existingBatches = [];
+            }
+
+            // =============== decrement from the last batch ================
+            if (existingBatches.length > 0) {
+                for (let index = existingBatches.length - 1; index >= 0; index--) {
+                    if (existingBatches[ index ].quantity > 0) {
+                        existingBatches[ index ].quantity -= 1;
+                        if (existingBatches[ index ].quantity === 0) {
+                            existingBatches.splice(index, 1);
+                        }
+                        break;
+                    }
+                }
+            }
+
             await window.dbAPI.updateDataInTable("invoice_table_item", {
                 condition: itemCondition,
                 data: {
@@ -157,6 +224,7 @@ export default function useCartOperation(tableId = null) {
                     sales_price: product.sales_price,
                     sub_total: updatedSubTotal,
                     display_name: product.display_name,
+                    batches: JSON.stringify(existingBatches),
                 },
             });
 

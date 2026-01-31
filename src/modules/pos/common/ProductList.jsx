@@ -6,9 +6,13 @@ import Categories from './Categories';
 import ProductFilters from './ProductFilters'
 import ProductTable from './ProductTable';
 import useCartOperation from '@hooks/useCartOperation';
+import BatchProductModal from '@components/modals/BatchProductModal';
+import { useDisclosure } from '@mantine/hooks';
 
 export default function ProductList() {
     const [ allProducts, setAllProducts ] = useState([])
+    const [ selectedProduct, setSelectedProduct ] = useState(null);
+    const [ batchModalOpened, { open: openBatchModal, close: closeBatchModal } ] = useDisclosure(false);
     const { increment } = useCartOperation();
     const { mainAreaHeight, isOnline } = useOutletContext();
     const { configData } = useConfigData({ offlineFetch: !isOnline })
@@ -27,6 +31,56 @@ export default function ProductList() {
 
         fetchProducts()
     }, [])
+
+    // =============== handle product click ================
+    const handleProductClick = async (product) => {
+        let purchaseItems = [];
+        
+        // =============== parse purchase_item_for_sales ================
+        try {
+            purchaseItems = product.purchase_item_for_sales 
+                ? JSON.parse(product.purchase_item_for_sales) 
+                : [];
+        } catch (error) {
+            console.error('Error parsing purchase_item_for_sales:', error);
+            purchaseItems = [];
+        }
+
+        // =============== if product has batches, show modal ================
+        if (purchaseItems.length > 0) {
+            // =============== fetch current batches from cart ================
+            const itemCondition = {
+                stock_item_id: product.stock_item_id || product.stock_id,
+            };
+            const cartItems = await window.dbAPI.getDataFromTable("invoice_table_item", itemCondition);
+            
+            let currentBatches = [];
+            if (cartItems && cartItems.length > 0) {
+                try {
+                    currentBatches = typeof cartItems[0].batches === 'string' 
+                        ? JSON.parse(cartItems[0].batches) 
+                        : (Array.isArray(cartItems[0].batches) ? cartItems[0].batches : []);
+                } catch {
+                    currentBatches = [];
+                }
+            }
+            
+            setSelectedProduct({ ...product, currentBatches });
+            openBatchModal();
+        } else {
+            // =============== directly add to cart ================
+            increment(product);
+        }
+    };
+
+    // =============== handle batch selection ================
+    const handleBatchSelect = (selectedBatches) => {
+        if (selectedProduct) {
+            const isUpdate = selectedProduct.currentBatches && selectedProduct.currentBatches.length > 0;
+            increment(selectedProduct, selectedBatches, isUpdate);
+            setSelectedProduct(null);
+        }
+    };
 
     const filteredProducts = useMemo(() => {
         const normalizedSearchValue = filter.search.trim().toLowerCase()
@@ -83,7 +137,7 @@ export default function ProductList() {
                                                         transition: "transform 0.5s ease-in-out",
                                                     },
                                                 })}
-                                                onClick={() => increment(product)}
+                                                onClick={() => handleProductClick(product)}
                                             >
                                                 <Image
                                                     radius="sm"
@@ -137,6 +191,14 @@ export default function ProductList() {
                     </Box>
                 </Grid.Col>
             </Grid>
+
+            <BatchProductModal
+                opened={batchModalOpened}
+                close={closeBatchModal}
+                purchaseItems={JSON.parse(selectedProduct?.purchase_item_for_sales || "[]")}
+                currentBatches={selectedProduct?.currentBatches || []}
+                onBatchSelect={handleBatchSelect}
+            />
         </Box >
     )
 }
