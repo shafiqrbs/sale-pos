@@ -49,9 +49,9 @@ export default function BatchProductModal({ opened, close, purchaseItems, curren
         close();
     };
 
+    // =============== add/update cart requires at least 1 quantity from any batch ================
     const totalQuantity = Object.values(selectedBatches).reduce((sum, quantity) => sum + quantity, 0);
-    const isUpdateMode = currentBatches?.length > 0;
-    const isUpdateCartDisabled = isUpdateMode && totalQuantity === 0;
+    const isAddOrUpdateCartDisabled = totalQuantity === 0;
 
     return (
         <Modal
@@ -116,7 +116,7 @@ export default function BatchProductModal({ opened, close, purchaseItems, curren
                 </Button>
                 <Button
                     onClick={handleUpdateCart}
-                    disabled={isUpdateCartDisabled}
+                    disabled={isAddOrUpdateCartDisabled}
                 >
                     {currentBatches?.length > 0 ? "Update Cart" : "Add to Cart"}
                 </Button>
