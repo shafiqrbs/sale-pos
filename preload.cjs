@@ -31,6 +31,9 @@ try {
 			console.log("Calling resetDatabase...");
 			return ipcRenderer.invoke("reset-database");
 		},
+		relaunchApp: () => {
+			return ipcRenderer.invoke("relaunch-app");
+		},
 	});
 	console.info("dbAPI exposed successfully");
 

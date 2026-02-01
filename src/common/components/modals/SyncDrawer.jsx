@@ -99,10 +99,12 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 								sales_price: item?.sales_price ?? 0,
 								custom_price: item?.custom_price ?? 0,
 
+								batches: JSON.parse(item?.batches || "[]"),
+
 								is_print: item?.is_print ?? 0,
 								sub_total: item?.sub_total ?? 0,
 
-								crated_at: item?.crated_at ?? "",
+								created_at: item?.created_at ?? "",
 								updated_at: item?.updated_at ?? ""
 							}))
 							: [],
@@ -110,13 +112,13 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 						multi_transaction: sale?.multi_transaction ?? 0,
 
 						splitPayment: Array.isArray(sale?.splitPayment)
-							? sale.splitPayment.map((p) => ({
-								id: p?.id ?? null,
-								transaction_mode_id: p?.transaction_mode_id ?? null,
-								invoice_id: p?.invoice_id ?? "",
-								amount: p?.amount ?? 0,
-								created_at: p?.created_at ?? "",
-								updated_at: p?.updated_at ?? ""
+							? sale.splitPayment.map((payment) => ({
+								id: payment?.id ?? null,
+								transaction_mode_id: payment?.transaction_mode_id ?? null,
+								invoice_id: payment?.invoice_id ?? "",
+								amount: payment?.amount ?? 0,
+								created_at: payment?.created_at ?? "",
+								updated_at: payment?.updated_at ?? ""
 							}))
 							: []
 					}))

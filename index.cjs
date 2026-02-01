@@ -99,6 +99,16 @@ ipcMain.handle("get-joined-table-data", async (event, data) => {
 	}
 });
 
+ipcMain.handle("relaunch-app", async () => {
+	try {
+		await dbModule.close();
+		app.relaunch();
+		app.exit(0);
+	} catch (error) {
+		console.error("Error occurred on relaunching app: ", error);
+	}
+});
+
 let mainWindow;
 let splash;
 
