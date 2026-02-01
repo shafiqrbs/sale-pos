@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { DataTable } from "mantine-datatable";
 import tableCss from "@assets/css/Table.module.css";
-import { Text, Tooltip, Group, ActionIcon } from "@mantine/core";
+import { Text, Group, ActionIcon } from "@mantine/core";
 import { IconMinus, IconPlus, IconTrash } from "@tabler/icons-react";
 import { useTranslation } from 'react-i18next';
 import { useOutletContext } from 'react-router';
@@ -42,23 +42,22 @@ export default function CheckoutTable() {
 
             // =============== if product has batches, show modal ================
             if (purchaseItems.length > 0) {
-                // =============== fetch current batches from cart ================
                 const itemCondition = {
                     stock_item_id: data.stock_item_id,
                 };
                 const cartItems = await window.dbAPI.getDataFromTable("invoice_table_item", itemCondition);
-                
+
                 let currentBatches = [];
                 if (cartItems && cartItems.length > 0) {
                     try {
-                        currentBatches = typeof cartItems[0].batches === 'string' 
-                            ? JSON.parse(cartItems[0].batches) 
-                            : (Array.isArray(cartItems[0].batches) ? cartItems[0].batches : []);
+                        currentBatches = typeof cartItems[ 0 ].batches === 'string'
+                            ? JSON.parse(cartItems[ 0 ].batches)
+                            : (Array.isArray(cartItems[ 0 ].batches) ? cartItems[ 0 ].batches : []);
                     } catch {
                         currentBatches = [];
                     }
                 }
-                
+
                 setSelectedProduct({ ...product, currentBatches });
                 openBatchModal();
             } else {
@@ -70,7 +69,6 @@ export default function CheckoutTable() {
                 }
             }
         } else {
-            // =============== fallback for non-batched products ================
             if (action === 'increment') {
                 increment(data);
             } else {
@@ -79,7 +77,6 @@ export default function CheckoutTable() {
         }
     };
 
-    // =============== handle batch selection ================
     const handleBatchSelect = (selectedBatches) => {
         if (selectedProduct) {
             const isUpdate = selectedProduct.currentBatches && selectedProduct.currentBatches.length > 0;
@@ -110,34 +107,14 @@ export default function CheckoutTable() {
                         accessor: "display_name",
                         title: t("Product"),
                         render: (data) => (
-                            <Tooltip
-                                multiline
-                                w={220}
-                                px={12}
-                                py={2}
-                                bg={"red.6"}
-                                c={"white"}
-                                withArrow
-                                position="top"
-                                offset={{ mainAxis: 5, crossAxis: 10 }}
-                                zIndex={999}
-                                transitionProps={{
-                                    transition: "pop-bottom-left",
-                                    duration: 500,
-                                }}
+                            <Text
+                                variant="subtle"
+                                onClick={handleClick}
+                                c={"red"}
+                                fz={"xs"}
                             >
-                                <Text
-                                    variant="subtle"
-                                    style={{ cursor: "pointer" }}
-                                    component="a"
-                                    onClick={handleClick}
-                                    name="additionalProductAdd"
-                                    c={"red"}
-                                    fz={"xs"}
-                                >
-                                    {data.display_name}
-                                </Text>
-                            </Tooltip>
+                                {data.display_name}
+                            </Text>
                         ),
                     },
                     {

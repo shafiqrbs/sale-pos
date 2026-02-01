@@ -45,10 +45,13 @@ export default function BatchProductModal({ opened, close, purchaseItems, curren
         close();
     };
 
-    // =============== handle cancel ================
     const handleCancel = () => {
         close();
     };
+
+    const totalQuantity = Object.values(selectedBatches).reduce((sum, quantity) => sum + quantity, 0);
+    const isUpdateMode = currentBatches?.length > 0;
+    const isUpdateCartDisabled = isUpdateMode && totalQuantity === 0;
 
     return (
         <Modal
@@ -113,6 +116,7 @@ export default function BatchProductModal({ opened, close, purchaseItems, curren
                 </Button>
                 <Button
                     onClick={handleUpdateCart}
+                    disabled={isUpdateCartDisabled}
                 >
                     {currentBatches?.length > 0 ? "Update Cart" : "Add to Cart"}
                 </Button>
