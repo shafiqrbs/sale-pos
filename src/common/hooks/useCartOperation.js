@@ -27,19 +27,19 @@ export default function useCartOperation(tableId = null) {
         const vatConfig = configData?.inventory_config?.config_vat;
 
         try {
-            if (isOnline) {
-                const payload = {
-                    ...withInvoiceId(tableId),
-                    field_name: "items",
-                    value: { ...product, quantity: 1 },
-                };
+            // if (isOnline) {
+            //     const payload = {
+            //         ...withInvoiceId(tableId),
+            //         field_name: "items",
+            //         value: { ...product, quantity: 1 },
+            //     };
 
-                const res = await inlineUpdate(payload).unwrap();
-                if (res?.status !== 200) {
-                    showNotification(res?.message || "Error updating invoice", "red", "", "", true);
-                }
-                return;
-            }
+            //     const res = await inlineUpdate(payload).unwrap();
+            //     if (res?.status !== 200) {
+            //         showNotification(res?.message || "Error updating invoice", "red", "", "", true);
+            //     }
+            //     return;
+            // }
 
             const itemCondition = {
                 stock_item_id: product.stock_item_id || product.stock_id,
@@ -155,19 +155,19 @@ export default function useCartOperation(tableId = null) {
         const vatConfig = configData?.inventory_config?.config_vat;
 
         try {
-            if (isOnline) {
-                const payload = {
-                    ...withInvoiceId(tableId),
-                    field_name: "items",
-                    value: { ...product, quantity: -1 },
-                };
+            // if (isOnline) {
+            //     const payload = {
+            //         ...withInvoiceId(tableId),
+            //         field_name: "items",
+            //         value: { ...product, quantity: -1 },
+            //     };
 
-                const res = await inlineUpdate(payload).unwrap();
-                if (res?.status !== 200) {
-                    showNotification(res?.message || "Error updating invoice", "red", "", "", true);
-                }
-                return;
-            }
+            //     const res = await inlineUpdate(payload).unwrap();
+            //     if (res?.status !== 200) {
+            //         showNotification(res?.message || "Error updating invoice", "red", "", "", true);
+            //     }
+            //     return;
+            // }
 
             const itemCondition = {
                 stock_item_id: product.stock_item_id || product.stock_id,
@@ -244,20 +244,20 @@ export default function useCartOperation(tableId = null) {
 
     const remove = async (product) => {
         try {
-            if (isOnline) {
-                const payload = {
-                    ...withInvoiceId(tableId),
-                    field_name: "items",
-                    value: [],
-                };
+            // if (isOnline) {
+            //     const payload = {
+            //         ...withInvoiceId(tableId),
+            //         field_name: "items",
+            //         value: [],
+            //     };
 
-                const res = await inlineUpdate(payload).unwrap();
-                if (res?.status !== 200) {
-                    showNotification(res?.message || "Error updating invoice", "red", "", "", true);
-                }
-                refetchInvoice();
-                return;
-            }
+            //     const res = await inlineUpdate(payload).unwrap();
+            //     if (res?.status !== 200) {
+            //         showNotification(res?.message || "Error updating invoice", "red", "", "", true);
+            //     }
+            //     refetchInvoice();
+            //     return;
+            // }
 
             const invoiceTable = tableId
                 ? await window.dbAPI.getDataFromTable("invoice_table", tableId)
@@ -283,6 +283,74 @@ export default function useCartOperation(tableId = null) {
         }
     };
 
+    const updateQuantity = async (product, newQuantity) => {
+        const vatConfig = configData?.inventory_config?.config_vat;
+
+        try {
+            const itemCondition = {
+                stock_item_id: product.stock_item_id || product.stock_id,
+                ...withInvoiceId(tableId),
+            };
+
+            const [ items, invoiceTable ] = await Promise.all([
+                window.dbAPI.getDataFromTable("invoice_table_item", itemCondition),
+                tableId
+                    ? window.dbAPI.getDataFromTable("invoice_table", tableId)
+                    : Promise.resolve(null),
+            ]);
+
+            if (!items?.length) {
+                showNotification("Item not found in cart", "red", "", "", true);
+                return;
+            }
+
+            const quantityValue = parseFloat(newQuantity) || 0;
+
+            const updatedSubTotal = calculateSubTotalWithVAT(
+                product.sales_price,
+                quantityValue,
+                vatConfig
+            );
+
+            const deltaSubTotal = updatedSubTotal - items[ 0 ].sub_total;
+
+            // =============== preserve existing batches structure ================
+            let existingBatches = [];
+            try {
+                existingBatches = typeof items[ 0 ].batches === 'string'
+                    ? JSON.parse(items[ 0 ].batches)
+                    : (Array.isArray(items[ 0 ].batches) ? items[ 0 ].batches : []);
+            } catch {
+                existingBatches = [];
+            }
+
+            await window.dbAPI.updateDataInTable("invoice_table_item", {
+                condition: itemCondition,
+                data: {
+                    ...itemCondition,
+                    quantity: quantityValue,
+                    purchase_price: product.purchase_price,
+                    sales_price: product.sales_price,
+                    sub_total: updatedSubTotal,
+                    display_name: product.display_name,
+                    batches: JSON.stringify(existingBatches),
+                },
+            });
+
+            if (tableId && invoiceTable) {
+                await window.dbAPI.updateDataInTable("invoice_table", {
+                    id: tableId,
+                    data: { sub_total: invoiceTable.sub_total + deltaSubTotal },
+                });
+            }
+
+            refetchInvoice();
+        } catch (error) {
+            showNotification("Request failed. Please try again.", "red", "", "", true);
+            console.error(error);
+        }
+    };
+
     const clear = () => dispatch(setInvoiceData([]));
 
     const getCartTotal = () =>
@@ -296,6 +364,7 @@ export default function useCartOperation(tableId = null) {
         increment,
         decrement,
         remove,
+        updateQuantity,
         clear,
         refetchInvoice,
         getCartTotal,

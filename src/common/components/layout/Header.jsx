@@ -27,6 +27,7 @@ import {
 	IconDashboard,
 	IconStack,
 	IconCashBanknote,
+	IconCalculator,
 } from "@tabler/icons-react";
 import { NavLink, useLocation, useNavigate } from "react-router";
 import LanguagePickerStyle from "@assets/css/LanguagePicker.module.css";
@@ -58,6 +59,7 @@ export default function Header({ isOnline, toggleNetwork }) {
 
 	const modalLinks = [
 		{ label: "Dashboard", icon: <IconDashboard size={18} />, pathname: APP_NAVLINKS.DASHBOARD },
+		{ label: "POS", icon: <IconCalculator size={18} />, pathname: APP_NAVLINKS.BAKERY },
 		{ label: "Sales", icon: <IconCashBanknote size={18} />, pathname: APP_NAVLINKS.SALES },
 		{ label: "Stock", icon: <IconStack size={18} />, pathname: APP_NAVLINKS.STOCK },
 	]
@@ -117,7 +119,7 @@ export default function Header({ isOnline, toggleNetwork }) {
 						>
 							{configData?.domain?.company_name || configData?.company_name}
 						</Box>
-						<Flex ml="60px" gap="sm" align="center">
+						<Flex ml="46px" gap="sm" align="center">
 							{modalLinks.map((link) => {
 								const isActive = link.pathname === location?.pathname;
 

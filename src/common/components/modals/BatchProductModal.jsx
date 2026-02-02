@@ -1,4 +1,4 @@
-import { Modal, Text, Box, Group, ActionIcon, Button, ScrollArea, Divider } from "@mantine/core";
+import { Modal, Text, Box, Group, ActionIcon, Button, ScrollArea, Divider, NumberInput } from "@mantine/core";
 import { IconPlus, IconMinus } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
 
@@ -14,7 +14,6 @@ export default function BatchProductModal({ opened, close, purchaseItems, curren
             });
             setSelectedBatches(batchesObject);
         } else if (!opened) {
-            // =============== reset when modal closes ================
             setSelectedBatches({});
         }
     }, [ opened, currentBatches ]);
@@ -24,6 +23,21 @@ export default function BatchProductModal({ opened, close, purchaseItems, curren
         setSelectedBatches(previous => {
             const currentQuantity = previous[ purchaseItemId ] || 0;
             const newQuantity = Math.max(0, currentQuantity + change);
+
+            if (newQuantity === 0) {
+                const { [ purchaseItemId ]: _, ...rest } = previous;
+                return rest;
+            }
+
+            return { ...previous, [ purchaseItemId ]: newQuantity };
+        });
+    };
+
+    // =============== handle direct quantity input for a batch ================
+    const handleDirectQuantityChange = (purchaseItemId, value, maxQuantity) => {
+        setSelectedBatches(previous => {
+            const numericValue = parseFloat(value) || 0;
+            const newQuantity = Math.min(Math.max(0, numericValue), maxQuantity);
 
             if (newQuantity === 0) {
                 const { [ purchaseItemId ]: _, ...rest } = previous;
@@ -85,9 +99,29 @@ export default function BatchProductModal({ opened, close, purchaseItems, curren
                                         >
                                             <IconMinus height={16} width={16} />
                                         </ActionIcon>
-                                        <Text size="sm" ta="center" fw={600} miw={30}>
-                                            {selectedBatches[ item.purchase_item_id ] || 0}
-                                        </Text>
+                                        <NumberInput
+                                            size="xs"
+                                            ta="center"
+                                            fw={600}
+                                            maw={60}
+                                            miw={60}
+                                            value={selectedBatches[ item.purchase_item_id ] || 0}
+                                            min={0}
+                                            max={item.remain_quantity}
+                                            step={1}
+                                            decimalScale={2}
+                                            hideControls
+                                            onChange={(value) => {
+                                                handleDirectQuantityChange(item.purchase_item_id, value, item.remain_quantity);
+                                            }}
+                                            styles={{
+                                                input: {
+                                                    textAlign: 'center',
+                                                    fontWeight: 600,
+                                                    padding: '0 2px'
+                                                }
+                                            }}
+                                        />
                                         <ActionIcon
                                             size="md"
                                             variant="filled"

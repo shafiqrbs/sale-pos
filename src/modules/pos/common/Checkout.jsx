@@ -9,10 +9,12 @@ import useConfigData from '@hooks/useConfigData';
 import { IconSum } from '@tabler/icons-react';
 import Transaction from './Transaction';
 import useCartOperation from '@hooks/useCartOperation';
+import useLoggedInUser from '@hooks/useLoggedInUser';
 
 export default function Checkout() {
     const { t } = useTranslation();
 
+    const user = useLoggedInUser();
     const { isOnline } = useOutletContext();
     const { configData } = useConfigData({ offlineFetch: !isOnline });
     const { invoiceData, getCartTotal } = useCartOperation()
@@ -59,6 +61,12 @@ export default function Checkout() {
         }
         fetchTransactionData();
     }, []);
+
+    useEffect(() => {
+        if (user) {
+            form.setFieldValue("sales_by_id", user?.id?.toString());
+        }
+    }, [ user ]);
 
     return (
         <Box pr="3xs">

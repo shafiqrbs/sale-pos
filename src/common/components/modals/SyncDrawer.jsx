@@ -37,7 +37,7 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 
 	const buildSyncPayload = ({ syncType, syncData }) => {
 		const basePayload = {
-			device_id: configData?.deviceId ?? "123",
+			device_id: configData?.domain_id?.toString() ?? "123",
 			sync_batch_id: generateUniqueId(),
 		};
 

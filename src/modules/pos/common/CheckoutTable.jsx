@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { DataTable } from "mantine-datatable";
 import tableCss from "@assets/css/Table.module.css";
-import { Text, Group, ActionIcon } from "@mantine/core";
+import { Text, Group, ActionIcon, NumberInput } from "@mantine/core";
 import { IconMinus, IconPlus, IconTrash } from "@tabler/icons-react";
 import { useTranslation } from 'react-i18next';
 import { useOutletContext } from 'react-router';
@@ -12,7 +12,7 @@ import { useDisclosure } from '@mantine/hooks';
 export default function CheckoutTable() {
     const { mainAreaHeight } = useOutletContext()
     const { t } = useTranslation();
-    const { invoiceData, increment, decrement, remove } = useCartOperation()
+    const { invoiceData, increment, decrement, remove, updateQuantity } = useCartOperation()
     const [ selectedProduct, setSelectedProduct ] = useState(null);
     const [ batchModalOpened, { open: openBatchModal, close: closeBatchModal } ] = useDisclosure(false);
 
@@ -20,8 +20,8 @@ export default function CheckoutTable() {
         console.info("handleClick")
     }
 
-    // =============== handle increment or decrement with batch check ================
-    const handleQuantityChange = async (data, action = 'increment') => {
+    // =============== check if product has batches and open modal ================
+    const checkAndOpenBatchModal = async (data) => {
         const fullProduct = await window.dbAPI.getDataFromTable("core_products", {
             stock_id: data.stock_item_id
         });
@@ -60,20 +60,33 @@ export default function CheckoutTable() {
 
                 setSelectedProduct({ ...product, currentBatches });
                 openBatchModal();
-            } else {
-                // =============== for non-batched products, use regular increment/decrement ================
-                if (action === 'increment') {
-                    increment(data);
-                } else {
-                    decrement(data);
-                }
+                return true;
             }
-        } else {
+        }
+        return false;
+    };
+
+    // =============== handle increment or decrement with batch check ================
+    const handleQuantityChange = async (data, action = 'increment') => {
+        const hasBatch = await checkAndOpenBatchModal(data);
+
+        if (!hasBatch) {
+            // =============== for non-batched products, use regular increment/decrement ================
             if (action === 'increment') {
                 increment(data);
             } else {
                 decrement(data);
             }
+        }
+    };
+
+    // =============== handle quantity input click ================
+    const handleQuantityInputClick = async (event, data) => {
+        event.preventDefault();
+        const hasBatch = await checkAndOpenBatchModal(data);
+
+        if (hasBatch) {
+            event.target.blur();
         }
     };
 
@@ -122,7 +135,7 @@ export default function CheckoutTable() {
                         title: t("Qty"),
                         textAlign: "center",
                         render: (data) => (
-                            <Group miw={100} gap={4} justify="center">
+                            <Group wrap='nowrap' miw={50} gap={4} justify="center">
                                 <ActionIcon
                                     size={"sm"}
                                     bg={"gray.7"}
@@ -131,9 +144,27 @@ export default function CheckoutTable() {
                                 >
                                     <IconMinus height={"12"} width={"12"} />
                                 </ActionIcon>
-                                <Text size="sm" ta={"center"} fw={600} maw={30} miw={30}>
-                                    {data.quantity}
-                                </Text>
+                                <NumberInput
+                                    size="xs"
+                                    ta="center"
+                                    fw={600}
+                                    value={data.quantity}
+                                    min={0}
+                                    step={1}
+                                    decimalScale={2}
+                                    hideControls
+                                    onClick={(event) => handleQuantityInputClick(event, data)}
+                                    onChange={(value) => {
+                                        updateQuantity(data, value);
+                                    }}
+                                    styles={{
+                                        input: {
+                                            textAlign: 'center',
+                                            fontWeight: 600,
+                                            padding: '0 2px'
+                                        }
+                                    }}
+                                />
                                 <ActionIcon
                                     size={"sm"}
                                     bg={"gray.7"}

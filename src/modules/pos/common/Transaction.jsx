@@ -87,6 +87,13 @@ export default function Transaction({ form, transactionModeData, tableId = null 
             return;
         }
 
+        // =============== check if any quantity is 0 ================
+        const hasZeroQuantity = invoiceData.some(item => !item.quantity || item.quantity <= 0);
+        if (hasZeroQuantity) {
+            showNotification("Quantity can't be 0, check your cart", "red", "", "", true, 2000, true);
+            return;
+        }
+
         // if (!salesByUser || salesByUser === "undefined") {
         // 	showNotificationComponent(t("ChooseUser"), "red", "", "", true, 1000, true);
         // 	return;
@@ -107,11 +114,11 @@ export default function Transaction({ form, transactionModeData, tableId = null 
         try {
             const fullAmount = form.values.receive_amount;
 
-            if (isOnline) {
-                await handleOnlineSave(fullAmount);
-            } else {
-                await handleOfflineSave(fullAmount);
-            }
+            // if (isOnline) {
+            //     await handleOnlineSave(fullAmount);
+            // } else {
+            await handleOfflineSave(fullAmount);
+            // }
 
             showNotification(t("SalesComplete"), "blue", "", "", true, 1000, true);
             setCustomerObject(null);
