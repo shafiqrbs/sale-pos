@@ -148,6 +148,7 @@ export default function CheckoutTable() {
                                     size="xs"
                                     ta="center"
                                     fw={600}
+                                    maw={80}
                                     value={data.quantity}
                                     min={0}
                                     step={1}
