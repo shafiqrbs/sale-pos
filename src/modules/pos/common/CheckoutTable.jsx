@@ -151,8 +151,9 @@ export default function CheckoutTable() {
                                     value={data.quantity}
                                     min={0}
                                     step={1}
-                                    decimalScale={2}
+                                    decimalScale={3}
                                     hideControls
+                                    allowNegative={false}
                                     onClick={(event) => handleQuantityInputClick(event, data)}
                                     onChange={(value) => {
                                         updateQuantity(data, value);

@@ -94,7 +94,7 @@ export default function TransactionInformation({ form, transactionModeData }) {
                     >
                         <Text fw={800} c="white" size="lg">
                             {configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol}{" "}
-                            {getCartTotal()?.toFixed(2)}
+                            {Math.round(getCartTotal())?.toFixed(2)}
                         </Text>
                         <Text fw={500} c="white" size="md">
                             {t("Total")}
@@ -112,7 +112,7 @@ export default function TransactionInformation({ form, transactionModeData }) {
                     >
                         <Text fw={800} c="white" size="lg">
                             {configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol}{" "}
-                            {(Math.abs(getCartTotal() - form.values.receive_amount))?.toFixed(2)}
+                            {Math.abs(Math.round(getCartTotal()) - form.values.receive_amount)?.toFixed(2)}
                         </Text>
                         <Text fw={500} c="white" size="md">
                             {returnOrDueText}

@@ -103,13 +103,13 @@ export default function BatchProductModal({ opened, close, purchaseItems, curren
                                             size="xs"
                                             ta="center"
                                             fw={600}
-                                            maw={60}
-                                            miw={60}
+                                            w={60}
                                             value={selectedBatches[ item.purchase_item_id ] || 0}
                                             min={0}
+                                            allowNegative={false}
                                             max={item.remain_quantity}
                                             step={1}
-                                            decimalScale={2}
+                                            decimalScale={3}
                                             hideControls
                                             onChange={(value) => {
                                                 handleDirectQuantityChange(item.purchase_item_id, value, item.remain_quantity);

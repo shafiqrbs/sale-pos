@@ -1,5 +1,5 @@
 import SelectForm from '@components/form-builders/SelectForm';
-import { ActionIcon, Box, Button, Grid, Group, Stack, Text, TextInput, Tooltip } from '@mantine/core';
+import { ActionIcon, Box, Button, Grid, Group, NumberInput, Stack, Text, TextInput, Tooltip } from '@mantine/core';
 import { IconChefHat, IconDeviceFloppy, IconPlusMinus, IconPrinter, IconTicket, IconUserPlus } from '@tabler/icons-react';
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next';
@@ -54,7 +54,7 @@ export default function Transaction({ form, transactionModeData, tableId = null 
 
     useEffect(() => {
         const cartTotal = getCartTotal();
-        form.setFieldValue("receive_amount", cartTotal);
+        form.setFieldValue("receive_amount", Math.round(cartTotal));
     }, [ getCartTotal() ]);
 
     useEffect(() => {
@@ -178,7 +178,7 @@ export default function Transaction({ form, transactionModeData, tableId = null 
         const salesData = {
             invoice: invoiceId,
             sub_total: getCartTotal(),
-            total: getCartTotal(),
+            total: Math.round(getCartTotal()),
             approved_by_id: form.values.sales_by_id,
             payment: fullAmount,
             discount: 0,
@@ -416,16 +416,18 @@ export default function Transaction({ form, transactionModeData, tableId = null 
                             errorMessage={t("ReceiveAmountValidateMessage")}
                             opened={!!form.errors.receive_amount}
                         >
-                            <TextInput
-                                type="number"
+                            <NumberInput
+                                allowNegative={false}
+                                hideControls
+                                decimalScale={3}
                                 placeholder={isThisTableSplitPaymentActive ? t("SplitPaymentActive") : t("Amount")}
                                 value={form.values.receive_amount}
                                 error={form.errors.receive_amount}
-                                size={"sm"}
+                                size="sm"
                                 disabled={isThisTableSplitPaymentActive}
                                 leftSection={<IconPlusMinus size={16} opacity={0.5} />}
-                                onChange={(event) => {
-                                    form.setFieldValue("receive_amount", event.target.value);
+                                onChange={(value) => {
+                                    form.setFieldValue("receive_amount", value);
                                 }}
                             />
                         </FormValidationWrapper>
@@ -439,24 +441,24 @@ export default function Transaction({ form, transactionModeData, tableId = null 
                         opened={!!form.errors.print_all}
                     >
                         <Button
-                            bg={"white"}
+                            bg="white"
                             variant="outline"
-                            c={"black"}
+                            c="black"
                             color="gray"
-                            size={"lg"}
+                            size="lg"
                             fullWidth={true}
                             onClick={handlePrintAll}
                         >
-                            <Text size="md">{t("AllPrint")}</Text>
+                            <Text fz="md">{t("AllPrint")}</Text>
                         </Button>
                     </FormValidationWrapper>
                 </Grid.Col>
                 <Grid.Col span={4}>
                     <Button
                         // disabled={isDisabled}
-                        bg={"#264653"}
-                        c={"white"}
-                        size={"lg"}
+                        bg="#264653"
+                        c="white"
+                        size="lg"
                         fullWidth={true}
                         leftSection={<IconPrinter />}
                         onClick={() => handleSave({ withPos: true })}
@@ -466,9 +468,9 @@ export default function Transaction({ form, transactionModeData, tableId = null 
                 </Grid.Col>
                 <Grid.Col span={4}>
                     <Button
-                        size={"lg"}
-                        c={"white"}
-                        bg={"#38b000"}
+                        size="lg"
+                        c="white"
+                        bg="#38b000"
                         fullWidth={true}
                         leftSection={<IconDeviceFloppy />}
                         onClick={() => handleSave({ withPos: false })}
