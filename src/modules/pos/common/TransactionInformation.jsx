@@ -28,6 +28,8 @@ export default function TransactionInformation({ form, transactionModeData }) {
         form.setFieldValue("transaction_mode_name", name);
     };
 
+    const totalAmount = Math.round(getCartTotal()) - (form.values.discount ?? 0);
+    const dueAmount = totalAmount - form.values.receive_amount;
     return (
         <>
             <Grid
@@ -94,7 +96,7 @@ export default function TransactionInformation({ form, transactionModeData }) {
                     >
                         <Text fw={800} c="white" size="lg">
                             {configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol}{" "}
-                            {Math.round(getCartTotal())?.toFixed(2)}
+                            {totalAmount?.toFixed(2)}
                         </Text>
                         <Text fw={500} c="white" size="md">
                             {t("Total")}
@@ -112,7 +114,7 @@ export default function TransactionInformation({ form, transactionModeData }) {
                     >
                         <Text fw={800} c="white" size="lg">
                             {configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol}{" "}
-                            {Math.abs(Math.round(getCartTotal()) - form.values.receive_amount)?.toFixed(2)}
+                            {(dueAmount)?.toFixed(2)}
                         </Text>
                         <Text fw={500} c="white" size="md">
                             {returnOrDueText}

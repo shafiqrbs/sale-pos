@@ -1,6 +1,6 @@
 import SelectForm from '@components/form-builders/SelectForm';
 import { ActionIcon, Box, Button, Grid, Group, NumberInput, Stack, Text, TextInput, Tooltip } from '@mantine/core';
-import { IconChefHat, IconDeviceFloppy, IconPlusMinus, IconPrinter, IconTicket, IconUserPlus } from '@tabler/icons-react';
+import { IconChefHat, IconCurrencyTaka, IconDeviceFloppy, IconPercentage, IconPlusMinus, IconPrinter, IconTicket, IconUserPlus } from '@tabler/icons-react';
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next';
 import TransactionInformation from './TransactionInformation';
@@ -26,16 +26,13 @@ export default function Transaction({ form, transactionModeData, tableId = null 
     const [ customersDropdownData, setCustomersDropdownData ] = useState([]);
     const [ customerDrawerOpened, { open: customerDrawerOpen, close: customerDrawerClose } ] = useDisclosure(false);
     const [ customerObject, setCustomerObject ] = useState(null);
+    const [ discountMode, setDiscountMode ] = useState("flat");
 
     // ============= wreckage start =============
-    const discountType = "Flat";
     const isThisTableSplitPaymentActive = false;
     const handleClick = () => { };
     const enableTable = false;
     const salesByUser = "";
-    const enableCoupon = "Coupon";
-    const setEnableCoupon = () => { };
-    const salesDiscountAmount = 0;
     const isSplitPaymentActive = false;
     // ============= wreckage stop ==============
 
@@ -53,9 +50,9 @@ export default function Transaction({ form, transactionModeData, tableId = null 
     }
 
     useEffect(() => {
-        const cartTotal = getCartTotal();
-        form.setFieldValue("receive_amount", Math.round(cartTotal));
-    }, [ getCartTotal() ]);
+        const cartTotal = Math.round(getCartTotal()) - (form.values.discount ?? 0);
+        form.setFieldValue("receive_amount", cartTotal);
+    }, [ getCartTotal(), form.values.discount ]);
 
     useEffect(() => {
         fetchCustomers();
@@ -178,12 +175,12 @@ export default function Transaction({ form, transactionModeData, tableId = null 
         const salesData = {
             invoice: invoiceId,
             sub_total: getCartTotal(),
-            total: Math.round(getCartTotal()),
+            total: Math.round(getCartTotal() - form.values.discount),
             approved_by_id: form.values.sales_by_id,
             payment: fullAmount,
-            discount: 0,
+            discount: form.values.discount,
             discount_calculation: 0,
-            discount_type: form.values.discount_type,
+            discount_type: discountMode,
             customerId: form.values.customer_id,
             customerName: customerInfo?.name || customerInfo?.label?.split(" -- ")[ 1 ],
             customerMobile: customerInfo?.mobile || customerInfo?.label?.split(" -- ")[ 0 ],
@@ -314,6 +311,7 @@ export default function Transaction({ form, transactionModeData, tableId = null 
                                 fullWidth
                                 size="sm"
                                 color="#0077b6"
+                                px="2xs"
                                 leftSection={
                                     customerObject?.name ? (
                                         <></>
@@ -339,28 +337,35 @@ export default function Transaction({ form, transactionModeData, tableId = null 
                         >
                             <Button
                                 fullWidth={true}
-                                onClick={() =>
-                                    enableCoupon === "Coupon" ? setEnableCoupon("Discount") : setEnableCoupon("Coupon")
-                                }
+                                onClick={() => {
+                                    if (discountMode === "coupon") {
+                                        setDiscountMode("discount");
+                                        form.setFieldValue("coupon_code", "");
+                                    } else {
+                                        setDiscountMode("coupon");
+                                        form.setFieldValue("discount", 0);
+                                    }
+                                }}
                                 variant="filled"
-                                fz={"xs"}
+                                px="2xs"
+                                fz="xs"
                                 leftSection={
-                                    enableCoupon === "Coupon" ? <IconTicket size={14} /> : <IconPercentage size={14} />
+                                    discountMode === "coupon" ? <IconTicket size={14} /> : <IconPercentage size={14} />
                                 }
                                 color="gray"
                             >
-                                {enableCoupon === "Coupon" ? t("Coupon") : t("Discount")}
+                                {discountMode === "coupon" ? t("Coupon") : t("Discount")}
                             </Button>
                         </FormValidationWrapper>
                     </Grid.Col>
                     <Grid.Col span={6} bg="red.3">
-                        {enableCoupon === "Coupon" ? (
+                        {discountMode === "coupon" ? (
                             <TextInput
                                 type="text"
                                 placeholder={t("CouponCode")}
                                 value={form.values.coupon_code}
                                 error={form.errors.coupon_code}
-                                size={"sm"}
+                                size="sm"
                                 onChange={(event) => {
                                     form.setFieldValue("coupon_code", event.target.value);
                                 }}
@@ -379,32 +384,23 @@ export default function Transaction({ form, transactionModeData, tableId = null 
                         ) : (
                             <FormValidationWrapper
                                 errorMessage={t("ClickRightButtonForPercentFlat")}
-                                opened={!!form.errors.coupon_code}
+                                opened={!!form.errors.discount}
                                 position="left"
                             >
-                                <TextInput
-                                    type="number"
-                                    style={{ textAlign: "right" }}
+                                <NumberInput
                                     placeholder={t("Discount")}
-                                    value={salesDiscountAmount}
+                                    value={form.values.discount}
                                     error={form.errors.discount}
                                     size="sm"
-                                    onChange={(event) => {
-                                        form.setFieldValue("discount", event.target.value);
-                                        const newValue = event.target.value;
-                                        form.setFieldValue("discount", newValue);
-                                    }}
+                                    onChange={(value) => form.setFieldValue("discount", value)}
                                     rightSection={
                                         <ActionIcon
                                             size={32}
-                                            bg={"red.5"}
+                                            bg="red.5"
                                             variant="filled"
+                                            mr={10}
                                         >
-                                            {discountType === "Flat" ? (
-                                                <IconCurrencyTaka size={16} />
-                                            ) : (
-                                                <IconPercentage size={16} />
-                                            )}
+                                            <IconPercentage size={16} />
                                         </ActionIcon>
                                     }
                                 />

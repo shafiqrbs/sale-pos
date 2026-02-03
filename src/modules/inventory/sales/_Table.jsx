@@ -95,6 +95,22 @@ export default function Table({ activeTab }) {
                                 )
                             },
                             {
+                                accessor: "subtotal",
+                                title: t("Sub Total"),
+                                textAlign: "right",
+                                render: (data) => (
+                                    <>{data.sub_total}</>
+                                ),
+                            },
+                            {
+                                accessor: "discount",
+                                title: t("Discount"),
+                                textAlign: "right",
+                                render: (data) => (
+                                    <>{data.discount ? Number(data.discount).toFixed(2) : "0.00"}</>
+                                ),
+                            },
+                            {
                                 accessor: "total",
                                 title: t("Total"),
                                 textAlign: "right",
