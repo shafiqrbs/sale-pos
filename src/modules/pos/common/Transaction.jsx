@@ -114,7 +114,7 @@ export default function Transaction({ form, transactionModeData, tableId = null 
             // if (isOnline) {
             //     await handleOnlineSave(fullAmount);
             // } else {
-            await handleOfflineSave(fullAmount);
+            const responseSalesData = await handleOfflineSave(fullAmount);
             // }
 
             showNotification(t("SalesComplete"), "blue", "", "", true, 1000, true);
@@ -131,7 +131,7 @@ export default function Transaction({ form, transactionModeData, tableId = null 
                 const status = await window.deviceAPI.thermalPrint({
                     configData,
                     salesItems: invoiceData,
-                    salesViewData: {},
+                    salesViewData: responseSalesData,
                     setup,
                 });
 
@@ -139,7 +139,9 @@ export default function Transaction({ form, transactionModeData, tableId = null 
                     showNotification(t("PrintingFailed"), "red", "", "", true, 1000, true);
                     return;
                 }
+
             }
+
         } catch (err) {
             console.error("Error saving sale:", err);
         } finally {
@@ -239,6 +241,8 @@ export default function Transaction({ form, transactionModeData, tableId = null 
 
         // reset invoice redux store
         refetchInvoice();
+
+        return salesData;
     };
 
     const handlePrintAll = async () => {

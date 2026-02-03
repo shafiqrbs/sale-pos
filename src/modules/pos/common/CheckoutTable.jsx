@@ -137,12 +137,12 @@ export default function CheckoutTable() {
                         render: (data) => (
                             <Group wrap='nowrap' miw={50} gap={4} justify="center">
                                 <ActionIcon
-                                    size={"sm"}
+                                    size="sm"
                                     bg={"gray.7"}
                                     disabled={data.quantity === 1}
                                     onClick={() => handleQuantityChange(data, 'decrement')}
                                 >
-                                    <IconMinus height={"12"} width={"12"} />
+                                    <IconMinus height="12" width="12" />
                                 </ActionIcon>
                                 <NumberInput
                                     size="xs"
@@ -168,11 +168,11 @@ export default function CheckoutTable() {
                                     }}
                                 />
                                 <ActionIcon
-                                    size={"sm"}
+                                    size="sm"
                                     bg={"gray.7"}
                                     onClick={() => handleQuantityChange(data, 'increment')}
                                 >
-                                    <IconPlus height={"12"} width={"12"} />
+                                    <IconPlus height="12" width="12" />
                                 </ActionIcon>
                             </Group>
                         ),

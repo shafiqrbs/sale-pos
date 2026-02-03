@@ -37,6 +37,7 @@ export default function Table({ activeTab }) {
     }, [ isOnline ]);
 
     const handleShowDetails = (item) => {
+        console.info("item:", item);
         setLoading(true);
         setSelectedRow(item.invoice);
         setSalesViewData(item);

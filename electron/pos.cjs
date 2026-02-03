@@ -127,7 +127,7 @@ const thermalPrint = async ({ configData, salesItems, salesViewData, setup }) =>
 			{ text: "Due", align: "LEFT", bold: true, width: 0.5 },
 			{
 				text: `${(
-					Number(salesViewData?.total || salesViewData?.sub_total) -
+					Number(salesViewData?.total) -
 					Number(salesViewData?.payment)
 				).toFixed(2)}`,
 				align: "RIGHT",
