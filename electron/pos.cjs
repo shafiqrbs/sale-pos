@@ -1,6 +1,8 @@
 const ThermalPrinter = require("node-thermal-printer").printer;
 const PrinterTypes = require("node-thermal-printer").types;
 
+const DOUBLE_LINE = "================================================================"
+
 const thermalPrint = async ({ configData, salesItems, salesViewData, setup }) => {
 	try {
 		const printer = new ThermalPrinter({
@@ -13,8 +15,11 @@ const thermalPrint = async ({ configData, salesItems, salesViewData, setup }) =>
 				timeout: 5000,
 			},
 		});
+		console.log(configData);
+		
 
-		// printer.alignCenter();
+		printer.setTypeFontB();
+		printer.alignCenter();
 		// await printer.printImage("./icons/sandra.png");
 		printer.bold(true);
 		printer.setTextSize(1, 1);
@@ -25,25 +30,25 @@ const thermalPrint = async ({ configData, salesItems, salesViewData, setup }) =>
 		printer.setTextSize(0, 0);
 		printer.drawLine();
 
-		printer.alignLeft();
-		printer.setTextSize(0, 0);
-		printer.println(`Email  : ${configData?.domain?.email || "N/A"}`);
+		printer.alignCenter();
 		printer.setTextSize(0, 0);
 		printer.println(`Mobile : ${configData?.domain?.mobile || "N/A"}`);
 		printer.setTextSize(0, 0);
 		printer.println(`Address: ${configData?.address || "N/A"}`);
+		printer.setTextSize(0, 0);
+		printer.println(`Email  : ${configData?.domain?.email || "N/A"}`);
 		printer.drawLine();
 
 		printer.alignCenter();
 		printer.bold(true);
 		printer.setTextSize(0, 0);
-		printer.println(`Retail Invoice ${salesViewData?.invoice || "N/A"}`);
+		printer.println(`Bill No- ${salesViewData?.invoice?.slice(-6) || "N/A"}`);
 		printer.bold(false);
 		printer.drawLine();
 
 		printer.setTypeFontB();
 		printer.tableCustom([
-			{ text: `Created: ${salesViewData?.created || "N/A"}`, align: "LEFT", width: 0.5 },
+			{ text: `Date: ${salesViewData?.created || "N/A"}`, align: "LEFT", width: 0.5 },
 			{
 				text: `${salesViewData?.customerName || salesViewData?.createdByName || "N/A"}`,
 				align: "RIGHT",
@@ -60,13 +65,13 @@ const thermalPrint = async ({ configData, salesItems, salesViewData, setup }) =>
 		printer.setTypeFontB();
 		printer.bold(true);
 		printer.tableCustom([
-			{ text: "Particulars", align: "LEFT", width: 0.5 },
+			{ text: "Item Name", align: "LEFT", width: 0.5 },
 			{ text: "QTY", align: "CENTER", width: 0.05 },
 			{ text: "Price", align: "RIGHT", width: 0.1 },
 			{ text: "Total", align: "RIGHT", width: 0.30 },
 		]);
 		printer.bold(false);
-		printer.drawLine();
+		printer.println(DOUBLE_LINE);
 
 		// Table Rows (Sales Items)
 		salesItems.forEach((item) => {
@@ -82,7 +87,8 @@ const thermalPrint = async ({ configData, salesItems, salesViewData, setup }) =>
 			]);
 		});
 
-		printer.drawLine();
+
+		printer.println(DOUBLE_LINE);
 		// Totals
 		printer.tableCustom([
 			{ text: "SubTotal", align: "LEFT", bold: true, width: 0.5 },
@@ -100,6 +106,7 @@ const thermalPrint = async ({ configData, salesItems, salesViewData, setup }) =>
 				width: 0.5,
 			},
 		]);
+		printer.drawLine();
 		printer.tableCustom([
 			{ text: "Total", align: "LEFT", bold: true, width: 0.5 },
 			{
@@ -122,13 +129,13 @@ const thermalPrint = async ({ configData, salesItems, salesViewData, setup }) =>
 				width: 0.5,
 			},
 		]);
-		printer.drawLine();
+		printer.println(DOUBLE_LINE);
 		printer.tableCustom([
-			{ text: "Due", align: "LEFT", bold: true, width: 0.5 },
+			{ text: "Returned", align: "LEFT", bold: true, width: 0.5 },
 			{
 				text: `${(
-					Number(salesViewData?.total) -
-					Number(salesViewData?.payment)
+					Math.abs(Number(salesViewData?.total) -
+					Number(salesViewData?.payment))
 				).toFixed(2)}`,
 				align: "RIGHT",
 				width: 0.5,
