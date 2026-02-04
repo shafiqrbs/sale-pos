@@ -14,6 +14,8 @@ import {
 	saveSyncRecordToLocalStorage,
 } from "@utils/index";
 import { useMemo, useState } from "react";
+import { apiSlice } from "@services/api.mjs";
+import { useDispatch } from "react-redux";
 
 const TABLE_MAPPING = {
 	sales: "sales",
@@ -24,6 +26,7 @@ const TABLE_MAPPING = {
 };
 
 export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen }) {
+	const dispatch = useDispatch();
 	const [ syncPos ] = useSyncPosMutation();
 	const [ syncRecords, setSyncRecords ] = useState(() => getSyncRecordsFromLocalStorage());
 	const [ loadingStates, setLoadingStates ] = useState(() => {
@@ -182,6 +185,8 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 
 				// silently destroy the table data after successful sync
 				window.dbAPI.destroyTableData(tableName);
+
+				dispatch(apiSlice.util.invalidateTags([ { type: "Sales", id: "LIST" } ]));
 			}
 		} catch (error) {
 			console.error(`Error syncing ${syncOption} data:`, error);

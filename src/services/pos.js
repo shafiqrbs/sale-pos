@@ -10,38 +10,7 @@ export const extendedPosApiSlice = apiSlice.injectEndpoints({
                     method: "POST",
                     body,
                 };
-            },
-            invalidatesTags: (result, error, { syncType }) => {
-                const tags = [];
-
-                switch (syncType) {
-                    case "sales":
-                        tags.push({ type: "Sales", id: "LIST" });
-                        break;
-                    case "purchases":
-                        tags.push({ type: "Purchases", id: "LIST" });
-                        break;
-                    case "products":
-                        tags.push({ type: "Product", id: "LIST" });
-                        tags.push({ type: "Categories", id: "LIST" });
-                        break;
-                    case "customers":
-                        tags.push({ type: "Customers", id: "LIST" });
-                        break;
-                    case "vendors":
-                        tags.push({ type: "Vendors", id: "LIST" });
-                        break;
-                    default:
-                        // =============== default tags for backward compatibility ================
-                        tags.push(
-                            { type: "Categories", id: "LIST" },
-                            { type: "InvoiceMode", id: "LIST" },
-                            { type: "Product", id: "LIST" }
-                        );
-                }
-
-                return tags;
-            },
+            }
         }),
         getCategories: builder.query({
             query: () => {

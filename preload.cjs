@@ -8,8 +8,8 @@ try {
 		upsertIntoTable: (table, data) => {
 			return ipcRenderer.invoke("upsert-into-table", table, data);
 		},
-		getDataFromTable: (table, id, property) => {
-			return ipcRenderer.invoke("get-data-from-table", table, id, property);
+		getDataFromTable: (table, id, property, options) => {
+			return ipcRenderer.invoke("get-data-from-table", table, id, property, options);
 		},
 		getJoinedTableData: (data) => {
 			return ipcRenderer.invoke("get-joined-table-data", data);
@@ -22,6 +22,9 @@ try {
 		},
 		deleteManyFromTable: (table, ids, property) => {
 			return ipcRenderer.invoke("delete-many-from-table", table, ids, property);
+		},
+		getTableCount: (table, conditions, options) => {
+			return ipcRenderer.invoke("get-table-count", table, conditions, options);
 		},
 		destroyTableData: (table) => {
 			console.log("Calling destroyTableData...");

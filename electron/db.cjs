@@ -477,38 +477,114 @@ const upsertIntoTable = (table, data) => {
 	}
 };
 
-const getDataFromTable = (table, idOrConditions, property = "id") => {
+const getDataFromTable = (table, idOrConditions, property = "id", options = {}) => {
 	table = convertTableName(table);
 	const useGet = [ "config_data", "users", "license_activate", "printer" ].includes(table); // return a single row for these tables
 
 	let stmt;
 	let result;
 
+	const { limit, offset, search } = options || {};
+
+	const buildSearchClause = (initialConditions = [], initialValues = []) => {
+		const conditions = [ ...initialConditions ];
+		const values = [ ...initialValues ];
+
+		if (search && typeof search === "object") {
+			if (search.equals && typeof search.equals === "object") {
+				for (const [ field, value ] of Object.entries(search.equals)) {
+					if (value !== undefined && value !== null && value !== "") {
+						conditions.push(`${field} = ?`);
+						values.push(value);
+					}
+				}
+			}
+
+			if (search.like && typeof search.like === "object") {
+				for (const [ field, value ] of Object.entries(search.like)) {
+					if (value !== undefined && value !== null && value !== "") {
+						conditions.push(`${field} LIKE ?`);
+						values.push(`%${value}%`);
+					}
+				}
+			}
+
+			if (search.in && typeof search.in === "object") {
+				for (const [ field, list ] of Object.entries(search.in)) {
+					if (Array.isArray(list) && list.length > 0) {
+						const placeholders = list.map(() => "?").join(", ");
+						conditions.push(`${field} IN (${placeholders})`);
+						values.push(...list);
+					}
+				}
+			}
+		}
+
+		return { conditions, values };
+	};
+
+	const buildPaginatedQuery = (baseQuery, baseValues = []) => {
+		let query = baseQuery;
+		const values = [ ...baseValues ];
+
+		if (!useGet && typeof limit === "number") {
+			query += " LIMIT ?";
+			values.push(limit);
+		}
+
+		if (!useGet && typeof offset === "number") {
+			query += " OFFSET ?";
+			values.push(offset);
+		}
+
+		return { query, values };
+	};
+
 	if (typeof idOrConditions === "object" && idOrConditions !== null) {
 		// multiple conditions
 		const keys = Object.keys(idOrConditions);
-		const conditions = keys.map((key) => `${key} = ?`).join(" AND ");
-		const values = keys.map((key) => idOrConditions[ key ]);
+		const baseConditions = keys.map((key) => `${key} = ?`);
+		const baseValues = keys.map((key) => idOrConditions[ key ]);
+
+		const { conditions, values } = buildSearchClause(baseConditions, baseValues);
+		const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
 		if (useGet) {
-			stmt = db.prepare(
-				`SELECT * FROM ${table} WHERE ${conditions} ORDER BY created_at DESC LIMIT 1`
+			const { query, values: finalValues } = buildPaginatedQuery(
+				`SELECT * FROM ${table} ${whereClause} ORDER BY created_at DESC`,
+				values
 			);
-			result = stmt.get(...values);
+			stmt = db.prepare(query);
+			result = stmt.get(...finalValues);
 		} else {
-			stmt = db.prepare(`SELECT * FROM ${table} WHERE ${conditions} ORDER BY created_at DESC`);
-			result = stmt.all(...values);
+			const { query, values: finalValues } = buildPaginatedQuery(
+				`SELECT * FROM ${table} ${whereClause} ORDER BY created_at DESC`,
+				values
+			);
+			stmt = db.prepare(query);
+			result = stmt.all(...finalValues);
 		}
 	} else if (idOrConditions) {
 		stmt = db.prepare(`SELECT * FROM ${table} WHERE ${property} = ?`);
 		result = stmt.get(idOrConditions);
 	} else {
+		const { conditions, values } = buildSearchClause([], []);
+		const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+
 		if (useGet) {
-			stmt = db.prepare(`SELECT * FROM ${table} ORDER BY created_at DESC LIMIT 1`);
-			result = stmt.get();
+			const { query, values: finalValues } = buildPaginatedQuery(
+				`SELECT * FROM ${table} ${whereClause} ORDER BY created_at DESC`,
+				values
+			);
+			stmt = db.prepare(query);
+			result = stmt.get(...finalValues);
 		} else {
-			stmt = db.prepare(`SELECT * FROM ${table} ORDER BY created_at DESC`);
-			result = stmt.all();
+			const { query, values: finalValues } = buildPaginatedQuery(
+				`SELECT * FROM ${table} ${whereClause} ORDER BY created_at DESC`,
+				values
+			);
+			stmt = db.prepare(query);
+			result = stmt.all(...finalValues);
 		}
 	}
 
@@ -583,6 +659,63 @@ const deleteManyFromTable = (table, ids = [], property = "id") => {
 const destroyTableData = (table = "users") => {
 	const stmt = db.prepare(`DELETE FROM ${table}`);
 	stmt.run();
+};
+
+const getTableCount = (table, conditions = {}, options = {}) => {
+	try {
+		table = convertTableName(table);
+
+		let query = `SELECT COUNT(*) as total FROM ${table}`;
+		let whereClauses = [];
+		let values = [];
+
+		if (conditions && typeof conditions === "object" && Object.keys(conditions).length > 0) {
+			whereClauses = Object.keys(conditions).map((key) => `${key} = ?`);
+			values.push(...Object.keys(conditions).map((key) => conditions[ key ]));
+		}
+
+		const { search } = options || {};
+
+		if (search && typeof search === "object") {
+			if (search.equals && typeof search.equals === "object") {
+				for (const [ field, value ] of Object.entries(search.equals)) {
+					if (value !== undefined && value !== null && value !== "") {
+						whereClauses.push(`${field} = ?`);
+						values.push(value);
+					}
+				}
+			}
+
+			if (search.like && typeof search.like === "object") {
+				for (const [ field, value ] of Object.entries(search.like)) {
+					if (value !== undefined && value !== null && value !== "") {
+						whereClauses.push(`${field} LIKE ?`);
+						values.push(`%${value}%`);
+					}
+				}
+			}
+
+			if (search.in && typeof search.in === "object") {
+				for (const [ field, list ] of Object.entries(search.in)) {
+					if (Array.isArray(list) && list.length > 0) {
+						const placeholders = list.map(() => "?").join(", ");
+						whereClauses.push(`${field} IN (${placeholders})`);
+						values.push(...list);
+					}
+				}
+			}
+		}
+
+		if (whereClauses.length > 0) {
+			query += ` WHERE ${whereClauses.join(" AND ")}`;
+		}
+
+		const row = db.prepare(query).get(...values);
+		return row ? row.total : 0;
+	} catch (error) {
+		console.error("Error in getTableCount:", error);
+		return 0;
+	}
 };
 
 const resetDatabase = async () => {
@@ -712,5 +845,6 @@ module.exports = {
 	destroyTableData,
 	resetDatabase,
 	getJoinedTableData,
+	getTableCount,
 	close,
 };

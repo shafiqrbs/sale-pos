@@ -91,20 +91,19 @@ export default function useSalesList({ params, offlineFetch = false, activeTab }
   const networkStatus = useNetwork();
   const shouldUseOffline = offlineFetch || !networkStatus.online;
 
-  // =============== online query hook ================
   const {
     data: onlineSalesResponse,
     isLoading: isOnlineLoading,
     isFetching: isOnlineFetching,
     error: onlineError,
-  } = useGetSalesQuery(params, { skip: shouldUseOffline });
+  } = useGetSalesQuery(params, {
+    skip: shouldUseOffline
+  });
 
-  // =============== offline local data state ================
   const [ localSales, setLocalSales ] = useState(null);
   const [ isLocalLoading, setIsLocalLoading ] = useState(false);
   const [ localError, setLocalError ] = useState(null);
 
-  // =============== fetch local data when offline or preferredMode is offline ================
   useEffect(() => {
     if (shouldUseOffline) {
       const fetchLocalSales = async () => {

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Image, ScrollArea, Box, Card, Grid, Text, Flex } from '@mantine/core'
 import { useOutletContext } from 'react-router'
 import useConfigData from '@hooks/useConfigData'
@@ -8,9 +8,14 @@ import ProductTable from './ProductTable';
 import useCartOperation from '@hooks/useCartOperation';
 import BatchProductModal from '@components/modals/BatchProductModal';
 import { useDisclosure } from '@mantine/hooks';
+import ProductPagination from './ProductPagination';
+
+const ITEMS_PER_PAGE = 16;
 
 export default function ProductList() {
     const [ allProducts, setAllProducts ] = useState([])
+    const [ totalProducts, setTotalProducts ] = useState(0)
+    const [ activePage, setActivePage ] = useState(1)
     const [ selectedProduct, setSelectedProduct ] = useState(null);
     const [ batchModalOpened, { open: openBatchModal, close: closeBatchModal } ] = useDisclosure(false);
     const { increment } = useCartOperation();
@@ -24,15 +29,48 @@ export default function ProductList() {
     })
 
     useEffect(() => {
-        async function fetchProducts() {
-            const fetchedProducts = await window.dbAPI.getDataFromTable("core_products")
-            setAllProducts(fetchedProducts)
+        async function fetchProductsPage() {
+            try {
+                const offset = (activePage - 1) * ITEMS_PER_PAGE;
+
+                const normalizedSearchValue = filter.search.trim();
+                const normalizedBarcodeValue = filter.barcode.trim();
+                const selectedCategoryIds = filter.categories;
+
+                const searchConditions = {
+                    like: {
+                        display_name: normalizedSearchValue || undefined,
+                        barcode: normalizedBarcodeValue || undefined,
+                    },
+                    in: {
+                        category_id: Array.isArray(selectedCategoryIds) && selectedCategoryIds.length > 0
+                            ? selectedCategoryIds
+                            : undefined,
+                    },
+                }
+
+                const fetchedProducts = await window.dbAPI.getDataFromTable("core_products", {}, "id", {
+                    limit: ITEMS_PER_PAGE,
+                    offset,
+                    search: searchConditions,
+                });
+
+                const productsCount = await window.dbAPI.getTableCount("core_products", {}, {
+                    search: searchConditions,
+                });
+
+                setAllProducts(Array.isArray(fetchedProducts) ? fetchedProducts : []);
+                setTotalProducts(typeof productsCount === "number" ? productsCount : 0);
+            } catch (error) {
+                console.error("Failed to fetch paginated products from sqlite:", error);
+                setAllProducts([]);
+                setTotalProducts(0);
+            }
         }
 
-        fetchProducts()
-    }, [])
+        fetchProductsPage();
+    }, [ activePage, filter.barcode, filter.categories, filter.search ])
 
-    // =============== handle product click ================
     const handleProductClick = async (product) => {
         const purchaseItems =
             JSON.parse(product?.purchase_item_for_sales || "[]")
@@ -70,49 +108,21 @@ export default function ProductList() {
         }
     };
 
-    const filteredProducts = useMemo(() => {
-        const normalizedSearchValue = filter.search.trim().toLowerCase()
-        const normalizedBarcodeValue = filter.barcode.trim()
-        const selectedCategoryIds = filter.categories
-
-        return allProducts.filter((product) => {
-            if (selectedCategoryIds.length > 0 && !selectedCategoryIds.includes(product.category_id)) {
-                return false
-            }
-
-            if (normalizedSearchValue) {
-                const productDisplayName = (product.display_name ?? "").toString().toLowerCase()
-                if (!productDisplayName.includes(normalizedSearchValue)) {
-                    return false
-                }
-            }
-
-            if (normalizedBarcodeValue) {
-                const productBarcodeValue = (product.barcode ?? "").toString()
-                if (!productBarcodeValue.includes(normalizedBarcodeValue)) {
-                    return false
-                }
-            }
-
-            return true
-        })
-    }, [ allProducts, filter.barcode, filter.categories, filter.search ])
-
     return (
         <Box bg="white" w="100%" className="border-radius">
             <Grid columns={12} gutter="4xs" pl="3xs" pb="3xs">
                 <Grid.Col span={3}>
                     <Categories filter={filter} setFilter={setFilter} />
                 </Grid.Col>
-                <Grid.Col span={9}>
+                <Grid.Col span={9} pos='relative'>
                     <Box bg="gray.8" px="les" pt="es" pb="les" mb="les" bdrs={6}>
                         <ProductFilters filter={filter} setFilter={setFilter} />
                     </Box>
                     <Box bg="gray.8" p="4xs" bdrs={6}>
                         <ScrollArea h={mainAreaHeight - 60} type="never" scrollbars="y">
-                            <Grid columns={12} gutter="4xs">
+                            <Grid columns={12} gutter="4xs" mb={58}>
                                 {filter.view !== "minimal" ? <>
-                                    {filteredProducts.length > 0 ? filteredProducts.map((product) => (
+                                    {allProducts.length > 0 ? allProducts.map((product) => (
                                         <Grid.Col span={filter.view === "grid" ? 3 : filter.view === "list" ? 6 : 12} key={product.id}>
                                             <Card
                                                 shadow="md"
@@ -132,9 +142,7 @@ export default function ProductList() {
                                                     h={120}
                                                     w="auto"
                                                     fit="cover"
-                                                    src={`${import.meta.env.VITE_IMAGE_GATEWAY_URL
-                                                        }/uploads/inventory/product/feature_image/${product.feature_image
-                                                        }`}
+                                                    src={`${import.meta.env.VITE_IMAGE_GATEWAY_URL}/storage/${product.feature_image}`}
                                                     fallbackSrc="./no-image.png"
                                                 />
                                                 <Text
@@ -171,12 +179,18 @@ export default function ProductList() {
                                     )}
                                 </> : (
                                     <Box w="100%">
-                                        <ProductTable products={filteredProducts} />
+                                        <ProductTable products={allProducts || []} />
                                     </Box>
                                 )}
                             </Grid>
                         </ScrollArea>
                     </Box>
+                    <ProductPagination
+                        activePage={activePage}
+                        totalItems={totalProducts}
+                        itemsPerPage={ITEMS_PER_PAGE}
+                        onPageChange={setActivePage}
+                    />
                 </Grid.Col>
             </Grid>
 

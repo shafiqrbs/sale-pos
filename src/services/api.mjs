@@ -16,7 +16,7 @@ export const apiSlice = createApi({
 					headers.set("X-Api-User", user.id);
 				}
 			} catch (err) {
-				console.error("Error getting user data");
+				console.error("Error getting user data", err);
 			}
 
 			return headers;

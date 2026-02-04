@@ -21,9 +21,9 @@ ipcMain.handle("update-in-table", async (event, table, values) => {
 	}
 });
 
-ipcMain.handle("get-data-from-table", async (event, table, id, property) => {
+ipcMain.handle("get-data-from-table", async (event, table, id, property, options) => {
 	try {
-		return dbModule.getDataFromTable(table, id, property);
+		return dbModule.getDataFromTable(table, id, property, options);
 	} catch (error) {
 		console.error(`Error getting data from ${table}:`, error);
 		throw error;
@@ -62,6 +62,15 @@ ipcMain.handle("reset-database", async () => {
 		return dbModule.resetDatabase();
 	} catch (error) {
 		console.error(`Error resetting data`);
+		throw error;
+	}
+});
+
+ipcMain.handle("get-table-count", async (event, table, conditions, options) => {
+	try {
+		return dbModule.getTableCount(table, conditions, options);
+	} catch (error) {
+		console.error(`Error getting table count for ${table}:`, error);
 		throw error;
 	}
 });

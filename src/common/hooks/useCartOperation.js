@@ -275,7 +275,6 @@ export default function useCartOperation(tableId = null) {
                 });
             }
 
-            showNotification("Item removed from cart", "green", "", "", true);
             refetchInvoice();
         } catch (error) {
             showNotification("Request failed. Please try again.", "red", "", "", true);
