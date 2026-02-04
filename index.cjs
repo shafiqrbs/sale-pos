@@ -57,6 +57,15 @@ ipcMain.handle("destroy-table-data", async (event, table) => {
 	}
 });
 
+ipcMain.handle("clear-and-insert-bulk", async (event, table, dataArray) => {
+	try {
+		return dbModule.clearAndInsertBulk(table, dataArray);
+	} catch (error) {
+		console.error(`Error clearing and inserting bulk data for ${table}:`, error);
+		throw error;
+	}
+});
+
 ipcMain.handle("reset-database", async () => {
 	try {
 		return dbModule.resetDatabase();

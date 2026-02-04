@@ -832,6 +832,26 @@ const getJoinedTableData = ({
 	}
 };
 
+const clearAndInsertBulk = (table, dataArray) => {
+	try {
+		table = convertTableName(table);
+
+		const transaction = db.transaction(() => {
+			destroyTableData(table);
+
+			for (const data of dataArray) {
+				upsertIntoTable(table, data);
+			}
+		});
+
+		transaction();
+		console.log(`Successfully cleared and inserted ${dataArray.length} records into ${table}`);
+	} catch (error) {
+		console.error(`Error in clearAndInsertBulk for table ${table}:`, error);
+		throw error;
+	}
+};
+
 const close = () => {
 	db.close();
 };
@@ -843,6 +863,7 @@ module.exports = {
 	deleteDataFromTable,
 	deleteManyFromTable,
 	destroyTableData,
+	clearAndInsertBulk,
 	resetDatabase,
 	getJoinedTableData,
 	getTableCount,

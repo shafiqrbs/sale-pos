@@ -7,6 +7,7 @@ import ProductFilters from './ProductFilters'
 import ProductTable from './ProductTable';
 import useCartOperation from '@hooks/useCartOperation';
 import BatchProductModal from '@components/modals/BatchProductModal';
+import { getPublicAssetPath } from '@utils/index';
 import { useDisclosure } from '@mantine/hooks';
 import ProductPagination from './ProductPagination';
 
@@ -143,7 +144,7 @@ export default function ProductList() {
                                                     w="auto"
                                                     fit="cover"
                                                     src={`${import.meta.env.VITE_IMAGE_GATEWAY_URL}/storage/${product.feature_image}`}
-                                                    fallbackSrc="./no-image.png"
+                                                    fallbackSrc={getPublicAssetPath("no-image.png")}
                                                 />
                                                 <Text
                                                     fw={600}
@@ -174,7 +175,7 @@ export default function ProductList() {
                                         </Grid.Col>
                                     )) : (
                                         <Flex bdrs="4px" className='overflow-hidden' w="100%" align="center" justify="center" bg="#ECF0F3" h={mainAreaHeight - 58}>
-                                            <Image src="./not-found.webp" w="100%" h="100%" fit="contain" />
+                                            <Image src={getPublicAssetPath("not-found.webp")} w="100%" h="100%" fit="contain" />
                                         </Flex>
                                     )}
                                 </> : (

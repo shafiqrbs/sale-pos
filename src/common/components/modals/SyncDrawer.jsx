@@ -1,4 +1,4 @@
-import { Divider, Stack, Paper, Group, Text, ActionIcon, rem, Flex } from "@mantine/core";
+import { Divider, Stack, Paper, Group, Text, ActionIcon, rem, Flex, LoadingOverlay } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { IconRefresh } from "@tabler/icons-react";
 import { SYNC_DATA } from "@/constants";
@@ -14,8 +14,13 @@ import {
 	saveSyncRecordToLocalStorage,
 } from "@utils/index";
 import { useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { apiSlice } from "@services/api.mjs";
 import { useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
+import axios from "axios";
+import { APP_NAVLINKS, MASTER_APIS } from "@/routes/routes";
+import commonDataStoreIntoLocalStorage from "@utils/local-storage/commonDataStoreIntoLocalStorage";
 
 const TABLE_MAPPING = {
 	sales: "sales",
@@ -25,7 +30,17 @@ const TABLE_MAPPING = {
 	vendors: "vendors"
 };
 
+const PLATFORM_SYNC_DATA_MAP = {
+	core_customers: "customers",
+	core_users: "users",
+	core_vendors: "vendors",
+	accounting_transaction_mode: "transaction_modes",
+	config_data: "domain_config",
+	core_products: "stock_item",
+};
+
 export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen }) {
+	const { t } = useTranslation();
 	const dispatch = useDispatch();
 	const [ syncPos ] = useSyncPosMutation();
 	const [ syncRecords, setSyncRecords ] = useState(() => getSyncRecordsFromLocalStorage());
@@ -35,7 +50,7 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 			return accumulator;
 		}, {});
 	});
-
+	const [ platformSyncing, setPlatformSyncing ] = useState(false);
 	const lastSyncRecord = useMemo(() => getLastSyncRecord(syncRecords), [ syncRecords ]);
 
 	const buildSyncPayload = ({ syncType, syncData }) => {
@@ -219,43 +234,167 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 		});
 	};
 
+	const confirmAndSyncPlatform = () => {
+		modals.openConfirmModal({
+			title: "Confirm sync",
+			children: (
+				<Text size="sm">
+					Are you sure you want to sync platform data now? Local data will be cleared after the successful sync but available in the online database.
+				</Text>
+			),
+			labels: { confirm: "Sync now", cancel: "Cancel" },
+			confirmProps: { color: "teal", leftSection: <IconRefresh size={20} /> },
+			onConfirm: () => runSyncPlatform("platform"),
+		});
+	};
+
+	const runSyncPlatform = async () => {
+		setPlatformSyncing(true);
+
+		try {
+			const licenseActivateData = await window.dbAPI.getDataFromTable("license_activate");
+
+			if (!licenseActivateData?.license_key || !licenseActivateData?.active_key) {
+				showNotification(
+					"License or activation key not found. Please activate your account first.",
+					"red",
+					"",
+					"",
+					true
+				);
+				return;
+			}
+
+			const licenseKey = licenseActivateData.license_key;
+			const activeKey = licenseActivateData.active_key;
+
+			// =============== call the activation url to get fresh data ================
+			const response = await axios({
+				url: `${MASTER_APIS.SPLASH}?license_key=${licenseKey}&active_key=${activeKey}`
+			});
+
+			if (response.data.status !== 200) {
+				showNotification(
+					response.data.message || "Failed to sync platform data",
+					"red",
+					"",
+					"",
+					true
+				);
+				return;
+			}
+
+			// =============== clear and repopulate tables except license_activate and users ================
+			const syncOperations = Object.entries(PLATFORM_SYNC_DATA_MAP)
+				.map(async ([ table, property ]) => {
+					const dataList = Array.isArray(response.data.data[ property ])
+						? response.data.data[ property ]
+						: [ response.data.data[ property ] ];
+
+					// =============== handle config_data special formatting ================
+					if (table === "config_data") {
+						const formattedData = dataList.map((data) => ({
+							id: 1,
+							data: JSON.stringify(data),
+						}));
+						await window.dbAPI.clearAndInsertBulk(table, formattedData);
+					} else {
+						await window.dbAPI.clearAndInsertBulk(table, dataList);
+					}
+				});
+
+			await Promise.all(syncOperations);
+
+			// =============== clear tables that will be populated by commonDataStoreIntoLocalStorage ================
+			await window.dbAPI.destroyTableData("categories");
+			await window.dbAPI.destroyTableData("invoice_table");
+
+			// =============== get user id from users table and call common data store function ================
+			const userData = await window.dbAPI.getDataFromTable("users");
+			if (userData?.id) {
+				await commonDataStoreIntoLocalStorage(userData.id);
+			}
+
+			// =============== save sync record ================
+			const nextSyncRecords = saveSyncRecordToLocalStorage({
+				mode: "platform",
+				syncedAt: new Date().toISOString(),
+			});
+			setSyncRecords(nextSyncRecords);
+
+			showNotification(
+				"Platform data synced successfully",
+				"teal",
+				"lightgray",
+				"",
+				"",
+				true
+			);
+
+			// =============== invalidate relevant redux cache tags ================
+			dispatch(apiSlice.util.invalidateTags([
+				{ type: "Sales", id: "LIST" }
+			]));
+
+			// window.location.href = APP_NAVLINKS.BAKERY;
+			window.location.reload()
+
+		} catch (error) {
+			console.error("Error syncing platform data:", error);
+			showNotification(
+				error?.response?.data?.message || error?.message || "Failed to sync platform data. Please try again.",
+				"red",
+				"",
+				"",
+				true
+			);
+		} finally {
+			setPlatformSyncing(false);
+		}
+	};
+
 	const getLastModeRecord = (mode) => {
 		const lastModeRecord = getLastSyncRecordByMode(syncRecords, mode);
 		if (!lastModeRecord?.syncedAt) return "Not synced yet";
 		return `Last synced: ${formatDateTime(new Date(lastModeRecord.syncedAt))}`;
 	}
 
-	return (
-		<GlobalDrawer
-			opened={syncPanelOpen}
-			onClose={() => setSyncPanelOpen(false)}
-			title="Syncing Information"
-			styles={{
-				title: { fontWeight: 600, fontSize: rem(20), color: "#626262" },
-			}}
-		>
-			<Divider mb="md" />
+	const loadingOverlayNode = (
+		<LoadingOverlay h="100vh" zIndex={999} visible={platformSyncing} style={{ position: "fixed", inset: 0 }} />
+	);
 
-			<Stack gap="md">
-				{SYNC_DATA.map((item, index) => (
-					<Paper key={index} p="md" radius="md" withBorder shadow="sm">
+	return (
+		<>
+			{createPortal(loadingOverlayNode, document.body)}
+			<GlobalDrawer
+				opened={syncPanelOpen}
+				onClose={() => setSyncPanelOpen(false)}
+				title="Syncing Information"
+				styles={{
+					title: { fontWeight: 600, fontSize: rem(20), color: "#626262" },
+				}}
+			>
+				<Divider mb="md" />
+
+				<Stack gap="md">
+					<Paper p="md" radius="md" withBorder shadow="sm">
 						<Group justify="space-between" wrap="nowrap">
 							<Stack gap={4}>
 								<Text fw={600} tt="capitalize">
-									{item.mode}
+									{t("PlatformSync")}
 								</Text>
 								<Text size="sm" c="dimmed">
-									{getLastModeRecord(item?.mode)}
+									{getLastModeRecord("platform")}
 								</Text>
 							</Stack>
 							<ActionIcon
-								loading={loadingStates[ item.mode ] || false}
+								loading={platformSyncing}
 								loaderProps={{
 									children: <Flex justify="center" align="center" h="100%">
 										<IconRefresh className="spin" height={20} width={20} />
 									</Flex>
 								}}
-								onClick={() => confirmAndSync(item.mode)}
+								onClick={confirmAndSyncPlatform}
 								variant="filled"
 								radius="xl"
 								color="teal"
@@ -265,14 +404,43 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 							</ActionIcon>
 						</Group>
 					</Paper>
-				))}
-			</Stack>
+					{SYNC_DATA.map((item, index) => (
+						<Paper key={index} p="md" radius="md" withBorder shadow="sm">
+							<Group justify="space-between" wrap="nowrap">
+								<Stack gap={4}>
+									<Text fw={600} tt="capitalize">
+										{item.mode}
+									</Text>
+									<Text size="sm" c="dimmed">
+										{getLastModeRecord(item?.mode)}
+									</Text>
+								</Stack>
+								<ActionIcon
+									loading={loadingStates[ item.mode ] || false}
+									loaderProps={{
+										children: <Flex justify="center" align="center" h="100%">
+											<IconRefresh className="spin" height={20} width={20} />
+										</Flex>
+									}}
+									onClick={() => confirmAndSync(item.mode)}
+									variant="filled"
+									radius="xl"
+									color="teal"
+									size="32px"
+								>
+									<IconRefresh size={22} />
+								</ActionIcon>
+							</Group>
+						</Paper>
+					))}
+				</Stack>
 
-			<Text size="xs" c="dimmed" mt="xl" ta="center">
-				{lastSyncRecord?.mode && lastSyncRecord?.syncedAt
-					? `Last synced ${lastSyncRecord.mode} data at: ${formatDateTime(new Date(lastSyncRecord.syncedAt))}`
-					: "No sync record available yet"}
-			</Text>
-		</GlobalDrawer>
+				<Text size="xs" c="dimmed" mt="xl" ta="center">
+					{lastSyncRecord?.mode && lastSyncRecord?.syncedAt
+						? `Last synced ${lastSyncRecord.mode} data at: ${formatDateTime(new Date(lastSyncRecord.syncedAt))}`
+						: "No sync record available yet"}
+				</Text>
+			</GlobalDrawer>
+		</>
 	);
 }

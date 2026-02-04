@@ -30,6 +30,9 @@ try {
 			console.log("Calling destroyTableData...");
 			return ipcRenderer.invoke("destroy-table-data", table);
 		},
+		clearAndInsertBulk: (table, dataArray) => {
+			return ipcRenderer.invoke("clear-and-insert-bulk", table, dataArray);
+		},
 		resetDatabase: () => {
 			console.log("Calling resetDatabase...");
 			return ipcRenderer.invoke("reset-database");
