@@ -72,7 +72,7 @@ export default function SalesDetails({ loading, salesViewData }) {
           {salesViewData?.invoice}
         </Box>
         <Box className="borderRadiusAll" fz="sm">
-          <ScrollArea h={142} type="never">
+          <ScrollArea h={102} type="never">
             <Box
               fz="sm"
               fw="600"
@@ -107,32 +107,6 @@ export default function SalesDetails({ loading, salesViewData }) {
                       </Text>
                     </Grid.Col>
                   </Grid>
-                  <Grid columns={15} gutter={{ base: 4 }}>
-                    <Grid.Col span={6}>
-                      <Text fz="sm" lh="xs">
-                        {t("Address")}
-                      </Text>
-                    </Grid.Col>
-                    <Grid.Col span={9}>
-                      <Text fz="sm" lh="xs">
-                        {salesViewData.customer_address || "N/A"}
-                      </Text>
-                    </Grid.Col>
-                  </Grid>
-                  <Grid columns={15} gutter={{ base: 4 }}>
-                    <Grid.Col span={6}>
-                      <Text fz="sm" lh="xs">
-                        {t("Balance")}
-                      </Text>
-                    </Grid.Col>
-                    <Grid.Col span={9}>
-                      <Text fz="sm" lh="xs">
-                        {salesViewData.balance
-                          ? Number(salesViewData.balance).toFixed(2)
-                          : "0.00"}
-                      </Text>
-                    </Grid.Col>
-                  </Grid>
                 </Grid.Col>
                 <Grid.Col span="6">
                   <Grid columns={15} gutter={{ base: 4 }}>
@@ -144,18 +118,6 @@ export default function SalesDetails({ loading, salesViewData }) {
                     <Grid.Col span={9}>
                       <Text fz="sm" lh="xs">
                         {salesViewData.created}
-                      </Text>
-                    </Grid.Col>
-                  </Grid>
-                  <Grid columns={15} gutter={{ base: 4 }}>
-                    <Grid.Col span={6}>
-                      <Text fz="sm" lh="xs">
-                        {t("CreatedBy")}
-                      </Text>
-                    </Grid.Col>
-                    <Grid.Col span={9}>
-                      <Text fz="sm" lh="xs">
-                        {salesViewData.createdByName || "N/A"}
                       </Text>
                     </Grid.Col>
                   </Grid>
@@ -183,23 +145,11 @@ export default function SalesDetails({ loading, salesViewData }) {
                       </Text>
                     </Grid.Col>
                   </Grid>
-                  <Grid columns={15} gutter={{ base: 4 }}>
-                    <Grid.Col span={6}>
-                      <Text fz="sm" lh="xs">
-                        {t("Process")}
-                      </Text>
-                    </Grid.Col>
-                    <Grid.Col span={9}>
-                      <Text fz="sm" lh="xs">
-                        {salesViewData.process}
-                      </Text>
-                    </Grid.Col>
-                  </Grid>
                 </Grid.Col>
               </Grid>
             </Box>
           </ScrollArea>
-          <ScrollArea h={mainAreaHeight - 240} scrollbarSize={2} type="never">
+          <ScrollArea h={mainAreaHeight - 196} scrollbarSize={2} type="never">
             <Table stickyHeader className='sales-details-table'>
               <Table.Thead>
                 <Table.Tr>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Navigate, Outlet, useLocation } from "react-router";
-import { useViewportSize } from "@mantine/hooks";
+import { useLocalStorage, useViewportSize } from "@mantine/hooks";
 import { AppShell, Center, Loader } from "@mantine/core";
 import Header from "./Header";
 import Footer from "./Footer";
@@ -10,7 +10,7 @@ import { APP_NAVLINKS } from "@/routes/routes";
 
 const Layout = () => {
 	const networkStatus = useNetwork();
-	const [ isOnline, setIsOnline ] = useState(false);
+	const [ isOnline, setIsOnline ] = useLocalStorage({ key: "network-preference", defaultValue: false });
 	const { height } = useViewportSize();
 	const location = useLocation();
 	const paramPath = location.pathname;

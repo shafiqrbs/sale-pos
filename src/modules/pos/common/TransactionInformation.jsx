@@ -29,7 +29,7 @@ export default function TransactionInformation({ form, transactionModeData }) {
     };
 
     const totalAmount = Math.round(getCartTotal()) - (form.values.discount ?? 0);
-    const dueAmount = totalAmount - form.values.receive_amount;
+    const dueAmount = Math.abs(totalAmount - (form.values.receive_amount ?? 0));
     return (
         <>
             <Grid

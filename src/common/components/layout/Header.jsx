@@ -141,9 +141,9 @@ export default function Header({ isOnline, toggleNetwork }) {
 						direction="row"
 						wrap="wrap"
 						mih={42}
-						align={"right"}
-						px={`xs`}
-						pr={"24"}
+						align="right"
+						px="xs"
+						pr="24"
 					>
 						<Menu
 							onOpen={() => setLanguageOpened(true)}
@@ -154,7 +154,7 @@ export default function Header({ isOnline, toggleNetwork }) {
 							withArrow
 							arrowPosition="center"
 						>
-							<Tooltip label="Sync Data" bg={`red.5`} withArrow>
+							<Tooltip label="Sync Data" bg="red.5" withArrow>
 								<ActionIcon
 									disabled={!isOnline}
 									mt={"4xs"}
@@ -220,14 +220,14 @@ export default function Header({ isOnline, toggleNetwork }) {
 						</Menu>
 						<Tooltip
 							label={fullscreen ? t("NormalScreen") : t("Fullscreen")}
-							bg={`red.5`}
+							bg="red.5"
 							withArrow
 						>
 							<ActionIcon
-								mt={"4xs"}
+								mt="4xs"
 								onClick={toggle}
 								variant="subtle"
-								color={`white`}
+								color="white"
 							>
 								{fullscreen ? (
 									<IconWindowMinimize size={24} />
@@ -236,12 +236,12 @@ export default function Header({ isOnline, toggleNetwork }) {
 								)}
 							</ActionIcon>
 						</Tooltip>
-						<Tooltip label={t("Logout")} bg={`red.5`} withArrow position={"left"}>
+						<Tooltip label={t("Logout")} bg="red.5" withArrow position="left">
 							<ActionIcon
 								onClick={() => logout()}
 								variant="subtle"
-								mt={"4xs"}
-								color={`white`}
+								mt="4xs"
+								color="white"
 							>
 								<IconLogout size={24} />
 							</ActionIcon>

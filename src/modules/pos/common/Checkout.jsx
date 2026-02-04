@@ -31,6 +31,7 @@ export default function Checkout() {
             transaction_mode_name: "",
             sales_by_id: "",
             receive_amount: null,
+            discount_type: "flat",
             discount: 0,
             coupon_code: "",
         },

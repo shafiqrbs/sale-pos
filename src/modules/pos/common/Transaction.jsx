@@ -1,6 +1,6 @@
 import SelectForm from '@components/form-builders/SelectForm';
 import { ActionIcon, Box, Button, Grid, Group, NumberInput, Stack, Text, TextInput, Tooltip } from '@mantine/core';
-import { IconChefHat, IconCurrencyTaka, IconDeviceFloppy, IconPercentage, IconPlusMinus, IconPrinter, IconTicket, IconUserPlus } from '@tabler/icons-react';
+import { IconChefHat, IconDeviceFloppy, IconNumber123, IconPercentage, IconPlusMinus, IconPrinter, IconTicket, IconUserPlus } from '@tabler/icons-react';
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next';
 import TransactionInformation from './TransactionInformation';
@@ -8,7 +8,7 @@ import useCartOperation from '@hooks/useCartOperation';
 import { showNotification } from '@components/ShowNotificationComponent';
 import { useOutletContext } from 'react-router';
 import useConfigData from '@hooks/useConfigData';
-import { formatDate, generateInvoiceId, withInvoiceId } from '@utils/index';
+import { formatDateTime, generateInvoiceId, withInvoiceId } from '@utils/index';
 import { useInlineUpdateMutation, useSalesCompleteMutation } from '@services/pos';
 import CustomerDrawer from '@components/modals/CustomerDrawer';
 import { useDisclosure } from '@mantine/hooks';
@@ -27,6 +27,7 @@ export default function Transaction({ form, transactionModeData, tableId = null 
     const [ customerDrawerOpened, { open: customerDrawerOpen, close: customerDrawerClose } ] = useDisclosure(false);
     const [ customerObject, setCustomerObject ] = useState(null);
     const [ discountMode, setDiscountMode ] = useState("flat");
+    const [ percentageValue, setPercentageValue ] = useState(0)
 
     // ============= wreckage start =============
     const isThisTableSplitPaymentActive = false;
@@ -78,9 +79,16 @@ export default function Transaction({ form, transactionModeData, tableId = null 
         customerDrawerOpen();
     };
     const handleSave = async ({ withPos = false }) => {
+        const total = Math.round(getCartTotal()) - (form.values.discount ?? 0);
+
         // Validation checks
         if (!invoiceData?.length) {
             showNotification(t("NoProductAdded"), "red", "", "", true, 1000, true);
+            return;
+        }
+
+        if (form.values.receive_amount < total) {
+            showNotification(t("DuesAreNotAllowed"), "red", "", "", true, 1000, true);
             return;
         }
 
@@ -194,7 +202,7 @@ export default function Transaction({ form, transactionModeData, tableId = null 
             salesByName: salesBy?.name,
             process: "approved",
             mode_name: form.values.transaction_mode_name,
-            created: formatDate(new Date()),
+            created: formatDateTime(new Date()),
             sales_items: JSON.stringify(invoiceData),
             multi_transaction: isSplitPaymentActive ? 1 : 0,
         }
@@ -261,6 +269,32 @@ export default function Transaction({ form, transactionModeData, tableId = null 
         //     }
         // }
     };
+
+    const handlePercentageChange = (value) => {
+        setPercentageValue(value);
+
+        const discount = (Math.round(getCartTotal()) * value) / 100;
+        form.setFieldValue("discount", Math.round(discount));
+    }
+
+    const handleDiscountModeChange = () => {
+        if (discountMode === "coupon") {
+            setDiscountMode("discount");
+            form.setFieldValue("discount_type", "flat");
+            form.setFieldValue("coupon_code", "");
+        } else {
+            setDiscountMode("coupon");
+            form.setFieldValue("discount_type", "coupon");
+            form.setFieldValue("discount", 0);
+        }
+    }
+
+    const toggleDiscountMode = () => {
+        form.setFieldValue("discount", 0);
+        setPercentageValue(0);
+        const discountType = form.values.discount_type === "flat" ? "percentage" : "flat";
+        form.setFieldValue("discount_type", discountType);
+    }
 
     return (
         <Stack bg="gray.0" align="stretch" justify="center" mt={6} gap={4} pl={4} pr={2} mb={0}>
@@ -341,15 +375,7 @@ export default function Transaction({ form, transactionModeData, tableId = null 
                         >
                             <Button
                                 fullWidth={true}
-                                onClick={() => {
-                                    if (discountMode === "coupon") {
-                                        setDiscountMode("discount");
-                                        form.setFieldValue("coupon_code", "");
-                                    } else {
-                                        setDiscountMode("coupon");
-                                        form.setFieldValue("discount", 0);
-                                    }
-                                }}
+                                onClick={handleDiscountModeChange}
                                 variant="filled"
                                 px="2xs"
                                 fz="xs"
@@ -362,7 +388,7 @@ export default function Transaction({ form, transactionModeData, tableId = null 
                             </Button>
                         </FormValidationWrapper>
                     </Grid.Col>
-                    <Grid.Col span={6} bg="red.3">
+                    <Grid.Col span={6} bg={form.values.discount_type === "flat" ? "red.3" : form.values.discount_type === "percentage" ? "violet.3" : "gray.3"}>
                         {discountMode === "coupon" ? (
                             <TextInput
                                 type="text"
@@ -391,23 +417,54 @@ export default function Transaction({ form, transactionModeData, tableId = null 
                                 opened={!!form.errors.discount}
                                 position="left"
                             >
-                                <NumberInput
-                                    placeholder={t("Discount")}
-                                    value={form.values.discount}
-                                    error={form.errors.discount}
-                                    size="sm"
-                                    onChange={(value) => form.setFieldValue("discount", value)}
-                                    rightSection={
-                                        <ActionIcon
-                                            size={32}
-                                            bg="red.5"
-                                            variant="filled"
-                                            mr={10}
-                                        >
-                                            <IconPercentage size={16} />
-                                        </ActionIcon>
-                                    }
-                                />
+                                {form.values.discount_type === "flat" ? (
+                                    <NumberInput
+                                        placeholder={t("Discount")}
+                                        value={form.values.discount}
+                                        error={form.errors.discount}
+                                        size="sm"
+                                        onChange={(value) => form.setFieldValue("discount", value)}
+                                        rightSection={
+                                            <ActionIcon
+                                                size={32}
+                                                bg="red.5"
+                                                variant="filled"
+                                                mr={10}
+                                                onClick={toggleDiscountMode}
+                                            >
+                                                <IconPercentage size={16} />
+                                            </ActionIcon>
+
+                                        }
+                                    />
+                                ) : (
+                                    <NumberInput
+                                        placeholder={t("Discount")}
+                                        value={percentageValue}
+                                        error={form.errors.discount}
+                                        size="sm"
+                                        suffix='%'
+                                        max={100}
+                                        min={0}
+                                        allowNegative={false}
+                                        step={1}
+                                        decimalScale={2}
+                                        hideControls
+                                        onChange={handlePercentageChange}
+                                        rightSection={
+                                            <ActionIcon
+                                                size={32}
+                                                bg="violet.5"
+                                                variant="filled"
+                                                mr={10}
+                                                onClick={toggleDiscountMode}
+                                            >
+                                                <IconNumber123 size={16} />
+                                            </ActionIcon>
+                                        }
+                                    />
+                                )}
+
                             </FormValidationWrapper>
                         )}
                     </Grid.Col>
@@ -424,6 +481,7 @@ export default function Transaction({ form, transactionModeData, tableId = null 
                                 value={form.values.receive_amount}
                                 error={form.errors.receive_amount}
                                 size="sm"
+                                min={form.values.total}
                                 disabled={isThisTableSplitPaymentActive}
                                 leftSection={<IconPlusMinus size={16} opacity={0.5} />}
                                 onChange={(value) => {

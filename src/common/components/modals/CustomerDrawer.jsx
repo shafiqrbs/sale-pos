@@ -241,7 +241,6 @@ export default function CustomerDrawer({ opened, onClose, form, customersDropdow
                         c="white"
                         leftSection={<IconDeviceFloppy size={16} />}
                         loading={isLoading}
-                        disabled={!selectedCustomerId && (!customerForm.values.name || customerForm.values.mobile.trim().length < 11)}
                     >
                         {t('Save')}
                     </Button>
