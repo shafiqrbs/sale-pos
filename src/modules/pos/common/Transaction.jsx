@@ -78,6 +78,7 @@ export default function Transaction({ form, transactionModeData, tableId = null 
     const handleCustomerAdd = () => {
         customerDrawerOpen();
     };
+
     const handleSave = async ({ withPos = false }) => {
         const total = Math.round(getCartTotal()) - (form.values.discount ?? 0);
 
@@ -298,7 +299,10 @@ export default function Transaction({ form, transactionModeData, tableId = null 
 
     return (
         <Stack bg="gray.0" align="stretch" justify="center" mt={6} gap={4} pl={4} pr={2} mb={0}>
+            {/* =============== transaction methods + split payment methods ================ */}
             <TransactionInformation form={form} transactionModeData={transactionModeData} />
+            {/* =============== transaction methods + split payment methods end ================ */}
+
             <Group gap={6} mb={4} preventGrowOverflow={false} grow align="center" wrap="nowrap">
                 <SelectForm
                     pt="4"
@@ -326,8 +330,7 @@ export default function Transaction({ form, transactionModeData, tableId = null 
                             color="green"
                             name="kitchen"
                             mt={4}
-                            miw={122}
-                            maw={122}
+                            w={122}
                             leftSection={<IconChefHat height={14} width={14} stroke={2} />}
                             onClick={handleClick}
                         >
@@ -339,7 +342,7 @@ export default function Transaction({ form, transactionModeData, tableId = null 
                 )}
             </Group>
             <Box m={0} mb={"12"}>
-                <Grid columns={24} gutter={{ base: 8 }} pr={"2"} align="center" justify="center">
+                <Grid columns={24} gutter={{ base: 8 }} pr="2px" align="center" justify="center">
                     <Grid.Col span={6}>
                         <FormValidationWrapper
                             errorMessage={t("ChooseCustomer")}

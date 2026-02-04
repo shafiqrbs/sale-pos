@@ -1,6 +1,7 @@
 import React from 'react'
 import useConfigData from '@hooks/useConfigData';
 import { ActionIcon, Grid, Box, Flex, Group, Image, ScrollArea, Stack, Text, Tooltip } from '@mantine/core'
+import { Carousel } from '@mantine/carousel';
 import { IconChevronLeft, IconChevronRight, IconScissors, IconX } from '@tabler/icons-react';
 import { calculateVATAmount } from '@utils/index';
 import { useTranslation } from 'react-i18next';
@@ -16,8 +17,6 @@ export default function TransactionInformation({ form, transactionModeData }) {
 
     // ========= wreckages start =============
     const discountType = "Flat";
-    const showLeftArrow = true;
-    const showRightArrow = true;
     const isThisTableSplitPaymentActive = false;
     const clearTableSplitPayment = () => { };
     const handleClick = () => { };
@@ -128,57 +127,52 @@ export default function TransactionInformation({ form, transactionModeData }) {
                 align="center"
                 justify="center"
                 mb={4}
-                style={{
-                    borderRadius: 4,
-                    border: form.errors.transaction_mode_id && !"transactionModeId" ? "1px solid red" : "none",
-                }}
+                bdrs={4}
             >
                 <Grid.Col span={21}>
-                    <Box mr={4} style={{ position: "relative" }}>
-                        <ScrollArea
-                            type="never"
-                            pl={"1"}
-                            scrollbars="x"
-                            pr={"2"}
-                            w={450}
+                    <Box mr={4}>
+                        <Tooltip
+                            label={t("TransactionMode")}
+                            opened={!!form.errors.transaction_mode_id}
+                            px={16}
+                            py={2}
+                            bg="orange.8"
+                            c="white"
+                            withArrow
+                            offset={{ mainAxis: 5, crossAxis: -364 }}
+                            zIndex={999}
+                            transitionProps={{
+                                transition: "pop-bottom-left",
+                                duration: 500,
+                            }}
                         >
-                            <Tooltip
-                                label={t("TransactionMode")}
-                                opened={!!form.errors.transaction_mode_id}
-                                px={16}
-                                py={2}
-                                bg={"orange.8"}
-                                c={"white"}
-                                withArrow
-                                offset={{ mainAxis: 5, crossAxis: -364 }}
-                                zIndex={999}
-                                transitionProps={{
-                                    transition: "pop-bottom-left",
-                                    duration: 500,
-                                }}
+                            <Carousel
+                                id='transaction-mode-carousel'
+                                slideSize="20%"
+                                slideGap="es"
+                                align="start"
+                                height={60}
+                                withIndicators={false}
+                                controlSize={28}
+                                controlsOffset={2}
+                                emblaOptions={{ align: 'start', slidesToScroll: 3 }}
                             >
-                                <Group m={0} py={8} justify="flex-start" align="flex-start" gap="0" wrap="nowrap">
-                                    {transactionModeData?.map((mode, index) => (
+                                {transactionModeData?.map((mode) => (
+                                    <Carousel.Slide key={mode.id}>
                                         <Box
                                             onClick={() => {
                                                 handleTransactionModel(mode.id, mode.name);
                                             }}
-                                            key={index}
-                                            p={4}
-                                            style={{
-                                                position: "relative",
-                                                cursor: "pointer",
-                                            }}
+                                            pos="relative"
+                                            className='cursor-pointer'
                                         >
                                             <Flex
                                                 bg={mode.id === form.values.transaction_mode_id ? "green.8" : "white"}
                                                 direction="column"
                                                 align="center"
                                                 justify="center"
-                                                p={2}
-                                                style={{
-                                                    color: "black",
-                                                }}
+                                                c="black"
+                                                p={3}
                                             >
                                                 <Tooltip
                                                     label={mode.name}
@@ -191,59 +185,19 @@ export default function TransactionInformation({ form, transactionModeData }) {
                                                     color="red"
                                                 >
                                                     <Image
-                                                        w={56}
-                                                        h={48}
-                                                        fit="fit"
+                                                        w={80}
+                                                        fit="contain"
                                                         alt={mode.name}
-                                                        src={isOnline ? mode.path : `./transactions/${mode.name}.jpg`}
-                                                        fallbackSrc={`https://placehold.co/120x80/FFFFFF/2f9e44`}
+                                                        src={mode.path}
+                                                        fallbackSrc={`https://placehold.co/120x80/FFFFFF/2f9e44?text=${mode.name}`}
                                                     />
                                                 </Tooltip>
                                             </Flex>
                                         </Box>
-                                    ))}
-                                </Group>
-                            </Tooltip>
-                        </ScrollArea>
-
-                        {showLeftArrow && (
-                            <ActionIcon
-                                variant="filled"
-                                color="gray.2"
-                                radius="xl"
-                                size="lg"
-                                h={24}
-                                w={24}
-                                style={{
-                                    position: "absolute",
-                                    left: -5,
-                                    top: "50%",
-                                    transform: "translateY(-50%)",
-                                }}
-                                onClick={() => scroll("left")}
-                            >
-                                <IconChevronLeft height={18} width={18} stroke={2} color="black" />
-                            </ActionIcon>
-                        )}
-                        {showRightArrow && (
-                            <ActionIcon
-                                variant="filled"
-                                color="gray.2"
-                                radius="xl"
-                                size="lg"
-                                h={24}
-                                w={24}
-                                style={{
-                                    position: "absolute",
-                                    right: 5,
-                                    top: "50%",
-                                    transform: "translateY(-50%)",
-                                }}
-                                onClick={() => scroll("right")}
-                            >
-                                <IconChevronRight height={18} width={18} stroke={2} color="black" />
-                            </ActionIcon>
-                        )}
+                                    </Carousel.Slide>
+                                ))}
+                            </Carousel>
+                        </Tooltip>
                     </Box>
                 </Grid.Col>
                 <Grid.Col span={3} style={{ textAlign: "right" }} pr="8">

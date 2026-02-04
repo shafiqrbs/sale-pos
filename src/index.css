@@ -137,6 +137,35 @@ button[data-active='true'].mantine-focus-auto.mantine-active.mantine-datatable-p
   animation: spin 1.5s linear infinite;
 }
 
+#transaction-mode-carousel {
+  .mantine-Carousel-slide {
+    align-items: center;
+    display: flex;
+  }
+
+
+  .mantine-Carousel-controls {
+
+    height: 50%;
+
+    button {
+      position: absolute;
+    }
+
+    button[data-type="previous"] {
+      left: -6px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    button[data-type="next"] {
+      right: -6px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+  }
+}
+
 @keyframes spin {
   from {
     transform: rotate(0deg);

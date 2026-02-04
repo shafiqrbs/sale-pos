@@ -28,7 +28,7 @@ export default function ProductPagination({
                     value={activePage}
                     onChange={onPageChange}
                     total={totalPages}
-                    radius="md"
+                    radius="sm"
                     size="md"
                     withEdges
                 />
