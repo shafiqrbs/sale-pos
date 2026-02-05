@@ -143,18 +143,10 @@ export const saveSyncRecordToLocalStorage = (syncRecord) => {
 
 export const getLastSyncRecord = (syncRecords) => {
 	if (!Array.isArray(syncRecords) || syncRecords.length === 0) return null;
-	return syncRecords[0] ?? null;
+	return syncRecords[ 0 ] ?? null;
 };
 
 export const getLastSyncRecordByMode = (syncRecords, mode) => {
 	if (!Array.isArray(syncRecords) || !mode) return null;
 	return syncRecords.find((record) => record?.mode === mode) ?? null;
-};
-
-// =============== public folder asset path: use ./ in built Electron app, absolute URL in browser so it works after full-page redirect ===============
-export const getPublicAssetPath = (filename) => {
-	if (typeof window === "undefined") return `./${filename}`;
-	const isElectron = typeof window.dbAPI !== "undefined";
-	if (isElectron) return `./${filename}`;
-	return `${window.location.origin}/${filename}`;
 };

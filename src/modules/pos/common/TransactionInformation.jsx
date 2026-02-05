@@ -1,8 +1,8 @@
 import React from 'react'
 import useConfigData from '@hooks/useConfigData';
-import { ActionIcon, Grid, Box, Flex, Group, Image, ScrollArea, Stack, Text, Tooltip } from '@mantine/core'
+import { ActionIcon, Grid, Box, Flex, Group, Image, Stack, Text, Tooltip } from '@mantine/core'
 import { Carousel } from '@mantine/carousel';
-import { IconChevronLeft, IconChevronRight, IconScissors, IconX } from '@tabler/icons-react';
+import { IconScissors, IconX } from '@tabler/icons-react';
 import { calculateVATAmount } from '@utils/index';
 import { useTranslation } from 'react-i18next';
 import { useOutletContext } from 'react-router';
@@ -37,10 +37,10 @@ export default function TransactionInformation({ form, transactionModeData }) {
                 justify="center"
                 align="center"
                 pb={4}
-                bg={"gray.1"}
+                bg="gray.1"
             >
                 <Grid.Col span={7} px={4}>
-                    <Grid bg={"gray.1"} px={4}>
+                    <Grid bg="gray.1" px={4}>
                         <Grid.Col span={6}>
                             <Stack gap={0}>
                                 <Group justify="space-between" gap={0}>

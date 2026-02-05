@@ -336,8 +336,8 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 				{ type: "Sales", id: "LIST" }
 			]));
 
-			// window.location.href = APP_NAVLINKS.BAKERY;
-			window.location.reload()
+			window.location.href = APP_NAVLINKS.BAKERY;
+			// window.location.reload()
 
 		} catch (error) {
 			console.error("Error syncing platform data:", error);
