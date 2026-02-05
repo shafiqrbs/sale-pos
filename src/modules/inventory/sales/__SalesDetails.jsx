@@ -149,7 +149,7 @@ export default function SalesDetails({ loading, salesViewData }) {
               </Grid>
             </Box>
           </ScrollArea>
-          <ScrollArea h={mainAreaHeight - 196} scrollbarSize={2} type="never">
+          <ScrollArea h={mainAreaHeight - 246} scrollbarSize={2} type="never">
             <Table stickyHeader className='sales-details-table'>
               <Table.Thead>
                 <Table.Tr>
@@ -232,18 +232,6 @@ export default function SalesDetails({ loading, salesViewData }) {
             {t("Print")}
           </Button>
           <SalesPrintThermal salesViewData={salesViewData} salesItems={salesItems} />
-          {isOnline && (
-            <Button
-              onClick={() => navigate(`/inventory/sales/edit/${salesViewData?.id}`)}
-              component="a"
-              fullWidth={true}
-              variant="filled"
-              leftSection={<IconEdit size={14} />}
-              color="cyan.5"
-            >
-              {t("Edit")}
-            </Button>
-          )}
         </Button.Group>
       </Box>
       {printA4 && (

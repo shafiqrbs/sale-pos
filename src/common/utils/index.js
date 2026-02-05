@@ -150,3 +150,27 @@ export const getLastSyncRecordByMode = (syncRecords, mode) => {
 	if (!Array.isArray(syncRecords) || !mode) return null;
 	return syncRecords.find((record) => record?.mode === mode) ?? null;
 };
+
+// =============== returns YYYY-MM-DD for api query params (e.g. start_date, end_date) ===============
+export const formatDateISO = (date) => {
+	if (!date) return "";
+	if (typeof date === "string") date = new Date(date);
+	const year = date.getFullYear();
+	const month = String(date.getMonth() + 1).padStart(2, "0");
+	const day = String(date.getDate()).padStart(2, "0");
+	return `${year}-${month}-${day}`;
+};
+
+// =============== parses both YYYY-MM-DD and DD-MM-YYYY strings to Date ===============
+export const parseDateString = (dateString) => {
+	if (!dateString) return null;
+	const parts = String(dateString).trim().split("-");
+	if (parts.length !== 3) return null;
+	const first = parts[0];
+	const isISO = first.length === 4 && Number(first) > 999;
+	const [ year, month, day ] = isISO
+		? [ Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]) ]
+		: [ Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]) ];
+	const parsed = new Date(year, month, day);
+	return isNaN(parsed.getTime()) ? null : parsed;
+};

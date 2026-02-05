@@ -41,6 +41,9 @@
   --theme-warn-color-7: var(--mantine-color-orange-7);
   --theme-warn-color-8: var(--mantine-color-orange-8);
 
+  --theme-grey-color-0: #f9f9f9;
+  --theme-grey-color-1: #e6e6e6;
+
   --theme-success-color: var(--mantine-color-green-6);
   --theme-remove-color: var(--mantine-color-red-6);
   --theme-delete-color: var(--mantine-color-red-6);

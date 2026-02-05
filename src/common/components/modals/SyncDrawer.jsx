@@ -189,19 +189,10 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 				});
 				setSyncRecords(nextSyncRecords);
 
-				showNotification(
-					response?.message || `${syncOption.charAt(0).toUpperCase() + syncOption.slice(1)} data synced successfully`,
-					"teal",
-					"lightgray",
-					"",
-					"",
-					true
-				);
-
 				// silently destroy the table data after successful sync
 				window.dbAPI.destroyTableData(tableName);
 
-				dispatch(apiSlice.util.invalidateTags([ { type: "Sales", id: "LIST" } ]));
+				runSyncPlatform()
 			}
 		} catch (error) {
 			console.error(`Error syncing ${syncOption} data:`, error);
@@ -244,7 +235,7 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 			),
 			labels: { confirm: "Sync now", cancel: "Cancel" },
 			confirmProps: { color: "teal", leftSection: <IconRefresh size={20} /> },
-			onConfirm: () => runSyncPlatform("platform"),
+			onConfirm: () => runSyncPlatform(),
 		});
 	};
 
@@ -337,8 +328,6 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 			]));
 
 			window.location.href = APP_NAVLINKS.BAKERY;
-			// window.location.reload()
-
 		} catch (error) {
 			console.error("Error syncing platform data:", error);
 			showNotification(

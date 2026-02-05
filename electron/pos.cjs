@@ -15,8 +15,6 @@ const thermalPrint = async ({ configData, salesItems, salesViewData, setup }) =>
 				timeout: 5000,
 			},
 		});
-		console.log(configData);
-		
 
 		printer.setTypeFontB();
 		printer.alignCenter();
@@ -50,7 +48,7 @@ const thermalPrint = async ({ configData, salesItems, salesViewData, setup }) =>
 		printer.tableCustom([
 			{ text: `Date: ${salesViewData?.created || "N/A"}`, align: "LEFT", width: 0.5 },
 			{
-				text: `${salesViewData?.customerName || salesViewData?.createdByName || "N/A"}`,
+				text: `${salesViewData?.customerName || "N/A"}`,
 				align: "RIGHT",
 				width: 0.5,
 			},
@@ -135,7 +133,7 @@ const thermalPrint = async ({ configData, salesItems, salesViewData, setup }) =>
 			{
 				text: `${(
 					Math.abs(Number(salesViewData?.total) -
-					Number(salesViewData?.payment))
+						Number(salesViewData?.payment))
 				).toFixed(2)}`,
 				align: "RIGHT",
 				width: 0.5,

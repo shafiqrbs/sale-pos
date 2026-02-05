@@ -19,6 +19,10 @@ export default function SalesPrintThermal({ salesViewData, salesItems }) {
 				color: "red",
 			})
 		}
+
+		console.log({ salesItems, salesViewData });
+		return;
+
 		const status = await window.deviceAPI.thermalPrint({ configData, salesItems, salesViewData, setup });
 
 		if (!status?.success) {
