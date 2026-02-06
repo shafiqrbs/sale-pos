@@ -129,13 +129,11 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 
 						multi_transaction: sale?.multi_transaction ?? 0,
 
-						splitPayment: Array.isArray(sale?.split_payments)
-							? sale.split_payments.map((payment) => ({
-								transaction_mode_id: payment?.transaction_mode_id ?? null,
-								invoice_id: sale?.invoice ?? "",
-								amount: payment?.amount ?? 0,
-							}))
-							: []
+						splitPayment: JSON.parse(sale?.split_payments || "[]")?.map((payment) => ({
+							transaction_mode_id: payment?.transaction_mode_id ?? null,
+							invoice_id: sale?.invoice ?? "",
+							amount: payment?.amount ?? 0,
+						}))
 					}))
 				};
 

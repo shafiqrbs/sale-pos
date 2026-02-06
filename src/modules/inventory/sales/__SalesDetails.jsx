@@ -140,7 +140,7 @@ export default function SalesDetails({ loading, salesViewData }) {
                     </Grid.Col>
                     <Grid.Col span={9}>
                       <Text fz="sm" lh="xs">
-                        {salesViewData.mode_name}
+                        {salesViewData?.multi_transaction ? "Multi Transaction" : salesViewData?.mode_name}
                       </Text>
                     </Grid.Col>
                   </Grid>

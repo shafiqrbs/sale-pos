@@ -59,4 +59,10 @@ export const extendedSalesApiSlice = apiSlice.injectEndpoints({
   }),
 });
 
-export const { useGetSalesQuery, useAddSalesMutation, useUpdateSalesMutation, useDeleteSalesMutation, useGetSalesByIdQuery } = extendedSalesApiSlice;
+export const {
+  useGetSalesQuery,
+  useAddSalesMutation,
+  useUpdateSalesMutation,
+  useDeleteSalesMutation,
+  useGetSalesByIdQuery
+} = extendedSalesApiSlice;

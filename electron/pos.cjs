@@ -127,6 +127,23 @@ const thermalPrint = async ({ configData, salesItems, salesViewData, setup }) =>
 				width: 0.5,
 			},
 		]);
+
+		printer.println("Payments:");
+
+		if (salesViewData?.multi_transaction) {
+			JSON.parse(salesViewData?.split_payments || "[]")?.forEach((payment) => {
+				printer.tableCustom([
+					{ text: `-${payment?.mode_name}:`, align: "LEFT", width: 0.5 },
+					{ text: `${payment?.amount?.toFixed(2) || "0.00"}`, align: "RIGHT", width: 0.5 },
+				]);
+			});
+		} else {
+			printer.tableCustom([
+				{ text: `-${salesViewData?.mode_name}:`, align: "LEFT", width: 0.5 },
+				{ text: `${salesViewData?.payment?.toFixed(2) || "0.00"}`, align: "RIGHT", width: 0.5 },
+			]);
+		}
+
 		printer.println(DOUBLE_LINE);
 		printer.tableCustom([
 			{ text: "Returned", align: "LEFT", bold: true, width: 0.5 },
