@@ -1,9 +1,9 @@
 import React, { useRef, useState } from 'react'
 import SalesPrintThermal from '../common/SalesPrintThermal';
 import { Box, Grid, Text, LoadingOverlay, Button, ScrollArea, Table } from '@mantine/core';
-import { IconPrinter, IconEdit } from '@tabler/icons-react';
+import { IconPrinter } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useOutletContext } from 'react-router';
+import { useOutletContext } from 'react-router';
 import SalesPrintA4 from '@components/print-formats/SalesPrintA4';
 import useConfigData from '@hooks/useConfigData';
 
@@ -12,7 +12,6 @@ export default function SalesDetails({ loading, salesViewData }) {
   const { isOnline, mainAreaHeight } = useOutletContext()
   const { t } = useTranslation();
   const [ printA4, setPrintA4 ] = useState(false);
-  const navigate = useNavigate();
   const { configData } = useConfigData({ offlineFetch: !isOnline });
 
   const salesItems = isOnline

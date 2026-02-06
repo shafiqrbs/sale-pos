@@ -1,12 +1,13 @@
-import React from 'react'
+import { useState } from 'react'
 import useConfigData from '@hooks/useConfigData';
 import { ActionIcon, Grid, Box, Flex, Group, Image, Stack, Text, Tooltip } from '@mantine/core'
 import { Carousel } from '@mantine/carousel';
-import { IconScissors, IconX } from '@tabler/icons-react';
+import { IconScissors } from '@tabler/icons-react';
 import { calculateVATAmount } from '@utils/index';
 import { useTranslation } from 'react-i18next';
 import { useOutletContext } from 'react-router';
 import useCartOperation from '@hooks/useCartOperation';
+import SplitPaymentsDrawer from '@components/modals/SplitPaymentsDrawer';
 
 export default function TransactionInformation({ form, transactionModeData }) {
     const { invoiceData, getCartTotal } = useCartOperation();
@@ -15,20 +16,59 @@ export default function TransactionInformation({ form, transactionModeData }) {
     const { t } = useTranslation();
     const returnOrDueText = getCartTotal() < form.values.receive_amount ? "Return" : "Due";
 
+    // ========= split payment state management =============
+    const [ splitPaymentDrawerOpened, setSplitPaymentDrawerOpened ] = useState(false)
+    const [ splitPayments, setSplitPayments ] = useState([])
+    const isThisTableSplitPaymentActive = splitPayments.length > 0
+
     // ========= wreckages start =============
     const discountType = "Flat";
-    const isThisTableSplitPaymentActive = false;
-    const clearTableSplitPayment = () => { };
-    const handleClick = () => { };
     // ========= wreckages stop =============
 
+    // =============== handle opening split payment drawer ================
+    const handleClick = () => {
+        setSplitPaymentDrawerOpened(true)
+    }
+
+    // =============== handle clearing split payments ================
+    const clearTableSplitPayment = () => {
+        setSplitPayments([])
+        form.setFieldValue("split_payments", [])
+        form.setFieldValue("multi_transaction", 0);
+
+        const cashMethod = transactionModeData.find(method => method.slug === "cash");
+        form.setFieldValue("transaction_mode_id", cashMethod?.id);
+        form.setFieldValue("transaction_mode_name", cashMethod?.name);
+    }
+
+    // =============== handle save split payments ================
+    const handleSaveSplitPayments = (payments) => {
+        setSplitPayments(payments)
+
+        // =============== calculate total amount from split payments ================
+        const totalSplitAmount = payments.reduce((sum, payment) => sum + payment.amount, 0)
+
+        // =============== update form values ================
+        form.setFieldValue("split_payments", payments)
+        form.setFieldValue("multi_transaction", 1)
+        form.setFieldValue("receive_amount", totalSplitAmount)
+
+        form.setFieldValue("transaction_mode_id", null)
+        form.setFieldValue("transaction_mode_name", null)
+    }
+
     const handleTransactionModel = (id, name) => {
+        if (isThisTableSplitPaymentActive) {
+            return;
+        }
+
         form.setFieldValue("transaction_mode_id", id);
         form.setFieldValue("transaction_mode_name", name);
     };
 
     const totalAmount = Math.round(getCartTotal()) - (form.values.discount ?? 0);
     const dueAmount = Math.abs(totalAmount - (form.values.receive_amount ?? 0));
+
     return (
         <>
             <Grid
@@ -164,7 +204,7 @@ export default function TransactionInformation({ form, transactionModeData }) {
                                                 handleTransactionModel(mode.id, mode.name);
                                             }}
                                             pos="relative"
-                                            className='cursor-pointer'
+                                            className={isThisTableSplitPaymentActive ? "cursor-not-allowed" : "cursor-pointer"}
                                         >
                                             <Flex
                                                 bg={mode.id === form.values.transaction_mode_id ? "green.8" : "white"}
@@ -215,27 +255,28 @@ export default function TransactionInformation({ form, transactionModeData }) {
                         }}
                     >
                         <ActionIcon
-                            name={isThisTableSplitPaymentActive ? "clearSplitPayment" : "splitPayment"}
+                            name="splitPayment"
                             size="xl"
-                            bg={isThisTableSplitPaymentActive ? "red.6" : "gray.8"}
+                            bg={isThisTableSplitPaymentActive ? "green.6" : "gray.8"}
                             variant="filled"
-                            onClick={(e) => {
-                                if (isThisTableSplitPaymentActive) {
-                                    clearTableSplitPayment("currentTableKey");
-                                } else {
-                                    handleClick(e);
-                                }
-                            }}
+                            onClick={handleClick}
+                            disabled={!invoiceData?.length}
                         >
-                            {isThisTableSplitPaymentActive ? (
-                                <IconX style={{ width: "70%", height: "70%" }} stroke={1.5} />
-                            ) : (
-                                <IconScissors style={{ width: "70%", height: "70%" }} stroke={1.5} />
-                            )}
+                            <IconScissors style={{ width: "70%", height: "70%" }} stroke={1.5} />
                         </ActionIcon>
                     </Tooltip>
                 </Grid.Col>
             </Grid>
+
+            {/* =============== split payments drawer ================ */}
+            <SplitPaymentsDrawer
+                opened={splitPaymentDrawerOpened}
+                onClose={() => setSplitPaymentDrawerOpened(false)}
+                totalAmount={Math.round(getCartTotal()) - (form.values.discount ?? 0)}
+                onSave={handleSaveSplitPayments}
+                onRemove={clearTableSplitPayment}
+                existingSplitPayments={splitPayments}
+            />
         </>
     )
 }

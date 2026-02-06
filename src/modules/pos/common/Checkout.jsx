@@ -1,7 +1,7 @@
 // import useGetInvoiceDetails from '@hooks/useGetInvoiceDetails';
 import { Box, Group, Text } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { useOutletContext } from 'react-router';
 import CheckoutTable from './CheckoutTable';
 import { useTranslation } from 'react-i18next';
@@ -18,8 +18,6 @@ export default function Checkout() {
     const { isOnline } = useOutletContext();
     const { configData } = useConfigData({ offlineFetch: !isOnline });
     const { invoiceData, getCartTotal } = useCartOperation()
-
-    const [ transactionModeData, setTransactionModeData ] = useState([]);
 
     const isSplitPaymentActive = !!invoiceData?.split_payment;
     const customerId = invoiceData?.customer_id;
@@ -49,19 +47,6 @@ export default function Checkout() {
             },
         },
     });
-
-    useEffect(() => {
-        async function fetchTransactionData() {
-            const data = await window.dbAPI.getDataFromTable("accounting_transaction_mode");
-            setTransactionModeData(data);
-
-            if (data.length) {
-                form.setFieldValue("transaction_mode_id", data[ 0 ]?.id);
-                form.setFieldValue("transaction_mode_name", data[ 0 ]?.name);
-            }
-        }
-        fetchTransactionData();
-    }, []);
 
     useEffect(() => {
         if (user) {
@@ -95,7 +80,7 @@ export default function Checkout() {
                 </Group>
             </Group>
 
-            <Transaction form={form} transactionModeData={transactionModeData} />
+            <Transaction form={form} />
         </Box>
     )
 }

@@ -55,7 +55,7 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 
 	const buildSyncPayload = ({ syncType, syncData }) => {
 		const basePayload = {
-			device_id: configData?.domain_id?.toString() ?? "123",
+			device_id: `DESKTOP_DEVICE_${(configData?.domain_id ?? 123)}`,
 			sync_batch_id: generateUniqueId(),
 		};
 
@@ -129,14 +129,11 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 
 						multi_transaction: sale?.multi_transaction ?? 0,
 
-						splitPayment: Array.isArray(sale?.splitPayment)
-							? sale.splitPayment.map((payment) => ({
-								id: payment?.id ?? null,
+						splitPayment: Array.isArray(sale?.split_payments)
+							? sale.split_payments.map((payment) => ({
 								transaction_mode_id: payment?.transaction_mode_id ?? null,
-								invoice_id: payment?.invoice_id ?? "",
+								invoice_id: sale?.invoice ?? "",
 								amount: payment?.amount ?? 0,
-								created_at: payment?.created_at ?? "",
-								updated_at: payment?.updated_at ?? ""
 							}))
 							: []
 					}))
@@ -192,6 +189,7 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 				// silently destroy the table data after successful sync
 				window.dbAPI.destroyTableData(tableName);
 
+				// overall platform sync
 				runSyncPlatform()
 			}
 		} catch (error) {

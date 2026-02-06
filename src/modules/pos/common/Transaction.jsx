@@ -8,34 +8,49 @@ import useCartOperation from '@hooks/useCartOperation';
 import { showNotification } from '@components/ShowNotificationComponent';
 import { useOutletContext } from 'react-router';
 import useConfigData from '@hooks/useConfigData';
-import { formatDateTime, generateInvoiceId, withInvoiceId } from '@utils/index';
-import { useInlineUpdateMutation, useSalesCompleteMutation } from '@services/pos';
+import { formatDateTime, generateInvoiceId } from '@utils/index';
 import CustomerDrawer from '@components/modals/CustomerDrawer';
 import { useDisclosure } from '@mantine/hooks';
 import FormValidationWrapper from '@components/form-builders/FormValidationWrapper';
 
-export default function Transaction({ form, transactionModeData, tableId = null }) {
+export default function Transaction({ form, tableId = null }) {
     const { t } = useTranslation();
     const { isOnline } = useOutletContext();
     const { configData } = useConfigData({ offlineFetch: !isOnline });
     const [ coreUsers, setCoreUsers ] = useState([])
     const { invoiceData, getCartTotal, refetchInvoice } = useCartOperation();
     const [ isLoading, setIsLoading ] = useState({ saveAll: false, save: false, print: false })
-    const [ inlineUpdate ] = useInlineUpdateMutation();
-    const [ salesComplete ] = useSalesCompleteMutation();
     const [ customersDropdownData, setCustomersDropdownData ] = useState([]);
     const [ customerDrawerOpened, { open: customerDrawerOpen, close: customerDrawerClose } ] = useDisclosure(false);
     const [ customerObject, setCustomerObject ] = useState(null);
     const [ discountMode, setDiscountMode ] = useState("flat");
     const [ percentageValue, setPercentageValue ] = useState(0)
 
+    const [ transactionModeData, setTransactionModeData ] = useState([]);
+
     // ============= wreckage start =============
-    const isThisTableSplitPaymentActive = false;
-    const handleClick = () => { };
     const enableTable = false;
     const salesByUser = "";
-    const isSplitPaymentActive = false;
+    const handleClick = () => { };
     // ============= wreckage stop ==============
+
+    // =============== check if split payment is active ================
+    const isSplitPaymentActive = form.values.multi_transaction === 1
+
+    useEffect(() => {
+        async function fetchTransactionData() {
+            const data = await window.dbAPI.getDataFromTable("accounting_transaction_mode");
+            setTransactionModeData(data);
+
+            if (data.length) {
+                const cashMethod = data.find(method => method.slug === "cash");
+
+                form.setFieldValue("transaction_mode_id", cashMethod?.id);
+                form.setFieldValue("transaction_mode_name", cashMethod?.name);
+            }
+        }
+        fetchTransactionData();
+    }, []);
 
     useEffect(() => {
         async function fetchCoreUsers() {
@@ -51,9 +66,11 @@ export default function Transaction({ form, transactionModeData, tableId = null 
     }
 
     useEffect(() => {
-        const cartTotal = Math.round(getCartTotal()) - (form.values.discount ?? 0);
-        form.setFieldValue("receive_amount", cartTotal);
-    }, [ getCartTotal(), form.values.discount ]);
+        if (!isSplitPaymentActive) {
+            const cartTotal = Math.round(getCartTotal()) - (form.values.discount ?? 0);
+            form.setFieldValue("receive_amount", cartTotal);
+        }
+    }, [ getCartTotal(), form.values.discount, isSplitPaymentActive ]);
 
     useEffect(() => {
         fetchCustomers();
@@ -158,24 +175,25 @@ export default function Transaction({ form, transactionModeData, tableId = null 
         }
     };
 
-    const handleOnlineSave = async (fullAmount) => {
-        if (isSplitPaymentActive) {
-            inlineUpdate({
-                ...withInvoiceId(tableId),
-                field_name: "amount",
-                value: fullAmount,
-            })
-        }
+    // =============== handle online save (currently disabled) ================
+    // const handleOnlineSave = async (fullAmount) => {
+    //     if (isSplitPaymentActive) {
+    //         inlineUpdate({
+    //             ...withInvoiceId(tableId),
+    //             field_name: "amount",
+    //             value: fullAmount,
+    //         })
+    //     }
 
-        const resultAction = await salesComplete({
-            invoice_id: invoiceData.id,
-        });
+    //     const resultAction = await salesComplete({
+    //         invoice_id: invoiceData.id,
+    //     });
 
-        if (resultAction.error) {
-            showNotification(t("FailedToCompleteOnlineSale"), "red", "", "", true, 1000, true);
-            return;
-        }
-    };
+    //     if (resultAction.error) {
+    //         showNotification(t("FailedToCompleteOnlineSale"), "red", "", "", true, 1000, true);
+    //         return;
+    //     }
+    // };
 
     const handleOfflineSave = async (fullAmount) => {
         // =============== get customer info from database or customerObject ================
@@ -206,6 +224,7 @@ export default function Transaction({ form, transactionModeData, tableId = null 
             created: formatDateTime(new Date()),
             sales_items: JSON.stringify(invoiceData),
             multi_transaction: isSplitPaymentActive ? 1 : 0,
+            split_payments: isSplitPaymentActive ? JSON.stringify(form.values.split_payments) : null,
         }
 
         // Insert sale record
@@ -480,12 +499,13 @@ export default function Transaction({ form, transactionModeData, tableId = null 
                                 allowNegative={false}
                                 hideControls
                                 decimalScale={3}
-                                placeholder={isThisTableSplitPaymentActive ? t("SplitPaymentActive") : t("Amount")}
+                                placeholder={isSplitPaymentActive ? t("SplitPaymentActive") : t("Amount")}
                                 value={form.values.receive_amount}
                                 error={form.errors.receive_amount}
                                 size="sm"
                                 min={form.values.total}
-                                disabled={isThisTableSplitPaymentActive}
+                                readOnly={isSplitPaymentActive}
+                                disabled={isSplitPaymentActive}
                                 leftSection={<IconPlusMinus size={16} opacity={0.5} />}
                                 onChange={(value) => {
                                     form.setFieldValue("receive_amount", value);

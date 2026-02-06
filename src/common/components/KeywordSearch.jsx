@@ -12,7 +12,7 @@ export default function KeywordSearch({
     onSearch,
     onReset,
     placeholder = "Keyword Search",
-    tooltip = "Search by patient name, mobile, email, etc.",
+    tooltip = "Search by product name, unit, quantity, price, etc.",
     showDatePicker = false,
     showStartEndDate = false,
     showAdvancedFilter = true,

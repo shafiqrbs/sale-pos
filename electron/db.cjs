@@ -225,6 +225,7 @@ db.prepare(
 		balance REAL,
 		sales_items TEXT,
 		multi_transaction INTEGER DEFAULT 0,
+		split_payments TEXT,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);
@@ -384,19 +385,6 @@ db.prepare(
 		printer_name TEXT NOT NULL,
 		line_character TEXT DEFAULT '-',
 		character_set TEXT DEFAULT 'SLOVENIA',
-		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-	)`
-).run();
-
-// sales transactions table
-db.prepare(
-	`
-	CREATE TABLE IF NOT EXISTS sales_transactions (
-		id INTEGER PRIMARY KEY,
-		transaction_mode_id INTEGER NOT NULL,
-		invoice_id TEXT NOT NULL,
-		amount REAL NOT NULL,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	)`
