@@ -8,7 +8,7 @@ const checkoutSlice = createSlice({
     name: "checkout",
     initialState,
     reducers: {
-        setInvoiceData(state, action) {
+        setCartData(state, action) {
             state.invoiceData = action.payload;
         },
         clearCart(state) {
@@ -17,5 +17,5 @@ const checkoutSlice = createSlice({
     },
 });
 
-export const { setInvoiceData, clearCart } = checkoutSlice.actions;
+export const { setCartData, clearCart } = checkoutSlice.actions;
 export default checkoutSlice.reducer;

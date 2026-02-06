@@ -11,16 +11,7 @@ export const extendedSalesApiSlice = apiSlice.injectEndpoints({
           params,
         };
       },
-      providesTags: (result) =>
-        result?.data
-          ? [
-            { type: "Sales", id: "LIST" },
-            ...result.data.map((sale) => ({
-              type: "Sales",
-              id: sale.invoice,
-            })),
-          ]
-          : [ { type: "Sales", id: "LIST" } ],
+      providesTags: [ "Sales" ]
     }),
 
     addSales: builder.mutation({
@@ -31,7 +22,7 @@ export const extendedSalesApiSlice = apiSlice.injectEndpoints({
           body,
         };
       },
-      invalidatesTags: [ { type: "Sales", id: "LIST" } ],
+      invalidatesTags: [ "Sales" ],
     }),
 
     updateSales: builder.mutation({
@@ -42,10 +33,7 @@ export const extendedSalesApiSlice = apiSlice.injectEndpoints({
           body,
         };
       },
-      invalidatesTags: (result, error, body) => [
-        { type: "Sales", id: body.invoice },
-        { type: "Sales", id: "LIST" },
-      ],
+      invalidatesTags: [ "Sales" ],
     }),
 
     deleteSales: builder.mutation({
@@ -56,7 +44,7 @@ export const extendedSalesApiSlice = apiSlice.injectEndpoints({
           id,
         };
       },
-      invalidatesTags: [ { type: "Sales", id: "LIST" } ],
+      invalidatesTags: [ "Sales" ],
     }),
 
     getSalesById: builder.query({
@@ -66,7 +54,7 @@ export const extendedSalesApiSlice = apiSlice.injectEndpoints({
           method: "GET",
         };
       },
-      providesTags: (result, error, id) => [ { type: "Sales", id } ],
+      providesTags: [ "Sales" ],
     }),
   }),
 });

@@ -4,7 +4,7 @@ import { calculateSubTotalWithVAT, withInvoiceId } from "@utils/index";
 import { useInlineUpdateMutation } from "@services/pos";
 import { useOutletContext } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
-import { setInvoiceData } from "@services/checkout";
+import { setCartData } from "@services/checkout";
 import { useEffect } from "react";
 
 export default function useCartOperation(tableId = null) {
@@ -16,7 +16,7 @@ export default function useCartOperation(tableId = null) {
 
     const refetchInvoice = async () => {
         const data = await window.dbAPI.getDataFromTable("invoice_table_item");
-        dispatch(setInvoiceData(data));
+        dispatch(setCartData(data));
     };
 
     useEffect(() => {
@@ -350,7 +350,7 @@ export default function useCartOperation(tableId = null) {
         }
     };
 
-    const clear = () => dispatch(setInvoiceData([]));
+    const clear = () => dispatch(setCartData([]));
 
     const getCartTotal = () =>
         invoiceData?.reduce((sum, item) => sum + item.sub_total, 0) || 0;
