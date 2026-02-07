@@ -24,6 +24,7 @@ const thermalPrint = async ({ configData, salesItems, salesViewData, setup }) =>
 		printer.alignCenter();
 		printer.println("Sandra Foods Intl.");
 		printer.bold(false);
+
 		printer.setTypeFontB();
 		printer.setTextSize(0, 0);
 		printer.drawLine();

@@ -1,27 +1,12 @@
 import { useState, useEffect } from "react";
-import { useNetwork } from "@mantine/hooks";
-import { useGetInvoiceDetailsQuery } from "@services/pos";
 
-const useGetInvoiceDetails = (tableId, { offlineFetch = false } = {}) => {
-	const networkStatus = useNetwork();
-	const shouldUseOffline = offlineFetch || !networkStatus.online;
-
-	// =============== online query hook ================
-	const { data: onlineInvoiceData, isLoading: isOnlineLoading, error: onlineError } = useGetInvoiceDetailsQuery(
-		{ invoice_id: tableId },
-		{
-			skip: shouldUseOffline || !tableId,
-		}
-	);
-
-	// =============== offline local data state ================
+const useGetInvoiceDetails = (tableId) => {
 	const [ localInvoiceData, setLocalInvoiceData ] = useState(null);
 	const [ isLocalLoading, setIsLocalLoading ] = useState(false);
 	const [ localError, setLocalError ] = useState(null);
 
-	// =============== fetch local data when offline or preferredMode is offline ================
 	useEffect(() => {
-		if (shouldUseOffline && tableId) {
+		if (tableId) {
 			const fetchLocalInvoiceData = async () => {
 				setIsLocalLoading(true);
 				setLocalError(null);
@@ -42,21 +27,12 @@ const useGetInvoiceDetails = (tableId, { offlineFetch = false } = {}) => {
 
 			fetchLocalInvoiceData();
 		}
-	}, [ shouldUseOffline, tableId ]);
-
-	// =============== return appropriate data based on preferredMode and network status ================
-	if (shouldUseOffline) {
-		return {
-			invoiceData: localInvoiceData,
-			isLoading: isLocalLoading,
-			error: localError,
-		};
-	}
+	}, [ tableId ]);
 
 	return {
-		invoiceData: onlineInvoiceData?.data?.data || null,
-		isLoading: isOnlineLoading,
-		error: onlineError,
+		invoiceData: localInvoiceData,
+		isLoading: isLocalLoading,
+		error: localError,
 	};
 };
 

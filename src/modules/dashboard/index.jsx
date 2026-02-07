@@ -1,26 +1,47 @@
-import { BarChart } from "@mantine/charts";
-
-const data = [
-    { month: 'January', Smartphones: 1200, Laptops: 900, Tablets: 200 },
-    { month: 'February', Smartphones: 1900, Laptops: 1200, Tablets: 400 },
-    { month: 'March', Smartphones: 400, Laptops: 1000, Tablets: 200 },
-    { month: 'April', Smartphones: 1000, Laptops: 200, Tablets: 800 },
-    { month: 'May', Smartphones: 800, Laptops: 1400, Tablets: 1200 },
-    { month: 'June', Smartphones: 750, Laptops: 600, Tablets: 1000 },
-];
+import { Box, Grid, Loader, Center } from "@mantine/core";
+import useDailyMatrixData from "@hooks/useDailyMatrixData";
+import SalesSummaryCard from "@components/dashboard/SalesSummaryCard";
+import TransactionModesCard from "@components/dashboard/TransactionModesCard";
+import TopSellingProductsCard from "@components/dashboard/TopSellingProductsCard";
+import TodaysOverviewCard from "@components/dashboard/TodaysOverviewCard";
 
 export default function DashboardIndex() {
+    const { dailyData, isLoading } = useDailyMatrixData();
+
+    if (isLoading) {
+        return (
+            <Center h={400}>
+                <Loader size="lg" />
+            </Center>
+        );
+    }
+
     return (
-        <BarChart
-            h={300}
-            data={data}
-            dataKey="month"
-            series={[
-                { name: 'Smartphones', color: 'violet.6' },
-                { name: 'Laptops', color: 'blue.6' },
-                { name: 'Tablets', color: 'teal.6' },
-            ]}
-            tickLine="y"
-        />
-    )
+        <Box p="md">
+            <Grid gutter="md" mb="md">
+                {/* =============== sales summary ================ */}
+                <Grid.Col span={{ base: 12, md: 6 }}>
+                    <SalesSummaryCard dailyData={dailyData} />
+                </Grid.Col>
+
+                {/* =============== transaction modes ================ */}
+                <Grid.Col span={{ base: 12, md: 6 }}>
+                    <TransactionModesCard dailyData={dailyData} />
+                </Grid.Col>
+            </Grid>
+
+            <Grid gutter="md">
+                {/* =============== top selling products ================ */}
+                <Grid.Col span={{ base: 12, md: 6 }}>
+                    <TopSellingProductsCard dailyData={dailyData} />
+                </Grid.Col>
+
+                {/* =============== today's overview ================ */}
+                <Grid.Col span={{ base: 12, md: 6 }}>
+                    <TodaysOverviewCard dailyData={dailyData} />
+                </Grid.Col>
+            </Grid>
+        </Box>
+    );
 }
+

@@ -1170,5 +1170,20 @@
 	"EnterLicenseDetails": "Enter your license details to activate your account",
 	"ActivateAccount": "Activate Account",
 	"ActivationKey": "Activation Key",
-	"AccountActivationFailed": "Account activation failed"
+	"AccountActivationFailed": "Account activation failed",
+	"TodaysSalesSummary": "Today's Sales Summary",
+	"TransactionModes": "Transaction Modes",
+	"NoTransactionDataAvailable": "No transaction data available",
+	"TopSellingProducts": "Top Selling Products",
+	"NoProductsSoldToday": "No products sold today",
+	"TodaysOverview": "Today's Overview",
+	"AverageInvoiceValue": "Average Invoice Value",
+	"AverageDiscountPerInvoice": "Average Discount/Invoice",
+	"CollectionRate": "Collection Rate",
+	"MostUsedPaymentMethod": "Most Used Payment Method",
+	"NA": "N/A",
+	"LastUpdated": "Last Updated",
+	"BestSellingProduct": "Best Selling Product",
+	"UnitsSold": "units sold",
+	"TotalInvoices": "Total Invoices"
 }

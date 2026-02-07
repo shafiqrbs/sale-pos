@@ -166,11 +166,29 @@ export const parseDateString = (dateString) => {
 	if (!dateString) return null;
 	const parts = String(dateString).trim().split("-");
 	if (parts.length !== 3) return null;
-	const first = parts[0];
+	const first = parts[ 0 ];
 	const isISO = first.length === 4 && Number(first) > 999;
 	const [ year, month, day ] = isISO
-		? [ Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]) ]
-		: [ Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]) ];
+		? [ Number(parts[ 0 ]), Number(parts[ 1 ]) - 1, Number(parts[ 2 ]) ]
+		: [ Number(parts[ 2 ]), Number(parts[ 1 ]) - 1, Number(parts[ 0 ]) ];
 	const parsed = new Date(year, month, day);
 	return isNaN(parsed.getTime()) ? null : parsed;
 };
+
+export function getRandomColor() {
+	const colors = [
+		'var(--mantine-color-blue-6)',
+		'var(--mantine-color-grape-6)',
+		'var(--mantine-color-violet-6)',
+		'var(--mantine-color-pink-6)',
+		'var(--mantine-color-red-6)',
+		'var(--mantine-color-orange-6)',
+		'var(--mantine-color-yellow-6)',
+		'var(--mantine-color-lime-6)',
+		'var(--mantine-color-green-6)',
+		'var(--mantine-color-teal-6)',
+		'var(--mantine-color-cyan-6)',
+		'var(--mantine-color-indigo-6)',
+	];
+	return colors[ Math.floor(Math.random() * colors.length) ];
+}

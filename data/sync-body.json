@@ -1,103 +1,100 @@
 {
-  "device_id": "ANDROID_ABC_123",
-  "sync_batch_id": "20260121-001",
-  "content": [
-    {
-      "id": 1,
-      "created": "21-01-2026, 04:04 pm",
-      "invoice": "768989869279",
-      "sub_total": 509.25,
-      "total": 509.25,
-      "approved_by_id": null,
-      "payment": 600,
-      "discount": null,
-      "is_domain_sales_completed": null,
-      "discount_calculation": null,
-      "discount_type": "Percent",
-      "invoice_batch_id": null,
-      "customerId": null,
-      "customerName": "Sandra Foods Ltd.",
-      "customerMobile": null,
-      "createdByUser": "sandra",
-      "createdByName": null,
-      "createdById": null,
-      "salesById": null,
-      "salesByUser": "sandra",
-      "salesByName": null,
-      "process": "approved",
-      "mode_name": "Cash",
-      "customer_address": null,
-      "customer_group": null,
-      "balance": null,
-      "sales_items": [
-        {
-          "id": 1,
-          "stock_item_id": 1037,
-          "invoice_id": null,
-          "display_name": "স্যান্ডুইচ ব্রেড",
-          "quantity": 1,
-          "purchase_price": 0,
-          "sales_price": 210,
-          "custom_price": 0,
-          "is_print": 0,
-          "sub_total": 210,
-          "crated_at": "2026-01-21 10:04:14",
-          "updated_at": "2026-01-21 10:04:14"
-        },
-        {
-          "id": 2,
-          "stock_item_id": 1038,
-          "invoice_id": null,
-          "display_name": "Milk Bread",
-          "quantity": 1,
-          "purchase_price": 0,
-          "sales_price": 126,
-          "custom_price": 0,
-          "is_print": 0,
-          "sub_total": 126,
-          "crated_at": "2026-01-21 10:04:15",
-          "updated_at": "2026-01-21 10:04:15"
-        },
-        {
-          "id": 3,
-          "stock_item_id": 1039,
-          "invoice_id": null,
-          "display_name": "Butter Bun",
-          "quantity": 1,
-          "purchase_price": 0,
-          "sales_price": 57.75,
-          "custom_price": 0,
-          "is_print": 0,
-          "sub_total": 57.75,
-          "crated_at": "2026-01-21 10:04:16",
-          "updated_at": "2026-01-21 10:04:16"
-        },
-        {
-          "id": 4,
-          "stock_item_id": 1040,
-          "invoice_id": null,
-          "display_name": "Premium Bread",
-          "quantity": 1,
-          "purchase_price": 0,
-          "sales_price": 115.5,
-          "custom_price": 0,
-          "is_print": 0,
-          "sub_total": 115.5,
-          "crated_at": "2026-01-21 10:04:17",
-          "updated_at": "2026-01-21 10:04:17"
-        }
-      ],
-      "multi_transaction": 0,
-      "splitPayment": [
-        {
-          "id": 1,
-          "transaction_mode_id": 11,
-          "invoice_id": "768989869279",
-          "amount": 600,
-          "created_at": "2026-01-21 10:04:29",
-          "updated_at": "2026-01-21 10:04:29"
-        }
-      ]
-    }
-  ]
+	"device_id": "ANDROID_ABC_123",
+	"sync_batch_id": "20260121-001",
+	"content": [
+		{
+			"id": 1,
+			"created": "21-01-2026, 04:04 pm",
+			"invoice": "768989869279",
+			"sub_total": 509.25,
+			"total": 509.25,
+			"approved_by_id": null,
+			"payment": 600,
+			"discount": null,
+			"is_domain_sales_completed": null,
+			"discount_calculation": null,
+			"discount_type": "Percent",
+			"invoice_batch_id": null,
+			"customerId": null,
+			"customerName": "Sandra Foods Ltd.",
+			"customerMobile": null,
+			"createdByUser": "sandra",
+			"createdByName": null,
+			"createdById": null,
+			"salesById": null,
+			"salesByUser": "sandra",
+			"salesByName": null,
+			"process": "approved",
+			"mode_name": "Cash",
+			"customer_address": null,
+			"customer_group": null,
+			"balance": null,
+			"sales_items": [
+				{
+					"id": 1,
+					"stock_item_id": 1037,
+					"invoice_id": null,
+					"display_name": "স্যান্ডুইচ ব্রেড",
+					"quantity": 1,
+					"purchase_price": 0,
+					"sales_price": 210,
+					"custom_price": 0,
+					"is_print": 0,
+					"sub_total": 210,
+					"crated_at": "2026-01-21 10:04:14",
+					"updated_at": "2026-01-21 10:04:14"
+				},
+				{
+					"id": 2,
+					"stock_item_id": 1038,
+					"invoice_id": null,
+					"display_name": "Milk Bread",
+					"quantity": 1,
+					"purchase_price": 0,
+					"sales_price": 126,
+					"custom_price": 0,
+					"is_print": 0,
+					"sub_total": 126,
+					"crated_at": "2026-01-21 10:04:15",
+					"updated_at": "2026-01-21 10:04:15"
+				},
+				{
+					"id": 3,
+					"stock_item_id": 1039,
+					"invoice_id": null,
+					"display_name": "Butter Bun",
+					"quantity": 1,
+					"purchase_price": 0,
+					"sales_price": 57.75,
+					"custom_price": 0,
+					"is_print": 0,
+					"sub_total": 57.75,
+					"crated_at": "2026-01-21 10:04:16",
+					"updated_at": "2026-01-21 10:04:16"
+				},
+				{
+					"id": 4,
+					"stock_item_id": 1040,
+					"invoice_id": null,
+					"display_name": "Premium Bread",
+					"quantity": 1,
+					"purchase_price": 0,
+					"sales_price": 115.5,
+					"custom_price": 0,
+					"is_print": 0,
+					"sub_total": 115.5,
+					"crated_at": "2026-01-21 10:04:17",
+					"updated_at": "2026-01-21 10:04:17"
+				}
+			],
+			"multi_transaction": 0,
+			"splitPayment": [
+				{
+					"transaction_mode_id": 11,
+					"invoice_id": "768989869279",
+					"amount": 600
+				}
+			]
+		}
+	]
 }
