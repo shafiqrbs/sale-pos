@@ -22,15 +22,19 @@ const thermalPrint = async ({ configData, salesItems, salesViewData, setup }) =>
 		printer.bold(true);
 		printer.setTextSize(1, 1);
 		printer.alignCenter();
-		printer.println(
-			`${configData?.domain?.company_name || configData?.company_name || "Sandra"}`,
-		);
+		printer.println("Sandra Foods Intl.");
 		printer.bold(false);
 		printer.setTypeFontB();
 		printer.setTextSize(0, 0);
 		printer.drawLine();
 
 		printer.alignCenter();
+		printer.setTextSize(0, 0);
+		printer.bold(true);
+		printer.println(
+			`${configData?.domain?.company_name || configData?.company_name || "Sandra"}`,
+		);
+		printer.bold(false);
 		printer.setTextSize(0, 0);
 		printer.println(`Mobile : ${configData?.mobile || configData?.domain?.mobile || "N/A"}`);
 		printer.setTextSize(0, 0);
@@ -109,11 +113,10 @@ const thermalPrint = async ({ configData, salesItems, salesViewData, setup }) =>
 		printer.tableCustom([
 			{ text: "Total", align: "LEFT", bold: true, width: 0.5 },
 			{
-				text: `${
-					salesViewData?.total?.toFixed(2) ||
+				text: `${salesViewData?.total?.toFixed(2) ||
 					salesViewData?.sub_total?.toFixed(2) ||
 					"0.00"
-				}`,
+					}`,
 				align: "RIGHT",
 				width: 0.5,
 			},
@@ -121,11 +124,10 @@ const thermalPrint = async ({ configData, salesItems, salesViewData, setup }) =>
 		printer.tableCustom([
 			{ text: "Receive", align: "LEFT", bold: true, width: 0.5 },
 			{
-				text: `${
-					salesViewData?.payment?.toFixed(2) ||
+				text: `${salesViewData?.payment?.toFixed(2) ||
 					salesViewData?.receive?.toFixed(2) ||
 					"0.00"
-				}`,
+					}`,
 				align: "RIGHT",
 				width: 0.5,
 			},

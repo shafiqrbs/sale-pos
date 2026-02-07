@@ -18,6 +18,7 @@ import { createPortal } from "react-dom";
 import { apiSlice } from "@services/api.mjs";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router";
 import axios from "axios";
 import { APP_NAVLINKS, MASTER_APIS } from "@/routes/routes";
 import commonDataStoreIntoLocalStorage from "@utils/local-storage/commonDataStoreIntoLocalStorage";
@@ -42,6 +43,7 @@ const PLATFORM_SYNC_DATA_MAP = {
 export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen }) {
 	const { t } = useTranslation();
 	const dispatch = useDispatch();
+	const navigate = useNavigate();
 	const [ syncPos ] = useSyncPosMutation();
 	const [ syncRecords, setSyncRecords ] = useState(() => getSyncRecordsFromLocalStorage());
 	const [ loadingStates, setLoadingStates ] = useState(() => {
@@ -318,12 +320,13 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 				true
 			);
 
-			// =============== invalidate relevant redux cache tags ================
 			dispatch(apiSlice.util.invalidateTags([
-				{ type: "Sales", id: "LIST" }
+				"Sales"
 			]));
 
-			window.location.href = APP_NAVLINKS.BAKERY;
+			navigate(APP_NAVLINKS.BAKERY, { replace: true });
+
+			setTimeout(() => window.location.reload(), 100);
 		} catch (error) {
 			console.error("Error syncing platform data:", error);
 			showNotification(
