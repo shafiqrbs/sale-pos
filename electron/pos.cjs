@@ -1,7 +1,7 @@
 const ThermalPrinter = require("node-thermal-printer").printer;
 const PrinterTypes = require("node-thermal-printer").types;
 
-const DOUBLE_LINE = "================================================================"
+const DOUBLE_LINE = "================================================================";
 
 const thermalPrint = async ({ configData, salesItems, salesViewData, setup }) => {
 	try {
@@ -22,7 +22,9 @@ const thermalPrint = async ({ configData, salesItems, salesViewData, setup }) =>
 		printer.bold(true);
 		printer.setTextSize(1, 1);
 		printer.alignCenter();
-		printer.println(`${configData?.domain?.company_name || configData?.company_name || "Sandra"}`);
+		printer.println(
+			`${configData?.domain?.company_name || configData?.company_name || "Sandra"}`,
+		);
 		printer.bold(false);
 		printer.setTypeFontB();
 		printer.setTextSize(0, 0);
@@ -30,11 +32,11 @@ const thermalPrint = async ({ configData, salesItems, salesViewData, setup }) =>
 
 		printer.alignCenter();
 		printer.setTextSize(0, 0);
-		printer.println(`Mobile : ${configData?.domain?.mobile || "N/A"}`);
+		printer.println(`Mobile : ${configData?.mobile || configData?.domain?.mobile || "N/A"}`);
 		printer.setTextSize(0, 0);
 		printer.println(`Address: ${configData?.address || "N/A"}`);
 		printer.setTextSize(0, 0);
-		printer.println(`Email  : ${configData?.domain?.email || "N/A"}`);
+		printer.println(`Email  : ${configData?.email || configData?.domain?.email || "N/A"}`);
 		printer.drawLine();
 
 		printer.alignCenter();
@@ -48,15 +50,15 @@ const thermalPrint = async ({ configData, salesItems, salesViewData, setup }) =>
 		printer.tableCustom([
 			{ text: `Date: ${salesViewData?.created || "N/A"}`, align: "LEFT", width: 0.5 },
 			{
-				text: `${salesViewData?.customerName || "N/A"}`,
+				text: `${configData?.user?.username || "N/A"}`,
 				align: "RIGHT",
 				width: 0.5,
 			},
 		]);
-		printer.tableCustom([
-			{ text: `${salesViewData?.createdByName || "N/A"}`, align: "LEFT", width: 0.5 },
-			{ text: `${salesViewData?.customerMobile || "N/A"}`, align: "RIGHT", width: 0.5 },
-		]);
+		// printer.tableCustom([
+		// 	{ text: `${salesViewData?.createdByName || "N/A"}`, align: "LEFT", width: 0.5 },
+		// 	{ text: `${salesViewData?.customerMobile || "N/A"}`, align: "RIGHT", width: 0.5 },
+		// ]);
 		printer.drawLine();
 
 		// Table Header
@@ -65,8 +67,8 @@ const thermalPrint = async ({ configData, salesItems, salesViewData, setup }) =>
 		printer.tableCustom([
 			{ text: "Item Name", align: "LEFT", width: 0.5 },
 			{ text: "QTY", align: "CENTER", width: 0.05 },
-			{ text: "Price", align: "RIGHT", width: 0.1 },
-			{ text: "Total", align: "RIGHT", width: 0.30 },
+			{ text: "Price", align: "RIGHT", width: 0.15 },
+			{ text: "Total", align: "RIGHT", width: 0.25 },
 		]);
 		printer.bold(false);
 		printer.println(DOUBLE_LINE);
@@ -81,10 +83,9 @@ const thermalPrint = async ({ configData, salesItems, salesViewData, setup }) =>
 				},
 				{ text: `${item?.quantity?.toString() || "0"}`, align: "CENTER", width: 0.05 },
 				{ text: `${item?.sales_price?.toString() || "0.00"}`, align: "RIGHT", width: 0.1 },
-				{ text: `${item?.sub_total?.toString() || "0.00"}`, align: "RIGHT", width: 0.30 },
+				{ text: `${item?.sub_total?.toString() || "0.00"}`, align: "RIGHT", width: 0.3 },
 			]);
 		});
-
 
 		printer.println(DOUBLE_LINE);
 		// Totals
@@ -108,10 +109,11 @@ const thermalPrint = async ({ configData, salesItems, salesViewData, setup }) =>
 		printer.tableCustom([
 			{ text: "Total", align: "LEFT", bold: true, width: 0.5 },
 			{
-				text: `${salesViewData?.total?.toFixed(2) ||
+				text: `${
+					salesViewData?.total?.toFixed(2) ||
 					salesViewData?.sub_total?.toFixed(2) ||
 					"0.00"
-					}`,
+				}`,
 				align: "RIGHT",
 				width: 0.5,
 			},
@@ -119,28 +121,44 @@ const thermalPrint = async ({ configData, salesItems, salesViewData, setup }) =>
 		printer.tableCustom([
 			{ text: "Receive", align: "LEFT", bold: true, width: 0.5 },
 			{
-				text: `${salesViewData?.payment?.toFixed(2) ||
+				text: `${
+					salesViewData?.payment?.toFixed(2) ||
 					salesViewData?.receive?.toFixed(2) ||
 					"0.00"
-					}`,
+				}`,
 				align: "RIGHT",
 				width: 0.5,
 			},
 		]);
 
+		printer.drawLine();
+
+		printer.alignLeft();
+		printer.bold(true);
 		printer.println("Payments:");
+		printer.bold(false);
+
+		printer.println(DOUBLE_LINE);
 
 		if (salesViewData?.multi_transaction) {
 			JSON.parse(salesViewData?.split_payments || "[]")?.forEach((payment) => {
 				printer.tableCustom([
 					{ text: `-${payment?.mode_name}:`, align: "LEFT", width: 0.5 },
-					{ text: `${payment?.amount?.toFixed(2) || "0.00"}`, align: "RIGHT", width: 0.5 },
+					{
+						text: `${payment?.amount?.toFixed(2) || "0.00"}`,
+						align: "RIGHT",
+						width: 0.5,
+					},
 				]);
 			});
 		} else {
 			printer.tableCustom([
 				{ text: `-${salesViewData?.mode_name}:`, align: "LEFT", width: 0.5 },
-				{ text: `${salesViewData?.payment?.toFixed(2) || "0.00"}`, align: "RIGHT", width: 0.5 },
+				{
+					text: `${salesViewData?.payment?.toFixed(2) || "0.00"}`,
+					align: "RIGHT",
+					width: 0.5,
+				},
 			]);
 		}
 
@@ -148,9 +166,8 @@ const thermalPrint = async ({ configData, salesItems, salesViewData, setup }) =>
 		printer.tableCustom([
 			{ text: "Returned", align: "LEFT", bold: true, width: 0.5 },
 			{
-				text: `${(
-					Math.abs(Number(salesViewData?.total) -
-						Number(salesViewData?.payment))
+				text: `${Math.abs(
+					Number(salesViewData?.total) - Number(salesViewData?.payment),
 				).toFixed(2)}`,
 				align: "RIGHT",
 				width: 0.5,
@@ -159,11 +176,12 @@ const thermalPrint = async ({ configData, salesItems, salesViewData, setup }) =>
 
 		printer.drawLine();
 
-		printer.alignCenter();
-		printer.bold(true);
+		// printer.bold(true);
 		printer.setTextSize(0, 0);
-		printer.println(`© ${configData?.domain?.company_name || configData?.company_name || "Sandra"}`);
-		printer.bold(false);
+		printer.println(
+			"Thank you so much for choosing Sandra Foods. We truly appreciate your trust and support.",
+		);
+		// printer.bold(false);
 
 		printer.cut();
 
@@ -193,7 +211,9 @@ const kitchenPrint = async ({ configData, selectedProducts, salesByUserName, set
 		printer.bold(true);
 		printer.setTextSize(1, 1);
 		printer.alignCenter();
-		printer.println(`© ${configData?.domain?.company_name || configData?.company_name || "Sandra"}`);
+		printer.println(
+			`© ${configData?.domain?.company_name || configData?.company_name || "Sandra"}`,
+		);
 		printer.bold(false);
 		printer.setTypeFontB();
 		printer.setTextSize(0, 0);
@@ -238,7 +258,9 @@ const kitchenPrint = async ({ configData, selectedProducts, salesByUserName, set
 		printer.alignCenter();
 		printer.bold(true);
 		printer.setTextSize(0, 0);
-		printer.println(`© ${configData?.domain?.company_name || configData?.company_name || "Sandra"}`);
+		printer.println(
+			`© ${configData?.domain?.company_name || configData?.company_name || "Sandra"}`,
+		);
 		printer.bold(false);
 
 		printer.cut();

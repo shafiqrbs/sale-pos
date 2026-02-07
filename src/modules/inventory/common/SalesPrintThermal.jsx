@@ -4,8 +4,10 @@ import { useTranslation } from "react-i18next";
 import { notifications } from "@mantine/notifications";
 import useConfigData from "@hooks/useConfigData";
 import { useOutletContext } from "react-router";
+import useLoggedInUser from "@hooks/useLoggedInUser";
 
 export default function SalesPrintThermal({ salesViewData, salesItems }) {
+	const user = useLoggedInUser();
 	const { t } = useTranslation();
 	const { isOnline } = useOutletContext();
 	const { configData } = useConfigData({ offlineFetch: !isOnline });
@@ -20,10 +22,12 @@ export default function SalesPrintThermal({ salesViewData, salesItems }) {
 			})
 		}
 
-		console.log({ salesItems, salesViewData });
-		return;
-
-		const status = await window.deviceAPI.thermalPrint({ configData, salesItems, salesViewData, setup });
+		const status = await window.deviceAPI.thermalPrint({
+			configData: { ...configData, user },
+			salesItems,
+			salesViewData,
+			setup
+		});
 
 		if (!status?.success) {
 			notifications.show({
