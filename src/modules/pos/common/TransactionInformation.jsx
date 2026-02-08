@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import useConfigData from '@hooks/useConfigData';
 import { ActionIcon, Grid, Box, Flex, Group, Image, Stack, Text, Tooltip } from '@mantine/core'
 import { Carousel } from '@mantine/carousel';
@@ -14,11 +13,12 @@ export default function TransactionInformation({ form, transactionModeData }) {
     const { isOnline } = useOutletContext();
     const { configData } = useConfigData({ offlineFetch: !isOnline });
     const { t } = useTranslation();
-    const returnOrDueText = getCartTotal() < form.values.receive_amount ? "Return" : "Due";
+    const totalAmount = Math.round(getCartTotal()) - (form.values.discount ?? 0);
+    const dueAmount = Math.abs(totalAmount - (form.values.receive_amount ?? 0));
+    const returnOrDueText = form.values.receive_amount > totalAmount ? "Return" : "Due";
 
-    // ========= split payment state management =============
-    const [ splitPaymentDrawerOpened, setSplitPaymentDrawerOpened ] = useState(false)
-    const [ splitPayments, setSplitPayments ] = useState([])
+    const splitPaymentDrawerOpened = form.values.split_payment_drawer_opened ?? false
+    const splitPayments = form.values.split_payments ?? []
     const isThisTableSplitPaymentActive = splitPayments.length > 0
 
     // ========= wreckages start =============
@@ -26,13 +26,12 @@ export default function TransactionInformation({ form, transactionModeData }) {
     // ========= wreckages stop =============
 
     // =============== handle opening split payment drawer ================
-    const handleClick = () => {
-        setSplitPaymentDrawerOpened(true)
+    const handleOpenSplitPaymentDrawer = () => {
+        form.setFieldValue("split_payment_drawer_opened", true)
     }
 
     // =============== handle clearing split payments ================
     const clearTableSplitPayment = () => {
-        setSplitPayments([])
         form.setFieldValue("split_payments", [])
         form.setFieldValue("multi_transaction", 0);
 
@@ -43,8 +42,6 @@ export default function TransactionInformation({ form, transactionModeData }) {
 
     // =============== handle save split payments ================
     const handleSaveSplitPayments = (payments) => {
-        setSplitPayments(payments)
-
         // =============== calculate total amount from split payments ================
         const totalSplitAmount = payments.reduce((sum, payment) => sum + payment.amount, 0)
 
@@ -65,9 +62,6 @@ export default function TransactionInformation({ form, transactionModeData }) {
         form.setFieldValue("transaction_mode_id", id);
         form.setFieldValue("transaction_mode_name", name);
     };
-
-    const totalAmount = Math.round(getCartTotal()) - (form.values.discount ?? 0);
-    const dueAmount = Math.abs(totalAmount - (form.values.receive_amount ?? 0));
 
     return (
         <>
@@ -259,7 +253,7 @@ export default function TransactionInformation({ form, transactionModeData }) {
                             size="xl"
                             bg={isThisTableSplitPaymentActive ? "green.6" : "gray.8"}
                             variant="filled"
-                            onClick={handleClick}
+                            onClick={handleOpenSplitPaymentDrawer}
                             disabled={!invoiceData?.length}
                         >
                             <IconScissors style={{ width: "70%", height: "70%" }} stroke={1.5} />
@@ -271,7 +265,7 @@ export default function TransactionInformation({ form, transactionModeData }) {
             {/* =============== split payments drawer ================ */}
             <SplitPaymentsDrawer
                 opened={splitPaymentDrawerOpened}
-                onClose={() => setSplitPaymentDrawerOpened(false)}
+                onClose={() => form.setFieldValue("split_payment_drawer_opened", false)}
                 totalAmount={Math.round(getCartTotal()) - (form.values.discount ?? 0)}
                 onSave={handleSaveSplitPayments}
                 onRemove={clearTableSplitPayment}

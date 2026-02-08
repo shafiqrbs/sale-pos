@@ -42,7 +42,7 @@ export default function SplitPaymentsDrawer({ opened, onClose, totalAmount, onSa
     const dueAmount = totalAmount - totalEnteredAmount;
 
     // =============== check if save button should be enabled ================
-    const isSaveDisabled = totalEnteredAmount < totalAmount
+    const isSaveDisabled = totalEnteredAmount !== totalAmount
 
     // =============== handle input change for a specific method ================
     const handleInputChange = (methodId, value) => {
@@ -99,7 +99,7 @@ export default function SplitPaymentsDrawer({ opened, onClose, totalAmount, onSa
                     </Box>
 
                     <Divider />
-                    <ScrollArea h={mainAreaHeight - 164}>
+                    <ScrollArea scrollbars="y" scrollHideDelay={100} scrollbarSize={4} h={mainAreaHeight - 164}>
                         {/* =============== payment methods section ================ */}
                         <Stack gap="sm">
                             {methods?.map((method) => (

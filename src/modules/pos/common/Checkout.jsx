@@ -32,6 +32,9 @@ export default function Checkout() {
             discount_type: "flat",
             discount: 0,
             coupon_code: "",
+            split_payments: [],
+            multi_transaction: 0,
+            split_payment_drawer_opened: false,
         },
         validate: {
             transaction_mode_id: (value) => {
