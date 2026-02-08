@@ -81,26 +81,25 @@ export default function SplitPaymentsDrawer({ opened, onClose, totalAmount, onSa
             size="md"
         >
             <Box>
-                <ScrollArea h={mainAreaHeight - 44}>
-                    <Stack gap="md">
-                        <Divider />
-                        <Box>
-                            <Group justify="space-between" mb="xs">
-                                <Text size="lg" fw={600}>{t("Total")}</Text>
-                                <Text size="lg" fw={700} c="var(--theme-primary-color-6)">
-                                    {configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol} {totalAmount?.toFixed(2)}
-                                </Text>
-                            </Group>
-                            <Group justify="space-between">
-                                <Text size="md" fw={500}>{t("Due")}</Text>
-                                <Text size="md" fw={600} c={dueAmount > 0 ? "red" : "green"}>
-                                    {configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol} {dueAmount?.toFixed(2)}
-                                </Text>
-                            </Group>
-                        </Box>
+                <Stack gap="md">
+                    <Divider />
+                    <Box>
+                        <Group justify="space-between" mb="xs">
+                            <Text size="lg" fw={600}>{t("Total")}</Text>
+                            <Text size="lg" fw={700} c="var(--theme-primary-color-6)">
+                                {configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol} {totalAmount?.toFixed(2)}
+                            </Text>
+                        </Group>
+                        <Group justify="space-between">
+                            <Text size="md" fw={500}>{t("Due")}</Text>
+                            <Text size="md" fw={600} c={dueAmount > 0 ? "red" : "green"}>
+                                {configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol} {dueAmount?.toFixed(2)}
+                            </Text>
+                        </Group>
+                    </Box>
 
-                        <Divider />
-
+                    <Divider />
+                    <ScrollArea h={mainAreaHeight - 164}>
                         {/* =============== payment methods section ================ */}
                         <Stack gap="sm">
                             {methods?.map((method) => (
@@ -110,6 +109,9 @@ export default function SplitPaymentsDrawer({ opened, onClose, totalAmount, onSa
                                         fit="contain"
                                         alt={method.name}
                                         src={method.path}
+                                        border="1px solid #2f9e44"
+                                        radius="sm"
+                                        fallbackSrc={`https://placehold.co/60x60/FFFFFF/2f9e44?text=${method.name}`}
                                     />
                                     <Text size="sm" fw={500} style={{ minWidth: "100px" }}>
                                         {method.name}
@@ -128,8 +130,8 @@ export default function SplitPaymentsDrawer({ opened, onClose, totalAmount, onSa
                                 </Flex>
                             ))}
                         </Stack>
-                    </Stack>
-                </ScrollArea>
+                    </ScrollArea>
+                </Stack>
 
                 <Divider />
                 {/* =============== action buttons ================ */}

@@ -11,7 +11,6 @@ export default function DashboardIndex() {
     const { mainAreaHeight } = useOutletContext();
 
     const height = mainAreaHeight - 40;
-
     const cardHeight = (height - 166) / 2;
 
     if (isLoading) {
@@ -21,6 +20,8 @@ export default function DashboardIndex() {
             </Center>
         );
     }
+
+    console.log(dailyData)
 
     return (
         <Box p="md">

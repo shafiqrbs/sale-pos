@@ -1,4 +1,4 @@
-import { Box, Paper, Text, Stack, Group, Badge, Center, ScrollArea } from "@mantine/core";
+import { Box, Paper, Text, Stack, Group, Badge, Center, ScrollArea, Flex, Divider } from "@mantine/core";
 import { PieChart } from "@mantine/charts";
 import { useTranslation } from "react-i18next";
 import { getRandomColor } from "@utils/index";
@@ -16,9 +16,10 @@ export default function TransactionModesCard({ dailyData, cardHeight }) {
     return (
         <Paper shadow="sm" p="lg" radius="md" withBorder h="100%">
             <Text size="lg" fw={700} mb="md">{t("TransactionModes")}</Text>
+            <Divider />
             <ScrollArea scrollbarSize={4} scrollbars="y" type="hover" h={cardHeight}>
                 {transactionModesChartData.length > 0 ? (
-                    <Box>
+                    <Flex gap={50} align="center" justify="center">
                         <PieChart
                             data={transactionModesChartData}
                             h={250}
@@ -30,7 +31,7 @@ export default function TransactionModesCard({ dailyData, cardHeight }) {
 
                         <Stack gap="xs" mt="md">
                             {dailyData.transactionModes.map((mode, index) => (
-                                <Group key={index} justify="space-between">
+                                <Group key={index} gap={50} justify="space-between">
                                     <Group gap="xs">
                                         <Box
                                             w={12}
@@ -47,7 +48,7 @@ export default function TransactionModesCard({ dailyData, cardHeight }) {
                                 </Group>
                             ))}
                         </Stack>
-                    </Box>
+                    </Flex>
                 ) : (
                     <Center h={250}>
                         <Text c="dimmed">{t("NoTransactionDataAvailable")}</Text>

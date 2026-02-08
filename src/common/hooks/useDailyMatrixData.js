@@ -25,16 +25,21 @@ export default function useDailyMatrixData() {
         try {
             // =============== get today's date in the format used in the database ================
             const today = new Date();
-            const formattedDate = today.toISOString().split('T')[ 0 ]; // YYYY-MM-DD format
+            const day = String(today.getDate()).padStart(2, '0');
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const year = today.getFullYear();
+            const formattedDate = `${day}-${month}-${year}`; // DD-MM-YYYY format to match "08-02-2026, 12:53 pm"
 
-            // =============== fetch sales data for today ================
+            // =============== fetch sales data for today using database query ================
             const salesData = await window.dbAPI.getDataFromTable("sales", null, "id", {
                 search: {
-                    equals: {
+                    startsWith: {
                         created: formattedDate
                     }
                 }
             });
+
+            console.log(salesData)
 
             // =============== fetch transaction modes for reference ================
             const transactionModes = await window.dbAPI.getDataFromTable("accounting_transaction_mode");
