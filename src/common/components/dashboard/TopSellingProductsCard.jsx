@@ -3,7 +3,7 @@ import { DataTable } from "mantine-datatable";
 import { useTranslation } from "react-i18next";
 import tableCss from "@assets/css/Table.module.css";
 
-export default function TopSellingProductsCard({ dailyData }) {
+export default function TopSellingProductsCard({ dailyData, cardHeight }) {
     const { t } = useTranslation();
 
     return (
@@ -47,7 +47,7 @@ export default function TopSellingProductsCard({ dailyData }) {
                             ),
                         },
                     ]}
-                    minHeight={400}
+                    minHeight={cardHeight}
                     noRecordsText={t("NoProductsSoldToday")}
                 />
             </Box>
