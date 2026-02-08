@@ -144,6 +144,14 @@ button[data-active='true'].mantine-focus-auto.mantine-active.mantine-datatable-p
   animation: spin 1.5s linear infinite;
 }
 
+#left-options-drawer-button {
+  transition: opacity 0.2s ease-in-out;
+}
+
+#left-options-drawer-button:hover {
+  opacity: 1 !important;
+}
+
 #transaction-mode-carousel {
   .mantine-Carousel-slide {
     align-items: center;

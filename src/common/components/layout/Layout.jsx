@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { Navigate, Outlet, useLocation } from "react-router";
-import { useLocalStorage, useViewportSize } from "@mantine/hooks";
-import { AppShell, Center, Loader } from "@mantine/core";
+import { useDisclosure, useLocalStorage, useViewportSize } from "@mantine/hooks";
+import { AppShell, Box, Center, Loader, ActionIcon, Tooltip } from "@mantine/core";
+import { IconMenu2 } from "@tabler/icons-react";
 import Header from "./Header";
 import Footer from "./Footer";
 import { useNetwork } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { APP_NAVLINKS } from "@/routes/routes";
+import LeftOptionsDrawer from "@components/modals/LeftOptionsDrawer";
 
 const Layout = () => {
 	const networkStatus = useNetwork();
@@ -17,6 +19,7 @@ const Layout = () => {
 	const [ isLoading, setIsLoading ] = useState(true);
 	const [ activated, setActivated ] = useState({ is_activated: false });
 	const [ user, setUser ] = useState({});
+	const [ leftDrawerOpened, { open: openLeftDrawer, close: closeLeftDrawer } ] = useDisclosure(false);
 
 	useEffect(() => {
 		const initializeData = async () => {
@@ -95,11 +98,34 @@ const Layout = () => {
 				<Header isOnline={isOnline} toggleNetwork={toggleNetwork} />
 			</AppShell.Header>
 			<AppShell.Main py="44px" h="calc(100vh - 90px)">
+				{/* =============== floating left button to open options drawer =============== */}
+				<Box
+					pos="fixed"
+					left={0}
+					top="50%"
+					style={{ transform: "translateY(-50%)", zIndex: 1000 }}
+				>
+					<Tooltip label="Options" position="right">
+						<ActionIcon
+							id="left-options-drawer-button"
+							variant="filled"
+							size="lg"
+							opacity={leftDrawerOpened ? 1 : 0.5}
+							radius="md"
+							style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
+							onClick={openLeftDrawer}
+							aria-label="Open options menu"
+						>
+							<IconMenu2 size={20} />
+						</ActionIcon>
+					</Tooltip>
+				</Box>
 				<Outlet context={{ isOnline, toggleNetwork, mainAreaHeight, user }} />
 			</AppShell.Main>
 			<AppShell.Footer height={footerHeight}>
 				<Footer />
 			</AppShell.Footer>
+			<LeftOptionsDrawer opened={leftDrawerOpened} onClose={closeLeftDrawer} />
 		</AppShell>
 	);
 };
