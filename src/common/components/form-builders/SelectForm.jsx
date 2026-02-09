@@ -16,7 +16,7 @@ const SelectForm = forwardRef((props, ref) => {
 		mt,
 		id,
 		dropdownValue = [],
-		searchable,
+		searchable = false,
 		value,
 		changeValue,
 		style = {},
@@ -57,27 +57,27 @@ const SelectForm = forwardRef((props, ref) => {
 					zIndex={999}
 					transitionProps={{ transition: "pop-bottom-left", duration: 500 }}
 				>
-				<Select
-					pt={pt}
-					classNames={inputCss}
-					ref={ref}
-					id={id}
-					label={label}
-					placeholder={placeholder}
-					mt={mt}
-					size="sm"
-					data={dropdownValue}
-					autoComplete="off"
-					clearable={clearable}
-					searchable={searchable}
-					{...form.getInputProps(name)}
-					{...(value !== undefined && { value })}
-					onChange={handleChange}
-					withAsterisk={required}
-					comboboxProps={props.comboboxProps}
-					allowDeselect={allowDeselect}
-					style={style}
-				/>
+					<Select
+						pt={pt}
+						classNames={inputCss}
+						ref={ref}
+						id={id}
+						label={label}
+						placeholder={placeholder}
+						mt={mt}
+						size="sm"
+						data={dropdownValue}
+						autoComplete="off"
+						clearable={clearable}
+						searchable={searchable}
+						{...form.getInputProps(name)}
+						{...(value !== undefined && { value })}
+						onChange={handleChange}
+						withAsterisk={required}
+						comboboxProps={props.comboboxProps}
+						allowDeselect={allowDeselect}
+						style={style}
+					/>
 				</Tooltip>
 			)}
 		</>

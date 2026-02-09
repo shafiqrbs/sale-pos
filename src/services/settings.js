@@ -3,7 +3,7 @@ import { APP_APIS } from "@/routes/routes";
 
 export const extendedSettingsApiSlice = apiSlice.injectEndpoints({
 	endpoints: (builder) => ({
-		getSales: builder.query({
+		getDropdownData: builder.query({
 			query: (params) => {
 				return {
 					url: APP_APIS.SETTINGS,
@@ -11,9 +11,9 @@ export const extendedSettingsApiSlice = apiSlice.injectEndpoints({
 					params,
 				};
 			},
-			providesTags: ["Settings"],
+			providesTags: [ "Settings" ],
 		}),
 	}),
 });
 
-export const { useGetSalesQuery } = extendedSettingsApiSlice;
+export const { useGetDropdownDataQuery } = extendedSettingsApiSlice;

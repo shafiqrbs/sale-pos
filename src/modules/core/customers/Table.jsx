@@ -1,25 +1,26 @@
 import { useState } from "react";
 import { useForm } from "@mantine/form";
-import { useNavigate } from "react-router";
 import { Group, Box, ActionIcon, Text, Menu, rem, Flex, Button } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import { IconTrashX, IconDotsVertical, IconPlus } from "@tabler/icons-react";
 import { DataTable } from "mantine-datatable";
-import { useDispatch } from "react-redux";
 import { modals } from "@mantine/modals";
 import tableCss from "@assets/css/Table.module.css";
 import ViewDrawer from "./ViewDrawer.jsx";
 import { showNotification } from "@components/ShowNotificationComponent.jsx";
 import useMainAreaHeight from "@hooks/useMainAreaHeight.js";
 import useGetCoreCustomers from "@hooks/useGetCoreCustomers";
-import { useGetCustomersQuery } from "@services/core";
+import { useDeleteCustomerMutation, useGetCustomersQuery } from "@services/core";
 import KeywordSearch from "@components/KeywordSearch";
 import { useDisclosure } from "@mantine/hooks";
+import CustomerCreateModal from "./form/Create.jsx";
+import CustomerUpdateModal from "./form/Update.jsx";
 
 const PER_PAGE = 25;
 
 export default function Table() {
-	const [page, setPage] = useState(1);
+	const [ deleteCustomer, { isLoading: isCustomerDeleting } ] = useDeleteCustomerMutation();
+	const [ page, setPage ] = useState(1);
 
 	const filterForm = useForm({
 		initialValues: {
@@ -36,15 +37,15 @@ export default function Table() {
 	});
 
 	const { coreCustomers } = useGetCoreCustomers();
-	const dispatch = useDispatch();
 	const { t } = useTranslation();
 	const { mainAreaHeight } = useMainAreaHeight();
 	const height = mainAreaHeight - 102;
 
-	const [customerObject, setCustomerObject] = useState({});
-	const [viewDrawer, { open: openViewDrawer, close: closeViewDrawer }] = useDisclosure(false);
-
-	const navigate = useNavigate();
+	const [ customerObject, setCustomerObject ] = useState({});
+	const [ viewDrawer, { open: openViewDrawer, close: closeViewDrawer } ] = useDisclosure(false);
+	const [ createModal, { open: openCreateModal, close: closeCreateModal } ] = useDisclosure(false);
+	const [ updateModal, { open: openUpdateModal, close: closeUpdateModal } ] = useDisclosure(false);
+	const [ selectedCustomer, setSelectedCustomer ] = useState(null);
 
 	const handleShowData = (data) => {
 		const foundCustomers = coreCustomers.find((customer) => customer.id == data.id);
@@ -64,6 +65,45 @@ export default function Table() {
 		}
 	};
 
+	const handleDeleteCustomer = (id) => {
+		modals.openConfirmModal({
+			title: <Text size="md"> {t("FormConfirmationTitle")}</Text>,
+			children: <Text size="sm"> {t("FormConfirmationMessage")}</Text>,
+			confirmProps: { color: "red.6" },
+			labels: { confirm: "Confirm", cancel: "Cancel" },
+			onCancel: () => console.log("Cancel"),
+			onConfirm: async () => {
+				const response = await deleteCustomer(id);
+				if (response.data) {
+					showNotification(t("DeleteSuccessfully"), "green");
+				} else {
+					showNotification(t("DeleteFailed"), "red");
+				}
+			},
+		})
+	};
+
+
+	const selectEditCustomer = (data) => {
+		const foundCustomer = coreCustomers.find((customer) => customer.id == data.id);
+		console.log(data, coreCustomers);
+
+		if (foundCustomer) {
+			setSelectedCustomer(foundCustomer);
+			openUpdateModal();
+		} else {
+			showNotification(
+				t("Something Went wrong , please try again"),
+				"red",
+				"",
+				"",
+				false,
+				900,
+				true
+			);
+		}
+	}
+
 	return (
 		<>
 			<Flex gap="sm" mb="2xs" justify="space-between" align="center">
@@ -73,9 +113,7 @@ export default function Table() {
 					color="white"
 					bg="var(--theme-primary-color-6)"
 					w="100px"
-					onClick={() => {
-						navigate("/core/customer/create");
-					}}
+					onClick={openCreateModal}
 				>
 					{t("Add")}
 				</Button>
@@ -109,7 +147,12 @@ export default function Table() {
 							title: t("Action"),
 							textAlign: "right",
 							render: (data) => (
-								<Group gap={4} justify="right" wrap="nowrap">
+								<Group
+									onClick={(e) => e.stopPropagation()}
+									gap={4}
+									justify="right"
+									wrap="nowrap"
+								>
 									<Menu
 										position="bottom-end"
 										offset={3}
@@ -130,16 +173,14 @@ export default function Table() {
 											</ActionIcon>
 										</Menu.Target>
 										<Menu.Dropdown>
-											<Menu.Item onClick={() => handleShowData(data)} w={"200"}>
+											<Menu.Item
+												onClick={() => handleShowData(data)}
+												w={"200"}
+											>
 												{t("Show")}
 											</Menu.Item>
 											<Menu.Item
-												onClick={() => {
-													dispatch(setInsertType("update"));
-													dispatch(editEntityData("core/customer/" + data.id));
-													dispatch(setFormLoading(true));
-													navigate(`/core/customer/${data.id}`);
-												}}
+												onClick={() => selectEditCustomer(data)}
 												w={"200"}
 											>
 												{t("Edit")}
@@ -149,18 +190,7 @@ export default function Table() {
 												mt={"2"}
 												bg={"red.1"}
 												c={"red.6"}
-												onClick={() => {
-													modals.openConfirmModal({
-														title: <Text size="md"> {t("FormConfirmationTitle")}</Text>,
-														children: <Text size="sm"> {t("FormConfirmationMessage")}</Text>,
-														confirmProps: { color: "red.6" },
-														labels: { confirm: "Confirm", cancel: "Cancel" },
-														onCancel: () => console.log("Cancel"),
-														onConfirm: () => {
-															dispatch(deleteEntityData("core/customer/" + data.id));
-														},
-													});
-												}}
+												onClick={() => handleDeleteCustomer(data.id)}
 												rightSection={<IconTrashX style={{ width: rem(14), height: rem(14) }} />}
 											>
 												{t("Delete")}
@@ -171,7 +201,7 @@ export default function Table() {
 							),
 						},
 					]}
-					fetching={isLoading}
+					fetching={isLoading || isCustomerDeleting}
 					totalRecords={customers?.total || 0}
 					recordsPerPage={PER_PAGE}
 					page={page}
@@ -184,6 +214,17 @@ export default function Table() {
 			</Box>
 
 			<ViewDrawer opened={viewDrawer} onClose={closeViewDrawer} data={customerObject} />
+
+			<CustomerCreateModal
+				opened={createModal}
+				onClose={closeCreateModal}
+			/>
+
+			<CustomerUpdateModal
+				opened={updateModal}
+				onClose={closeUpdateModal}
+				entityEditData={selectedCustomer}
+			/>
 		</>
 	);
 }
