@@ -16,14 +16,16 @@
 		"build": "vite build --base=./",
 		"lint": "eslint .",
 		"preview": "vite preview",
+		"format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
+		"format:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
 		"start": "electron-forge start",
-		"dev-app": "concurrently \"VITE_DEV_SERVER_URL=http://localhost:3000 vite\" \"ELECTRON_START_URL=http://localhost:3000 electron-forge start\"",
-		"dev-mac": "concurrently \"cross-env VITE_DEV_SERVER_URL=http://localhost:3000 vite\" \"cross-env ELECTRON_START_URL=http://localhost:3000 electron-forge start\"",
+		"dev-app": "concurrently \"VITE_DEV_SERVER_URL=http://localhost:3000 SHOW_PROGRESS=false vite\" \"ELECTRON_START_URL=http://localhost:3000 electron-forge start\"",
+		"dev-mac": "concurrently \"cross-env VITE_DEV_SERVER_URL=http://localhost:3000 SHOW_PROGRESS=false vite\" \"cross-env ELECTRON_START_URL=http://localhost:3000 electron-forge start\"",
 		"package": "electron-forge package",
 		"make": "electron-forge make",
 		"make-win": "electron-forge make --platform=win32 --arch=x64",
 		"electron": "electron .",
-		"bin": "npm run build && npm start" 
+		"bin": "SHOW_PROGRESS=false npm run build && npm start"
 	},
 	"dependencies": {
 		"@mantine/carousel": "^8.3.12",
@@ -80,6 +82,7 @@
 		"postcss": "^8.5.6",
 		"postcss-preset-mantine": "^1.18.0",
 		"postcss-simple-vars": "^7.0.1",
+		"prettier": "^3.8.1",
 		"vite": "^7.2.4"
 	},
 	"build": {

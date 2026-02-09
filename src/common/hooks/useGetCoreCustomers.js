@@ -22,5 +22,5 @@ export default function useGetCoreCustomers() {
     }
   };
 
-  return { customers, isLoading, error };
+  return { coreCustomers: customers, isLoading, error };
 }

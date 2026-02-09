@@ -1,14 +1,13 @@
 import { Box, Group, Flex, ActionIcon, Text } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import classes from "@assets/css/FooterNavbar.module.css";
-import { useNavigate } from "react-router";
+import { NavLink } from "react-router";
 import { IconPlus, IconMinus } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
 
 function Footer() {
 	const { t } = useTranslation();
-	const navigate = useNavigate();
-	const [ zoomLevel, setZoomLevel ] = useState(() => {
+	const [zoomLevel, setZoomLevel] = useState(() => {
 		const initialZoom = window.zoomAPI.getZoomFactor();
 		return Math.round(initialZoom * 100);
 	});
@@ -59,17 +58,9 @@ function Footer() {
 	}, []);
 
 	const items = links.map((link) => (
-		<a
-			key={link.label}
-			href={link.link}
-			className={classes.link}
-			onClick={(event) => {
-				event.preventDefault();
-				navigate(link.link);
-			}}
-		>
+		<NavLink key={link.label} to={link.link} className={classes.link}>
 			{link.label}
-		</a>
+		</NavLink>
 	));
 
 	const leftLinks = [
@@ -78,17 +69,9 @@ function Footer() {
 	];
 
 	const leftItems = leftLinks.map((link) => (
-		<a
-			key={link.label}
-			href={link.link}
-			className={classes.link}
-			onClick={(event) => {
-				event.preventDefault();
-				navigate(link.link);
-			}}
-		>
+		<NavLink key={link.label} to={link.link} className={classes.link}>
 			{link.label}
-		</a>
+		</NavLink>
 	));
 
 	return (
@@ -96,14 +79,7 @@ function Footer() {
 			<footer className={classes.footer}>
 				<div className={classes.inner}>
 					<Group gap={5} className={classes.links} visibleFrom="sm">
-						<Flex
-							gap="md"
-							mih={42}
-							justify="flex-start"
-							align="center"
-							direction="row"
-							wrap="wrap"
-						>
+						<Flex gap="md" mih={42} justify="flex-start" align="center" direction="row" wrap="wrap">
 							{leftItems}
 						</Flex>
 					</Group>

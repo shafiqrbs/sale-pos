@@ -32,6 +32,7 @@ export const apiSlice = createApi({
 		"Categories",
 		"InvoiceMode",
 		"Settings",
+		"Customers",
 	],
 	endpoints: () => ({}),
 });

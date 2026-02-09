@@ -1,192 +1,203 @@
 :root {
-  --theme-primary-color-0: var(--mantine-color-blue-0);
-  --theme-primary-color-1: var(--mantine-color-blue-1);
-  --theme-primary-color-2: var(--mantine-color-blue-2);
-  --theme-primary-color-3: var(--mantine-color-blue-3);
-  --theme-primary-color-4: var(--mantine-color-blue-4);
-  --theme-primary-color-5: var(--mantine-color-blue-5);
-  --theme-primary-color-6: var(--mantine-color-blue-6);
-  --theme-primary-color-7: var(--mantine-color-blue-7);
-  --theme-primary-color-8: var(--mantine-color-blue-8);
-  --theme-primary-color-9: var(--mantine-color-blue-9);
+	--theme-primary-color-0: var(--mantine-color-blue-0);
+	--theme-primary-color-1: var(--mantine-color-blue-1);
+	--theme-primary-color-2: var(--mantine-color-blue-2);
+	--theme-primary-color-3: var(--mantine-color-blue-3);
+	--theme-primary-color-4: var(--mantine-color-blue-4);
+	--theme-primary-color-5: var(--mantine-color-blue-5);
+	--theme-primary-color-6: var(--mantine-color-blue-6);
+	--theme-primary-color-7: var(--mantine-color-blue-7);
+	--theme-primary-color-8: var(--mantine-color-blue-8);
+	--theme-primary-color-9: var(--mantine-color-blue-9);
 
-  --theme-secondary-color-0: var(--mantine-color-green-0);
-  --theme-secondary-color-1: var(--mantine-color-green-1);
-  --theme-secondary-color-2: var(--mantine-color-green-2);
-  --theme-secondary-color-3: var(--mantine-color-green-3);
-  --theme-secondary-color-4: var(--mantine-color-green-4);
-  --theme-secondary-color-5: var(--mantine-color-green-5);
-  --theme-secondary-color-6: var(--mantine-color-green-6);
-  --theme-secondary-color-7: var(--mantine-color-green-7);
-  --theme-secondary-color-8: var(--mantine-color-green-8);
-  --theme-secondary-color-9: var(--mantine-color-green-9);
+	--theme-secondary-color-0: var(--mantine-color-green-0);
+	--theme-secondary-color-1: var(--mantine-color-green-1);
+	--theme-secondary-color-2: var(--mantine-color-green-2);
+	--theme-secondary-color-3: var(--mantine-color-green-3);
+	--theme-secondary-color-4: var(--mantine-color-green-4);
+	--theme-secondary-color-5: var(--mantine-color-green-5);
+	--theme-secondary-color-6: var(--mantine-color-green-6);
+	--theme-secondary-color-7: var(--mantine-color-green-7);
+	--theme-secondary-color-8: var(--mantine-color-green-8);
+	--theme-secondary-color-9: var(--mantine-color-green-9);
 
-  --theme-tertiary-color-0: var(--mantine-color-gray-0);
-  --theme-tertiary-color-1: var(--mantine-color-gray-1);
-  --theme-tertiary-color-2: var(--mantine-color-gray-2);
-  --theme-tertiary-color-3: var(--mantine-color-gray-3);
-  --theme-tertiary-color-4: var(--mantine-color-gray-4);
-  --theme-tertiary-color-5: var(--mantine-color-gray-5);
-  --theme-tertiary-color-6: var(--mantine-color-gray-6);
-  --theme-tertiary-color-7: var(--mantine-color-gray-7);
-  --theme-tertiary-color-8: var(--mantine-color-gray-8);
+	--theme-tertiary-color-0: var(--mantine-color-gray-0);
+	--theme-tertiary-color-1: var(--mantine-color-gray-1);
+	--theme-tertiary-color-2: var(--mantine-color-gray-2);
+	--theme-tertiary-color-3: var(--mantine-color-gray-3);
+	--theme-tertiary-color-4: var(--mantine-color-gray-4);
+	--theme-tertiary-color-5: var(--mantine-color-gray-5);
+	--theme-tertiary-color-6: var(--mantine-color-gray-6);
+	--theme-tertiary-color-7: var(--mantine-color-gray-7);
+	--theme-tertiary-color-8: var(--mantine-color-gray-8);
 
-  --theme-warn-color-0: var(--mantine-color-orange-0);
-  --theme-warn-color-1: var(--mantine-color-orange-1);
-  --theme-warn-color-2: var(--mantine-color-orange-2);
-  --theme-warn-color-3: var(--mantine-color-orange-3);
-  --theme-warn-color-4: var(--mantine-color-orange-4);
-  --theme-warn-color-5: var(--mantine-color-orange-5);
-  --theme-warn-color-6: var(--mantine-color-orange-6);
-  --theme-warn-color-7: var(--mantine-color-orange-7);
-  --theme-warn-color-8: var(--mantine-color-orange-8);
+	--theme-warn-color-0: var(--mantine-color-orange-0);
+	--theme-warn-color-1: var(--mantine-color-orange-1);
+	--theme-warn-color-2: var(--mantine-color-orange-2);
+	--theme-warn-color-3: var(--mantine-color-orange-3);
+	--theme-warn-color-4: var(--mantine-color-orange-4);
+	--theme-warn-color-5: var(--mantine-color-orange-5);
+	--theme-warn-color-6: var(--mantine-color-orange-6);
+	--theme-warn-color-7: var(--mantine-color-orange-7);
+	--theme-warn-color-8: var(--mantine-color-orange-8);
 
-  --theme-grey-color-0: #f9f9f9;
-  --theme-grey-color-1: #e6e6e6;
+	--theme-grey-color-0: #f9f9f9;
+	--theme-grey-color-1: #e6e6e6;
 
-  --theme-success-color: var(--mantine-color-green-6);
-  --theme-remove-color: var(--mantine-color-red-6);
-  --theme-delete-color: var(--mantine-color-red-6);
-  --theme-error-color: var(--mantine-color-red-6);
-  --theme-warning-color: var(--mantine-color-yellow-6);
-  --theme-info-color: var(--mantine-color-blue-6);
-  --theme-notice-color: var(--mantine-color-gray-6);
-  --theme-validation-error-color: var(--mantine-color-red-6);
-  --theme-validation-success-color: var(--mantine-color-blue-6);
-  --theme-tab-save-color: var(--mantine-color-blue-9);
+	--theme-success-color: var(--mantine-color-green-6);
+	--theme-remove-color: var(--mantine-color-red-6);
+	--theme-delete-color: var(--mantine-color-red-6);
+	--theme-error-color: var(--mantine-color-red-6);
+	--theme-warning-color: var(--mantine-color-yellow-6);
+	--theme-info-color: var(--mantine-color-blue-6);
+	--theme-notice-color: var(--mantine-color-gray-6);
+	--theme-validation-error-color: var(--mantine-color-red-6);
+	--theme-validation-success-color: var(--mantine-color-blue-6);
+	--theme-tab-save-color: var(--mantine-color-blue-9);
 
-  --theme-reset-btn-color: var(--mantine-color-gray-6);
-  --theme-reset-btn-color-hover: var(--mantine-color-gray-8);
+	--theme-reset-btn-color: var(--mantine-color-gray-6);
+	--theme-reset-btn-color-hover: var(--mantine-color-gray-8);
 
-  --theme-hold-btn-color: var(--mantine-color-yellow-8);
-  --theme-hold-btn-color-hover: var(--mantine-color-yellow-9);
+	--theme-hold-btn-color: var(--mantine-color-yellow-8);
+	--theme-hold-btn-color-hover: var(--mantine-color-yellow-9);
 
-  --theme-prescription-btn-color: var(--mantine-color-red-6);
-  --theme-prescription-btn-color-hover: var(--mantine-color-red-9);
+	--theme-prescription-btn-color: var(--mantine-color-red-6);
+	--theme-prescription-btn-color-hover: var(--mantine-color-red-9);
 
-  --theme-print-btn-color: var(--mantine-color-green-8);
-  --theme-print-btn-color-hover: var(--mantine-color-green-9);
+	--theme-print-btn-color: var(--mantine-color-green-8);
+	--theme-print-btn-color-hover: var(--mantine-color-green-9);
 
-  --theme-pos-btn-color: var(--mantine-color-violet-7);
-  --theme-pos-btn-color-hover: var(--mantine-color-violet-8);
+	--theme-pos-btn-color: var(--mantine-color-violet-7);
+	--theme-pos-btn-color-hover: var(--mantine-color-violet-8);
 
-  --theme-save-btn-color: var(--mantine-color-cyan-6);
-  --theme-save-btn-color-hover: var(--mantine-color-cyan-8);
+	--theme-save-btn-color: var(--mantine-color-cyan-6);
+	--theme-save-btn-color-hover: var(--mantine-color-cyan-8);
 
-  --theme-submit-btn-color: var(--mantine-color-green-7);
-  --theme-submit-btn-color-hover: var(--mantine-color-green-8);
+	--theme-submit-btn-color: var(--mantine-color-green-7);
+	--theme-submit-btn-color-hover: var(--mantine-color-green-8);
 
-  --theme-add-btn-color: var(--mantine-color-blue-8);
-  --theme-add-btn-color-hover: var(--mantine-color-blue-9);
+	--theme-add-btn-color: var(--mantine-color-blue-8);
+	--theme-add-btn-color-hover: var(--mantine-color-blue-9);
 
-  --theme-edit-btn-color: var(--mantine-color-indigo-6);
-  --theme-edit-btn-color-hover: var(--mantine-color-indigo-8);
+	--theme-edit-btn-color: var(--mantine-color-indigo-6);
+	--theme-edit-btn-color-hover: var(--mantine-color-indigo-8);
 
-  --theme-drawer-border-color: var(--mantine-color-blue-4);
+	--theme-drawer-border-color: var(--mantine-color-blue-4);
 
-  --theme-tooltip-color: var(--mantine-color-gray-6);
+	--theme-tooltip-color: var(--mantine-color-gray-6);
 
-  --theme-carousel-item-color: var(--mantine-color-green-8);
+	--theme-carousel-item-color: var(--mantine-color-green-8);
 
-  --theme-menu-three-dot: var(--mantine-color-red-6);
+	--theme-menu-three-dot: var(--mantine-color-red-6);
 }
 
 .cursor-pointer {
-  cursor: pointer !important;
+	cursor: pointer !important;
 }
 
 .cursor-not-allowed {
-  cursor: not-allowed !important;
+	cursor: not-allowed !important;
 }
 
 .user-none {
-  user-select: none !important;
+	user-select: none !important;
 }
 
 .overflow-hidden {
-  overflow: hidden !important;
+	overflow: hidden !important;
 }
 
 .nav-link {
-  padding-inline: 10px !important;
-  padding-block: 2px !important;
+	padding-inline: 10px !important;
+	padding-block: 2px !important;
 }
 
 .active-navbar-link {
-  color: var(--theme-primary-color-6) !important;
-  background-color: white !important;
-  border-radius: 4px;
+	color: var(--theme-primary-color-6) !important;
+	background-color: white !important;
+	border-radius: 4px;
 }
 
 .sales-details-table tr th {
-  background-color: var(--theme-primary-color-0);
+	background-color: var(--theme-primary-color-0);
 }
 
-button[data-active='true'].mantine-focus-auto.mantine-active.mantine-datatable-pagination-pages-control {
-  background-color: var(--theme-primary-color-6) !important;
+button[data-active="true"].mantine-focus-auto.mantine-active.mantine-datatable-pagination-pages-control {
+	background-color: var(--theme-primary-color-6) !important;
 }
 
 .capitalize {
-  text-transform: capitalize !important;
+	text-transform: capitalize !important;
 }
 
 .mantine-TextInput-error,
 .mantine-Textarea-error,
 .mantine-DateInput-error {
-  display: none !important;
+	display: none !important;
 }
 
-[data-error=true].mantine-Input-wrapper {
-  margin-bottom: 0;
+[data-error="true"].mantine-Input-wrapper {
+	margin-bottom: 0;
 }
 
 .spin {
-  animation: spin 1.5s linear infinite;
+	animation: spin 1.5s linear infinite;
+}
+
+.overflow-hidden {
+	overflow: hidden !important;
+}
+
+.box-bg {
+	background-color: var(--mantine-color-gray-0) !important;
+}
+
+.border-all-radius {
+	border: 1px solid #e5dcff;
+	border-radius: 4px;
 }
 
 #left-options-drawer-button {
-  transition: opacity 0.2s ease-in-out;
+	transition: opacity 0.2s ease-in-out;
 }
 
 #left-options-drawer-button:hover {
-  opacity: 1 !important;
+	opacity: 1 !important;
 }
 
 #transaction-mode-carousel {
-  .mantine-Carousel-slide {
-    align-items: center;
-    display: flex;
-  }
+	.mantine-Carousel-slide {
+		align-items: center;
+		display: flex;
+	}
 
+	.mantine-Carousel-controls {
+		height: 50%;
 
-  .mantine-Carousel-controls {
+		button {
+			position: absolute;
+		}
 
-    height: 50%;
+		button[data-type="previous"] {
+			left: -6px;
+			top: 50%;
+			transform: translateY(-50%);
+		}
 
-    button {
-      position: absolute;
-    }
-
-    button[data-type="previous"] {
-      left: -6px;
-      top: 50%;
-      transform: translateY(-50%);
-    }
-
-    button[data-type="next"] {
-      right: -6px;
-      top: 50%;
-      transform: translateY(-50%);
-    }
-  }
+		button[data-type="next"] {
+			right: -6px;
+			top: 50%;
+			transform: translateY(-50%);
+		}
+	}
 }
 
 @keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
+	from {
+		transform: rotate(0deg);
+	}
 
-  to {
-    transform: rotate(360deg);
-  }
+	to {
+		transform: rotate(360deg);
+	}
 }

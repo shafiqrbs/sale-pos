@@ -1,7 +1,9 @@
 import flagBD from "../assets/images/flags/bd.svg";
 import flagGB from "../assets/images/flags/gb.svg";
 
-const CHARACTER_SET = [
+export const SHOW_PROGRESSIVE_WORKS = true;
+
+export const CHARACTER_SET = [
 	"PC437_USA",
 	"PC850_MULTILINGUAL",
 	"PC860_PORTUGUESE",
@@ -35,17 +37,17 @@ const CHARACTER_SET = [
 	"WPC1258_VIETNAMESE",
 	"KZ1048_KAZAKHSTAN",
 ];
-const LINE_CHARACTER = [
+export const LINE_CHARACTER = [
 	{ label: "---------------------------------", value: "-" },
 	{ label: "=====================", value: "=" },
 ];
 
-const LANGUAGES = [
+export const LANGUAGES = [
 	{ label: "EN", value: "en", flag: flagGB },
 	{ label: "BN", value: "bn", flag: flagBD },
 ];
 
-const SYNC_DATA = [
+export const SYNC_DATA = [
 	{
 		mode: "sales",
 		description: "Sync sales data to cloud",
@@ -68,7 +70,7 @@ const SYNC_DATA = [
 	},
 ];
 
-const ADVANCED_FILTER_SEARCH_OPERATOR = {
+export const ADVANCED_FILTER_SEARCH_OPERATOR = {
 	INPUT_PARAMETER: {
 		equal: "=",
 		not_equal: "!=",
@@ -85,6 +87,3 @@ const ADVANCED_FILTER_SEARCH_OPERATOR = {
 	ARRAY_PARAMETER: { equal: "=", not_equal: "!=", in: "in", not_in: "not_in" },
 	OBJECT_PARAMETER: { equal: "=", not_equal: "!=", in: "in", not_in: "not_in" },
 };
-
-
-export { LANGUAGES, CHARACTER_SET, SYNC_DATA, LINE_CHARACTER, ADVANCED_FILTER_SEARCH_OPERATOR };

@@ -22,7 +22,7 @@ export default function Table() {
     const { mainAreaHeight, isOnline } = useOutletContext();
     const form = useForm({
         initialValues: {
-            keywordSearch: "",
+            term: "",
             start_date: "",
             end_date: "",
         },
@@ -30,7 +30,7 @@ export default function Table() {
 
     const { sales: salesData, isLoading } = useSalesList({
         params: {
-            term: form.values.keywordSearch,
+            term: form.values.term,
             start_date: form.values.start_date,
             end_date: form.values.end_date,
             page,

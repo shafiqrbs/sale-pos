@@ -10,22 +10,26 @@ import { notifications } from "@mantine/notifications";
 import { APP_NAVLINKS } from "@/routes/routes";
 import LeftOptionsDrawer from "@components/modals/LeftOptionsDrawer";
 import useMainAreaHeight from "@hooks/useMainAreaHeight";
+import { SHOW_PROGRESSIVE_WORKS } from "@constants/index";
 
 export default function Layout() {
 	const { mainAreaHeight, headerHeight, footerHeight, padding } = useMainAreaHeight();
 	const networkStatus = useNetwork();
-	const [ isOnline, setIsOnline ] = useLocalStorage({ key: "network-preference", defaultValue: false });
+	const [isOnline, setIsOnline] = useLocalStorage({
+		key: "network-preference",
+		defaultValue: false,
+	});
 	const location = useLocation();
 	const paramPath = location.pathname;
-	const [ isLoading, setIsLoading ] = useState(true);
-	const [ activated, setActivated ] = useState({ is_activated: false });
-	const [ user, setUser ] = useState({});
-	const [ leftDrawerOpened, { open: openLeftDrawer, close: closeLeftDrawer } ] = useDisclosure(false);
+	const [isLoading, setIsLoading] = useState(true);
+	const [activated, setActivated] = useState({ is_activated: false });
+	const [user, setUser] = useState({});
+	const [leftDrawerOpened, { open: openLeftDrawer, close: closeLeftDrawer }] = useDisclosure(false);
 
 	useEffect(() => {
 		const initializeData = async () => {
 			try {
-				const [ activationData, user ] = await Promise.all([
+				const [activationData, user] = await Promise.all([
 					window.dbAPI.getDataFromTable("license_activate"),
 					window.dbAPI.getDataFromTable("users"),
 				]);
@@ -46,7 +50,7 @@ export default function Layout() {
 		if (!networkStatus.online && isOnline) {
 			setIsOnline(false);
 		}
-	}, [ networkStatus.online ]);
+	}, [networkStatus.online]);
 
 	const toggleNetwork = () => {
 		if (!networkStatus.online) {
@@ -93,8 +97,8 @@ export default function Layout() {
 			<AppShell.Header height={headerHeight} bg="gray.0">
 				<Header isOnline={isOnline} toggleNetwork={toggleNetwork} />
 			</AppShell.Header>
-			<AppShell.Main py="44px" h="calc(100vh - 90px)">
-				{!leftDrawerOpened && (
+			<AppShell.Main bg="gray.0" py="44px" h="calc(100vh - 90px)">
+				{!leftDrawerOpened && SHOW_PROGRESSIVE_WORKS && (
 					<Box
 						pos="fixed"
 						left={0}

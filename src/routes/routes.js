@@ -28,6 +28,6 @@ export const APP_APIS = {
 	INLINE_UPDATE: "/inventory/pos/inline-update",
 	SALES_COMPLETE: "/inventory/pos/sales-complete",
 	SALES: "/inventory/sales",
-	CUSTOMERS: "/core/customers",
+	CUSTOMERS: "/core/customer",
 	SETTINGS: "/core/select/setting",
 };
