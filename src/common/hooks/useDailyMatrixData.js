@@ -85,18 +85,18 @@ export default function useDailyMatrixData() {
                         splitPayments.forEach(payment => {
                             const modeId = payment.transaction_mode_id;
                             const amount = Number(payment.amount) || 0;
+                            const mode = transactionModes?.find(mode => mode.id === modeId);
+                            const modeName = mode?.name || payment.mode_name || "Unknown";
 
-                            if (!transactionModeMap[ modeId ]) {
-                                const mode = transactionModes?.find(mode => mode.id === modeId);
-                                transactionModeMap[ modeId ] = {
-                                    id: modeId,
-                                    name: mode?.name || payment.mode_name || "Unknown",
+                            if (!transactionModeMap[modeName]) {
+                                transactionModeMap[modeName] = {
+                                    name: modeName,
                                     amount: 0,
                                     count: 0
                                 };
                             }
-                            transactionModeMap[ modeId ].amount += amount;
-                            transactionModeMap[ modeId ].count += 1;
+                            transactionModeMap[modeName].amount += amount;
+                            transactionModeMap[modeName].count += 1;
                         });
                     } catch (error) {
                         console.error("Error parsing split_payments:", error);
@@ -104,15 +104,15 @@ export default function useDailyMatrixData() {
                 } else {
                     // =============== single transaction mode ================
                     const modeName = sale.mode_name || "Cash";
-                    if (!transactionModeMap[ modeName ]) {
-                        transactionModeMap[ modeName ] = {
+                    if (!transactionModeMap[modeName]) {
+                        transactionModeMap[modeName] = {
                             name: modeName,
                             amount: 0,
                             count: 0
                         };
                     }
-                    transactionModeMap[ modeName ].amount += salePayment;
-                    transactionModeMap[ modeName ].count += 1;
+                    transactionModeMap[modeName].amount += salePayment;
+                    transactionModeMap[modeName].count += 1;
                 }
 
                 // =============== aggregate products ================

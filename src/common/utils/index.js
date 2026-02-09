@@ -175,7 +175,7 @@ export const parseDateString = (dateString) => {
 	return isNaN(parsed.getTime()) ? null : parsed;
 };
 
-export function getRandomColor() {
+export function getRandomColor(index) {
 	const colors = [
 		'var(--mantine-color-blue-6)',
 		'var(--mantine-color-grape-6)',
@@ -190,5 +190,5 @@ export function getRandomColor() {
 		'var(--mantine-color-cyan-6)',
 		'var(--mantine-color-indigo-6)',
 	];
-	return colors[ Math.floor(Math.random() * colors.length) ];
+	return colors[ index % colors.length ];
 }

@@ -21,8 +21,6 @@ export default function DashboardIndex() {
         );
     }
 
-    console.log(dailyData)
-
     return (
         <Box p="md">
             <Grid gutter="md" mb="md">

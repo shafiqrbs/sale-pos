@@ -11,15 +11,15 @@ import {
 	IconBox,
 } from "@tabler/icons-react";
 import GlobalDrawer from "./GlobalDrawer";
+import { APP_NAVLINKS } from "@/routes/routes";
 
-// =============== add main menus and their submenu items here; UI is driven by this array ===============
 const DRAWER_MENU = [
 	{
 		value: "core",
 		label: "Core",
 		icon: IconSettings,
 		submenu: [
-			{ label: "Manage customers", pathname: "/core/customer", icon: IconUsers },
+			{ label: "Manage customers", pathname: APP_NAVLINKS.CUSTOMERS, icon: IconUsers },
 			{ label: "Manage vendors", pathname: "/core/vendor", icon: IconTruck },
 		],
 	},
@@ -41,7 +41,6 @@ export default function LeftOptionsDrawer({ opened, onClose }) {
 	const navigate = useNavigate();
 	const location = useLocation();
 
-	// =============== navigate to submenu link and close drawer ================
 	const handleSubmenuClick = (pathname) => {
 		navigate(pathname);
 		onClose();
@@ -53,7 +52,7 @@ export default function LeftOptionsDrawer({ opened, onClose }) {
 			onClose={onClose}
 			title="Options"
 			position="left"
-			size="sm"
+			size="330px"
 		>
 			<Divider mb="md" />
 			<Accordion variant="filled" defaultValue="core">

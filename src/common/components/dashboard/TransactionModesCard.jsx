@@ -1,17 +1,43 @@
 import { Box, Paper, Text, Stack, Group, Badge, Center, ScrollArea, Flex, Divider } from "@mantine/core";
 import { PieChart } from "@mantine/charts";
 import { useTranslation } from "react-i18next";
-import { getRandomColor } from "@utils/index";
+import { getRandomColor } from "@/common/utils";
 
 export default function TransactionModesCard({ dailyData, cardHeight }) {
     const { t } = useTranslation();
 
-    // =============== prepare data for transaction modes chart ================
-    const transactionModesChartData = dailyData.transactionModes.map(mode => ({
-        name: mode.name,
-        value: Number(mode.amount.toFixed(2)),
-        color: getRandomColor()
-    }));
+    const transactionModesChartData = dailyData.transactionModes.map((mode, index) => {
+        return {
+            name: mode.name,
+            value: Number(mode.amount.toFixed(2)),
+            color: getRandomColor(index)
+        };
+    });
+
+    const tooltipProps = {
+        content: ({ _, payload }) => {
+            if (!payload || payload.length === 0) return null;
+            const data = payload[ 0 ];
+            return (
+                <Paper p="xs" shadow="md" withBorder>
+                    <Stack gap={2}>
+                        <Group gap="xs" align="center">
+                            <Box
+                                w={10}
+                                h={10}
+                                style={{
+                                    borderRadius: '50%',
+                                    backgroundColor: data.payload.color
+                                }}
+                            />
+                            <Text size="sm" fw={600}>{data.name}</Text>
+                        </Group>
+                        <Text size="sm">৳ {data.value}</Text>
+                    </Stack>
+                </Paper>
+            );
+        }
+    };
 
     return (
         <Paper shadow="sm" p="lg" radius="md" withBorder h="100%">
@@ -27,6 +53,7 @@ export default function TransactionModesCard({ dailyData, cardHeight }) {
                             labelsPosition="outside"
                             labelsType="value"
                             withTooltip
+                            tooltipProps={tooltipProps}
                         />
 
                         <Stack gap="xs" mt="md">

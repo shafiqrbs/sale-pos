@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Navigate, Outlet, useLocation } from "react-router";
-import { useDisclosure, useLocalStorage, useViewportSize } from "@mantine/hooks";
+import { useDisclosure, useLocalStorage } from "@mantine/hooks";
 import { AppShell, Box, Center, Loader, ActionIcon, Tooltip } from "@mantine/core";
 import { IconMenu2 } from "@tabler/icons-react";
 import Header from "./Header";
@@ -9,11 +9,12 @@ import { useNetwork } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { APP_NAVLINKS } from "@/routes/routes";
 import LeftOptionsDrawer from "@components/modals/LeftOptionsDrawer";
+import useMainAreaHeight from "@hooks/useMainAreaHeight";
 
-const Layout = () => {
+export default function Layout() {
+	const { mainAreaHeight, headerHeight, footerHeight, padding } = useMainAreaHeight();
 	const networkStatus = useNetwork();
 	const [ isOnline, setIsOnline ] = useLocalStorage({ key: "network-preference", defaultValue: false });
-	const { height } = useViewportSize();
 	const location = useLocation();
 	const paramPath = location.pathname;
 	const [ isLoading, setIsLoading ] = useState(true);
@@ -87,39 +88,35 @@ const Layout = () => {
 		return <Navigate replace to={APP_NAVLINKS.BAKERY} />;
 	}
 
-	const headerHeight = 42;
-	const footerHeight = 58;
-	const padding = 0;
-	const mainAreaHeight = height - headerHeight - footerHeight - padding;
-
 	return (
 		<AppShell padding={padding}>
 			<AppShell.Header height={headerHeight} bg="gray.0">
 				<Header isOnline={isOnline} toggleNetwork={toggleNetwork} />
 			</AppShell.Header>
 			<AppShell.Main py="44px" h="calc(100vh - 90px)">
-				{/* =============== floating left button to open options drawer =============== */}
-				<Box
-					pos="fixed"
-					left={0}
-					top="50%"
-					style={{ transform: "translateY(-50%)", zIndex: 1000 }}
-				>
-					<Tooltip label="Options" position="right">
-						<ActionIcon
-							id="left-options-drawer-button"
-							variant="filled"
-							size="lg"
-							opacity={leftDrawerOpened ? 1 : 0.5}
-							radius="md"
-							style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
-							onClick={openLeftDrawer}
-							aria-label="Open options menu"
-						>
-							<IconMenu2 size={20} />
-						</ActionIcon>
-					</Tooltip>
-				</Box>
+				{!leftDrawerOpened && (
+					<Box
+						pos="fixed"
+						left={0}
+						top="50%"
+						style={{ transform: "translateY(-50%)", zIndex: 1000 }}
+					>
+						<Tooltip label="Options" position="right">
+							<ActionIcon
+								id="left-options-drawer-button"
+								variant="filled"
+								size="lg"
+								opacity={leftDrawerOpened ? 1 : 0.5}
+								radius="md"
+								style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
+								onClick={openLeftDrawer}
+								aria-label="Open options menu"
+							>
+								<IconMenu2 size={20} />
+							</ActionIcon>
+						</Tooltip>
+					</Box>
+				)}
 				<Outlet context={{ isOnline, toggleNetwork, mainAreaHeight, user }} />
 			</AppShell.Main>
 			<AppShell.Footer height={footerHeight}>
@@ -128,6 +125,4 @@ const Layout = () => {
 			<LeftOptionsDrawer opened={leftDrawerOpened} onClose={closeLeftDrawer} />
 		</AppShell>
 	);
-};
-
-export default Layout;
+}

@@ -7,6 +7,7 @@ import BakeryIndex from '@modules/pos/bakery'
 import SalesIndex from '@modules/inventory/sales'
 import StockIndex from '@modules/stock'
 import DashboardIndex from '@modules/dashboard'
+import CustomersIndex from '@modules/core/customers'
 
 export default function AppRoutes() {
     return (
@@ -14,10 +15,9 @@ export default function AppRoutes() {
             <Route path="/activate" element={<Activate />} />
             <Route path="/login" element={<Login />} />
             <Route path="/" element={<Layout />}>
-                {/* <Route path="core">
-                    <Route index path="vendor" element={<VendorIndex />} />
-                    <Route path="vendor/:id" element={<VendorIndex />} />
-                </Route> */}
+                <Route path="core">
+                    <Route index path="customers" element={<CustomersIndex />} />
+                </Route>
                 <Route path="inventory">
                     <Route path="sales" element={<SalesIndex />} />
                     {/* <Route path="sales/edit/:id" element={<SalesEdit />} /> */}
