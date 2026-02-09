@@ -47,8 +47,6 @@ export default function LeftOptionsDrawer({ opened, onClose }) {
 		onClose();
 	};
 
-	const defaultExpandedValues = DRAWER_MENU.map((menuItem) => menuItem.value);
-
 	return (
 		<GlobalDrawer
 			opened={opened}
@@ -57,7 +55,8 @@ export default function LeftOptionsDrawer({ opened, onClose }) {
 			position="left"
 			size="sm"
 		>
-			<Accordion variant="separated" defaultValue={defaultExpandedValues} multiple>
+			<Divider mb="md" />
+			<Accordion variant="filled" defaultValue="core">
 				{DRAWER_MENU.map((menuItem) => {
 					const MainIcon = menuItem.icon;
 					return (

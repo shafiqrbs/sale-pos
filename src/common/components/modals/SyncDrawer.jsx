@@ -55,6 +55,50 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 	const [ platformSyncing, setPlatformSyncing ] = useState(false);
 	const lastSyncRecord = useMemo(() => getLastSyncRecord(syncRecords), [ syncRecords ]);
 
+	const buildSalesSyncPayload = (sale) => {
+		const items = [];
+		const salesItems = JSON.parse(sale?.sales_items || "[]")
+
+		salesItems?.forEach((item) => {
+			const itemBody = {
+				id: item?.id ?? null,
+				stock_item_id: item?.stock_item_id ?? null,
+				invoice_id: item?.invoice_id ?? null,
+
+				display_name: item?.display_name ?? "",
+				quantity: item?.quantity ?? 0,
+
+				purchase_price: item?.purchase_price ?? 0,
+				sales_price: item?.sales_price ?? 0,
+				custom_price: item?.custom_price ?? 0,
+
+				is_print: item?.is_print ?? 0,
+				sub_total: item?.sub_total ?? 0,
+
+				purchase_item_id: null,
+
+				created_at: item?.created_at ?? "",
+				updated_at: item?.updated_at ?? ""
+			}
+
+			const batchItems = JSON.parse(item.batches || "[]");
+
+			if (batchItems.length) {
+				batchItems.forEach((batch) => {
+					items.push({
+						...itemBody,
+						quantity: batch.quantity,
+						purchase_item_id: batch.id,
+					})
+				})
+			} else {
+				items.push(itemBody)
+			}
+		});
+
+		return items;
+	}
+
 	const buildSyncPayload = ({ syncType, syncData }) => {
 		const basePayload = {
 			device_id: `DESKTOP_DEVICE_${(configData?.domain_id ?? 123)}`,
@@ -106,32 +150,13 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 						customer_group: sale?.customer_group ?? null,
 						balance: sale?.balance ?? null,
 
-						sales_items: Array.isArray(JSON.parse(sale?.sales_items || "[]"))
-							? JSON.parse(sale?.sales_items || "[]")?.map((item) => ({
-								id: item?.id ?? null,
-								stock_item_id: item?.stock_item_id ?? null,
-								invoice_id: item?.invoice_id ?? null,
+						purchase_item_id: null,
 
-								display_name: item?.display_name ?? "",
-								quantity: item?.quantity ?? 0,
-
-								purchase_price: item?.purchase_price ?? 0,
-								sales_price: item?.sales_price ?? 0,
-								custom_price: item?.custom_price ?? 0,
-
-								batches: JSON.parse(item?.batches || "[]"),
-
-								is_print: item?.is_print ?? 0,
-								sub_total: item?.sub_total ?? 0,
-
-								created_at: item?.created_at ?? "",
-								updated_at: item?.updated_at ?? ""
-							}))
-							: [],
+						sales_items: buildSalesSyncPayload(sale),
 
 						multi_transaction: sale?.multi_transaction ?? 0,
 
-						splitPayment: JSON.parse(sale?.split_payments || "[]")?.map((payment) => ({
+						split_payment: JSON.parse(sale?.split_payments || "[]")?.map((payment) => ({
 							transaction_mode_id: payment?.transaction_mode_id ?? null,
 							invoice_id: sale?.invoice ?? "",
 							amount: payment?.amount ?? 0,
@@ -168,7 +193,7 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 			syncData = await window.dbAPI.getDataFromTable(tableName);
 
 			const payload = buildSyncPayload({ syncType: syncOption, syncData: syncData || [] });
-
+			return console.log({ syncType: syncOption, ...payload })
 			const response = await syncPos({ syncType: syncOption, ...payload }).unwrap();
 
 			if (response?.status === "error") {
