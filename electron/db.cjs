@@ -225,7 +225,7 @@ db.prepare(
 		balance REAL,
 		sales_items TEXT,
 		multi_transaction INTEGER DEFAULT 0,
-		split_payments TEXT,
+		payments TEXT,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);
@@ -414,7 +414,7 @@ const upsertIntoTable = (table, data) => {
 		const validData = Object.keys(data)
 			.filter((key) => columns.includes(key))
 			.reduce((obj, key) => {
-				obj[ key ] = formatValue(data[ key ]);
+				obj[key] = formatValue(data[key]);
 				return obj;
 			}, {});
 
@@ -437,20 +437,18 @@ const upsertIntoTable = (table, data) => {
 		if (!existingRow) {
 			stmt.run(...Object.values(validData));
 		} else {
-			const existingData = db
-				.prepare(`SELECT * FROM ${table} WHERE id = ?`)
-				.get(validData.id);
+			const existingData = db.prepare(`SELECT * FROM ${table} WHERE id = ?`).get(validData.id);
 
 			const isChanged = keys.some((key) => {
 				const existingValue =
-					typeof existingData[ key ] === "string" && existingData[ key ].startsWith("{")
-						? JSON.parse(existingData[ key ])
-						: existingData[ key ];
+					typeof existingData[key] === "string" && existingData[key].startsWith("{")
+						? JSON.parse(existingData[key])
+						: existingData[key];
 
 				const newValue =
-					typeof validData[ key ] === "string" && validData[ key ].startsWith("{")
-						? JSON.parse(validData[ key ])
-						: validData[ key ];
+					typeof validData[key] === "string" && validData[key].startsWith("{")
+						? JSON.parse(validData[key])
+						: validData[key];
 
 				return JSON.stringify(existingValue) !== JSON.stringify(newValue);
 			});
@@ -467,7 +465,7 @@ const upsertIntoTable = (table, data) => {
 
 const getDataFromTable = (table, idOrConditions, property = "id", options = {}) => {
 	table = convertTableName(table);
-	const useGet = [ "config_data", "users", "license_activate", "printer" ].includes(table); // return a single row for these tables
+	const useGet = ["config_data", "users", "license_activate", "printer"].includes(table); // return a single row for these tables
 
 	let stmt;
 	let result;
@@ -475,12 +473,12 @@ const getDataFromTable = (table, idOrConditions, property = "id", options = {}) 
 	const { limit, offset, search } = options || {};
 
 	const buildSearchClause = (initialConditions = [], initialValues = []) => {
-		const conditions = [ ...initialConditions ];
-		const values = [ ...initialValues ];
+		const conditions = [...initialConditions];
+		const values = [...initialValues];
 
 		if (search && typeof search === "object") {
 			if (search.equals && typeof search.equals === "object") {
-				for (const [ field, value ] of Object.entries(search.equals)) {
+				for (const [field, value] of Object.entries(search.equals)) {
 					if (value !== undefined && value !== null && value !== "") {
 						conditions.push(`${field} = ?`);
 						values.push(value);
@@ -489,7 +487,7 @@ const getDataFromTable = (table, idOrConditions, property = "id", options = {}) 
 			}
 
 			if (search.like && typeof search.like === "object") {
-				for (const [ field, value ] of Object.entries(search.like)) {
+				for (const [field, value] of Object.entries(search.like)) {
 					if (value !== undefined && value !== null && value !== "") {
 						conditions.push(`${field} LIKE ?`);
 						values.push(`%${value}%`);
@@ -498,7 +496,7 @@ const getDataFromTable = (table, idOrConditions, property = "id", options = {}) 
 			}
 
 			if (search.in && typeof search.in === "object") {
-				for (const [ field, list ] of Object.entries(search.in)) {
+				for (const [field, list] of Object.entries(search.in)) {
 					if (Array.isArray(list) && list.length > 0) {
 						const placeholders = list.map(() => "?").join(", ");
 						conditions.push(`${field} IN (${placeholders})`);
@@ -513,7 +511,7 @@ const getDataFromTable = (table, idOrConditions, property = "id", options = {}) 
 
 	const buildPaginatedQuery = (baseQuery, baseValues = []) => {
 		let query = baseQuery;
-		const values = [ ...baseValues ];
+		const values = [...baseValues];
 
 		if (!useGet && typeof limit === "number") {
 			query += " LIMIT ?";
@@ -532,7 +530,7 @@ const getDataFromTable = (table, idOrConditions, property = "id", options = {}) 
 		// multiple conditions
 		const keys = Object.keys(idOrConditions);
 		const baseConditions = keys.map((key) => `${key} = ?`);
-		const baseValues = keys.map((key) => idOrConditions[ key ]);
+		const baseValues = keys.map((key) => idOrConditions[key]);
 
 		const { conditions, values } = buildSearchClause(baseConditions, baseValues);
 		const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
@@ -591,7 +589,7 @@ const updateDataInTable = (table, { id, data, condition = {}, property = "id" })
 	// build SET clause
 	const setKeys = Object.keys(updatePayload);
 	const setClause = setKeys.map((key) => `${key} = ?`).join(", ");
-	const setValues = setKeys.map((key) => updatePayload[ key ]);
+	const setValues = setKeys.map((key) => updatePayload[key]);
 
 	// build WHERE clause
 	let whereClause = "";
@@ -600,11 +598,11 @@ const updateDataInTable = (table, { id, data, condition = {}, property = "id" })
 	if (id !== undefined) {
 		// backward compatible: use id + property
 		whereClause = `WHERE ${property} = ?`;
-		whereValues = [ id ];
+		whereValues = [id];
 	} else if (typeof condition === "object" && Object.keys(condition).length > 0) {
 		const conditionKeys = Object.keys(condition);
 		whereClause = "WHERE " + conditionKeys.map((key) => `${key} = ?`).join(" AND ");
-		whereValues = conditionKeys.map((key) => condition[ key ]);
+		whereValues = conditionKeys.map((key) => condition[key]);
 	} else {
 		throw new Error("No condition provided for update");
 	}
@@ -620,7 +618,7 @@ const deleteDataFromTable = (table, idOrConditions = 1, property = "id") => {
 		// multiple conditions
 		const keys = Object.keys(idOrConditions);
 		const conditions = keys.map((key) => `${key} = ?`).join(" AND ");
-		const values = keys.map((key) => idOrConditions[ key ]);
+		const values = keys.map((key) => idOrConditions[key]);
 		stmt = db.prepare(`DELETE FROM ${table} WHERE ${conditions}`);
 		stmt.run(...values);
 	} else {
@@ -637,9 +635,7 @@ const deleteManyFromTable = (table, ids = [], property = "id") => {
 	// Create ?,?,? placeholders dynamically
 	const placeholders = ids.map(() => "?").join(",");
 
-	const stmt = db.prepare(
-		`DELETE FROM ${table} WHERE ${property} IN (${placeholders})`
-	);
+	const stmt = db.prepare(`DELETE FROM ${table} WHERE ${property} IN (${placeholders})`);
 
 	return stmt.run(...ids);
 };
@@ -659,14 +655,14 @@ const getTableCount = (table, conditions = {}, options = {}) => {
 
 		if (conditions && typeof conditions === "object" && Object.keys(conditions).length > 0) {
 			whereClauses = Object.keys(conditions).map((key) => `${key} = ?`);
-			values.push(...Object.keys(conditions).map((key) => conditions[ key ]));
+			values.push(...Object.keys(conditions).map((key) => conditions[key]));
 		}
 
 		const { search } = options || {};
 
 		if (search && typeof search === "object") {
 			if (search.equals && typeof search.equals === "object") {
-				for (const [ field, value ] of Object.entries(search.equals)) {
+				for (const [field, value] of Object.entries(search.equals)) {
 					if (value !== undefined && value !== null && value !== "") {
 						whereClauses.push(`${field} = ?`);
 						values.push(value);
@@ -675,7 +671,7 @@ const getTableCount = (table, conditions = {}, options = {}) => {
 			}
 
 			if (search.like && typeof search.like === "object") {
-				for (const [ field, value ] of Object.entries(search.like)) {
+				for (const [field, value] of Object.entries(search.like)) {
 					if (value !== undefined && value !== null && value !== "") {
 						whereClauses.push(`${field} LIKE ?`);
 						values.push(`%${value}%`);
@@ -684,7 +680,7 @@ const getTableCount = (table, conditions = {}, options = {}) => {
 			}
 
 			if (search.in && typeof search.in === "object") {
-				for (const [ field, list ] of Object.entries(search.in)) {
+				for (const [field, list] of Object.entries(search.in)) {
 					if (Array.isArray(list) && list.length > 0) {
 						const placeholders = list.map(() => "?").join(", ");
 						whereClauses.push(`${field} IN (${placeholders})`);
@@ -709,14 +705,16 @@ const getTableCount = (table, conditions = {}, options = {}) => {
 const resetDatabase = async () => {
 	try {
 		const tables = db
-			.prepare(`
+			.prepare(
+				`
 			SELECT name
 			FROM sqlite_master
 			WHERE type='table'
 			AND name NOT LIKE 'sqlite_%'
-		`)
+		`
+			)
 			.all()
-			.map(row => row.name);
+			.map((row) => row.name);
 
 		db.prepare("PRAGMA foreign_keys = OFF").run();
 
@@ -742,8 +740,8 @@ const getJoinedTableData = ({
 	foreignKey,
 	conditions = {},
 	select = {
-		table1: [ "*" ], // ['id', 'name', 'price'] or ['*'] for all columns
-		table2: [ "*" ], // ['id', 'name'] or ['*'] for all columns
+		table1: ["*"], // ['id', 'name', 'price'] or ['*'] for all columns
+		table2: ["*"], // ['id', 'name'] or ['*'] for all columns
 	},
 	rename = {}, // { 'table1.id': 'product_id', 'table2.name': 'category_name' }
 	pagination = {
@@ -774,7 +772,7 @@ const getJoinedTableData = ({
 			return columns
 				.map((col) => {
 					const renameKey = `${table}.${col}`;
-					const newName = rename[ renameKey ] || col;
+					const newName = rename[renameKey] || col;
 					return `${alias}.${col} as ${newName}`;
 				})
 				.join(", ");
@@ -792,10 +790,10 @@ const getJoinedTableData = ({
 
 		// Add conditions if provided
 		if (Object.keys(conditions).length > 0) {
-			const conditionClauses = Object.entries(conditions).map(([ key, value ]) => {
+			const conditionClauses = Object.entries(conditions).map(([key, value]) => {
 				if (typeof value === "object") {
 					// Handle operators like IN, LIKE, etc.
-					const [ operator, operand ] = Object.entries(value)[ 0 ];
+					const [operator, operand] = Object.entries(value)[0];
 					return `p.${key} ${operator} ?`;
 				}
 				return `p.${key} = ?`;
@@ -808,7 +806,7 @@ const getJoinedTableData = ({
 		const stmt = db.prepare(query);
 		const values = Object.values(conditions).map((value) => {
 			if (typeof value === "object") {
-				return Object.values(value)[ 0 ];
+				return Object.values(value)[0];
 			}
 			return value;
 		});

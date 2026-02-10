@@ -58,7 +58,7 @@ export default function SplitPaymentsDrawer({ opened, onClose, totalAmount, onSa
             .filter(method => paymentInputs[ method.id ] && parseFloat(paymentInputs[ method.id ]) > 0)
             .map(method => ({
                 transaction_mode_id: method.id,
-                mode_name: method.name,
+                transaction_mode_name: method.name,
                 amount: parseFloat(paymentInputs[ method.id ])
             }))
 

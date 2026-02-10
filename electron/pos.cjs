@@ -32,9 +32,7 @@ const thermalPrint = async ({ configData, salesItems, salesViewData, setup }) =>
 		printer.alignCenter();
 		printer.setTextSize(0, 0);
 		printer.bold(true);
-		printer.println(
-			`${configData?.domain?.company_name || configData?.company_name || "Sandra"}`,
-		);
+		printer.println(`${configData?.domain?.company_name || configData?.company_name || "Sandra"}`);
 		printer.bold(false);
 		printer.setTextSize(0, 0);
 		printer.println(`Mobile : ${configData?.mobile || configData?.domain?.mobile || "N/A"}`);
@@ -114,10 +112,9 @@ const thermalPrint = async ({ configData, salesItems, salesViewData, setup }) =>
 		printer.tableCustom([
 			{ text: "Total", align: "LEFT", bold: true, width: 0.5 },
 			{
-				text: `${salesViewData?.total?.toFixed(2) ||
-					salesViewData?.sub_total?.toFixed(2) ||
-					"0.00"
-					}`,
+				text: `${
+					salesViewData?.total?.toFixed(2) || salesViewData?.sub_total?.toFixed(2) || "0.00"
+				}`,
 				align: "RIGHT",
 				width: 0.5,
 			},
@@ -125,10 +122,9 @@ const thermalPrint = async ({ configData, salesItems, salesViewData, setup }) =>
 		printer.tableCustom([
 			{ text: "Receive", align: "LEFT", bold: true, width: 0.5 },
 			{
-				text: `${salesViewData?.payment?.toFixed(2) ||
-					salesViewData?.receive?.toFixed(2) ||
-					"0.00"
-					}`,
+				text: `${
+					salesViewData?.payment?.toFixed(2) || salesViewData?.receive?.toFixed(2) || "0.00"
+				}`,
 				align: "RIGHT",
 				width: 0.5,
 			},
@@ -143,35 +139,30 @@ const thermalPrint = async ({ configData, salesItems, salesViewData, setup }) =>
 
 		printer.println(DOUBLE_LINE);
 
-		if (salesViewData?.multi_transaction) {
-			JSON.parse(salesViewData?.split_payments || "[]")?.forEach((payment) => {
-				printer.tableCustom([
-					{ text: `-${payment?.mode_name}:`, align: "LEFT", width: 0.5 },
-					{
-						text: `${payment?.amount?.toFixed(2) || "0.00"}`,
-						align: "RIGHT",
-						width: 0.5,
-					},
-				]);
-			});
-		} else {
+		// =============== print all payments from payments array ================
+		const payments = JSON.parse(salesViewData?.payments || "[]");
+		payments?.forEach((payment) => {
 			printer.tableCustom([
-				{ text: `-${salesViewData?.mode_name}:`, align: "LEFT", width: 0.5 },
 				{
-					text: `${salesViewData?.payment?.toFixed(2) || "0.00"}`,
+					text: `-${payment?.transaction_mode_name || "Unknown"}:`,
+					align: "LEFT",
+					width: 0.5,
+				},
+				{
+					text: `${payment?.amount?.toFixed(2) || "0.00"}`,
 					align: "RIGHT",
 					width: 0.5,
 				},
 			]);
-		}
+		});
 
 		printer.println(DOUBLE_LINE);
 		printer.tableCustom([
 			{ text: "Returned", align: "LEFT", bold: true, width: 0.5 },
 			{
-				text: `${Math.abs(
-					Number(salesViewData?.total) - Number(salesViewData?.payment),
-				).toFixed(2)}`,
+				text: `${Math.abs(Number(salesViewData?.total) - Number(salesViewData?.payment)).toFixed(
+					2
+				)}`,
 				align: "RIGHT",
 				width: 0.5,
 			},
@@ -182,7 +173,7 @@ const thermalPrint = async ({ configData, salesItems, salesViewData, setup }) =>
 		// printer.bold(true);
 		printer.setTextSize(0, 0);
 		printer.println(
-			"Thank you so much for choosing Sandra Foods. We truly appreciate your trust and support.",
+			"Thank you so much for choosing Sandra Foods. We truly appreciate your trust and support."
 		);
 		// printer.bold(false);
 
@@ -215,7 +206,7 @@ const kitchenPrint = async ({ configData, selectedProducts, salesByUserName, set
 		printer.setTextSize(1, 1);
 		printer.alignCenter();
 		printer.println(
-			`© ${configData?.domain?.company_name || configData?.company_name || "Sandra"}`,
+			`© ${configData?.domain?.company_name || configData?.company_name || "Sandra"}`
 		);
 		printer.bold(false);
 		printer.setTypeFontB();
@@ -262,7 +253,7 @@ const kitchenPrint = async ({ configData, selectedProducts, salesByUserName, set
 		printer.bold(true);
 		printer.setTextSize(0, 0);
 		printer.println(
-			`© ${configData?.domain?.company_name || configData?.company_name || "Sandra"}`,
+			`© ${configData?.domain?.company_name || configData?.company_name || "Sandra"}`
 		);
 		printer.bold(false);
 

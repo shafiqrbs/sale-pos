@@ -1,4 +1,14 @@
-import { Divider, Stack, Paper, Group, Text, ActionIcon, rem, Flex, LoadingOverlay } from "@mantine/core";
+import {
+	Divider,
+	Stack,
+	Paper,
+	Group,
+	Text,
+	ActionIcon,
+	rem,
+	Flex,
+	LoadingOverlay,
+} from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { IconRefresh } from "@tabler/icons-react";
 import { SYNC_DATA } from "@/constants";
@@ -28,7 +38,7 @@ const TABLE_MAPPING = {
 	purchases: "purchases",
 	products: "products",
 	customers: "customers",
-	vendors: "vendors"
+	vendors: "vendors",
 };
 
 const PLATFORM_SYNC_DATA_MAP = {
@@ -44,20 +54,20 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 	const { t } = useTranslation();
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
-	const [ syncPos ] = useSyncPosMutation();
-	const [ syncRecords, setSyncRecords ] = useState(() => getSyncRecordsFromLocalStorage());
-	const [ loadingStates, setLoadingStates ] = useState(() => {
+	const [syncPos] = useSyncPosMutation();
+	const [syncRecords, setSyncRecords] = useState(() => getSyncRecordsFromLocalStorage());
+	const [loadingStates, setLoadingStates] = useState(() => {
 		return SYNC_DATA.reduce((accumulator, item) => {
-			accumulator[ item.mode ] = false;
+			accumulator[item.mode] = false;
 			return accumulator;
 		}, {});
 	});
-	const [ platformSyncing, setPlatformSyncing ] = useState(false);
-	const lastSyncRecord = useMemo(() => getLastSyncRecord(syncRecords), [ syncRecords ]);
+	const [platformSyncing, setPlatformSyncing] = useState(false);
+	const lastSyncRecord = useMemo(() => getLastSyncRecord(syncRecords), [syncRecords]);
 
 	const buildSalesSyncPayload = (sale) => {
 		const items = [];
-		const salesItems = JSON.parse(sale?.sales_items || "[]")
+		const salesItems = JSON.parse(sale?.sales_items || "[]");
 
 		salesItems?.forEach((item) => {
 			const itemBody = {
@@ -78,8 +88,8 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 				purchase_item_id: null,
 
 				created_at: item?.created_at ?? "",
-				updated_at: item?.updated_at ?? ""
-			}
+				updated_at: item?.updated_at ?? "",
+			};
 
 			const batchItems = JSON.parse(item.batches || "[]");
 
@@ -89,19 +99,19 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 						...itemBody,
 						quantity: batch.quantity,
 						purchase_item_id: batch.id,
-					})
-				})
+					});
+				});
 			} else {
-				items.push(itemBody)
+				items.push(itemBody);
 			}
 		});
 
 		return items;
-	}
+	};
 
 	const buildSyncPayload = ({ syncType, syncData }) => {
 		const basePayload = {
-			device_id: `DESKTOP_DEVICE_${(configData?.domain_id ?? 123)}`,
+			device_id: `DESKTOP_DEVICE_${configData?.domain_id ?? 123}`,
 			sync_batch_id: generateUniqueId(),
 		};
 
@@ -128,10 +138,7 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 						invoice_batch_id: sale?.invoice_batch_id ?? null,
 
 						customerId: sale?.customerId ?? "",
-						customerName:
-							sale?.customerName ??
-							configData?.domain?.name ??
-							"",
+						customerName: sale?.customerName ?? configData?.domain?.name ?? "",
 
 						customerMobile: sale?.customerMobile ?? null,
 
@@ -156,12 +163,13 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 
 						multi_transaction: sale?.multi_transaction ?? 0,
 
-						split_payment: JSON.parse(sale?.split_payments || "[]")?.map((payment) => ({
+						payments: JSON.parse(sale?.payments || "[]")?.map((payment) => ({
 							transaction_mode_id: payment?.transaction_mode_id ?? null,
+							transaction_mode_name: payment?.transaction_mode_name ?? null,
 							invoice_id: sale?.invoice ?? "",
 							amount: payment?.amount ?? 0,
-						}))
-					}))
+						})),
+					})),
 				};
 
 			case "purchases":
@@ -171,7 +179,7 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 				// =============== generic payload structure for other sync types ================
 				return {
 					...basePayload,
-					content: syncData || []
+					content: syncData || [],
 				};
 
 			default:
@@ -182,18 +190,18 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 	const runSync = async (syncOption) => {
 		setLoadingStates((previousStates) => ({
 			...previousStates,
-			[ syncOption ]: true,
+			[syncOption]: true,
 		}));
 
 		try {
 			let tableName = syncOption;
 			let syncData = null;
 
-			tableName = TABLE_MAPPING[ syncOption ] || syncOption;
+			tableName = TABLE_MAPPING[syncOption] || syncOption;
 			syncData = await window.dbAPI.getDataFromTable(tableName);
 
 			const payload = buildSyncPayload({ syncType: syncOption, syncData: syncData || [] });
-			return console.log({ syncType: syncOption, ...payload })
+			return console.log({ syncType: syncOption, ...payload });
 			const response = await syncPos({ syncType: syncOption, ...payload }).unwrap();
 
 			if (response?.status === "error") {
@@ -215,21 +223,15 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 				window.dbAPI.destroyTableData(tableName);
 
 				// overall platform sync
-				runSyncPlatform()
+				runSyncPlatform();
 			}
 		} catch (error) {
 			console.error(`Error syncing ${syncOption} data:`, error);
-			showNotification(
-				`Failed to sync ${syncOption} data. Please try again.`,
-				"red",
-				"",
-				"",
-				true
-			);
+			showNotification(`Failed to sync ${syncOption} data. Please try again.`, "red", "", "", true);
 		} finally {
 			setLoadingStates((previousStates) => ({
 				...previousStates,
-				[ syncOption ]: false,
+				[syncOption]: false,
 			}));
 		}
 	};
@@ -239,7 +241,12 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 			title: "Confirm sync",
 			children: (
 				<Text size="sm">
-					Are you sure you want to sync <Text span fw={600} tt="capitalize">{syncOption}</Text> data now? Local data will be cleared after the successful sync but available in the online database.
+					Are you sure you want to sync{" "}
+					<Text span fw={600} tt="capitalize">
+						{syncOption}
+					</Text>{" "}
+					data now? Local data will be cleared after the successful sync but available in the online
+					database.
 				</Text>
 			),
 			labels: { confirm: "Sync now", cancel: "Cancel" },
@@ -253,7 +260,8 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 			title: "Confirm sync",
 			children: (
 				<Text size="sm">
-					Are you sure you want to sync platform data now? Local data will be cleared after the successful sync but available in the online database.
+					Are you sure you want to sync platform data now? Local data will be cleared after the
+					successful sync but available in the online database.
 				</Text>
 			),
 			labels: { confirm: "Sync now", cancel: "Cancel" },
@@ -284,7 +292,7 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 
 			// =============== call the activation url to get fresh data ================
 			const response = await axios({
-				url: `${MASTER_APIS.SPLASH}?license_key=${licenseKey}&active_key=${activeKey}`
+				url: `${MASTER_APIS.SPLASH}?license_key=${licenseKey}&active_key=${activeKey}`,
 			});
 
 			if (response.data.status !== 200) {
@@ -299,11 +307,11 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 			}
 
 			// =============== clear and repopulate tables except license_activate and users ================
-			const syncOperations = Object.entries(PLATFORM_SYNC_DATA_MAP)
-				.map(async ([ table, property ]) => {
-					const dataList = Array.isArray(response.data.data[ property ])
-						? response.data.data[ property ]
-						: [ response.data.data[ property ] ];
+			const syncOperations = Object.entries(PLATFORM_SYNC_DATA_MAP).map(
+				async ([table, property]) => {
+					const dataList = Array.isArray(response.data.data[property])
+						? response.data.data[property]
+						: [response.data.data[property]];
 
 					// =============== handle config_data special formatting ================
 					if (table === "config_data") {
@@ -315,7 +323,8 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 					} else {
 						await window.dbAPI.clearAndInsertBulk(table, dataList);
 					}
-				});
+				}
+			);
 
 			await Promise.all(syncOperations);
 
@@ -336,18 +345,9 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 			});
 			setSyncRecords(nextSyncRecords);
 
-			showNotification(
-				"Platform data synced successfully",
-				"teal",
-				"lightgray",
-				"",
-				"",
-				true
-			);
+			showNotification("Platform data synced successfully", "teal", "lightgray", "", "", true);
 
-			dispatch(apiSlice.util.invalidateTags([
-				"Sales"
-			]));
+			dispatch(apiSlice.util.invalidateTags(["Sales"]));
 
 			navigate(APP_NAVLINKS.BAKERY, { replace: true });
 
@@ -355,7 +355,9 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 		} catch (error) {
 			console.error("Error syncing platform data:", error);
 			showNotification(
-				error?.response?.data?.message || error?.message || "Failed to sync platform data. Please try again.",
+				error?.response?.data?.message ||
+					error?.message ||
+					"Failed to sync platform data. Please try again.",
 				"red",
 				"",
 				"",
@@ -370,10 +372,15 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 		const lastModeRecord = getLastSyncRecordByMode(syncRecords, mode);
 		if (!lastModeRecord?.syncedAt) return "Not synced yet";
 		return `Last synced: ${formatDateTime(new Date(lastModeRecord.syncedAt))}`;
-	}
+	};
 
 	const loadingOverlayNode = (
-		<LoadingOverlay h="100vh" zIndex={999} visible={platformSyncing} style={{ position: "fixed", inset: 0 }} />
+		<LoadingOverlay
+			h="100vh"
+			zIndex={999}
+			visible={platformSyncing}
+			style={{ position: "fixed", inset: 0 }}
+		/>
 	);
 
 	return (
@@ -403,9 +410,11 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 							<ActionIcon
 								loading={platformSyncing}
 								loaderProps={{
-									children: <Flex justify="center" align="center" h="100%">
-										<IconRefresh className="spin" height={20} width={20} />
-									</Flex>
+									children: (
+										<Flex justify="center" align="center" h="100%">
+											<IconRefresh className="spin" height={20} width={20} />
+										</Flex>
+									),
 								}}
 								onClick={confirmAndSyncPlatform}
 								variant="filled"
@@ -429,11 +438,13 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 									</Text>
 								</Stack>
 								<ActionIcon
-									loading={loadingStates[ item.mode ] || false}
+									loading={loadingStates[item.mode] || false}
 									loaderProps={{
-										children: <Flex justify="center" align="center" h="100%">
-											<IconRefresh className="spin" height={20} width={20} />
-										</Flex>
+										children: (
+											<Flex justify="center" align="center" h="100%">
+												<IconRefresh className="spin" height={20} width={20} />
+											</Flex>
+										),
 									}}
 									onClick={() => confirmAndSync(item.mode)}
 									variant="filled"
