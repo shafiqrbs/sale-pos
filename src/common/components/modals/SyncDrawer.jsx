@@ -201,7 +201,7 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 			syncData = await window.dbAPI.getDataFromTable(tableName);
 
 			const payload = buildSyncPayload({ syncType: syncOption, syncData: syncData || [] });
-			return console.log({ syncType: syncOption, ...payload });
+			// return console.log({ syncType: syncOption, ...payload });
 			const response = await syncPos({ syncType: syncOption, ...payload }).unwrap();
 
 			if (response?.status === "error") {
