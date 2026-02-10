@@ -28,7 +28,7 @@ import PhoneNumber from "@components/form-builders/PhoneNumberInput.jsx";
 import CustomerGroupDrawer from "../CustomerGroupDrawer.jsx";
 import useMainAreaHeight from "@hooks/useMainAreaHeight.js";
 import { customerRequest } from "../helper/request.js";
-import { useCreateCustomerMutation, useUpdateCustomerMutation } from "@services/core.js";
+import { useCreateCustomerMutation, useUpdateCustomerMutation } from "@services/core/customer.js";
 import { showNotification } from "@components/ShowNotificationComponent.jsx";
 import { useGetDropdownDataQuery } from "@services/settings.js";
 

@@ -10,7 +10,7 @@ import ViewDrawer from "./ViewDrawer.jsx";
 import { showNotification } from "@components/ShowNotificationComponent.jsx";
 import useMainAreaHeight from "@hooks/useMainAreaHeight.js";
 import useGetCoreCustomers from "@hooks/useGetCoreCustomers";
-import { useDeleteCustomerMutation, useGetCustomersQuery } from "@services/core";
+import { useDeleteCustomerMutation, useGetCustomersQuery } from "@services/core/customer.js";
 import KeywordSearch from "@components/KeywordSearch";
 import { useDisclosure } from "@mantine/hooks";
 import CustomerCreateModal from "./form/Create.jsx";
@@ -30,7 +30,7 @@ export default function Table() {
 		},
 	});
 
-	const { data: customers, isLoading } = useGetCustomersQuery({
+	const { data: customers, isLoading, refetch } = useGetCustomersQuery({
 		...filterForm.values,
 		page,
 		offset: PER_PAGE,
@@ -86,7 +86,6 @@ export default function Table() {
 
 	const selectEditCustomer = (data) => {
 		const foundCustomer = coreCustomers.find((customer) => customer.id == data.id);
-		console.log(data, coreCustomers);
 
 		if (foundCustomer) {
 			setSelectedCustomer(foundCustomer);
