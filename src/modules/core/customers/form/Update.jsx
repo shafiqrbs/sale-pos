@@ -1,12 +1,8 @@
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 import GlobalModal from "@components/modals/GlobalModal";
 import Form from "./Form";
 
-export default function CustomerUpdateModal({
-	opened,
-	onClose,
-	entityEditData
-}) {
+export default function CustomerUpdateModal({ isLoading, opened, onClose, entityEditData }) {
 	const { t } = useTranslation();
 
 	const handleSuccess = () => {
@@ -15,6 +11,7 @@ export default function CustomerUpdateModal({
 
 	return (
 		<GlobalModal
+			loading={isLoading}
 			opened={opened}
 			onClose={onClose}
 			title={t("UpdateCustomer")}

@@ -2,11 +2,12 @@ import { Grid, Box, Text } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import GlobalDrawer from "@components/modals/GlobalDrawer";
 
-export default function ViewDrawer({ opened, onClose, data }) {
+export default function ViewDrawer({ isLoading, opened, onClose, data }) {
 	const { t } = useTranslation();
 
 	return (
 		<GlobalDrawer
+			loading={isLoading}
 			opened={opened}
 			onClose={onClose}
 			position="right"

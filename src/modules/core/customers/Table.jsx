@@ -2,15 +2,24 @@ import { useState } from "react";
 import { useForm } from "@mantine/form";
 import { Group, Box, ActionIcon, Text, Menu, rem, Flex, Button } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import { IconTrashX, IconDotsVertical, IconPlus } from "@tabler/icons-react";
+import {
+	IconTrashX,
+	IconDotsVertical,
+	IconPlus,
+	IconRefresh,
+	IconReload,
+} from "@tabler/icons-react";
 import { DataTable } from "mantine-datatable";
 import { modals } from "@mantine/modals";
 import tableCss from "@assets/css/Table.module.css";
 import ViewDrawer from "./ViewDrawer.jsx";
 import { showNotification } from "@components/ShowNotificationComponent.jsx";
 import useMainAreaHeight from "@hooks/useMainAreaHeight.js";
-import useGetCoreCustomers from "@hooks/useGetCoreCustomers";
-import { useDeleteCustomerMutation, useGetCustomersQuery } from "@services/core/customer.js";
+import {
+	useDeleteCustomerMutation,
+	useGetCustomersQuery,
+	useGetCustomerByIdQuery,
+} from "@services/core/customer.js";
 import KeywordSearch from "@components/KeywordSearch";
 import { useDisclosure } from "@mantine/hooks";
 import CustomerCreateModal from "./form/Create.jsx";
@@ -19,8 +28,16 @@ import CustomerUpdateModal from "./form/Update.jsx";
 const PER_PAGE = 25;
 
 export default function Table() {
-	const [ deleteCustomer, { isLoading: isCustomerDeleting } ] = useDeleteCustomerMutation();
-	const [ page, setPage ] = useState(1);
+	const [customerId, setCustomerId] = useState(null);
+	const {
+		data: customer,
+		isLoading: isCustomerLoading,
+		isFetching: isCustomerFetching,
+	} = useGetCustomerByIdQuery(customerId, {
+		skip: !customerId,
+	});
+	const [deleteCustomer, { isLoading: isCustomerDeleting }] = useDeleteCustomerMutation();
+	const [page, setPage] = useState(1);
 
 	const filterForm = useForm({
 		initialValues: {
@@ -30,39 +47,29 @@ export default function Table() {
 		},
 	});
 
-	const { data: customers, isLoading, refetch } = useGetCustomersQuery({
+	const {
+		data: customers,
+		isLoading,
+		refetch,
+		isFetching,
+	} = useGetCustomersQuery({
 		...filterForm.values,
 		page,
 		offset: PER_PAGE,
 	});
 
-	const { coreCustomers } = useGetCoreCustomers();
 	const { t } = useTranslation();
 	const { mainAreaHeight } = useMainAreaHeight();
 	const height = mainAreaHeight - 102;
 
-	const [ customerObject, setCustomerObject ] = useState({});
-	const [ viewDrawer, { open: openViewDrawer, close: closeViewDrawer } ] = useDisclosure(false);
-	const [ createModal, { open: openCreateModal, close: closeCreateModal } ] = useDisclosure(false);
-	const [ updateModal, { open: openUpdateModal, close: closeUpdateModal } ] = useDisclosure(false);
-	const [ selectedCustomer, setSelectedCustomer ] = useState(null);
+	const [viewDrawer, { open: openViewDrawer, close: closeViewDrawer }] = useDisclosure(false);
+	const [createModal, { open: openCreateModal, close: closeCreateModal }] = useDisclosure(false);
+	const [updateModal, { open: openUpdateModal, close: closeUpdateModal }] = useDisclosure(false);
 
 	const handleShowData = (data) => {
-		const foundCustomers = coreCustomers.find((customer) => customer.id == data.id);
-		if (foundCustomers) {
-			setCustomerObject(foundCustomers);
-			openViewDrawer();
-		} else {
-			showNotification(
-				t("Something Went wrong , please try again"),
-				"red",
-				"",
-				"",
-				false,
-				900,
-				true
-			);
-		}
+		setCustomerId(data.id);
+
+		openViewDrawer();
 	};
 
 	const handleDeleteCustomer = (id) => {
@@ -80,33 +87,26 @@ export default function Table() {
 					showNotification(t("DeleteFailed"), "red");
 				}
 			},
-		})
+		});
 	};
 
-
 	const selectEditCustomer = (data) => {
-		const foundCustomer = coreCustomers.find((customer) => customer.id == data.id);
-
-		if (foundCustomer) {
-			setSelectedCustomer(foundCustomer);
-			openUpdateModal();
-		} else {
-			showNotification(
-				t("Something Went wrong , please try again"),
-				"red",
-				"",
-				"",
-				false,
-				900,
-				true
-			);
-		}
-	}
+		setCustomerId(data.id);
+		openUpdateModal();
+	};
 
 	return (
 		<>
 			<Flex gap="sm" mb="2xs" justify="space-between" align="center">
 				<KeywordSearch form={filterForm} />
+				<ActionIcon
+					bg="var(--theme-secondary-color-6)"
+					onClick={refetch}
+					disabled={isLoading || isFetching}
+					aria-label="Refresh"
+				>
+					<IconReload size={16} stroke={1.5} />
+				</ActionIcon>
 				<Button
 					leftSection={<IconPlus size={16} stroke={1.5} />}
 					color="white"
@@ -146,12 +146,7 @@ export default function Table() {
 							title: t("Action"),
 							textAlign: "right",
 							render: (data) => (
-								<Group
-									onClick={(e) => e.stopPropagation()}
-									gap={4}
-									justify="right"
-									wrap="nowrap"
-								>
+								<Group onClick={(e) => e.stopPropagation()} gap={4} justify="right" wrap="nowrap">
 									<Menu
 										position="bottom-end"
 										offset={3}
@@ -172,16 +167,10 @@ export default function Table() {
 											</ActionIcon>
 										</Menu.Target>
 										<Menu.Dropdown>
-											<Menu.Item
-												onClick={() => handleShowData(data)}
-												w={"200"}
-											>
+											<Menu.Item onClick={() => handleShowData(data)} w={"200"}>
 												{t("Show")}
 											</Menu.Item>
-											<Menu.Item
-												onClick={() => selectEditCustomer(data)}
-												w={"200"}
-											>
+											<Menu.Item onClick={() => selectEditCustomer(data)} w={"200"}>
 												{t("Edit")}
 											</Menu.Item>
 											<Menu.Item
@@ -200,7 +189,7 @@ export default function Table() {
 							),
 						},
 					]}
-					fetching={isLoading || isCustomerDeleting}
+					fetching={isLoading || isCustomerDeleting || isFetching}
 					totalRecords={customers?.total || 0}
 					recordsPerPage={PER_PAGE}
 					page={page}
@@ -212,17 +201,20 @@ export default function Table() {
 				/>
 			</Box>
 
-			<ViewDrawer opened={viewDrawer} onClose={closeViewDrawer} data={customerObject} />
-
-			<CustomerCreateModal
-				opened={createModal}
-				onClose={closeCreateModal}
+			<ViewDrawer
+				isLoading={isCustomerLoading || isCustomerFetching}
+				opened={viewDrawer}
+				onClose={closeViewDrawer}
+				data={customer?.data}
 			/>
 
+			<CustomerCreateModal opened={createModal} onClose={closeCreateModal} />
+
 			<CustomerUpdateModal
+				isLoading={isCustomerLoading || isCustomerFetching}
 				opened={updateModal}
 				onClose={closeUpdateModal}
-				entityEditData={selectedCustomer}
+				entityEditData={customer?.data}
 			/>
 		</>
 	);

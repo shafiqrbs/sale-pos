@@ -32,18 +32,18 @@ export const extendedCustomerApiSlice = apiSlice.injectEndpoints({
 					body: customer,
 				};
 			},
-			invalidatesTags: ["Customers"],
+			invalidatesTags: (result, error, argument) => (error ? [] : ["Customers"]),
 		}),
 
 		updateCustomer: builder.mutation({
 			query: (customer) => {
 				return {
 					url: `${APP_APIS.CUSTOMERS}/${customer.id}`,
-					method: "PUT",
+					method: "PATCH",
 					body: customer,
 				};
 			},
-			invalidatesTags: ["Customers"],
+			invalidatesTags: (result, error, argument) => (error ? [] : ["Customers"]),
 		}),
 
 		deleteCustomer: builder.mutation({
@@ -53,7 +53,7 @@ export const extendedCustomerApiSlice = apiSlice.injectEndpoints({
 					method: "DELETE",
 				};
 			},
-			invalidatesTags: ["Customers"],
+			invalidatesTags: (result, error, argument) => (error ? [] : ["Customers"]),
 		}),
 	}),
 });
