@@ -32,8 +32,8 @@ const dataMap = {
 
 export default function Activate() {
 	const { t } = useTranslation();
-	const [ spinner, setSpinner ] = useState(false);
-	const [ errorMessage, setErrorMessage ] = useState("");
+	const [spinner, setSpinner] = useState(false);
+	const [errorMessage, setErrorMessage] = useState("");
 	const navigate = useNavigate();
 
 	const form = useForm({
@@ -43,8 +43,7 @@ export default function Activate() {
 		},
 		validate: {
 			licenseKey: (value) => (value.length < 11 ? t("LicenseKeyMustBe11Characters") : null),
-			activeKey: (value) =>
-				value.length < 10 ? t("ActivationKeyMustBe10Characters") : null,
+			activeKey: (value) => (value.length < 10 ? t("ActivationKeyMustBe10Characters") : null),
 		},
 	});
 
@@ -57,7 +56,7 @@ export default function Activate() {
 			const activeKey = values.activeKey?.toString().trim();
 
 			const response = await axios({
-				url: `${MASTER_APIS.SPLASH}?license_key=${licenseKey}&active_key=${activeKey}`
+				url: `${MASTER_APIS.SPLASH}?license_key=${licenseKey}&active_key=${activeKey}`,
 			});
 
 			if (response.data.status === 200) {
@@ -67,10 +66,10 @@ export default function Activate() {
 					is_activated: 1,
 				});
 
-				const operations = Object.entries(dataMap).map(([ table, property ]) => {
-					const dataList = Array.isArray(response.data.data[ property ])
-						? response.data.data[ property ]
-						: [ response.data.data[ property ] ];
+				const operations = Object.entries(dataMap).map(([table, property]) => {
+					const dataList = Array.isArray(response.data.data[property])
+						? response.data.data[property]
+						: [response.data.data[property]];
 
 					return dataList.map((data) => {
 						if (table === "config_data") {
@@ -82,7 +81,13 @@ export default function Activate() {
 					});
 				});
 
-				await Promise.all(operations);
+				const setPrinter = window.dbAPI.upsertIntoTable("printer", {
+					printer_name: "POS-PRINT",
+					line_character: "-",
+					character_set: "PC437_USA",
+				});
+
+				await Promise.all([...operations, setPrinter]);
 
 				navigate("/login", { replace: true });
 			} else {
@@ -107,7 +112,7 @@ export default function Activate() {
 			}
 		};
 		checkActivation();
-	}, [ navigate ]);
+	}, [navigate]);
 
 	return (
 		<Box
@@ -116,11 +121,7 @@ export default function Activate() {
 			style={{ display: "flex", alignItems: "center", backgroundColor: "#f8f9fa" }}
 		>
 			<Container size="sm" py="xl" pos="relative">
-				<LoadingOverlay
-					visible={spinner}
-					zIndex={1000}
-					overlayProps={{ radius: "sm", blur: 2 }}
-				/>
+				<LoadingOverlay visible={spinner} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
 				<Paper radius="md" p="xl" withBorder shadow="lg">
 					<Box ta="center" mb="md">
 						<img src="./sandra.jpg" height="90px" alt="Sandra" />
@@ -176,7 +177,7 @@ export default function Activate() {
 
 								<Box>
 									<Text fw={500} mb={5} c="dark">
-										{t("ActivationKey")} {" "}
+										{t("ActivationKey")}{" "}
 										<Box component="span" c="red">
 											*
 										</Box>
@@ -206,9 +207,7 @@ export default function Activate() {
 												{...form.getInputProps("activeKey")}
 												styles={(theme) => ({
 													input: {
-														borderColor: form.errors.activeKey
-															? theme.colors.red[ 5 ]
-															: undefined,
+														borderColor: form.errors.activeKey ? theme.colors.red[5] : undefined,
 													},
 												})}
 											/>
@@ -224,7 +223,11 @@ export default function Activate() {
 									radius="md"
 									mt="md"
 									leftIcon={<IconCheck size={18} />}
-									gradient={{ from: "var(--theme-secondary-color-6)", to: "var(--theme-secondary-color-8)", deg: 160 }}
+									gradient={{
+										from: "var(--theme-secondary-color-6)",
+										to: "var(--theme-secondary-color-8)",
+										deg: 160,
+									}}
 									variant="gradient"
 								>
 									{t("ActivateAccount")}

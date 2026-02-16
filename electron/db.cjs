@@ -382,9 +382,9 @@ db.prepare(
 	`
 	CREATE TABLE IF NOT EXISTS printer (
 		id INTEGER PRIMARY KEY,
-		printer_name TEXT NOT NULL,
-		line_character TEXT DEFAULT '-',
-		character_set TEXT DEFAULT 'SLOVENIA',
+		printer_name TEXT NOT NULL DEFAULT 'POS-PRINT',
+		line_character TEXT DEFAULT '=',
+		character_set TEXT DEFAULT 'PC437_USA',
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	)`
