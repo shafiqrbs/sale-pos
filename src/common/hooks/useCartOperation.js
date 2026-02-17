@@ -26,63 +26,6 @@ export default function useCartOperation(tableId = null) {
 		refetchInvoice();
 	}, [refetchInvoice]);
 
-	// =============== helper function to update product quantity and sales in database ================
-	const updateProductInDatabase = async (product, quantityDelta, batchUpdates = null) => {
-		try {
-			const stockItemId = product.stock_item_id || product.stock_id;
-
-			// =============== fetch current product from database ================
-			const currentProduct = await window.dbAPI.getDataFromTable("core_products", {
-				stock_id: stockItemId,
-			});
-			if (!currentProduct || currentProduct.length === 0) {
-				console.error("Product not found in database");
-				return;
-			}
-
-			const productData = currentProduct[0];
-			const newQuantity = (productData.quantity || 0) - quantityDelta;
-			const newTotalSales = (productData.total_sales || 0) + quantityDelta;
-
-			let updatedPurchaseItemForSales = productData.purchase_item_for_sales;
-
-			// =============== update batch quantities if batch updates provided ================
-			if (batchUpdates && Array.isArray(batchUpdates)) {
-				try {
-					const purchaseItems = JSON.parse(productData.purchase_item_for_sales || "[]");
-
-					batchUpdates.forEach((batchUpdate) => {
-						const batchIndex = purchaseItems.findIndex(
-							(item) => item.purchase_item_id === batchUpdate.id
-						);
-
-						if (batchIndex !== -1) {
-							purchaseItems[batchIndex].remain_quantity =
-								(purchaseItems[batchIndex].remain_quantity || 0) - batchUpdate.quantityDelta;
-							purchaseItems[batchIndex].sales_quantity =
-								(purchaseItems[batchIndex].sales_quantity || 0) + batchUpdate.quantityDelta;
-						}
-					});
-
-					updatedPurchaseItemForSales = JSON.stringify(purchaseItems);
-				} catch (error) {
-					console.error("Error updating batch data:", error);
-				}
-			}
-
-			// =============== update product in database ================
-			await window.dbAPI.updateDataInTable("core_products", {
-				condition: { stock_id: stockItemId },
-				data: {
-					quantity: newQuantity,
-					total_sales: newTotalSales,
-					purchase_item_for_sales: updatedPurchaseItemForSales,
-				},
-			});
-		} catch (error) {
-			console.error("Error updating product in database:", error);
-		}
-	};
 
 	const increment = async (product, selectedBatches = null, isUpdate = false) => {
 		const vatConfig = configData?.inventory_config?.config_vat;
@@ -124,51 +67,6 @@ export default function useCartOperation(tableId = null) {
 				totalQuantityToAdd = selectedBatches.reduce((sum, batch) => sum + batch.quantity, 0);
 			}
 
-			// =============== prepare batch updates for database ================
-			let batchUpdates = null;
-			if (selectedBatches && Array.isArray(selectedBatches)) {
-				if (isUpdate && items?.length) {
-					// =============== calculate difference for update mode ================
-					let existingBatches = [];
-					try {
-						existingBatches =
-							typeof items[0].batches === "string"
-								? JSON.parse(items[0].batches)
-								: Array.isArray(items[0].batches)
-									? items[0].batches
-									: [];
-					} catch {
-						existingBatches = [];
-					}
-
-					batchUpdates = selectedBatches.map((newBatch) => {
-						const existingBatch = existingBatches.find((batch) => batch.id === newBatch.id);
-						const oldQuantity = existingBatch ? existingBatch.quantity : 0;
-						return {
-							id: newBatch.id,
-							quantityDelta: newBatch.quantity - oldQuantity,
-						};
-					});
-
-					// =============== add batches that were removed in update ================
-					existingBatches.forEach((oldBatch) => {
-						const stillExists = selectedBatches.find((batch) => batch.id === oldBatch.id);
-						if (!stillExists) {
-							batchUpdates.push({
-								id: oldBatch.id,
-								quantityDelta: -oldBatch.quantity,
-							});
-						}
-					});
-				} else {
-					// =============== add mode: all quantities are new ================
-					batchUpdates = selectedBatches.map((batch) => ({
-						id: batch.id,
-						quantityDelta: batch.quantity,
-					}));
-				}
-			}
-
 			if (items?.length) {
 				const oldQuantity = items[0].quantity;
 				const updatedQuantity = isUpdate
@@ -181,10 +79,6 @@ export default function useCartOperation(tableId = null) {
 				);
 
 				deltaSubTotal = updatedSubTotal - items[0].sub_total;
-
-				// =============== update product database for quantity change ================
-				const quantityDelta = isUpdate ? updatedQuantity - oldQuantity : totalQuantityToAdd;
-				await updateProductInDatabase(product, quantityDelta, batchUpdates);
 
 				// =============== handle batches ================
 				let updatedBatches = [];
@@ -241,9 +135,6 @@ export default function useCartOperation(tableId = null) {
 					vatConfig
 				);
 				deltaSubTotal = subTotal;
-
-				// =============== update product database for new item ================
-				await updateProductInDatabase(product, totalQuantityToAdd, batchUpdates);
 
 				// =============== prepare batches for new item ================
 				const batchesData =
@@ -320,7 +211,6 @@ export default function useCartOperation(tableId = null) {
 
 			// =============== handle batch decrement ================
 			let existingBatches = [];
-			let decrementedBatchId = null;
 			try {
 				existingBatches =
 					typeof items[0].batches === "string"
@@ -336,7 +226,6 @@ export default function useCartOperation(tableId = null) {
 			if (existingBatches.length > 0) {
 				for (let index = existingBatches.length - 1; index >= 0; index--) {
 					if (existingBatches[index].quantity > 0) {
-						decrementedBatchId = existingBatches[index].id;
 						existingBatches[index].quantity -= 1;
 						if (existingBatches[index].quantity === 0) {
 							existingBatches.splice(index, 1);
@@ -345,12 +234,6 @@ export default function useCartOperation(tableId = null) {
 					}
 				}
 			}
-
-			// =============== restore product quantity and sales in database ================
-			const batchUpdates = decrementedBatchId
-				? [{ id: decrementedBatchId, quantityDelta: -1 }]
-				: null;
-			await updateProductInDatabase(product, -1, batchUpdates);
 
 			await window.dbAPI.updateDataInTable("invoice_table_item", {
 				condition: itemCondition,
@@ -407,34 +290,8 @@ export default function useCartOperation(tableId = null) {
 				tableId ? window.dbAPI.getDataFromTable("invoice_table", tableId) : null,
 			]);
 
-			// =============== restore product quantity and sales ================
+			// =============== remove product snapshot ================
 			if (cartItem?.length) {
-				const removedQuantity = cartItem[0].quantity;
-				let batchUpdates = null;
-
-				// =============== get batch data to restore ================
-				let existingBatches = [];
-				try {
-					existingBatches =
-						typeof cartItem[0].batches === "string"
-							? JSON.parse(cartItem[0].batches)
-							: Array.isArray(cartItem[0].batches)
-								? cartItem[0].batches
-								: [];
-				} catch {
-					existingBatches = [];
-				}
-
-				if (existingBatches.length > 0) {
-					batchUpdates = existingBatches.map((batch) => ({
-						id: batch.id,
-						quantityDelta: -batch.quantity,
-					}));
-				}
-
-				await updateProductInDatabase(product, -removedQuantity, batchUpdates);
-
-				// =============== remove product snapshot ================
 				const stockItemId = product.stock_item_id || product.stock_id;
 				dispatch(removeProductSnapshot(stockItemId));
 			}
@@ -475,8 +332,6 @@ export default function useCartOperation(tableId = null) {
 			}
 
 			const quantityValue = parseFloat(newQuantity) || 0;
-			const oldQuantity = items[0].quantity;
-			const quantityDelta = quantityValue - oldQuantity;
 
 			const updatedSubTotal = calculateSubTotalWithVAT(
 				product.sales_price,
@@ -485,11 +340,6 @@ export default function useCartOperation(tableId = null) {
 			);
 
 			const deltaSubTotal = updatedSubTotal - items[0].sub_total;
-
-			// =============== update product database ================
-			if (quantityDelta !== 0) {
-				await updateProductInDatabase(product, quantityDelta, null);
-			}
 
 			// =============== preserve existing batches structure ================
 			let existingBatches = [];

@@ -33,10 +33,13 @@ import CustomerDrawer from "@components/modals/CustomerDrawer";
 import { useDisclosure } from "@mantine/hooks";
 import FormValidationWrapper from "@components/form-builders/FormValidationWrapper";
 import useLoggedInUser from "@hooks/useLoggedInUser";
+import { useDispatch } from "react-redux";
+import { clearProductSnapshots } from "@features/cart";
 
 export default function Transaction({ form, tableId = null }) {
 	const user = useLoggedInUser();
 	const { t } = useTranslation();
+	const dispatch = useDispatch();
 	const { isOnline } = useOutletContext();
 	const { configData } = useConfigData({ offlineFetch: !isOnline });
 	const [coreUsers, setCoreUsers] = useState([]);
@@ -132,6 +135,86 @@ export default function Transaction({ form, tableId = null }) {
 
 	const handleCustomerAdd = () => {
 		customerDrawerOpen();
+	};
+
+	// =============== update product quantities and sales after successful sale ================
+	const updateProductsAfterSale = async () => {
+		try {
+			for (const cartItem of invoiceData) {
+				const stockItemId = cartItem.stock_item_id || cartItem.stock_id;
+				
+				// =============== fetch current product from database ================
+				const currentProducts = await window.dbAPI.getDataFromTable("core_products", {
+					stock_id: stockItemId,
+				});
+				
+				if (!currentProducts || currentProducts.length === 0) {
+					console.error(`Product not found in database: ${stockItemId}`);
+					continue;
+				}
+
+				const currentProduct = currentProducts[0];
+				const soldQuantity = cartItem.quantity;
+
+				// =============== calculate new quantities ================
+				const newQuantity = (currentProduct.quantity || 0) - soldQuantity;
+				const newTotalSales = (currentProduct.total_sales || 0) + soldQuantity;
+
+				let updatedPurchaseItemForSales = currentProduct.purchase_item_for_sales;
+
+				// =============== handle batch items ================
+				let cartBatches = [];
+				try {
+					cartBatches =
+						typeof cartItem.batches === "string"
+							? JSON.parse(cartItem.batches)
+							: Array.isArray(cartItem.batches)
+								? cartItem.batches
+								: [];
+				} catch {
+					cartBatches = [];
+				}
+
+				if (cartBatches.length > 0) {
+					try {
+						const purchaseItems = JSON.parse(currentProduct.purchase_item_for_sales || "[]");
+
+						cartBatches.forEach((soldBatch) => {
+							const batchIndex = purchaseItems.findIndex(
+								(item) => item.purchase_item_id === soldBatch.id
+							);
+
+							if (batchIndex !== -1) {
+								// =============== update sales_quantity and remain_quantity ================
+								purchaseItems[batchIndex].sales_quantity =
+									(purchaseItems[batchIndex].sales_quantity || 0) + soldBatch.quantity;
+								purchaseItems[batchIndex].remain_quantity =
+									(purchaseItems[batchIndex].remain_quantity || 0) - soldBatch.quantity;
+							}
+						});
+
+						updatedPurchaseItemForSales = JSON.stringify(purchaseItems);
+					} catch (error) {
+						console.error("Error updating batch data:", error);
+					}
+				}
+
+				// =============== update product in database ================
+				await window.dbAPI.updateDataInTable("core_products", {
+					condition: { stock_id: stockItemId },
+					data: {
+						quantity: newQuantity,
+						total_sales: newTotalSales,
+						purchase_item_for_sales: updatedPurchaseItemForSales,
+					},
+				});
+			}
+
+			// =============== clear all product snapshots after successful update ================
+			dispatch(clearProductSnapshots());
+		} catch (error) {
+			console.error("Error updating products after sale:", error);
+		}
 	};
 
 	const handleSave = async ({ withPos = false }) => {
@@ -280,6 +363,9 @@ export default function Transaction({ form, tableId = null }) {
 
 		// Insert sale record
 		await window.dbAPI.upsertIntoTable("sales", salesData);
+
+		// =============== update product quantities and sales after successful sale ================
+		await updateProductsAfterSale();
 
 		// Handle transactions
 		// if (isSplitPaymentActive) {

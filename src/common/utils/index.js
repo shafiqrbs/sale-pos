@@ -192,3 +192,12 @@ export function getRandomColor(index) {
 	];
 	return colors[ index % colors.length ];
 }
+
+export const formatCurrency = (amount) => {
+	if (!amount || isNaN(Number(amount))) return "0.00";
+
+	return new Intl.NumberFormat("en-BD", {
+		style: "decimal",
+		maximumFractionDigits: 2,
+	}).format(amount);
+};

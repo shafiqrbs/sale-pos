@@ -12,19 +12,20 @@ import ProductPagination from "./ProductPagination";
 import noProductImg from "@assets/images/not-found.webp";
 import noProductImgFound from "@assets/images/no-image.png";
 import { RESTRICT_PRODUCT_QUANTITY_LIMIT } from "@constants/index";
+import { formatCurrency } from "@utils/index";
 
 const ITEMS_PER_PAGE = 16;
 
 export default function ProductList() {
-	const [allProducts, setAllProducts] = useState([]);
-	const [totalProducts, setTotalProducts] = useState(0);
-	const [activePage, setActivePage] = useState(1);
-	const [selectedProduct, setSelectedProduct] = useState(null);
-	const [batchModalOpened, { open: openBatchModal, close: closeBatchModal }] = useDisclosure(false);
+	const [ allProducts, setAllProducts ] = useState([]);
+	const [ totalProducts, setTotalProducts ] = useState(0);
+	const [ activePage, setActivePage ] = useState(1);
+	const [ selectedProduct, setSelectedProduct ] = useState(null);
+	const [ batchModalOpened, { open: openBatchModal, close: closeBatchModal } ] = useDisclosure(false);
 	const { increment } = useCartOperation();
 	const { mainAreaHeight, isOnline } = useOutletContext();
 	const { configData } = useConfigData({ offlineFetch: !isOnline });
-	const [filter, setFilter] = useState({
+	const [ filter, setFilter ] = useState({
 		categories: [],
 		search: "",
 		barcode: "",
@@ -77,7 +78,7 @@ export default function ProductList() {
 		}
 
 		fetchProductsPage();
-	}, [activePage, filter.barcode, filter.categories, filter.search]);
+	}, [ activePage, filter.barcode, filter.categories, filter.search ]);
 
 	// =============== check if product should be disabled ================
 	const isProductDisabled = (product) => {
@@ -112,10 +113,10 @@ export default function ProductList() {
 			if (cartItems && cartItems.length > 0) {
 				try {
 					currentBatches =
-						typeof cartItems[0].batches === "string"
-							? JSON.parse(cartItems[0].batches)
-							: Array.isArray(cartItems[0].batches)
-								? cartItems[0].batches
+						typeof cartItems[ 0 ].batches === "string"
+							? JSON.parse(cartItems[ 0 ].batches)
+							: Array.isArray(cartItems[ 0 ].batches)
+								? cartItems[ 0 ].batches
 								: [];
 				} catch {
 					currentBatches = [];
@@ -189,22 +190,21 @@ export default function ProductList() {
 																{product?.display_name}
 															</Text>
 
-															<Text
-																styles={{
-																	root: {
-																		marginTop: "auto",
-																	},
-																}}
-																ta="right"
-																fw={900}
-																fz="18"
-																size="md"
-																c="green.9"
-															>
-																{configData?.currency?.symbol ||
-																	configData?.inventory_config?.currency?.symbol}{" "}
-																{product?.sales_price?.toFixed(2)}
-															</Text>
+															<Flex justify="space-between" gap={4} align="center" mt="auto">
+																<Text fz="10" c="gray.8">
+																	{product?.quantity >= 1 ? <>QTY: {product?.quantity}</> : <>Out of Stock</>}
+																</Text>
+																<Text
+																	fw={900}
+																	fz="18"
+																	size="md"
+																	c="green.9"
+																>
+																	{configData?.currency?.symbol ||
+																		configData?.inventory_config?.currency?.symbol}{" "}
+																	{formatCurrency(product?.sales_price)}
+																</Text>
+															</Flex>
 														</Card>
 													</Grid.Col>
 												);

@@ -47,7 +47,7 @@ export default function TopSellingProductsCard({ dailyData, cardHeight }) {
                             ),
                         },
                     ]}
-                    minHeight={cardHeight}
+                    height={cardHeight}
                     noRecordsText={t("NoProductsSoldToday")}
                 />
             </Box>

@@ -10,6 +10,8 @@ export default function DashboardIndex() {
     const { dailyData, isLoading } = useDailyMatrixData();
     const { mainAreaHeight } = useOutletContext();
 
+    console.log(dailyData)
+
     const height = mainAreaHeight - 40;
     const cardHeight = (height - 166) / 2;
 
