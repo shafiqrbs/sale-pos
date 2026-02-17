@@ -167,13 +167,13 @@ export default function ProductList() {
 															radius="md"
 															padding="xs"
 															h="100%"
+															title={productDisabled ? "Out of Stock" : "Add to Cart"}
 															className={productDisabled ? "" : "cursor-pointer"}
 															styles={() => ({
 																root: {
 																	transition: "transform 0.5s ease-in-out",
-																	opacity: productDisabled ? 0.5 : 1,
+																	opacity: productDisabled ? 0.75 : 1,
 																	cursor: productDisabled ? "not-allowed" : "pointer",
-																	pointerEvents: productDisabled ? "none" : "auto",
 																},
 															})}
 															onClick={() => handleProductClick(product)}
@@ -192,7 +192,7 @@ export default function ProductList() {
 
 															<Flex justify="space-between" gap={4} align="center" mt="auto">
 																<Text fz="10" c="gray.8">
-																	{product?.quantity >= 1 ? <>QTY: {product?.quantity}</> : <>Out of Stock</>}
+																	{product?.quantity >= 0.1 ? <>QTY: {product?.quantity} {product?.unit_name}</> : <>Out of Stock</>}
 																</Text>
 																<Text
 																	fw={900}

@@ -6,8 +6,7 @@ import { useOutletContext } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 import { setCartData } from "@features/checkout";
 import { useEffect, useCallback } from "react";
-import { RESTRICT_PRODUCT_QUANTITY_LIMIT } from "@constants/index";
-import { addProductSnapshot, removeProductSnapshot, clearProductSnapshots } from "@features/cart";
+import { addProductSnapshot, removeProductSnapshot, clearProductSnapshots } from "@features/cartSnapshot";
 
 export default function useCartOperation(tableId = null) {
 	const invoiceData = useSelector((state) => state.checkout.invoiceData);
@@ -20,11 +19,11 @@ export default function useCartOperation(tableId = null) {
 	const refetchInvoice = useCallback(async () => {
 		const data = await window.dbAPI.getDataFromTable("invoice_table_item");
 		dispatch(setCartData(data));
-	}, [dispatch]);
+	}, [ dispatch ]);
 
 	useEffect(() => {
 		refetchInvoice();
-	}, [refetchInvoice]);
+	}, [ refetchInvoice ]);
 
 
 	const increment = async (product, selectedBatches = null, isUpdate = false) => {
@@ -54,7 +53,7 @@ export default function useCartOperation(tableId = null) {
 				...withInvoiceId(tableId),
 			};
 
-			const [items, invoiceTable] = await Promise.all([
+			const [ items, invoiceTable ] = await Promise.all([
 				window.dbAPI.getDataFromTable("invoice_table_item", itemCondition),
 				tableId ? window.dbAPI.getDataFromTable("invoice_table", tableId) : Promise.resolve(null),
 			]);
@@ -68,39 +67,39 @@ export default function useCartOperation(tableId = null) {
 			}
 
 			if (items?.length) {
-				const oldQuantity = items[0].quantity;
+				// const oldQuantity = items[ 0 ].quantity;
 				const updatedQuantity = isUpdate
 					? totalQuantityToAdd
-					: items[0].quantity + totalQuantityToAdd;
+					: items[ 0 ].quantity + totalQuantityToAdd;
+
 				const updatedSubTotal = calculateSubTotalWithVAT(
 					product.sales_price,
 					updatedQuantity,
 					vatConfig
 				);
 
-				deltaSubTotal = updatedSubTotal - items[0].sub_total;
+				deltaSubTotal = updatedSubTotal - items[ 0 ].sub_total;
 
 				// =============== handle batches ================
 				let updatedBatches = [];
 
 				if (isUpdate) {
-					// =============== update mode: replace batches completely ================
 					updatedBatches = selectedBatches || [];
 				} else {
 					// =============== add mode: merge batches ================
 					let existingBatches = [];
 					try {
 						existingBatches =
-							typeof items[0].batches === "string"
-								? JSON.parse(items[0].batches)
-								: Array.isArray(items[0].batches)
-									? items[0].batches
+							typeof items[ 0 ].batches === "string"
+								? JSON.parse(items[ 0 ].batches)
+								: Array.isArray(items[ 0 ].batches)
+									? items[ 0 ].batches
 									: [];
 					} catch {
 						existingBatches = [];
 					}
 
-					updatedBatches = [...existingBatches];
+					updatedBatches = [ ...existingBatches ];
 
 					if (selectedBatches && Array.isArray(selectedBatches)) {
 						selectedBatches.forEach((newBatch) => {
@@ -108,7 +107,7 @@ export default function useCartOperation(tableId = null) {
 								(batch) => batch.id === newBatch.id
 							);
 							if (existingBatchIndex !== -1) {
-								updatedBatches[existingBatchIndex].quantity += newBatch.quantity;
+								updatedBatches[ existingBatchIndex ].quantity += newBatch.quantity;
 							} else {
 								updatedBatches.push(newBatch);
 							}
@@ -121,6 +120,7 @@ export default function useCartOperation(tableId = null) {
 					data: {
 						...itemCondition,
 						quantity: updatedQuantity,
+						quantity_limit: product.quantity,
 						purchase_price: product.purchase_price,
 						sales_price: product.sales_price,
 						sub_total: updatedSubTotal,
@@ -145,6 +145,7 @@ export default function useCartOperation(tableId = null) {
 				await window.dbAPI.upsertIntoTable("invoice_table_item", {
 					stock_item_id: product.stock_item_id || product.stock_id,
 					quantity: totalQuantityToAdd,
+					quantity_limit: product.quantity,
 					purchase_price: 0,
 					sales_price: product.sales_price,
 					custom_price: 0,
@@ -193,30 +194,30 @@ export default function useCartOperation(tableId = null) {
 				...withInvoiceId(tableId),
 			};
 
-			const [items, invoiceTable] = await Promise.all([
+			const [ items, invoiceTable ] = await Promise.all([
 				window.dbAPI.getDataFromTable("invoice_table_item", itemCondition),
 				tableId ? window.dbAPI.getDataFromTable("invoice_table", tableId) : Promise.resolve(null),
 			]);
 
-			if (!items?.length || items[0].quantity <= 1) return;
+			if (!items?.length || items[ 0 ].quantity <= 1) return;
 
-			const updatedQuantity = items[0].quantity - 1;
+			const updatedQuantity = items[ 0 ].quantity - 1;
 			const updatedSubTotal = calculateSubTotalWithVAT(
 				product.sales_price,
 				updatedQuantity,
 				vatConfig
 			);
 
-			const deltaSubTotal = updatedSubTotal - items[0].sub_total;
+			const deltaSubTotal = updatedSubTotal - items[ 0 ].sub_total;
 
 			// =============== handle batch decrement ================
 			let existingBatches = [];
 			try {
 				existingBatches =
-					typeof items[0].batches === "string"
-						? JSON.parse(items[0].batches)
-						: Array.isArray(items[0].batches)
-							? items[0].batches
+					typeof items[ 0 ].batches === "string"
+						? JSON.parse(items[ 0 ].batches)
+						: Array.isArray(items[ 0 ].batches)
+							? items[ 0 ].batches
 							: [];
 			} catch {
 				existingBatches = [];
@@ -225,9 +226,9 @@ export default function useCartOperation(tableId = null) {
 			// =============== decrement from the last batch ================
 			if (existingBatches.length > 0) {
 				for (let index = existingBatches.length - 1; index >= 0; index--) {
-					if (existingBatches[index].quantity > 0) {
-						existingBatches[index].quantity -= 1;
-						if (existingBatches[index].quantity === 0) {
+					if (existingBatches[ index ].quantity > 0) {
+						existingBatches[ index ].quantity -= 1;
+						if (existingBatches[ index ].quantity === 0) {
 							existingBatches.splice(index, 1);
 						}
 						break;
@@ -240,6 +241,7 @@ export default function useCartOperation(tableId = null) {
 				data: {
 					...itemCondition,
 					quantity: updatedQuantity,
+					quantity_limit: product.quantity,
 					purchase_price: product.purchase_price,
 					sales_price: product.sales_price,
 					sub_total: updatedSubTotal,
@@ -285,7 +287,7 @@ export default function useCartOperation(tableId = null) {
 			};
 
 			// =============== get cart item data before deletion ================
-			const [cartItem, invoiceTable] = await Promise.all([
+			const [ cartItem, invoiceTable ] = await Promise.all([
 				window.dbAPI.getDataFromTable("invoice_table_item", itemCondition),
 				tableId ? window.dbAPI.getDataFromTable("invoice_table", tableId) : null,
 			]);
@@ -321,7 +323,7 @@ export default function useCartOperation(tableId = null) {
 				...withInvoiceId(tableId),
 			};
 
-			const [items, invoiceTable] = await Promise.all([
+			const [ items, invoiceTable ] = await Promise.all([
 				window.dbAPI.getDataFromTable("invoice_table_item", itemCondition),
 				tableId ? window.dbAPI.getDataFromTable("invoice_table", tableId) : Promise.resolve(null),
 			]);
@@ -339,16 +341,16 @@ export default function useCartOperation(tableId = null) {
 				vatConfig
 			);
 
-			const deltaSubTotal = updatedSubTotal - items[0].sub_total;
+			const deltaSubTotal = updatedSubTotal - items[ 0 ].sub_total;
 
 			// =============== preserve existing batches structure ================
 			let existingBatches = [];
 			try {
 				existingBatches =
-					typeof items[0].batches === "string"
-						? JSON.parse(items[0].batches)
-						: Array.isArray(items[0].batches)
-							? items[0].batches
+					typeof items[ 0 ].batches === "string"
+						? JSON.parse(items[ 0 ].batches)
+						: Array.isArray(items[ 0 ].batches)
+							? items[ 0 ].batches
 							: [];
 			} catch {
 				existingBatches = [];
@@ -359,6 +361,7 @@ export default function useCartOperation(tableId = null) {
 				data: {
 					...itemCondition,
 					quantity: quantityValue,
+					quantity_limit: product.quantity,
 					purchase_price: product.purchase_price,
 					sales_price: product.sales_price,
 					sub_total: updatedSubTotal,

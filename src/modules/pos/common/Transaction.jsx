@@ -34,7 +34,7 @@ import { useDisclosure } from "@mantine/hooks";
 import FormValidationWrapper from "@components/form-builders/FormValidationWrapper";
 import useLoggedInUser from "@hooks/useLoggedInUser";
 import { useDispatch } from "react-redux";
-import { clearProductSnapshots } from "@features/cart";
+import { clearProductSnapshots } from "@features/cartSnapshot";
 
 export default function Transaction({ form, tableId = null }) {
 	const user = useLoggedInUser();
@@ -42,22 +42,22 @@ export default function Transaction({ form, tableId = null }) {
 	const dispatch = useDispatch();
 	const { isOnline } = useOutletContext();
 	const { configData } = useConfigData({ offlineFetch: !isOnline });
-	const [coreUsers, setCoreUsers] = useState([]);
+	const [ coreUsers, setCoreUsers ] = useState([]);
 	const { invoiceData, getCartTotal, refetchInvoice } = useCartOperation();
-	const [isLoading, setIsLoading] = useState({ saveAll: false, save: false, print: false });
-	const [customersDropdownData, setCustomersDropdownData] = useState([]);
-	const [customerDrawerOpened, { open: customerDrawerOpen, close: customerDrawerClose }] =
+	const [ isLoading, setIsLoading ] = useState({ saveAll: false, save: false, print: false });
+	const [ customersDropdownData, setCustomersDropdownData ] = useState([]);
+	const [ customerDrawerOpened, { open: customerDrawerOpen, close: customerDrawerClose } ] =
 		useDisclosure(false);
-	const [customerObject, setCustomerObject] = useState(null);
-	const [discountMode, setDiscountMode] = useState("flat");
-	const [percentageValue, setPercentageValue] = useState(0);
+	const [ customerObject, setCustomerObject ] = useState(null);
+	const [ discountMode, setDiscountMode ] = useState("flat");
+	const [ percentageValue, setPercentageValue ] = useState(0);
 
-	const [transactionModeData, setTransactionModeData] = useState([]);
+	const [ transactionModeData, setTransactionModeData ] = useState([]);
 
 	// ============= wreckage start =============
 	const enableTable = false;
 	const salesByUser = "";
-	const handleClick = () => {};
+	const handleClick = () => { };
 	// ============= wreckage stop ==============
 
 	// =============== check if split payment is active ================
@@ -102,7 +102,7 @@ export default function Transaction({ form, tableId = null }) {
 			form.setFieldValue("receive_amount", cartTotal);
 
 			if (form.values.payments.length === 1) {
-				const currentPayment = form.values.payments[0];
+				const currentPayment = form.values.payments[ 0 ];
 				form.setFieldValue("payments", [
 					{
 						...currentPayment,
@@ -111,7 +111,7 @@ export default function Transaction({ form, tableId = null }) {
 				]);
 			}
 		}
-	}, [getCartTotal(), form.values.discount, isSplitPaymentActive]);
+	}, [ getCartTotal(), form.values.discount, isSplitPaymentActive ]);
 
 	useEffect(() => {
 		fetchCustomers();
@@ -122,7 +122,7 @@ export default function Transaction({ form, tableId = null }) {
 		if (!customerDrawerOpened) {
 			fetchCustomers();
 		}
-	}, [customerDrawerOpened]);
+	}, [ customerDrawerOpened ]);
 
 	// =============== handle customer selection from drawer ================
 	const handleCustomerSelect = (customer) => {
@@ -142,18 +142,18 @@ export default function Transaction({ form, tableId = null }) {
 		try {
 			for (const cartItem of invoiceData) {
 				const stockItemId = cartItem.stock_item_id || cartItem.stock_id;
-				
+
 				// =============== fetch current product from database ================
 				const currentProducts = await window.dbAPI.getDataFromTable("core_products", {
 					stock_id: stockItemId,
 				});
-				
+
 				if (!currentProducts || currentProducts.length === 0) {
 					console.error(`Product not found in database: ${stockItemId}`);
 					continue;
 				}
 
-				const currentProduct = currentProducts[0];
+				const currentProduct = currentProducts[ 0 ];
 				const soldQuantity = cartItem.quantity;
 
 				// =============== calculate new quantities ================
@@ -186,10 +186,10 @@ export default function Transaction({ form, tableId = null }) {
 
 							if (batchIndex !== -1) {
 								// =============== update sales_quantity and remain_quantity ================
-								purchaseItems[batchIndex].sales_quantity =
-									(purchaseItems[batchIndex].sales_quantity || 0) + soldBatch.quantity;
-								purchaseItems[batchIndex].remain_quantity =
-									(purchaseItems[batchIndex].remain_quantity || 0) - soldBatch.quantity;
+								purchaseItems[ batchIndex ].sales_quantity =
+									(purchaseItems[ batchIndex ].sales_quantity || 0) + soldBatch.quantity;
+								purchaseItems[ batchIndex ].remain_quantity =
+									(purchaseItems[ batchIndex ].remain_quantity || 0) - soldBatch.quantity;
 							}
 						});
 
@@ -267,7 +267,7 @@ export default function Transaction({ form, tableId = null }) {
 			setCustomerObject(null);
 			form.reset();
 
-			const firstMode = transactionModeData[0];
+			const firstMode = transactionModeData[ 0 ];
 			if (firstMode) {
 				form.setFieldValue("payments", [
 					{
@@ -332,7 +332,7 @@ export default function Transaction({ form, tableId = null }) {
 
 		const modeName =
 			form.values.payments.length === 1
-				? form.values.payments[0].transaction_mode_name
+				? form.values.payments[ 0 ].transaction_mode_name
 				: "Multiple";
 
 		const salesData = {
@@ -345,8 +345,8 @@ export default function Transaction({ form, tableId = null }) {
 			discount_calculation: 0,
 			discount_type: discountMode,
 			customerId: form.values.customer_id,
-			customerName: customerInfo?.name || customerInfo?.label?.split(" -- ")[1],
-			customerMobile: customerInfo?.mobile || customerInfo?.label?.split(" -- ")[0],
+			customerName: customerInfo?.name || customerInfo?.label?.split(" -- ")[ 1 ],
+			customerMobile: customerInfo?.mobile || customerInfo?.label?.split(" -- ")[ 0 ],
 			customer_address: customerInfo?.address || "",
 			createdByUser: "Sandra",
 			createdById: form.values.sales_by_id,
