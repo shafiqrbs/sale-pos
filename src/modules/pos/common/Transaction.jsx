@@ -181,7 +181,6 @@ export default function Transaction({ form, tableId = null }) {
 			const responseSalesData = await handleOfflineSave(fullAmount);
 			// }
 
-			showNotification(t("SalesComplete"), "blue", "", "", true, 1000, true);
 			setCustomerObject(null);
 			form.reset();
 

@@ -95,6 +95,7 @@ db.prepare(
 		category_id INTEGER,
 		unit_id INTEGER NOT NULL,
 		quantity REAL NOT NULL,
+		total_sales REAL DEFAULT 0,
 		purchase_price REAL NOT NULL,
 		sales_price REAL NOT NULL,
 		barcode TEXT,
