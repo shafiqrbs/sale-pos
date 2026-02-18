@@ -6,11 +6,9 @@ import { useOutletContext } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 import { setCartData } from "@features/checkout";
 import { useEffect, useCallback } from "react";
-import { addProductSnapshot, removeProductSnapshot, clearProductSnapshots } from "@features/cartSnapshot";
 
 export default function useCartOperation(tableId = null) {
 	const invoiceData = useSelector((state) => state.checkout.invoiceData);
-	// const productSnapshots = useSelector((state) => state.cart.productSnapshots);
 	const dispatch = useDispatch();
 	const { isOnline } = useOutletContext();
 	const { configData } = useConfigData({ offlineFetch: !isOnline });
@@ -31,8 +29,6 @@ export default function useCartOperation(tableId = null) {
 
 		try {
 			// =============== store product snapshot ================
-			const stockItemId = product.stock_item_id || product.stock_id;
-			dispatch(addProductSnapshot({ stockItemId, product }));
 
 			// if (isOnline) {
 			//     const payload = {
@@ -120,7 +116,6 @@ export default function useCartOperation(tableId = null) {
 					data: {
 						...itemCondition,
 						quantity: updatedQuantity,
-						quantity_limit: product.quantity,
 						purchase_price: product.purchase_price,
 						sales_price: product.sales_price,
 						sub_total: updatedSubTotal,
@@ -241,7 +236,6 @@ export default function useCartOperation(tableId = null) {
 				data: {
 					...itemCondition,
 					quantity: updatedQuantity,
-					quantity_limit: product.quantity,
 					purchase_price: product.purchase_price,
 					sales_price: product.sales_price,
 					sub_total: updatedSubTotal,
@@ -291,12 +285,6 @@ export default function useCartOperation(tableId = null) {
 				window.dbAPI.getDataFromTable("invoice_table_item", itemCondition),
 				tableId ? window.dbAPI.getDataFromTable("invoice_table", tableId) : null,
 			]);
-
-			// =============== remove product snapshot ================
-			if (cartItem?.length) {
-				const stockItemId = product.stock_item_id || product.stock_id;
-				dispatch(removeProductSnapshot(stockItemId));
-			}
 
 			await window.dbAPI.deleteDataFromTable("invoice_table_item", itemCondition);
 
@@ -361,7 +349,6 @@ export default function useCartOperation(tableId = null) {
 				data: {
 					...itemCondition,
 					quantity: quantityValue,
-					quantity_limit: product.quantity,
 					purchase_price: product.purchase_price,
 					sales_price: product.sales_price,
 					sub_total: updatedSubTotal,
@@ -386,7 +373,6 @@ export default function useCartOperation(tableId = null) {
 
 	const clear = () => {
 		dispatch(setCartData([]));
-		dispatch(clearProductSnapshots());
 	};
 
 	const getCartTotal = () => invoiceData?.reduce((sum, item) => sum + item.sub_total, 0) || 0;

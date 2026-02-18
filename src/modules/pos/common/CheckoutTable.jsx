@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { DataTable } from "mantine-datatable";
 import tableCss from "@assets/css/Table.module.css";
 import { Text, Group, ActionIcon, NumberInput } from "@mantine/core";
@@ -9,6 +9,7 @@ import useCartOperation from "@hooks/useCartOperation";
 import BatchProductModal from "@components/modals/BatchProductModal";
 import { useDisclosure } from "@mantine/hooks";
 import { RESTRICT_PRODUCT_QUANTITY_LIMIT } from "@constants/index";
+import { showNotification } from "@components/ShowNotificationComponent";
 
 export default function CheckoutTable() {
 	const { mainAreaHeight } = useOutletContext();
@@ -102,6 +103,40 @@ export default function CheckoutTable() {
 		}
 	};
 
+	const handleLimitCheckOnBlur = (event, data) => {
+		const inputValue = parseFloat(event.target.value) || 0;
+		if (RESTRICT_PRODUCT_QUANTITY_LIMIT && inputValue > data.quantity_limit) {
+			showNotification(
+				`Quantity exceeds limit, available stock is ${data.quantity_limit}`,
+				"red",
+				"",
+				"",
+				true
+			);
+			updateQuantity(data, data.quantity_limit);
+		}
+	}
+
+	const handleQuantityUpdate = (data, value) => {
+		const numberValue = parseFloat(value) || 0;
+
+		if (RESTRICT_PRODUCT_QUANTITY_LIMIT && numberValue > data.quantity_limit) {
+			showNotification(
+				`Maximum available quantity is ${data.quantity_limit}`,
+				"red",
+				"",
+				"",
+				true,
+				1000,
+				true
+			);
+			updateQuantity(data, data.quantity_limit);
+			return;
+		}
+
+		updateQuantity(data, numberValue);
+	}
+
 	return (
 		<>
 			<DataTable
@@ -155,9 +190,8 @@ export default function CheckoutTable() {
 									hideControls
 									allowNegative={false}
 									onClick={(event) => handleQuantityInputClick(event, data)}
-									onChange={(value) => {
-										updateQuantity(data, value);
-									}}
+									onBlur={(event) => handleLimitCheckOnBlur(event, data)}
+									onChange={(value) => handleQuantityUpdate(data, value)}
 									styles={{
 										input: {
 											textAlign: "center",

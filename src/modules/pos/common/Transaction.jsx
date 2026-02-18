@@ -33,13 +33,10 @@ import CustomerDrawer from "@components/modals/CustomerDrawer";
 import { useDisclosure } from "@mantine/hooks";
 import FormValidationWrapper from "@components/form-builders/FormValidationWrapper";
 import useLoggedInUser from "@hooks/useLoggedInUser";
-import { useDispatch } from "react-redux";
-import { clearProductSnapshots } from "@features/cartSnapshot";
 
 export default function Transaction({ form, tableId = null }) {
 	const user = useLoggedInUser();
 	const { t } = useTranslation();
-	const dispatch = useDispatch();
 	const { isOnline } = useOutletContext();
 	const { configData } = useConfigData({ offlineFetch: !isOnline });
 	const [ coreUsers, setCoreUsers ] = useState([]);
@@ -210,8 +207,6 @@ export default function Transaction({ form, tableId = null }) {
 				});
 			}
 
-			// =============== clear all product snapshots after successful update ================
-			dispatch(clearProductSnapshots());
 		} catch (error) {
 			console.error("Error updating products after sale:", error);
 		}
