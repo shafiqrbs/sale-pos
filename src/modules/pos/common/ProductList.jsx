@@ -65,9 +65,12 @@ export default function ProductList() {
 				search: searchConditions,
 			});
 
-			await getProductCount({}, {
-				search: searchConditions,
-			});
+			await getProductCount(
+				{},
+				{
+					search: searchConditions,
+				}
+			);
 		} catch (error) {
 			console.error("Failed to fetch paginated products from sqlite:", error);
 		}
@@ -80,14 +83,10 @@ export default function ProductList() {
 
 	// =============== listen for product updates from sales and refetch ================
 	useEffect(() => {
-		const handleProductsUpdated = () => {
-			fetchProductsPage();
-		};
-
-		window.addEventListener("products-updated", handleProductsUpdated);
+		window.addEventListener("products-updated", fetchProductsPage);
 
 		return () => {
-			window.removeEventListener("products-updated", handleProductsUpdated);
+			window.removeEventListener("products-updated", fetchProductsPage);
 		};
 	}, [fetchProductsPage]);
 

@@ -11,6 +11,7 @@ import {
 } from "@mantine/core";
 import { IconPlus, IconMinus } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
+import { RESTRICT_PRODUCT_QUANTITY_LIMIT } from "@constants/index";
 
 // purchase_item_for_sales structure:
 // [
@@ -134,8 +135,9 @@ export default function BatchProductModal({
 											w={60}
 											value={selectedBatches[item.purchase_item_id] || 0}
 											min={0}
+											max={RESTRICT_PRODUCT_QUANTITY_LIMIT ? item.remain_quantity : undefined}
 											allowNegative={false}
-											max={item.remain_quantity}
+											clampBehavior="strict"
 											step={1}
 											decimalScale={3}
 											hideControls

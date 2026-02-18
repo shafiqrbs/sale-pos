@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DataTable } from "mantine-datatable";
 import tableCss from "@assets/css/Table.module.css";
 import { Text, Group, ActionIcon, NumberInput } from "@mantine/core";
@@ -19,6 +19,26 @@ export default function CheckoutTable() {
 	const [selectedProduct, setSelectedProduct] = useState(null);
 	const [batchModalOpened, { open: openBatchModal, close: closeBatchModal }] = useDisclosure(false);
 	const { getProduct } = useLocalProducts({ fetchOnMount: false });
+	const [inputValues, setInputValues] = useState({});
+
+	// =============== sync input values with cart data ================
+	useEffect(() => {
+		if (invoiceData && invoiceData.length > 0) {
+			const newInputValues = {};
+			invoiceData.forEach((item) => {
+				// =============== only update if value has changed to avoid unnecessary renders ================
+				if (inputValues[item.stock_item_id] !== item.quantity) {
+					newInputValues[item.stock_item_id] = item.quantity;
+				}
+			});
+
+			// =============== only set if there are actual changes ================
+			if (Object.keys(newInputValues).length > 0) {
+				setInputValues((prev) => ({ ...prev, ...newInputValues }));
+			}
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [invoiceData]);
 
 	const handleClick = () => {
 		console.info("handleClick");
@@ -102,37 +122,18 @@ export default function CheckoutTable() {
 		}
 	};
 
-	const handleLimitCheckOnBlur = (event, data) => {
-		const inputValue = parseFloat(event.target.value) || 0;
-		if (RESTRICT_PRODUCT_QUANTITY_LIMIT && inputValue > data.quantity_limit) {
-			showNotification(
-				`Quantity exceeds limit, available stock is ${data.quantity_limit}`,
-				"red",
-				"",
-				"",
-				true
-			);
-			updateQuantity(data, data.quantity_limit);
-		}
-	};
-
 	const handleQuantityUpdate = (data, value) => {
 		const numberValue = parseFloat(value) || 0;
+		const maxLimit = data.quantity_limit;
 
-		if (RESTRICT_PRODUCT_QUANTITY_LIMIT && numberValue > data.quantity_limit) {
-			showNotification(
-				`Maximum available quantity is ${data.quantity_limit}`,
-				"red",
-				"",
-				"",
-				true,
-				1000,
-				true
-			);
-			updateQuantity(data, data.quantity_limit);
+		if (RESTRICT_PRODUCT_QUANTITY_LIMIT && numberValue > maxLimit) {
+			setInputValues((prev) => ({ ...prev, [data.stock_item_id]: maxLimit }));
+			showNotification(`Maximum available quantity is ${maxLimit}`, "red", "", "", true, 800, true);
+			updateQuantity(data, maxLimit);
 			return;
 		}
 
+		setInputValues((prev) => ({ ...prev, [data.stock_item_id]: numberValue }));
 		updateQuantity(data, numberValue);
 	};
 
@@ -182,14 +183,15 @@ export default function CheckoutTable() {
 									ta="center"
 									fw={600}
 									maw={80}
-									value={data.quantity}
+									value={inputValues[data.stock_item_id] ?? data.quantity}
 									min={0}
+									max={RESTRICT_PRODUCT_QUANTITY_LIMIT ? data.quantity_limit : undefined}
 									step={1}
 									decimalScale={3}
 									hideControls
 									allowNegative={false}
+									clampBehavior="strict"
 									onClick={(event) => handleQuantityInputClick(event, data)}
-									onBlur={(event) => handleLimitCheckOnBlur(event, data)}
 									onChange={(value) => handleQuantityUpdate(data, value)}
 									styles={{
 										input: {
