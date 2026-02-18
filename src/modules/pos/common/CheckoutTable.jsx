@@ -10,13 +10,15 @@ import BatchProductModal from "@components/modals/BatchProductModal";
 import { useDisclosure } from "@mantine/hooks";
 import { RESTRICT_PRODUCT_QUANTITY_LIMIT } from "@constants/index";
 import { showNotification } from "@components/ShowNotificationComponent";
+import useLocalProducts from "@hooks/useLocalProducts";
 
 export default function CheckoutTable() {
 	const { mainAreaHeight } = useOutletContext();
 	const { t } = useTranslation();
 	const { invoiceData, increment, decrement, remove, updateQuantity } = useCartOperation();
-	const [ selectedProduct, setSelectedProduct ] = useState(null);
-	const [ batchModalOpened, { open: openBatchModal, close: closeBatchModal } ] = useDisclosure(false);
+	const [selectedProduct, setSelectedProduct] = useState(null);
+	const [batchModalOpened, { open: openBatchModal, close: closeBatchModal }] = useDisclosure(false);
+	const { getProduct } = useLocalProducts({ fetchOnMount: false });
 
 	const handleClick = () => {
 		console.info("handleClick");
@@ -24,12 +26,9 @@ export default function CheckoutTable() {
 
 	// =============== check if product has batches and open modal ================
 	const checkAndOpenBatchModal = async (data) => {
-		const fullProduct = await window.dbAPI.getDataFromTable("core_products", {
-			stock_id: data.stock_item_id,
-		});
+		const product = await getProduct(data.stock_item_id);
 
-		if (fullProduct && fullProduct.length > 0) {
-			const product = fullProduct[ 0 ];
+		if (product) {
 			let purchaseItems = [];
 
 			// =============== parse purchase_item_for_sales ================
@@ -53,10 +52,10 @@ export default function CheckoutTable() {
 				if (cartItems && cartItems.length > 0) {
 					try {
 						currentBatches =
-							typeof cartItems[ 0 ].batches === "string"
-								? JSON.parse(cartItems[ 0 ].batches)
-								: Array.isArray(cartItems[ 0 ].batches)
-									? cartItems[ 0 ].batches
+							typeof cartItems[0].batches === "string"
+								? JSON.parse(cartItems[0].batches)
+								: Array.isArray(cartItems[0].batches)
+									? cartItems[0].batches
 									: [];
 					} catch {
 						currentBatches = [];
@@ -115,7 +114,7 @@ export default function CheckoutTable() {
 			);
 			updateQuantity(data, data.quantity_limit);
 		}
-	}
+	};
 
 	const handleQuantityUpdate = (data, value) => {
 		const numberValue = parseFloat(value) || 0;
@@ -135,7 +134,7 @@ export default function CheckoutTable() {
 		}
 
 		updateQuantity(data, numberValue);
-	}
+	};
 
 	return (
 		<>
@@ -203,7 +202,7 @@ export default function CheckoutTable() {
 								<ActionIcon
 									size="sm"
 									bg="gray.7"
-									disabled={RESTRICT_PRODUCT_QUANTITY_LIMIT && (data.quantity >= data.quantity_limit)}
+									disabled={RESTRICT_PRODUCT_QUANTITY_LIMIT && data.quantity >= data.quantity_limit}
 									onClick={() => handleQuantityChange(data, "increment")}
 								>
 									<IconPlus height="12" width="12" />

@@ -28,6 +28,7 @@ import useCartOperation from "@hooks/useCartOperation";
 import { showNotification } from "@components/ShowNotificationComponent";
 import { useOutletContext } from "react-router";
 import useConfigData from "@hooks/useConfigData";
+import useLocalProducts from "@hooks/useLocalProducts";
 import { formatDateTime, generateInvoiceId } from "@utils/index";
 import CustomerDrawer from "@components/modals/CustomerDrawer";
 import { useDisclosure } from "@mantine/hooks";
@@ -41,6 +42,7 @@ export default function Transaction({ form, tableId = null }) {
 	const { configData } = useConfigData({ offlineFetch: !isOnline });
 	const [ coreUsers, setCoreUsers ] = useState([]);
 	const { invoiceData, getCartTotal, refetchInvoice } = useCartOperation();
+	const { getProduct } = useLocalProducts({ fetchOnMount: false });
 	const [ isLoading, setIsLoading ] = useState({ saveAll: false, save: false, print: false });
 	const [ customersDropdownData, setCustomersDropdownData ] = useState([]);
 	const [ customerDrawerOpened, { open: customerDrawerOpen, close: customerDrawerClose } ] =
@@ -141,16 +143,13 @@ export default function Transaction({ form, tableId = null }) {
 				const stockItemId = cartItem.stock_item_id || cartItem.stock_id;
 
 				// =============== fetch current product from database ================
-				const currentProducts = await window.dbAPI.getDataFromTable("core_products", {
-					stock_id: stockItemId,
-				});
+				const currentProduct = await getProduct(stockItemId);
 
-				if (!currentProducts || currentProducts.length === 0) {
+				if (!currentProduct) {
 					console.error(`Product not found in database: ${stockItemId}`);
 					continue;
 				}
 
-				const currentProduct = currentProducts[ 0 ];
 				const soldQuantity = cartItem.quantity;
 
 				// =============== calculate new quantities ================
@@ -207,6 +206,8 @@ export default function Transaction({ form, tableId = null }) {
 				});
 			}
 
+			// =============== dispatch event to notify product list to refetch ================
+			window.dispatchEvent(new CustomEvent("products-updated"));
 		} catch (error) {
 			console.error("Error updating products after sale:", error);
 		}

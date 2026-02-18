@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Image, ScrollArea, Box, Card, Grid, Text, Flex } from "@mantine/core";
 import { useOutletContext } from "react-router";
 import useConfigData from "@hooks/useConfigData";
@@ -13,72 +13,83 @@ import noProductImg from "@assets/images/not-found.webp";
 import noProductImgFound from "@assets/images/no-image.png";
 import { RESTRICT_PRODUCT_QUANTITY_LIMIT } from "@constants/index";
 import { formatCurrency } from "@utils/index";
+import useLocalProducts from "@hooks/useLocalProducts";
 
 const ITEMS_PER_PAGE = 16;
 
 export default function ProductList() {
-	const [ allProducts, setAllProducts ] = useState([]);
-	const [ totalProducts, setTotalProducts ] = useState(0);
-	const [ activePage, setActivePage ] = useState(1);
-	const [ selectedProduct, setSelectedProduct ] = useState(null);
-	const [ batchModalOpened, { open: openBatchModal, close: closeBatchModal } ] = useDisclosure(false);
+	const [activePage, setActivePage] = useState(1);
+	const [selectedProduct, setSelectedProduct] = useState(null);
+	const [batchModalOpened, { open: openBatchModal, close: closeBatchModal }] = useDisclosure(false);
 	const { increment } = useCartOperation();
 	const { mainAreaHeight, isOnline } = useOutletContext();
 	const { configData } = useConfigData({ offlineFetch: !isOnline });
-	const [ filter, setFilter ] = useState({
+	const {
+		products: allProducts,
+		totalCount: totalProducts,
+		getLocalProducts,
+		getProductCount,
+	} = useLocalProducts({ fetchOnMount: false });
+	const [filter, setFilter] = useState({
 		categories: [],
 		search: "",
 		barcode: "",
 		view: "grid", // grid | list | minimal
 	});
 
-	useEffect(() => {
-		async function fetchProductsPage() {
-			try {
-				const offset = (activePage - 1) * ITEMS_PER_PAGE;
+	// =============== reusable function to fetch products with current filters ================
+	const fetchProductsPage = useCallback(async () => {
+		try {
+			const offset = (activePage - 1) * ITEMS_PER_PAGE;
 
-				const normalizedSearchValue = filter.search.trim();
-				const normalizedBarcodeValue = filter.barcode.trim();
-				const selectedCategoryIds = filter.categories;
+			const normalizedSearchValue = filter.search.trim();
+			const normalizedBarcodeValue = filter.barcode.trim();
+			const selectedCategoryIds = filter.categories;
 
-				const searchConditions = {
-					like: {
-						display_name: normalizedSearchValue || undefined,
-						barcode: normalizedBarcodeValue || undefined,
-					},
-					in: {
-						category_id:
-							Array.isArray(selectedCategoryIds) && selectedCategoryIds.length > 0
-								? selectedCategoryIds
-								: undefined,
-					},
-				};
+			const searchConditions = {
+				like: {
+					display_name: normalizedSearchValue || undefined,
+					barcode: normalizedBarcodeValue || undefined,
+				},
+				in: {
+					category_id:
+						Array.isArray(selectedCategoryIds) && selectedCategoryIds.length > 0
+							? selectedCategoryIds
+							: undefined,
+				},
+			};
 
-				const fetchedProducts = await window.dbAPI.getDataFromTable("core_products", {}, "id", {
-					limit: ITEMS_PER_PAGE,
-					offset,
-					search: searchConditions,
-				});
+			await getLocalProducts({}, "id", {
+				limit: ITEMS_PER_PAGE,
+				offset,
+				search: searchConditions,
+			});
 
-				const productsCount = await window.dbAPI.getTableCount(
-					"core_products",
-					{},
-					{
-						search: searchConditions,
-					}
-				);
-
-				setAllProducts(Array.isArray(fetchedProducts) ? fetchedProducts : []);
-				setTotalProducts(typeof productsCount === "number" ? productsCount : 0);
-			} catch (error) {
-				console.error("Failed to fetch paginated products from sqlite:", error);
-				setAllProducts([]);
-				setTotalProducts(0);
-			}
+			await getProductCount({}, {
+				search: searchConditions,
+			});
+		} catch (error) {
+			console.error("Failed to fetch paginated products from sqlite:", error);
 		}
+	}, [activePage, filter, getLocalProducts, getProductCount]);
 
+	// =============== fetch products on mount and when filters change ================
+	useEffect(() => {
 		fetchProductsPage();
-	}, [ activePage, filter.barcode, filter.categories, filter.search ]);
+	}, [fetchProductsPage]);
+
+	// =============== listen for product updates from sales and refetch ================
+	useEffect(() => {
+		const handleProductsUpdated = () => {
+			fetchProductsPage();
+		};
+
+		window.addEventListener("products-updated", handleProductsUpdated);
+
+		return () => {
+			window.removeEventListener("products-updated", handleProductsUpdated);
+		};
+	}, [fetchProductsPage]);
 
 	// =============== check if product should be disabled ================
 	const isProductDisabled = (product) => {
@@ -113,10 +124,10 @@ export default function ProductList() {
 			if (cartItems && cartItems.length > 0) {
 				try {
 					currentBatches =
-						typeof cartItems[ 0 ].batches === "string"
-							? JSON.parse(cartItems[ 0 ].batches)
-							: Array.isArray(cartItems[ 0 ].batches)
-								? cartItems[ 0 ].batches
+						typeof cartItems[0].batches === "string"
+							? JSON.parse(cartItems[0].batches)
+							: Array.isArray(cartItems[0].batches)
+								? cartItems[0].batches
 								: [];
 				} catch {
 					currentBatches = [];
@@ -168,12 +179,11 @@ export default function ProductList() {
 															padding="xs"
 															h="100%"
 															title={productDisabled ? "Out of Stock" : "Add to Cart"}
-															className={productDisabled ? "" : "cursor-pointer"}
+															className={productDisabled ? "cursor-not-allowed" : "cursor-pointer"}
 															styles={() => ({
 																root: {
 																	transition: "transform 0.5s ease-in-out",
 																	opacity: productDisabled ? 0.75 : 1,
-																	cursor: productDisabled ? "not-allowed" : "pointer",
 																},
 															})}
 															onClick={() => handleProductClick(product)}
@@ -192,14 +202,15 @@ export default function ProductList() {
 
 															<Flex justify="space-between" gap={4} align="center" mt="auto">
 																<Text fz="10" c="gray.8">
-																	{product?.quantity >= 0.1 ? <>QTY: {product?.quantity} {product?.unit_name}</> : <>Out of Stock</>}
+																	{product?.quantity >= 0.1 ? (
+																		<>
+																			QTY: {product?.quantity} {product?.unit_name}
+																		</>
+																	) : (
+																		<>Out of Stock</>
+																	)}
 																</Text>
-																<Text
-																	fw={900}
-																	fz="18"
-																	size="md"
-																	c="green.9"
-																>
+																<Text fw={900} fz="18" size="md" c="green.9">
 																	{configData?.currency?.symbol ||
 																		configData?.inventory_config?.currency?.symbol}{" "}
 																	{formatCurrency(product?.sales_price)}
