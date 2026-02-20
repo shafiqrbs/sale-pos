@@ -7,7 +7,7 @@ import { useOutletContext } from 'react-router';
 import SalesPrintA4 from '@components/print-formats/SalesPrintA4';
 import useConfigData from '@hooks/useConfigData';
 
-export default function SalesDetails({ loading, salesViewData }) {
+export default function Details({ loading, salesViewData }) {
   const printRef = useRef();
   const { isOnline, mainAreaHeight } = useOutletContext()
   const { t } = useTranslation();

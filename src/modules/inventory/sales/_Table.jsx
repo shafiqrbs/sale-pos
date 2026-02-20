@@ -5,9 +5,10 @@ import { useOutletContext } from 'react-router'
 import { DataTable } from 'mantine-datatable';
 import tableCss from "@assets/css/Table.module.css";
 import { useTranslation } from 'react-i18next';
-import SalesDetails from './__SalesDetails';
+import Details from './__Details';
 import useSalesList from '@hooks/useSalesList';
 import KeywordSearch from '@components/KeywordSearch';
+import GlobalModal from '@components/modals/GlobalModal';
 import { useForm } from '@mantine/form';
 
 const PER_PAGE = 25;
@@ -62,7 +63,7 @@ export default function Table() {
                 <KeywordSearch showStartEndDate form={form} />
             </Box>
             <Grid columns={24} gutter={{ base: 8 }}>
-                <Grid.Col span={showDetails ? 16 : 24}>
+                <Grid.Col span={24}>
                     <Box bg="white" className="borderRadiusAll" bd="1px solid #e6e6e6">
                         <DataTable
                             classNames={{
@@ -215,13 +216,17 @@ export default function Table() {
                         />
                     </Box>
                 </Grid.Col>
-
-                {showDetails && (
-                    <Grid.Col span={8}>
-                        <SalesDetails loading={loading} salesViewData={salesViewData} salesData={salesData} />
-                    </Grid.Col>
-                )}
             </Grid>
+
+            <GlobalModal
+                opened={showDetails}
+                onClose={() => setShowDetails(false)}
+                size="xl"
+                padding="md"
+                title={`${t("Invoice")}: ${salesViewData?.invoice || ""}`}
+            >
+                <Details loading={loading} salesViewData={salesViewData} salesData={salesData} />
+            </GlobalModal>
         </Box>
 
     )

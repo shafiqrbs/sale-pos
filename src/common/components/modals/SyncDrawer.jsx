@@ -28,7 +28,7 @@ import { createPortal } from "react-dom";
 import { apiSlice } from "@services/api.mjs";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router";
+// import { useNavigate } from "react-router";
 import axios from "axios";
 import { APP_NAVLINKS, MASTER_APIS } from "@/routes/routes";
 import commonDataStoreIntoLocalStorage from "@utils/local-storage/commonDataStoreIntoLocalStorage";
@@ -53,17 +53,17 @@ const PLATFORM_SYNC_DATA_MAP = {
 export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen }) {
 	const { t } = useTranslation();
 	const dispatch = useDispatch();
-	const navigate = useNavigate();
-	const [syncPos] = useSyncPosMutation();
-	const [syncRecords, setSyncRecords] = useState(() => getSyncRecordsFromLocalStorage());
-	const [loadingStates, setLoadingStates] = useState(() => {
+	// const navigate = useNavigate();
+	const [ syncPos ] = useSyncPosMutation();
+	const [ syncRecords, setSyncRecords ] = useState(() => getSyncRecordsFromLocalStorage());
+	const [ loadingStates, setLoadingStates ] = useState(() => {
 		return SYNC_DATA.reduce((accumulator, item) => {
-			accumulator[item.mode] = false;
+			accumulator[ item.mode ] = false;
 			return accumulator;
 		}, {});
 	});
-	const [platformSyncing, setPlatformSyncing] = useState(false);
-	const lastSyncRecord = useMemo(() => getLastSyncRecord(syncRecords), [syncRecords]);
+	const [ platformSyncing, setPlatformSyncing ] = useState(false);
+	const lastSyncRecord = useMemo(() => getLastSyncRecord(syncRecords), [ syncRecords ]);
 
 	const buildSalesSyncPayload = (sale) => {
 		const items = [];
@@ -190,14 +190,14 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 	const runSync = async (syncOption) => {
 		setLoadingStates((previousStates) => ({
 			...previousStates,
-			[syncOption]: true,
+			[ syncOption ]: true,
 		}));
 
 		try {
 			let tableName = syncOption;
 			let syncData = null;
 
-			tableName = TABLE_MAPPING[syncOption] || syncOption;
+			tableName = TABLE_MAPPING[ syncOption ] || syncOption;
 			syncData = await window.dbAPI.getDataFromTable(tableName);
 
 			const payload = buildSyncPayload({ syncType: syncOption, syncData: syncData || [] });
@@ -231,7 +231,7 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 		} finally {
 			setLoadingStates((previousStates) => ({
 				...previousStates,
-				[syncOption]: false,
+				[ syncOption ]: false,
 			}));
 		}
 	};
@@ -308,10 +308,10 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 
 			// =============== clear and repopulate tables except license_activate and users ================
 			const syncOperations = Object.entries(PLATFORM_SYNC_DATA_MAP).map(
-				async ([table, property]) => {
-					const dataList = Array.isArray(response.data.data[property])
-						? response.data.data[property]
-						: [response.data.data[property]];
+				async ([ table, property ]) => {
+					const dataList = Array.isArray(response.data.data[ property ])
+						? response.data.data[ property ]
+						: [ response.data.data[ property ] ];
 
 					// =============== handle config_data special formatting ================
 					if (table === "config_data") {
@@ -347,17 +347,17 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 
 			showNotification("Platform data synced successfully", "teal", "lightgray", "", "", true);
 
-			dispatch(apiSlice.util.invalidateTags(["Sales"]));
+			dispatch(apiSlice.util.invalidateTags([ "Sales" ]));
 
-			navigate(APP_NAVLINKS.BAKERY, { replace: true });
+			// navigate(APP_NAVLINKS.BAKERY, { replace: true });
 
 			setTimeout(() => window.location.reload(), 100);
 		} catch (error) {
 			console.error("Error syncing platform data:", error);
 			showNotification(
 				error?.response?.data?.message ||
-					error?.message ||
-					"Failed to sync platform data. Please try again.",
+				error?.message ||
+				"Failed to sync platform data. Please try again.",
 				"red",
 				"",
 				"",
@@ -438,7 +438,7 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 									</Text>
 								</Stack>
 								<ActionIcon
-									loading={loadingStates[item.mode] || false}
+									loading={loadingStates[ item.mode ] || false}
 									loaderProps={{
 										children: (
 											<Flex justify="center" align="center" h="100%">
