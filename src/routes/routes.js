@@ -8,6 +8,8 @@ export const MASTER_APIS = {
 export const APP_NAVLINKS = {
 	BAKERY: "/pos/bakery",
 	SALES: "/inventory/sales",
+	PURCHASE: "/inventory/purchase",
+	PURCHASE_NEW: "/inventory/purchase/new",
 	STOCK: "/inventory/stock",
 	ACTIVATE: "/activate",
 	LOGIN: "/login",

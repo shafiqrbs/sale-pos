@@ -52,7 +52,7 @@ export default function LeftOptionsDrawer({ opened, onClose }) {
 			onClose={onClose}
 			title="Options"
 			position="left"
-			size="330px"
+			size="280px"
 		>
 			<Divider mb="md" />
 			<Accordion variant="filled" defaultValue="core">

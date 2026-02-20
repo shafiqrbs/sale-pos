@@ -1,7 +1,7 @@
-import { Box, Grid, Text, ActionIcon, Group, Menu, Flex } from '@mantine/core';
-import { IconDotsVertical, IconEye } from '@tabler/icons-react';
+import { Box, Grid, Text, ActionIcon, Group, Menu, Flex, Button } from '@mantine/core';
+import { IconDotsVertical, IconEye, IconPlus } from '@tabler/icons-react';
 import { useState } from 'react'
-import { useOutletContext } from 'react-router'
+import { useNavigate, useOutletContext } from 'react-router'
 import { DataTable } from 'mantine-datatable';
 import tableCss from "@assets/css/Table.module.css";
 import { useTranslation } from 'react-i18next';
@@ -11,10 +11,12 @@ import KeywordSearch from '@components/KeywordSearch';
 import GlobalModal from '@components/modals/GlobalModal';
 import { useForm } from '@mantine/form';
 import { useDisclosure } from '@mantine/hooks';
+import { APP_NAVLINKS } from '@/routes/routes';
 
 const PER_PAGE = 25;
 
 export default function Table() {
+    const navigate = useNavigate();
     const { t } = useTranslation();
     const [ opened, { open, close } ] = useDisclosure(false);
     const [ page, setPage ] = useState(1);
@@ -55,9 +57,12 @@ export default function Table() {
 
     return (
         <Box>
-            <Box mb="xs">
+            <Flex mb="xs" gap="sm">
                 <KeywordSearch showStartEndDate form={form} />
-            </Box>
+                <Button onClick={() => navigate(APP_NAVLINKS.PURCHASE_NEW)} w={150} bg="var(--theme-primary-color-6)" color="white" leftSection={<IconPlus size={18} />}>
+                    {t("Purchase")}
+                </Button>
+            </Flex>
             <Grid columns={24} gutter={{ base: 8 }}>
                 <Grid.Col span={24}>
                     <Box bg="white" className="borderRadiusAll" bd="1px solid #e6e6e6">
@@ -219,7 +224,7 @@ export default function Table() {
                 onClose={close}
                 size="xl"
                 padding="md"
-                title={`${t("Sales")}: ${salesViewData?.invoice || ""}`}
+                title={`${t("Purchase")}: ${salesViewData?.invoice || ""}`}
             >
                 <Details loading={loading} salesViewData={salesViewData} salesData={salesData} />
             </GlobalModal>
