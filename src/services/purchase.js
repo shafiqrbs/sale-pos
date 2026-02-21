@@ -56,6 +56,26 @@ export const extendedPurchaseApiSlice = apiSlice.injectEndpoints({
       },
       providesTags: [ "Purchase" ],
     }),
+
+    approvePurchase: builder.mutation({
+      query: (id) => {
+        return {
+          url: `${APP_APIS.PURCHASE}/approve/${id}`,
+          method: "GET",
+        };
+      },
+      invalidatesTags: [ "Purchase" ],
+    }),
+
+    copyPurchase: builder.mutation({
+      query: (id) => {
+        return {
+          url: `${APP_APIS.PURCHASE}/copy/${id}`,
+          method: "GET",
+        };
+      },
+      invalidatesTags: [ "Purchase" ],
+    }),
   }),
 });
 
@@ -64,5 +84,7 @@ export const {
   useAddPurchaseMutation,
   useUpdatePurchaseMutation,
   useDeletePurchaseMutation,
-  useGetPurchaseByIdQuery
+  useGetPurchaseByIdQuery,
+  useApprovePurchaseMutation,
+  useCopyPurchaseMutation,
 } = extendedPurchaseApiSlice;

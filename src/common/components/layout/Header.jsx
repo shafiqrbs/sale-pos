@@ -167,21 +167,21 @@ export default function Header({ isOnline, toggleNetwork }) {
 							{allowSync ? <Tooltip label="Sync Data" bg="red.5" withArrow>
 								<ActionIcon
 									disabled={!isOnline}
-									mt={"4xs"}
+									mt="4xs"
 									onClick={toggleSyncPanel}
 									variant="filled"
-									color={`white`}
+									color="white"
 									bg={isOnline ? "green.8" : "gray.1"}
 								>
 									<IconRefresh size={20} />
 								</ActionIcon>
 							</Tooltip> : null}
-							<Tooltip label="Pos printer setup" bg={`red.5`} withArrow>
+							<Tooltip label="Pos printer setup" bg="red.5" withArrow>
 								<ActionIcon
-									mt={"4xs"}
+									mt="4xs"
 									onClick={openPrinter}
 									variant="transparent"
-									color={`white`}
+									color="white"
 								>
 									<IconPrinter size={20} />
 								</ActionIcon>

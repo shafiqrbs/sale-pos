@@ -1,6 +1,6 @@
-import { Box, Grid, Text, ActionIcon, Group, Menu, Flex, Button } from '@mantine/core';
-import { IconDotsVertical, IconEye, IconPlus } from '@tabler/icons-react';
 import { useState } from 'react'
+import { Box, Grid, Text, ActionIcon, Group, Menu, Flex, Button, Badge } from '@mantine/core';
+import { IconCopy, IconDotsVertical, IconEye, IconPlus, IconTrashX } from '@tabler/icons-react';
 import { useNavigate, useOutletContext } from 'react-router'
 import { DataTable } from 'mantine-datatable';
 import tableCss from "@assets/css/Table.module.css";
@@ -11,11 +11,16 @@ import GlobalModal from '@components/modals/GlobalModal';
 import { useForm } from '@mantine/form';
 import { useDisclosure } from '@mantine/hooks';
 import { APP_NAVLINKS } from '@/routes/routes';
-import { useGetPurchaseQuery } from '@services/purchase';
+import { useApprovePurchaseMutation, useCopyPurchaseMutation, useGetPurchaseQuery, useDeletePurchaseMutation } from '@services/purchase';
+import { modals } from '@mantine/modals';
+import { showNotification } from '@components/ShowNotificationComponent';
 
 const PER_PAGE = 25;
 
 export default function Table() {
+    const [ approvePurchase ] = useApprovePurchaseMutation();
+    const [ copyPurchase ] = useCopyPurchaseMutation();
+    const [ deletePurchase ] = useDeletePurchaseMutation();
     const navigate = useNavigate();
     const { t } = useTranslation();
     const [ opened, { open, close } ] = useDisclosure(false);
@@ -43,6 +48,47 @@ export default function Table() {
         }
     });
 
+    const handlePurchaseApprove = (id) => {
+        // Open confirmation modal
+        modals.openConfirmModal({
+            title: <Text size="md">{t("FormConfirmationTitle")}</Text>,
+            children: <Text size="sm">{t("FormConfirmationMessage")}</Text>,
+            labels: { confirm: t("Submit"), cancel: t("Cancel") },
+            confirmProps: { color: "red" },
+            onCancel: () => {
+                console.log("Cancel");
+            },
+            onConfirm: () => {
+                handleConfirmPurchaseApprove(id)
+            }
+        });
+    };
+
+    const handleConfirmPurchaseApprove = async (id) => {
+        try {
+            const res = await approvePurchase(id);
+
+            if (res.data.status === 200) {
+                showNotification(t("ApprovedSuccessfully"), "teal")
+            }
+        } catch (error) {
+            console.error("Error approving purchase:", error);
+            showNotification(error?.data?.message || t("ApproveFailed"), "red")
+        }
+    };
+
+    const handlePurchaseCopy = async (id) => {
+        try {
+            const res = await copyPurchase(id);
+            if (res.data.status === 200) {
+                showNotification(t("CopyPurchaseSuccessfully"), "teal")
+            }
+        } catch (error) {
+            console.error("Error copying purchase:", error);
+            showNotification(error?.data?.message || t("CopyPurchaseFailed"), "red")
+        }
+    };
+
     const handleShowDetails = (item) => {
         console.info("item:", item);
         setLoading(true);
@@ -54,6 +100,35 @@ export default function Table() {
             setLoading(false);
         }, 700)
     }
+
+    // =============== open copy purchase confirmation modal ===============
+    const handleOpenCopyConfirmModal = (purchaseId) => {
+        modals.openConfirmModal({
+            title: <Text size="md"> {t("CopyPurchase")}</Text>,
+            children: <Text size="sm"> {t("FormConfirmationMessage")}</Text>,
+            labels: { confirm: 'Confirm', cancel: 'Cancel' },
+            onCancel: () => console.log('Cancel'),
+            onConfirm: () => handlePurchaseCopy(purchaseId),
+        });
+    };
+
+    // =============== open purchase details view from menu (stops propagation so row click does not fire) ===============
+    const handleShowPurchaseFromMenu = (event, purchaseData) => {
+        event.stopPropagation();
+        handleShowDetails(purchaseData);
+    };
+
+    // =============== open delete purchase confirmation modal ===============
+    const handleOpenDeleteConfirmModal = (purchaseId) => {
+        modals.openConfirmModal({
+            title: <Text size="md"> {t("FormConfirmationTitle")}</Text>,
+            children: <Text size="sm"> {t("FormConfirmationMessage")}</Text>,
+            labels: { confirm: "Confirm", cancel: "Cancel" },
+            confirmProps: { color: "red.6" },
+            onCancel: () => console.log("Cancel"),
+            onConfirm: () => deletePurchase(purchaseId),
+        });
+    };
 
     return (
         <Box>
@@ -103,9 +178,9 @@ export default function Table() {
                                     ),
                                 },
                                 {
-                                    accessor: "customerName", title: t("Vendor"), render: (item) => (
+                                    accessor: "vendor_name", title: t("Vendor"), render: (item) => (
                                         <Text size="sm">
-                                            {item?.customerName || "N/A"}
+                                            {item?.vendor_name || "N/A"}
                                         </Text>
                                     )
                                 },
@@ -135,11 +210,28 @@ export default function Table() {
                                 },
                                 {
                                     accessor: "due",
-                                    title: t("Due"),
+                                    title: t("Payable"),
                                     textAlign: "right",
                                     render: (data) => {
                                         return <>{Number(data.total) - Number(data.payment)}</>;
                                     },
+                                },
+                                // { accessor: "payment", title: t("Payment") },
+                                { accessor: "mode", title: t("Mode") },
+                                {
+                                    accessor: "process",
+                                    title: t("Status"),
+                                    width: "130px",
+                                    render: (item) => {
+                                        const colorMap = {
+                                            Created: "blue",
+                                            Approved: "red",
+                                        };
+
+                                        const badgeColor = colorMap[ item.process ] || "gray";
+
+                                        return item.process && <Badge color={badgeColor}>{item.process}</Badge>;
+                                    }
                                 },
                                 {
                                     accessor: "action",
@@ -147,6 +239,19 @@ export default function Table() {
                                     textAlign: "right",
                                     render: (data) => (
                                         <Group gap={4} justify="right" wrap="nowrap">
+                                            {
+                                                !data.approved_by_id &&
+                                                <Button component="a" size="compact-xs" radius="xs"
+                                                    variant="filled" fw={'100'} fz={'12'}
+                                                    color='var(--theme-secondary-color-8)'
+                                                    mr={'4'}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handlePurchaseApprove(data.id)
+                                                    }}
+                                                >{t('Approve')}
+                                                </Button>
+                                            }
                                             <Menu
                                                 position="bottom-end"
                                                 offset={3}
@@ -158,32 +263,66 @@ export default function Table() {
                                                 <Menu.Target>
                                                     <ActionIcon
                                                         size="sm"
-                                                        variant="outline"
-                                                        color="var(--theme-primary-color-6)"
+                                                        variant="transparent"
+                                                        color='red'
                                                         radius="xl"
                                                         aria-label="Settings"
-                                                        onClick={(e) => e.preventDefault()}
                                                     >
                                                         <IconDotsVertical
-                                                            height="18"
-                                                            width="18"
+                                                            height={"18"}
+                                                            width={"18"}
                                                             stroke={1.5}
                                                         />
                                                     </ActionIcon>
                                                 </Menu.Target>
                                                 <Menu.Dropdown>
+
+                                                    {
+                                                        <Menu.Item
+                                                            onClick={() => handleOpenCopyConfirmModal(data.id)}
+                                                            leftSection={
+                                                                <IconCopy
+                                                                    height={"18"}
+                                                                    width={"18"}
+                                                                    stroke={1.5}
+                                                                />
+                                                            }
+                                                            w="200"
+                                                        >
+                                                            {t("Copy")}
+                                                        </Menu.Item>
+                                                    }
                                                     <Menu.Item
-                                                        onClick={(e) => {
-                                                            e.preventDefault();
-                                                            handleShowDetails(data);
-                                                        }}
-                                                        w="140"
+                                                        onClick={(event) => handleShowPurchaseFromMenu(event, data)}
+                                                        w="200"
+                                                        leftSection={
+                                                            <IconEye
+                                                                height={"18"}
+                                                                width={"18"}
+                                                                stroke={1.5}
+                                                            />
+                                                        }
                                                     >
-                                                        <Flex gap={4} align="center">
-                                                            <IconEye size={18} />
-                                                            <Text size="sm">{t("Show")}</Text>
-                                                        </Flex>
+                                                        {t("Show")}
                                                     </Menu.Item>
+
+                                                    {
+                                                        !data.approved_by_id && data.is_requisition !== 1 &&
+                                                        <Menu.Item
+                                                            onClick={() => handleOpenDeleteConfirmModal(data.id)}
+                                                            w={200}
+                                                            leftSection={
+                                                                <IconTrashX
+                                                                    height={"18"}
+                                                                    width={"18"}
+                                                                    stroke={1.5}
+                                                                />
+                                                            }
+                                                        >
+                                                            {t("Delete")}
+                                                        </Menu.Item>
+                                                    }
+
                                                 </Menu.Dropdown>
                                             </Menu>
                                         </Group>
