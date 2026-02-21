@@ -30,13 +30,13 @@ import { useOutletContext } from "react-router";
 import useConfigData from "@hooks/useConfigData";
 import useLocalProducts from "@hooks/useLocalProducts";
 import { formatDateTime, generateInvoiceId } from "@utils/index";
-import CustomerDrawer from "@components/modals/CustomerDrawer";
+import CustomerDrawer from "@components/drawers/CustomerDrawer";
 import { useDisclosure } from "@mantine/hooks";
 import FormValidationWrapper from "@components/form-builders/FormValidationWrapper";
 import useLoggedInUser from "@hooks/useLoggedInUser";
 
 export default function Transaction({ form, tableId = null }) {
-	const user = useLoggedInUser();
+	const { user } = useLoggedInUser();
 	const { t } = useTranslation();
 	const { isOnline } = useOutletContext();
 	const { configData } = useConfigData({ offlineFetch: !isOnline });

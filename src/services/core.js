@@ -12,9 +12,16 @@ export const extendedCoreApiSlice = apiSlice.injectEndpoints({
             },
             providesTags: [ "Core" ],
         }),
+
+        changePassword: builder.mutation({
+            query: (body) => ({
+                url: APP_APIS.CHANGE_PASSWORD,
+                method: "POST",
+                body,
+            }),
+            invalidatesTags: [ "Core" ],
+        }),
     }),
 });
 
-export const {
-    useGetConfigQuery,
-} = extendedCoreApiSlice;
+export const { useGetConfigQuery, useChangePasswordMutation } = extendedCoreApiSlice;

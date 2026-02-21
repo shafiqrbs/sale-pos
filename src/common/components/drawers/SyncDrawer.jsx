@@ -14,7 +14,7 @@ import { IconRefresh } from "@tabler/icons-react";
 import { SYNC_DATA } from "@/constants";
 import { showNotification } from "@components/ShowNotificationComponent";
 import { useSyncPosMutation } from "@services/pos";
-import GlobalDrawer from "./GlobalDrawer";
+import GlobalDrawer from "../drawers/GlobalDrawer";
 import {
 	formatDateTime,
 	generateUniqueId,

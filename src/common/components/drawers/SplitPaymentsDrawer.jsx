@@ -3,7 +3,7 @@ import { Stack, Text, Group, NumberInput, Button, Box, Image, Flex, Divider, Scr
 import { useTranslation } from "react-i18next"
 import useConfigData from "@hooks/useConfigData"
 import { useOutletContext } from "react-router"
-import GlobalDrawer from "./GlobalDrawer"
+import GlobalDrawer from "../drawers/GlobalDrawer"
 
 export default function SplitPaymentsDrawer({ opened, onClose, totalAmount, onSave, onRemove, existingSplitPayments = [] }) {
     const { t } = useTranslation()

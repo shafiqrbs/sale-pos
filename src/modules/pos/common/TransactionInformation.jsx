@@ -6,7 +6,7 @@ import { calculateVATAmount } from "@utils/index";
 import { useTranslation } from "react-i18next";
 import { useOutletContext } from "react-router";
 import useCartOperation from "@hooks/useCartOperation";
-import SplitPaymentsDrawer from "@components/modals/SplitPaymentsDrawer";
+import SplitPaymentsDrawer from "@components/drawers/SplitPaymentsDrawer";
 
 export default function TransactionInformation({ form, transactionModeData }) {
 	const { invoiceData, getCartTotal } = useCartOperation();
@@ -178,7 +178,7 @@ export default function TransactionInformation({ form, transactionModeData }) {
 										>
 											<Flex
 												bg={
-													payments.length === 1 && payments[0]?.transaction_mode_id === mode.id
+													payments.length === 1 && payments[ 0 ]?.transaction_mode_id === mode.id
 														? "green.8"
 														: "white"
 												}

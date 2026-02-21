@@ -11,5 +11,15 @@ export default function useLoggedInUser() {
         fetchUser();
     }, []);
 
-    return user;
+    let roles = [];
+
+    try {
+        if (user?.access_control_role) {
+            roles = JSON.parse(user.access_control_role)
+        }
+    } catch {
+        roles = []
+    }
+
+    return { user, roles };
 }

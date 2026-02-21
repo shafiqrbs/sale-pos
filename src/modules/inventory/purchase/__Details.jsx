@@ -7,7 +7,7 @@ import { useOutletContext } from 'react-router';
 import SalesPrintA4 from '@components/print-formats/SalesPrintA4';
 import useConfigData from '@hooks/useConfigData';
 
-export default function Details({ loading, salesViewData }) {
+export default function Details({ loading, viewData }) {
   const printRef = useRef();
   const { isOnline, mainAreaHeight } = useOutletContext()
   const { t } = useTranslation();
@@ -15,10 +15,10 @@ export default function Details({ loading, salesViewData }) {
   const { configData } = useConfigData({ offlineFetch: !isOnline });
 
   const salesItems = isOnline
-    ? salesViewData?.sales_items
-    : Array.isArray(salesViewData?.sales_items)
-      ? salesViewData?.sales_items
-      : JSON.parse(salesViewData?.sales_items || "[]");
+    ? viewData?.sales_items
+    : Array.isArray(viewData?.sales_items)
+      ? viewData?.sales_items
+      : JSON.parse(viewData?.sales_items || "[]");
 
   const rows =
     Array.isArray(salesItems) &&
@@ -45,7 +45,7 @@ export default function Details({ loading, salesViewData }) {
       </Table.Tr>
     ));
 
-  const dueOrReturnValue = Number(salesViewData.total) - Number(salesViewData.payment);
+  const dueOrReturnValue = Number(viewData.total) - Number(viewData.payment);
 
   return (
     <>
@@ -68,7 +68,7 @@ export default function Details({ loading, salesViewData }) {
           className="boxBackground textColor borderRadiusAll"
         >
           {t("Invoice")}:{" "}
-          {salesViewData?.invoice}
+          {viewData?.invoice}
         </Box>
         <Box className="borderRadiusAll" fz="sm">
           <ScrollArea h={102} type="never">
@@ -90,7 +90,7 @@ export default function Details({ loading, salesViewData }) {
                     </Grid.Col>
                     <Grid.Col span={9}>
                       <Text fz="sm" lh="xs">
-                        {salesViewData.customerName || "N/A"}
+                        {viewData.customerName || "N/A"}
                       </Text>
                     </Grid.Col>
                   </Grid>
@@ -102,7 +102,7 @@ export default function Details({ loading, salesViewData }) {
                     </Grid.Col>
                     <Grid.Col span={9}>
                       <Text fz="sm" lh="xs">
-                        {salesViewData.customerMobile || "N/A"}
+                        {viewData.customerMobile || "N/A"}
                       </Text>
                     </Grid.Col>
                   </Grid>
@@ -116,7 +116,7 @@ export default function Details({ loading, salesViewData }) {
                     </Grid.Col>
                     <Grid.Col span={9}>
                       <Text fz="sm" lh="xs">
-                        {salesViewData.created}
+                        {viewData.created}
                       </Text>
                     </Grid.Col>
                   </Grid>
@@ -128,7 +128,7 @@ export default function Details({ loading, salesViewData }) {
                     </Grid.Col>
                     <Grid.Col span={9}>
                       <Text fz="sm" lh="xs">
-                        {salesViewData.salesByUser || "N/A"}
+                        {viewData.salesByUser || "N/A"}
                       </Text>
                     </Grid.Col>
                   </Grid>
@@ -140,7 +140,7 @@ export default function Details({ loading, salesViewData }) {
                     </Grid.Col>
                     <Grid.Col span={9}>
                       <Text fz="sm" lh="xs">
-                        {salesViewData?.multi_transaction ? "Multi Transaction" : salesViewData?.mode_name}
+                        {viewData?.multi_transaction ? "Multi Transaction" : viewData?.mode_name}
                       </Text>
                     </Grid.Col>
                   </Grid>
@@ -179,7 +179,7 @@ export default function Details({ loading, salesViewData }) {
                     {t("SubTotal")}
                   </Table.Th>
                   <Table.Th ta="right" fz="xs" w="100">
-                    {salesViewData.sub_total}
+                    {viewData.sub_total}
                   </Table.Th>
                 </Table.Tr>
                 <Table.Tr>
@@ -187,7 +187,7 @@ export default function Details({ loading, salesViewData }) {
                     {t("Discount")}
                   </Table.Th>
                   <Table.Th ta="right" fz="xs" w="100">
-                    {salesViewData.discount}
+                    {viewData.discount}
                   </Table.Th>
                 </Table.Tr>
                 <Table.Tr>
@@ -195,7 +195,7 @@ export default function Details({ loading, salesViewData }) {
                     {t("Total")}
                   </Table.Th>
                   <Table.Th ta="right" fz="xs" w="100">
-                    {salesViewData.total}
+                    {viewData.total}
                   </Table.Th>
                 </Table.Tr>
                 <Table.Tr>
@@ -203,7 +203,7 @@ export default function Details({ loading, salesViewData }) {
                     {t("Receive")}
                   </Table.Th>
                   <Table.Th ta="right" fz="xs" w="100">
-                    {salesViewData.payment}
+                    {viewData.payment}
                   </Table.Th>
                 </Table.Tr>
                 <Table.Tr>
@@ -230,12 +230,12 @@ export default function Details({ loading, salesViewData }) {
           >
             {t("Print")}
           </Button>
-          <SalesPrintThermal salesViewData={salesViewData} salesItems={salesItems} />
+          <SalesPrintThermal salesViewData={viewData} salesItems={salesItems} />
         </Button.Group>
       </Box>
       {printA4 && (
         <div style={{ display: "none" }}>
-          <SalesPrintA4 salesViewData={salesViewData} configData={configData} setPrintA4={setPrintA4} salesItems={salesItems} />
+          <SalesPrintA4 salesViewData={viewData} configData={configData} setPrintA4={setPrintA4} salesItems={salesItems} />
         </div>
       )}
     </>

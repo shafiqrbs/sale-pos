@@ -7,7 +7,7 @@ import { useOutletContext } from "react-router";
 import useLoggedInUser from "@hooks/useLoggedInUser";
 
 export default function SalesPrintThermal({ salesViewData, salesItems }) {
-	const user = useLoggedInUser();
+	const { user } = useLoggedInUser();
 	const { t } = useTranslation();
 	const { isOnline } = useOutletContext();
 	const { configData } = useConfigData({ offlineFetch: !isOnline });

@@ -9,7 +9,7 @@ function PasswordInputForm(props) {
 			{form && (
 				<Tooltip
 					label={tooltip}
-					opened={name in form.errors && !!form.errors[name]}
+					opened={name in form.errors && !!form.errors[ name ]}
 					px={16}
 					py={2}
 					position="top-end"
@@ -17,7 +17,6 @@ function PasswordInputForm(props) {
 					c={"white"}
 					withArrow
 					offset={2}
-					zIndex={0}
 					transitionProps={{ transition: "pop-bottom-left", duration: 500 }}
 				>
 					<PasswordInput
@@ -37,7 +36,7 @@ function PasswordInputForm(props) {
 						])}
 						autoComplete={"off"}
 						withAsterisk={required}
-						inputWrapperOrder={["label", "input", "description"]}
+						inputWrapperOrder={[ "label", "input", "description" ]}
 					/>
 				</Tooltip>
 			)}

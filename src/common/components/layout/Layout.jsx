@@ -8,7 +8,7 @@ import Footer from "./Footer";
 import { useNetwork } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { APP_NAVLINKS } from "@/routes/routes";
-import LeftOptionsDrawer from "@components/modals/LeftOptionsDrawer";
+import LeftOptionsDrawer from "@components/drawers/LeftOptionsDrawer";
 import useMainAreaHeight from "@hooks/useMainAreaHeight";
 import { SHOW_PROGRESSIVE_WORKS } from "@constants/index";
 

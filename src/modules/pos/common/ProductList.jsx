@@ -14,23 +14,25 @@ import noProductImgFound from "@assets/images/no-image.png";
 import { RESTRICT_PRODUCT_QUANTITY_LIMIT } from "@constants/index";
 import { formatCurrency } from "@utils/index";
 import useLocalProducts from "@hooks/useLocalProducts";
+import { useTranslation } from "react-i18next";
 
 const ITEMS_PER_PAGE = 16;
 
 export default function ProductList() {
-	const [activePage, setActivePage] = useState(1);
-	const [selectedProduct, setSelectedProduct] = useState(null);
-	const [batchModalOpened, { open: openBatchModal, close: closeBatchModal }] = useDisclosure(false);
+	const [ activePage, setActivePage ] = useState(1);
+	const [ selectedProduct, setSelectedProduct ] = useState(null);
+	const [ batchModalOpened, { open: openBatchModal, close: closeBatchModal } ] = useDisclosure(false);
 	const { increment } = useCartOperation();
 	const { mainAreaHeight, isOnline } = useOutletContext();
 	const { configData } = useConfigData({ offlineFetch: !isOnline });
+	const { t } = useTranslation()
 	const {
 		products: allProducts,
 		totalCount: totalProducts,
 		getLocalProducts,
 		getProductCount,
 	} = useLocalProducts({ fetchOnMount: false });
-	const [filter, setFilter] = useState({
+	const [ filter, setFilter ] = useState({
 		categories: [],
 		search: "",
 		barcode: "",
@@ -74,12 +76,12 @@ export default function ProductList() {
 		} catch (error) {
 			console.error("Failed to fetch paginated products from sqlite:", error);
 		}
-	}, [activePage, filter, getLocalProducts, getProductCount]);
+	}, [ activePage, filter, getLocalProducts, getProductCount ]);
 
 	// =============== fetch products on mount and when filters change ================
 	useEffect(() => {
 		fetchProductsPage();
-	}, [fetchProductsPage]);
+	}, [ fetchProductsPage ]);
 
 	// =============== listen for product updates from sales and refetch ================
 	useEffect(() => {
@@ -88,7 +90,7 @@ export default function ProductList() {
 		return () => {
 			window.removeEventListener("products-updated", fetchProductsPage);
 		};
-	}, [fetchProductsPage]);
+	}, [ fetchProductsPage ]);
 
 	// =============== check if product should be disabled ================
 	const isProductDisabled = (product) => {
@@ -123,10 +125,10 @@ export default function ProductList() {
 			if (cartItems && cartItems.length > 0) {
 				try {
 					currentBatches =
-						typeof cartItems[0].batches === "string"
-							? JSON.parse(cartItems[0].batches)
-							: Array.isArray(cartItems[0].batches)
-								? cartItems[0].batches
+						typeof cartItems[ 0 ].batches === "string"
+							? JSON.parse(cartItems[ 0 ].batches)
+							: Array.isArray(cartItems[ 0 ].batches)
+								? cartItems[ 0 ].batches
 								: [];
 				} catch {
 					currentBatches = [];
@@ -206,7 +208,7 @@ export default function ProductList() {
 																			QTY: {product?.quantity} {product?.unit_name}
 																		</>
 																	) : (
-																		<>Out of Stock</>
+																		<Box c="red.7" component="span">{t("OutOfStock")}</Box>
 																	)}
 																</Text>
 																<Text fw={900} fz="18" size="md" c="green.9">

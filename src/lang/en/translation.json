@@ -1143,7 +1143,7 @@
 	"GeneralIssue": "General issue",
 	"BatchIssue": "Batch issue",
 	"ChangePassword": "Manage Change Password",
-	"CurrentPassword": "CurrentPassword",
+	"CurrentPassword": "Current Password",
 	"EnterCurrentPassword": "Enter Your Current Password",
 	"NewPassword": "New Password",
 	"EnterNewPassword": "Enter Your New Password",
@@ -1185,5 +1185,7 @@
 	"LastUpdated": "Last Updated",
 	"BestSellingProduct": "Best Selling Product",
 	"UnitsSold": "units sold",
-	"TotalInvoices": "Total Invoices"
+	"TotalInvoices": "Total Invoices",
+	"ResetPassword": "Reset Password",
+	"OutOfStock": "Out of Stock"
 }

@@ -6,12 +6,12 @@ import { DataTable } from 'mantine-datatable';
 import tableCss from "@assets/css/Table.module.css";
 import { useTranslation } from 'react-i18next';
 import Details from './__Details';
-import useSalesList from '@hooks/useSalesList';
 import KeywordSearch from '@components/KeywordSearch';
 import GlobalModal from '@components/modals/GlobalModal';
 import { useForm } from '@mantine/form';
 import { useDisclosure } from '@mantine/hooks';
 import { APP_NAVLINKS } from '@/routes/routes';
+import { useGetPurchaseQuery } from '@services/purchase';
 
 const PER_PAGE = 25;
 
@@ -22,8 +22,9 @@ export default function Table() {
     const [ page, setPage ] = useState(1);
     const [ selectedRow, setSelectedRow ] = useState(null);
     const [ loading, setLoading ] = useState(false);
-    const [ salesViewData, setSalesViewData ] = useState(null);
-    const { mainAreaHeight, isOnline } = useOutletContext();
+    const [ viewData, setViewData ] = useState(null);
+    const { mainAreaHeight } = useOutletContext();
+
     const form = useForm({
         initialValues: {
             term: "",
@@ -32,22 +33,21 @@ export default function Table() {
         },
     });
 
-    const { sales: salesData, isLoading } = useSalesList({
+    const { data: purchaseData, isLoading } = useGetPurchaseQuery({
         params: {
             term: form.values.term,
             start_date: form.values.start_date,
             end_date: form.values.end_date,
             page,
             offset: PER_PAGE
-        },
-        offlineFetch: !isOnline
+        }
     });
 
     const handleShowDetails = (item) => {
         console.info("item:", item);
         setLoading(true);
         setSelectedRow(item.invoice);
-        setSalesViewData(item);
+        setViewData(item);
         open();
 
         setTimeout(() => {
@@ -77,7 +77,7 @@ export default function Table() {
                             onRowClick={(rowData) => {
                                 handleShowDetails(rowData.record);
                             }}
-                            records={salesData?.data}
+                            records={purchaseData?.data}
                             columns={[
                                 {
                                     accessor: "created",
@@ -103,7 +103,7 @@ export default function Table() {
                                     ),
                                 },
                                 {
-                                    accessor: "customerName", title: t("Customer"), render: (item) => (
+                                    accessor: "customerName", title: t("Vendor"), render: (item) => (
                                         <Text size="sm">
                                             {item?.customerName || "N/A"}
                                         </Text>
@@ -131,14 +131,6 @@ export default function Table() {
                                     textAlign: "right",
                                     render: (data) => (
                                         <>{data.total ? Number(data.total).toFixed(2) : "0.00"}</>
-                                    ),
-                                },
-                                {
-                                    accessor: "payment",
-                                    title: t("Receive"),
-                                    textAlign: "right",
-                                    render: (data) => (
-                                        <>{data.payment ? Number(data.payment).toFixed(2) : "0.00"}</>
                                     ),
                                 },
                                 {
@@ -199,7 +191,7 @@ export default function Table() {
                                 },
                             ]}
                             fetching={isLoading}
-                            totalRecords={salesData?.total || 0}
+                            totalRecords={purchaseData?.total || 0}
                             recordsPerPage={PER_PAGE}
                             loaderSize="xs"
                             loaderColor="grape"
@@ -224,11 +216,10 @@ export default function Table() {
                 onClose={close}
                 size="xl"
                 padding="md"
-                title={`${t("Purchase")}: ${salesViewData?.invoice || ""}`}
+                title={`${t("Purchase")}: ${viewData?.invoice || ""}`}
             >
-                <Details loading={loading} salesViewData={salesViewData} salesData={salesData} />
+                <Details loading={loading} viewData={viewData} />
             </GlobalModal>
         </Box>
-
-    )
+    );
 }

@@ -12,6 +12,7 @@ import {
 	Flex,
 	Select,
 	TextInput,
+	Divider,
 } from "@mantine/core";
 
 import { useDisclosure, useFullscreen } from "@mantine/hooks";
@@ -28,6 +29,9 @@ import {
 	IconStack,
 	IconCashBanknote,
 	IconCalculator,
+	IconSettings,
+	IconUserHexagon,
+	IconLock,
 } from "@tabler/icons-react";
 import { NavLink, useLocation, useNavigate } from "react-router";
 import LanguagePickerStyle from "@assets/css/LanguagePicker.module.css";
@@ -35,13 +39,17 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 // import Sandra_Logo from "@assets/images/sandra_logo.jpeg";
 import { CHARACTER_SET, LANGUAGES, LINE_CHARACTER } from "@/constants";
-import SyncDrawer from "@components/modals/SyncDrawer.jsx";
+import SyncDrawer from "@components/drawers/SyncDrawer.jsx";
 import { APP_NAVLINKS } from "@/routes/routes.js";
 import useConfigData from "@hooks/useConfigData";
+import useLoggedInUser from "@hooks/useLoggedInUser";
+import ChangePasswordDrawer from "@components/drawers/ChangePasswordDrawer";
 
 export default function Header({ isOnline, toggleNetwork }) {
+	const { user, roles } = useLoggedInUser();
 	const { configData } = useConfigData({ offlineFetch: !isOnline });
 	const [ openedPrinter, { open: openPrinter, close: closePrinter } ] = useDisclosure(false);
+	const [ changePasswordDrawerOpened, { open: openChangePasswordDrawer, close: closeChangePasswordDrawer } ] = useDisclosure(false);
 	const { t, i18n } = useTranslation();
 	const navigate = useNavigate();
 	const location = useLocation()
@@ -236,16 +244,49 @@ export default function Header({ isOnline, toggleNetwork }) {
 								)}
 							</ActionIcon>
 						</Tooltip>
-						<Tooltip label={t("Logout")} bg="red.5" withArrow position="left">
+						<Tooltip
+							label={t("Setting")}
+							bg="red.5"
+							withArrow
+						>
 							<ActionIcon
-								onClick={() => logout()}
+								mt={"6"}
 								variant="subtle"
-								mt="4xs"
-								color="white"
+								color={"white"}
+								onClick={() => {
+									navigate(APP_NAVLINKS.SETTINGS);
+								}}
 							>
-								<IconLogout size={24} />
+								<IconSettings size={24} />
 							</ActionIcon>
 						</Tooltip>
+						<Menu shadow="md" width={200}>
+							<Menu.Target>
+								<ActionIcon variant="subtle" mt={"6"} color={"white"}>
+									<IconUserHexagon size={24} />
+								</ActionIcon>
+							</Menu.Target>
+
+							<Menu.Dropdown>
+								<Menu.Label>
+									<Text fz={12}>{user?.name} ({user?.username})</Text>
+									<Text fz={12} c="gray.6">{roles.join(", ")}</Text>
+								</Menu.Label>
+								<Divider mt="es" />
+								<Menu.Item
+									leftSection={<IconLock size={16} />}
+									onClick={openChangePasswordDrawer}
+								>
+									<Text size="sm">{t("ResetPassword")}</Text>
+								</Menu.Item>
+								<Menu.Item
+									leftSection={<IconLogout size={16} />}
+									onClick={() => logout()}
+								>
+									<Text size="sm">{t("Logout")}</Text>
+								</Menu.Item>
+							</Menu.Dropdown>
+						</Menu>
 						<Tooltip
 							label={isOnline ? t("Online") : t("Offline")}
 							bg={isOnline ? "var(--theme-secondary-color-6)" : "red.5"}
@@ -322,6 +363,7 @@ export default function Header({ isOnline, toggleNetwork }) {
 			</Modal>
 			{/* ----------- sync information ----------- */}
 			<SyncDrawer syncPanelOpen={syncPanelOpen} configData={configData} setSyncPanelOpen={setSyncPanelOpen} />
+			<ChangePasswordDrawer opened={changePasswordDrawerOpened} onClose={closeChangePasswordDrawer} />
 		</>
 	);
 }

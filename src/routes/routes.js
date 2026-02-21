@@ -15,6 +15,7 @@ export const APP_NAVLINKS = {
 	LOGIN: "/login",
 	DASHBOARD: "/dashboard",
 	CUSTOMERS: "/core/customers",
+	SETTINGS: "/inventory/config",
 };
 
 export const APP_APIS = {
@@ -32,4 +33,6 @@ export const APP_APIS = {
 	SALES: "/inventory/sales",
 	CUSTOMERS: "/core/customer",
 	SETTINGS: "/core/select/setting",
+	PURCHASE: "/inventory/purchase",
+	CHANGE_PASSWORD: "/core/change-password",
 };
