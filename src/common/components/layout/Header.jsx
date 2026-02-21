@@ -72,6 +72,8 @@ export default function Header({ isOnline, toggleNetwork }) {
 		{ label: "Stock", icon: <IconStack size={18} />, pathname: APP_NAVLINKS.STOCK },
 	]
 
+	const allowSync = roles.includes("role_sales_purchase_manager") || roles.includes("role_sales_purchase_admin");
+
 	useEffect(() => {
 		const checkPrinterData = async () => {
 			const storedPrinterData = await window.dbAPI.getDataFromTable("printer");
@@ -162,7 +164,7 @@ export default function Header({ isOnline, toggleNetwork }) {
 							withArrow
 							arrowPosition="center"
 						>
-							<Tooltip label="Sync Data" bg="red.5" withArrow>
+							{allowSync ? <Tooltip label="Sync Data" bg="red.5" withArrow>
 								<ActionIcon
 									disabled={!isOnline}
 									mt={"4xs"}
@@ -173,7 +175,7 @@ export default function Header({ isOnline, toggleNetwork }) {
 								>
 									<IconRefresh size={20} />
 								</ActionIcon>
-							</Tooltip>
+							</Tooltip> : null}
 							<Tooltip label="Pos printer setup" bg={`red.5`} withArrow>
 								<ActionIcon
 									mt={"4xs"}
@@ -244,25 +246,28 @@ export default function Header({ isOnline, toggleNetwork }) {
 								)}
 							</ActionIcon>
 						</Tooltip>
-						<Tooltip
-							label={t("Setting")}
-							bg="red.5"
-							withArrow
-						>
-							<ActionIcon
-								mt={"6"}
-								variant="subtle"
-								color={"white"}
-								onClick={() => {
-									navigate(APP_NAVLINKS.SETTINGS);
-								}}
+						{isOnline ?
+							(<Tooltip
+								label={t("Setting")}
+								bg="red.5"
+								withArrow
 							>
-								<IconSettings size={24} />
-							</ActionIcon>
-						</Tooltip>
+								<ActionIcon
+									mt="6"
+									variant="subtle"
+									color="white"
+									onClick={() => {
+										navigate(APP_NAVLINKS.SETTINGS);
+									}}
+								>
+									<IconSettings size={24} />
+								</ActionIcon>
+							</Tooltip>)
+							: null
+						}
 						<Menu shadow="md" width={200}>
 							<Menu.Target>
-								<ActionIcon variant="subtle" mt={"6"} color={"white"}>
+								<ActionIcon variant="subtle" mt="6" color="white">
 									<IconUserHexagon size={24} />
 								</ActionIcon>
 							</Menu.Target>
@@ -273,12 +278,15 @@ export default function Header({ isOnline, toggleNetwork }) {
 									<Text fz={12} c="gray.6">{roles.join(", ")}</Text>
 								</Menu.Label>
 								<Divider mt="es" />
-								<Menu.Item
-									leftSection={<IconLock size={16} />}
-									onClick={openChangePasswordDrawer}
-								>
-									<Text size="sm">{t("ResetPassword")}</Text>
-								</Menu.Item>
+								{isOnline ?
+									<Menu.Item
+										leftSection={<IconLock size={16} />}
+										onClick={openChangePasswordDrawer}
+									>
+										<Text size="sm">{t("ResetPassword")}</Text>
+									</Menu.Item>
+									: null
+								}
 								<Menu.Item
 									leftSection={<IconLogout size={16} />}
 									onClick={() => logout()}
@@ -293,16 +301,16 @@ export default function Header({ isOnline, toggleNetwork }) {
 							withArrow
 						>
 							<ActionIcon
-								mt={"4xs"}
+								mt="4xs"
 								variant="filled"
 								radius="xl"
 								color={isOnline ? "var(--theme-secondary-color-6)" : "red.5"}
 								onClick={toggleNetwork}
 							>
 								{isOnline ? (
-									<IconWifi color={"white"} size={24} />
+									<IconWifi color="white" size={24} />
 								) : (
-									<IconWifiOff color={"white"} size={24} />
+									<IconWifiOff color="white" size={24} />
 								)}
 							</ActionIcon>
 						</Tooltip>
@@ -332,10 +340,10 @@ export default function Header({ isOnline, toggleNetwork }) {
 						required
 						label={t("Character Set")}
 						value={printerSetup.characterSet}
-						onChange={(e) =>
+						onChange={(value) =>
 							setPrinterSetup({
 								...printerSetup,
-								characterSet: e,
+								characterSet: value,
 							})
 						}
 						data={CHARACTER_SET}
@@ -346,22 +354,22 @@ export default function Header({ isOnline, toggleNetwork }) {
 						required
 						label={t("Line Character")}
 						value={printerSetup.lineCharacter}
-						onChange={(e) =>
+						onChange={(value) =>
 							setPrinterSetup({
 								...printerSetup,
-								lineCharacter: e,
+								lineCharacter: value,
 							})
 						}
 						description="How the lines separator will build"
 						data={LINE_CHARACTER}
 						placeholder="="
 					/>
-					<Button type="submit" fullWidth bg={"red.5"}>
+					<Button type="submit" fullWidth bg="red.5">
 						{t("Save Settings")}
 					</Button>
 				</form>
 			</Modal>
-			{/* ----------- sync information ----------- */}
+			{/* ----------- sync and reset password information ----------- */}
 			<SyncDrawer syncPanelOpen={syncPanelOpen} configData={configData} setSyncPanelOpen={setSyncPanelOpen} />
 			<ChangePasswordDrawer opened={changePasswordDrawerOpened} onClose={closeChangePasswordDrawer} />
 		</>
