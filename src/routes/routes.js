@@ -33,6 +33,8 @@ export const APP_APIS = {
 	SALES: "/inventory/sales",
 	CUSTOMERS: "/core/customer",
 	SETTINGS: "/core/select/setting",
+	INVENTORY_SETTINGS: "/inventory/select/setting",
 	PURCHASE: "/inventory/purchase",
 	CHANGE_PASSWORD: "/core/change-password",
+	PURCHASE_CONFIG: "/domain/config/inventory-purchase",
 };

@@ -1,15 +1,15 @@
 import { useState, useEffect } from "react";
-import { useGetConfigQuery } from "@services/core.js";
+import { useGetConfigQuery } from "@services/core/core.js";
 import { useNetwork } from "@mantine/hooks";
 
-const useConfigData = ({ offlineFetch = false }) => {
+const useConfigData = ({ offlineFetch = false } = {}) => {
 	const networkStatus = useNetwork();
 
 	const { data: onlineConfigData } = useGetConfigQuery(undefined, {
 		skip: !networkStatus.online || offlineFetch,
 	});
-	const [ localConfigData, setLocalConfigData ] = useState(null);
-	const [ configData, setConfigData ] = useState({});
+	const [localConfigData, setLocalConfigData] = useState(null);
+	const [configData, setConfigData] = useState({});
 
 	// =============== fetch local config data from database ================
 	useEffect(() => {
@@ -45,7 +45,7 @@ const useConfigData = ({ offlineFetch = false }) => {
 					// =============== update local database with online config data ================
 					await window.dbAPI.upsertIntoTable("config-data", {
 						id: 1,
-						data: JSON.stringify(onlineConfigData?.data)
+						data: JSON.stringify(onlineConfigData?.data),
 					});
 
 					setLocalConfigData(onlineConfigData?.data);
@@ -62,7 +62,7 @@ const useConfigData = ({ offlineFetch = false }) => {
 		};
 
 		syncConfigData();
-	}, [ onlineConfigData, localConfigData ]);
+	}, [onlineConfigData, localConfigData]);
 
 	return { configData };
 };

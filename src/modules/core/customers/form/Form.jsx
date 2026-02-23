@@ -2,13 +2,7 @@ import { useState, useEffect } from "react";
 import { useOutletContext } from "react-router";
 import { Button, rem, Flex, Grid, Box, ScrollArea, Text, LoadingOverlay } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import {
-	IconCheck,
-	IconDeviceFloppy,
-	IconPercentage,
-	IconPlusMinus,
-	IconX,
-} from "@tabler/icons-react";
+import { IconDeviceFloppy, IconPercentage, IconPlusMinus, IconX } from "@tabler/icons-react";
 import { useHotkeys } from "@mantine/hooks";
 import { useForm } from "@mantine/form";
 import { modals } from "@mantine/modals";
@@ -19,7 +13,7 @@ import TextAreaForm from "@components/form-builders/TextAreaForm";
 import PhoneNumber from "@components/form-builders/PhoneNumberInput.jsx";
 import CustomerGroupDrawer from "../CustomerGroupDrawer.jsx";
 import useMainAreaHeight from "@hooks/useMainAreaHeight.js";
-import { customerRequest } from "../helper/request.js";
+import { customerRequest } from "../helpers/request.js";
 import { useCreateCustomerMutation, useUpdateCustomerMutation } from "@services/core/customer.js";
 import { showNotification } from "@components/ShowNotificationComponent.jsx";
 import { useGetDropdownDataQuery } from "@services/settings.js";

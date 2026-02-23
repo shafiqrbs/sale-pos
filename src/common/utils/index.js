@@ -83,14 +83,14 @@ export const calculateVATAmount = (vatPrice, vatConfig) => {
 export const withInvoiceId = (tableId) => (tableId ? { invoice_id: tableId } : {});
 
 export const generateSlug = (name) => {
-	if (!name) return '';
+	if (!name) return "";
 
 	const slugName = name
 		.toLowerCase()
 		.trim()
-		.replace(/[^\w\s-]/g, '')
-		.replace(/[\s_-]+/g, '-')
-		.replace(/^-+|-+$/g, '');
+		.replace(/[^\w\s-]/g, "")
+		.replace(/[\s_-]+/g, "-")
+		.replace(/^-+|-+$/g, "");
 
 	return `${slugName}-${Date.now().toString()}`;
 };
@@ -100,11 +100,7 @@ export const generateUniqueId = () => {
 		return crypto.randomUUID();
 	}
 
-	return (
-		Date.now().toString(36) +
-		"-" +
-		Math.random().toString(36).slice(2, 10)
-	);
+	return Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10);
 };
 
 // =============== local storage sync records utilities ================
@@ -135,7 +131,7 @@ export const saveSyncRecordToLocalStorage = (syncRecord) => {
 	if (typeof window === "undefined" || !window?.localStorage) return [];
 
 	const existingRecords = getSyncRecordsFromLocalStorage();
-	const nextRecords = [ syncRecord, ...existingRecords ].slice(0, 200);
+	const nextRecords = [syncRecord, ...existingRecords].slice(0, 200);
 
 	window.localStorage.setItem(LOCAL_STORAGE_SYNC_RECORDS_KEY, JSON.stringify(nextRecords));
 	return nextRecords;
@@ -143,7 +139,7 @@ export const saveSyncRecordToLocalStorage = (syncRecord) => {
 
 export const getLastSyncRecord = (syncRecords) => {
 	if (!Array.isArray(syncRecords) || syncRecords.length === 0) return null;
-	return syncRecords[ 0 ] ?? null;
+	return syncRecords[0] ?? null;
 };
 
 export const getLastSyncRecordByMode = (syncRecords, mode) => {
@@ -166,31 +162,31 @@ export const parseDateString = (dateString) => {
 	if (!dateString) return null;
 	const parts = String(dateString).trim().split("-");
 	if (parts.length !== 3) return null;
-	const first = parts[ 0 ];
+	const first = parts[0];
 	const isISO = first.length === 4 && Number(first) > 999;
-	const [ year, month, day ] = isISO
-		? [ Number(parts[ 0 ]), Number(parts[ 1 ]) - 1, Number(parts[ 2 ]) ]
-		: [ Number(parts[ 2 ]), Number(parts[ 1 ]) - 1, Number(parts[ 0 ]) ];
+	const [year, month, day] = isISO
+		? [Number(parts[0]), Number(parts[1]) - 1, Number(parts[2])]
+		: [Number(parts[2]), Number(parts[1]) - 1, Number(parts[0])];
 	const parsed = new Date(year, month, day);
 	return isNaN(parsed.getTime()) ? null : parsed;
 };
 
 export function getRandomColor(index) {
 	const colors = [
-		'var(--mantine-color-blue-6)',
-		'var(--mantine-color-grape-6)',
-		'var(--mantine-color-violet-6)',
-		'var(--mantine-color-pink-6)',
-		'var(--mantine-color-red-6)',
-		'var(--mantine-color-orange-6)',
-		'var(--mantine-color-yellow-6)',
-		'var(--mantine-color-lime-6)',
-		'var(--mantine-color-green-6)',
-		'var(--mantine-color-teal-6)',
-		'var(--mantine-color-cyan-6)',
-		'var(--mantine-color-indigo-6)',
+		"var(--mantine-color-blue-6)",
+		"var(--mantine-color-grape-6)",
+		"var(--mantine-color-violet-6)",
+		"var(--mantine-color-pink-6)",
+		"var(--mantine-color-red-6)",
+		"var(--mantine-color-orange-6)",
+		"var(--mantine-color-yellow-6)",
+		"var(--mantine-color-lime-6)",
+		"var(--mantine-color-green-6)",
+		"var(--mantine-color-teal-6)",
+		"var(--mantine-color-cyan-6)",
+		"var(--mantine-color-indigo-6)",
 	];
-	return colors[ index % colors.length ];
+	return colors[index % colors.length];
 }
 
 export const formatCurrency = (amount) => {
@@ -201,3 +197,5 @@ export const formatCurrency = (amount) => {
 		maximumFractionDigits: 2,
 	}).format(amount);
 };
+
+export const forceBooleanToInt = (value) => (value === true || value === 1 ? 1 : 0);
