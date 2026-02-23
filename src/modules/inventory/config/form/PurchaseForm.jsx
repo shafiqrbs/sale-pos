@@ -38,7 +38,7 @@ const PurchaseForm = ({ height }) => {
 	});
 
 	const config_purchase = configData?.config_purchase;
-	const domainId = configData?.id;
+	const domainId = configData?.domain_id;
 
 	useEffect(() => {
 		if (!config_purchase) return;
