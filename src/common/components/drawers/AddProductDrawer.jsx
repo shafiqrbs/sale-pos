@@ -1,4 +1,4 @@
-import { ScrollArea } from "@mantine/core";
+import { Divider, ScrollArea } from "@mantine/core";
 import AddProductDrawerForm from "./AddProductDrawerForm.jsx";
 import useMainAreaHeight from "@hooks/useMainAreaHeight";
 import GlobalDrawer from "./GlobalDrawer.jsx";
@@ -11,7 +11,6 @@ export default function AddProductDrawer({
     fieldPrefix,
 }) {
     const { mainAreaHeight } = useMainAreaHeight();
-    const height = mainAreaHeight + 58;
 
     return (
         <GlobalDrawer
@@ -19,9 +18,11 @@ export default function AddProductDrawer({
             onClose={closeProductDrawer}
             position="right"
             size="30%"
+            title="Create Instant Product"
         >
+            <Divider />
             <ScrollArea
-                h={height}
+                h={mainAreaHeight}
                 scrollbarSize={2}
                 type="never"
                 bg="white"

@@ -99,16 +99,6 @@ export default function AddProductDrawerForm({ closeProductDrawer, setStockProdu
                     <Grid.Col span={9} >
                         <Box bg={'white'} className={'borderRadiusAll'} >
                             <Box bg={"white"} >
-                                <Box pl={`xs`} pr={8} pt={'4'} pb={'6'} mb={'4'} className={'boxBackground borderRadiusAll'} >
-                                    <Grid columns={12}>
-                                        <Grid.Col span={6} >
-                                            <Title order={6} pt={'6'}>{t('InstantProductCreate')}</Title>
-                                        </Grid.Col>
-                                        <Grid.Col span={6} >
-
-                                        </Grid.Col>
-                                    </Grid>
-                                </Box>
                                 <Box pl={`xs`} pr={'xs'} className={'borderRadiusAll'}>
                                     <ScrollArea h={height + 18} scrollbarSize={2} scrollbars="y" type="never">
                                         <Box mt={'8'}>
