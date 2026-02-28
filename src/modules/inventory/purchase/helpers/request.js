@@ -1,4 +1,5 @@
 const vendorOverviewInitialValues = {
+    vendor_id: "",
     vendorName: "",
     vendorPhone: "+880",
     vendorEmail: "",

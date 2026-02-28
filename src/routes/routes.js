@@ -22,6 +22,7 @@ export const APP_APIS = {
 	CONFIG: "/inventory/config",
 	LOGIN: "/auth/login",
 	REGISTER: "/auth/register",
+	VENDORS: "/core/vendor/local-storage",
 	LOGOUT: "/auth/logout",
 	RESET_PASSWORD: "/auth/reset-password",
 	SYNC_POS: "/inventory/pos/data-process",

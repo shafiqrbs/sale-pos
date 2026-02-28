@@ -7,16 +7,16 @@ import {
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import useConfigData from "@hooks/useConfigData";
-import useCoreVendors from "@hooks/useCoreVendors";
 import SelectForm from "@components/form-builders/SelectForm";
 import AddVendorModal from "@components/modals/AddVendorModal";
 import { IconUserPlus } from "@tabler/icons-react";
+import { useGetVendorsQuery } from "@services/core/vendors";
 
 export default function VendorInfoSection({ purchaseForm }) {
     const { configData } = useConfigData();
     const currencySymbol = configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol;
 
-    const { vendors } = useCoreVendors();
+    const { data: vendors } = useGetVendorsQuery();
     const [ isAddVendorModalOpened, { open: openAddVendorModal, close: closeAddVendorModal } ] = useDisclosure(false);
 
     return (
@@ -30,7 +30,7 @@ export default function VendorInfoSection({ purchaseForm }) {
                 <SelectForm
                     name="vendor_id"
                     form={purchaseForm}
-                    dropdownValue={vendors.map((vendor) => ({
+                    dropdownValue={vendors?.data?.map((vendor) => ({
                         value: String(vendor.id),
                         label: vendor.name,
                     }))}

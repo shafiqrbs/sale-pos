@@ -322,6 +322,7 @@ export default function PaymentSection({ purchaseForm, itemsTotal }) {
                     bg="var(--theme-save-btn-color)"
                     color="white"
                     radius={0}
+                    form="purchaseForm"
                     type="submit"
                 >
                     Save

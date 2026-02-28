@@ -1,6 +1,5 @@
 import React, { useMemo } from "react";
 import { Box } from "@mantine/core";
-import VendorInfoSection from "./VendorInfoSection";
 import PurchaseItemsTableSection from "./ItemsTableSection";
 import PurchasePaymentSection from "./PaymentSection";
 
