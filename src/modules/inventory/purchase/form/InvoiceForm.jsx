@@ -222,10 +222,7 @@ export default function InvoiceForm({ purchaseForm }) {
                         id="EntityFormSubmit"
                         leftSection={<IconPlus size={18} />}
                         rightSection={
-                            <Flex align="center" gap={4}>
-                                <IconShoppingCart size={16} />
-                                <Text fz="xs">alt+a</Text>
-                            </Flex>
+                            <IconShoppingCart size={16} />
                         }
                         bg="var(--theme-primary-color-6)"
                         color="white"
