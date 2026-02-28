@@ -9,7 +9,6 @@ import {
 	Stack,
 	Text,
 	TextInput,
-	Tooltip,
 } from "@mantine/core";
 import {
 	IconChefHat,

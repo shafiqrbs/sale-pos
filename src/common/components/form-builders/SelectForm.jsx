@@ -22,7 +22,10 @@ const SelectForm = forwardRef((props, ref) => {
 		style = {},
 		clearable = true,
 		allowDeselect = true,
+		rightSection,
 		pt,
+		comboboxProps,
+		rightSectionPointerEvents = "none"
 	} = props;
 
 	const handleChange = async (e) => {
@@ -74,9 +77,11 @@ const SelectForm = forwardRef((props, ref) => {
 						{...(value !== undefined && { value })}
 						onChange={handleChange}
 						withAsterisk={required}
-						comboboxProps={props.comboboxProps}
+						comboboxProps={comboboxProps}
 						allowDeselect={allowDeselect}
 						style={style}
+						rightSectionPointerEvents={rightSectionPointerEvents}
+						rightSection={rightSection}
 					/>
 				</Tooltip>
 			)}

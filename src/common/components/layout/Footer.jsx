@@ -4,17 +4,18 @@ import classes from "@assets/css/FooterNavbar.module.css";
 import { NavLink } from "react-router";
 import { IconPlus, IconMinus } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
+import { APP_NAVLINKS } from "@/routes/routes";
 
 function Footer() {
 	const { t } = useTranslation();
-	const [zoomLevel, setZoomLevel] = useState(() => {
+	const [ zoomLevel, setZoomLevel ] = useState(() => {
 		const initialZoom = window.zoomAPI.getZoomFactor();
 		return Math.round(initialZoom * 100);
 	});
 
 	const links = [
-		{ link: "/inventory/sales-invoice", label: t("Sales") },
-		{ link: "/inventory/purchase-invoice", label: t("Purchase") },
+		{ link: APP_NAVLINKS.SALES, label: t("Sales") },
+		{ link: APP_NAVLINKS.PURCHASE, label: t("Purchase") },
 		{ link: "/inventory/product", label: t("Product") },
 		{ link: "/accounting/voucher-entry", label: t("Accounting") },
 	];

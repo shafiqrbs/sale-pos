@@ -12,13 +12,14 @@ export const extendedSettingsApiSlice = apiSlice.injectEndpoints({
 				};
 			},
 			providesTags: (result, error, params) => {
-				const dropdownType = params?.["dropdown-type"] || "unknown";
+				const dropdownType = params?.[ "dropdown-type" ] || "unknown";
 				if (dropdownType) {
-					return [{ type: "Settings", id: dropdownType }];
+					return [ { type: "Settings", id: dropdownType } ];
 				}
-				return ["Settings"];
+				return [ "Settings" ];
 			},
 		}),
+
 		getInventorySettings: builder.query({
 			query: (params) => {
 				return {
@@ -28,14 +29,50 @@ export const extendedSettingsApiSlice = apiSlice.injectEndpoints({
 				};
 			},
 			providesTags: (result, error, params) => {
-				const dropdownType = params?.["dropdown-type"] || "unknown";
+				const dropdownType = params?.[ "dropdown-type" ] || "unknown";
 				if (dropdownType) {
-					return [{ type: "InventorySettings", id: dropdownType }];
+					return [ { type: "InventorySettings", id: dropdownType } ];
 				}
-				return ["InventorySettings"];
+				return [ "InventorySettings" ];
+			},
+		}),
+
+		getInventoryCategory: builder.query({
+			query: (params) => {
+				return {
+					url: APP_APIS.INVENTORY_CATEGORIES,
+					method: "GET",
+					params,
+				};
+			},
+
+			providesTags: (result, error, params) => {
+				const dropdownType = params?.type || "unknown";
+				if (dropdownType) {
+					return [ { type: "InventoryCategory", id: dropdownType } ];
+				}
+				return [ "InventoryCategory" ];
+			},
+		}),
+
+		getInventoryParticular: builder.query({
+			query: (params) => {
+				return {
+					url: APP_APIS.INVENTORY_PARTICULAR,
+					method: "GET",
+					params,
+				};
+			},
+
+			providesTags: (result, error, params) => {
+				const dropdownType = params?.[ "dropdown-type" ] || "unknown";
+				if (dropdownType) {
+					return [ { type: "InventoryParticular", id: dropdownType } ];
+				}
+				return [ "InventoryParticular" ];
 			},
 		}),
 	}),
 });
 
-export const { useGetDropdownDataQuery, useGetInventorySettingsQuery } = extendedSettingsApiSlice;
+export const { useGetDropdownDataQuery, useGetInventorySettingsQuery, useGetInventoryCategoryQuery, useGetInventoryParticularQuery } = extendedSettingsApiSlice;
