@@ -15,6 +15,7 @@ import { IconPercentage, IconCurrencyTaka } from "@tabler/icons-react";
 import useConfigData from "@hooks/useConfigData";
 import VendorInfoSection from "./VendorInfoSection";
 import useTransactionMode from "@hooks/useTransactionMode";
+import { formatCurrency } from "@utils/index";
 
 export default function PaymentSection({ purchaseForm, itemsTotal, isAddingPurchase }) {
     const { transactionMode } = useTransactionMode();
@@ -159,7 +160,7 @@ export default function PaymentSection({ purchaseForm, itemsTotal, isAddingPurch
                                     <Flex justify="center" align="center" gap={4}>
                                         <Text fz={11}>{currencySymbol}</Text>
                                         <Text fz={12} fw={600}>
-                                            {discountValue.toFixed(2)}
+                                            {formatCurrency(discountValue)}
                                         </Text>
                                     </Flex>
                                 </Flex>
@@ -181,7 +182,7 @@ export default function PaymentSection({ purchaseForm, itemsTotal, isAddingPurch
                                     <Flex align="center" gap={4}>
                                         <Text fz={11}>{currencySymbol}</Text>
                                         <Text fz={12} fw={600}>
-                                            {vatAmount.toFixed(2)}
+                                            {formatCurrency(vatAmount)}
                                         </Text>
                                     </Flex>
                                 </Flex>
@@ -203,7 +204,7 @@ export default function PaymentSection({ purchaseForm, itemsTotal, isAddingPurch
                                     <Flex align="center" gap={4}>
                                         <Text fz={11}>{currencySymbol}</Text>
                                         <Text fz={12} fw={700}>
-                                            {grandTotal.toFixed(2)}
+                                            {formatCurrency(grandTotal)}
                                         </Text>
                                     </Flex>
                                 </Flex>
@@ -267,7 +268,7 @@ export default function PaymentSection({ purchaseForm, itemsTotal, isAddingPurch
                                         {currencySymbol}
                                     </Text>
                                     <Text fz="sm" fw={700}>
-                                        {dueAmount.toFixed(2)}
+                                        {formatCurrency(dueAmount)}
                                     </Text>
                                 </Flex>
                             </Flex>
