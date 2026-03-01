@@ -6,6 +6,7 @@ import {
     Grid,
     NumberInput,
     Select,
+    Stack,
     Text,
     Textarea,
 } from "@mantine/core";
@@ -15,7 +16,7 @@ import useConfigData from "@hooks/useConfigData";
 import VendorInfoSection from "./VendorInfoSection";
 import useTransactionMode from "@hooks/useTransactionMode";
 
-export default function PaymentSection({ purchaseForm, itemsTotal }) {
+export default function PaymentSection({ purchaseForm, itemsTotal, isAddingPurchase }) {
     const { transactionMode } = useTransactionMode();
     const { configData } = useConfigData();
     const currencySymbol = configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol;
@@ -131,38 +132,48 @@ export default function PaymentSection({ purchaseForm, itemsTotal }) {
                 </Grid.Col>
 
                 <Grid.Col span={8}>
-                    <Box
+                    <Stack
                         bd="1px solid #dee2e6"
                         bg="white"
                         p="xs"
                         className="borderRadiusAll"
                         h="100%"
+                        justify="space-between"
+                        gap={0}
                     >
                         <Grid columns={24} gutter={{ base: 4 }}>
-                            <Grid.Col span={8}>
-                                <Box
+                            <Grid.Col span={8} h={66}>
+                                <Flex
+                                    align="center"
+                                    justify="center"
                                     bg="var(--theme-primary-color-0)"
                                     className="borderRadiusAll"
                                     px="xs"
                                     py={4}
+                                    h="100%"
+                                    direction="column"
                                 >
-                                    <Text fz={11} fw={500}>
+                                    <Text ta="center" fz={11} fw={500}>
                                         Discount
                                     </Text>
-                                    <Flex align="center" gap={4}>
+                                    <Flex justify="center" align="center" gap={4}>
                                         <Text fz={11}>{currencySymbol}</Text>
                                         <Text fz={12} fw={600}>
                                             {discountValue.toFixed(2)}
                                         </Text>
                                     </Flex>
-                                </Box>
+                                </Flex>
                             </Grid.Col>
                             <Grid.Col span={8}>
-                                <Box
+                                <Flex
+                                    align="center"
+                                    justify="center"
                                     bg="var(--theme-primary-color-0)"
                                     className="borderRadiusAll"
                                     px="xs"
                                     py={4}
+                                    h="100%"
+                                    direction="column"
                                 >
                                     <Text fz={11} fw={500}>
                                         Vat
@@ -173,14 +184,18 @@ export default function PaymentSection({ purchaseForm, itemsTotal }) {
                                             {vatAmount.toFixed(2)}
                                         </Text>
                                     </Flex>
-                                </Box>
+                                </Flex>
                             </Grid.Col>
                             <Grid.Col span={8}>
-                                <Box
+                                <Flex
+                                    align="center"
+                                    justify="center"
                                     bg="var(--theme-primary-color-0)"
                                     className="borderRadiusAll"
                                     px="xs"
                                     py={4}
+                                    h="100%"
+                                    direction="column"
                                 >
                                     <Text fz={11} fw={500}>
                                         Total
@@ -191,7 +206,7 @@ export default function PaymentSection({ purchaseForm, itemsTotal }) {
                                             {grandTotal.toFixed(2)}
                                         </Text>
                                     </Flex>
-                                </Box>
+                                </Flex>
                             </Grid.Col>
                         </Grid>
 
@@ -201,23 +216,23 @@ export default function PaymentSection({ purchaseForm, itemsTotal }) {
                             align="center"
                             gap={6}
                         >
+                            <Text fz="sm" fw={600}>Discount: </Text>
                             <Box sx={{ flex: 1 }}>
                                 <NumberInput
                                     value={discountAmount}
                                     onChange={(value) =>
                                         purchaseForm.setFieldValue(
                                             "discountAmount",
-                                            typeof value === "string"
-                                                ? parseFloat(value) || 0
-                                                : value || 0
+                                            parseFloat(value) || 0
                                         )
                                     }
+                                    hideControls
                                     size="xs"
                                     placeholder="Discount"
                                     leftSection={<IconCurrencyTaka size={14} />}
                                 />
                             </Box>
-                            <Button
+                            {/* <Button
                                 variant={isDiscountPercentage ? "filled" : "outline"}
                                 color="var(--theme-warn-color-6)"
                                 size="xs"
@@ -231,27 +246,27 @@ export default function PaymentSection({ purchaseForm, itemsTotal }) {
                                 leftSection={<IconPercentage size={14} />}
                             >
                                 %
-                            </Button>
+                            </Button> */}
                         </Flex>
 
                         <Flex
                             mt="xs"
                             direction="column"
                             gap={6}
-                            bg="var(--theme-primary-color-6)"
+                            bg="var(--theme-primary-color-1)"
                             className="borderRadiusAll"
                             px="xs"
                             py={6}
                         >
-                            <Flex justify="space-between" align="center">
-                                <Text fz="sm" fw={600} c="white">
+                            <Flex py={8} justify="space-between" align="center">
+                                <Text fz="sm" fw={600}>
                                     Due
                                 </Text>
                                 <Flex align="center" gap={4}>
-                                    <Text fz="sm" fw={500} c="white">
+                                    <Text fz="sm" fw={500}>
                                         {currencySymbol}
                                     </Text>
-                                    <Text fz="sm" fw={700} c="white">
+                                    <Text fz="sm" fw={700}>
                                         {dueAmount.toFixed(2)}
                                     </Text>
                                 </Flex>
@@ -261,11 +276,10 @@ export default function PaymentSection({ purchaseForm, itemsTotal }) {
                                 onChange={(value) =>
                                     purchaseForm.setFieldValue(
                                         "paymentAmount",
-                                        typeof value === "string"
-                                            ? parseFloat(value) || 0
-                                            : value || 0
+                                        parseFloat(value) || 0
                                     )
                                 }
+                                hideControls
                                 size="xs"
                                 placeholder="Amount"
                                 leftSection={<IconCurrencyTaka size={14} />}
@@ -276,7 +290,7 @@ export default function PaymentSection({ purchaseForm, itemsTotal }) {
                                 }}
                             />
                         </Flex>
-                    </Box>
+                    </Stack>
                 </Grid.Col>
             </Grid>
 
@@ -324,6 +338,7 @@ export default function PaymentSection({ purchaseForm, itemsTotal }) {
                     radius={0}
                     form="purchaseForm"
                     type="submit"
+                    loading={isAddingPurchase}
                 >
                     Save
                 </Button>

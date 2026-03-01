@@ -11,6 +11,7 @@ import { IconTrashX } from "@tabler/icons-react";
 import tableCss from "@assets/css/Table.module.css";
 import useConfigData from "@hooks/useConfigData";
 import useMainAreaHeight from "@hooks/useMainAreaHeight";
+import { formatCurrency } from "@utils/index";
 
 export default function ItemsTableSection({
     purchaseForm,
@@ -23,8 +24,7 @@ export default function ItemsTableSection({
     const purchaseItems = purchaseForm.values.items || [];
 
     const handleQuantityChange = (itemId, value) => {
-        const numericValue =
-            typeof value === "string" ? parseFloat(value) || 0 : value || 0;
+        const numericValue = parseFloat(value) || 0;
         const updatedItems = purchaseItems.map((item) =>
             item.id === itemId ? { ...item, quantity: numericValue } : item
         );
@@ -32,8 +32,7 @@ export default function ItemsTableSection({
     };
 
     const handlePriceChange = (itemId, value) => {
-        const numericValue =
-            typeof value === "string" ? parseFloat(value) || 0 : value || 0;
+        const numericValue = parseFloat(value) || 0;
         const updatedItems = purchaseItems.map((item) =>
             item.id === itemId ? { ...item, price: numericValue } : item
         );
@@ -135,8 +134,8 @@ export default function ItemsTableSection({
                                 (record.quantity || 0) * (record.price || 0);
                             return (
                                 <Text size="sm" fw={600}>
-                                    {currencySymbol}
-                                    {subTotal.toFixed(2)}
+                                    {currencySymbol}{" "}
+                                    {formatCurrency(subTotal)}
                                 </Text>
                             );
                         },
@@ -168,19 +167,19 @@ export default function ItemsTableSection({
                 mt={4}
                 px="xs"
                 py={6}
-                bg="var(--theme-primary-color-6)"
+                bg="var(--theme-primary-color-0)"
                 className="borderRadiusAll"
             >
                 <Flex justify="space-between" align="center">
-                    <Text fz="sm" fw={600} c="white">
+                    <Text fz="sm" fw={600}>
                         Σ&nbsp; {purchaseItems.length} Items
                     </Text>
                     <Flex align="center" gap={4}>
-                        <Text fz="sm" fw={500} c="white">
+                        <Text fz="sm" fw={500}>
                             {currencySymbol}
                         </Text>
-                        <Text fz="sm" fw={700} c="white">
-                            {itemsTotal.toFixed(2)}
+                        <Text fz="sm" fw={700}>
+                            {formatCurrency(itemsTotal)}
                         </Text>
                     </Flex>
                 </Flex>

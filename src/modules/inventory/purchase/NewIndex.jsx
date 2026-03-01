@@ -6,16 +6,35 @@ import InvoiceForm from "./form/InvoiceForm";
 import VendorOverview from "./Overview";
 import { vendorOverviewRequest } from "./helpers/request";
 import { useAddPurchaseMutation } from "@services/purchase";
+import { showNotification } from "@components/ShowNotificationComponent";
 
 export default function NewIndex() {
     const { initialValues } = vendorOverviewRequest();
-    const [ addPurchase ] = useAddPurchaseMutation();
+    const [ addPurchase, { isLoading: isAddingPurchase } ] = useAddPurchaseMutation();
 
     const purchaseForm = useForm({
         initialValues,
     });
 
     const handleSubmit = async (formValues) => {
+        if (!formValues.items?.length) {
+            showNotification("Add minimum one purchase item first", "red");
+            return;
+        }
+
+        if (!formValues.vendor_id) {
+            showNotification("Vendor is required", "red");
+            return;
+        }
+        if (!formValues.transactionModeId) {
+            showNotification("Transaction mode is required", "red");
+            return;
+        }
+        if (!formValues.paymentAmount) {
+            showNotification("Payment amount is required", "red");
+            return;
+        }
+
         const items = formValues.items || [];
         const subTotal = items.reduce(
             (sum, item) => sum + (Number(item.quantity) || 0) * (Number(item.price) || 0),
@@ -61,9 +80,16 @@ export default function NewIndex() {
         };
 
         try {
-            await addPurchase(payload);
+            const response = await addPurchase(payload).unwrap();
+            if (response.data) {
+                showNotification("Purchase added successfully", "teal");
+                purchaseForm.reset();
+            } else {
+                showNotification(response.message, "red");
+            }
         } catch (error) {
             console.error(error);
+            showNotification(error.data?.message, "red");
         }
     };
 
@@ -80,7 +106,7 @@ export default function NewIndex() {
                     </Box>
                 </Grid.Col>
                 <Grid.Col span={18}>
-                    <VendorOverview purchaseForm={purchaseForm} />
+                    <VendorOverview isAddingPurchase={isAddingPurchase} purchaseForm={purchaseForm} />
                 </Grid.Col>
             </Grid>
         </Box>

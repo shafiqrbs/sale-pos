@@ -4,7 +4,7 @@ import { APP_APIS } from "@/routes/routes";
 export const extendedProductApiSlice = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
         getProduct: builder.query({
-            query: (params) => {
+            query: (params = {}) => {
                 return {
                     url: APP_APIS.INVENTORY_PRODUCT,
                     method: "GET",

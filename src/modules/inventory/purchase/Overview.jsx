@@ -3,7 +3,7 @@ import { Box } from "@mantine/core";
 import PurchaseItemsTableSection from "./ItemsTableSection";
 import PurchasePaymentSection from "./PaymentSection";
 
-export default function Overview({ purchaseForm }) {
+export default function Overview({ purchaseForm, isAddingPurchase }) {
     const itemsTotal = useMemo(() => {
         const purchaseItems = purchaseForm.values.items || [];
 
@@ -29,6 +29,7 @@ export default function Overview({ purchaseForm }) {
             <PurchasePaymentSection
                 purchaseForm={purchaseForm}
                 itemsTotal={itemsTotal}
+                isAddingPurchase={isAddingPurchase}
             />
         </Box>
     );

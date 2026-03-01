@@ -17,11 +17,11 @@ export default function useLocalProducts(options = {}) {
 		queryOptions: initialQueryOptions = {},
 	} = options;
 
-	const [products, setProducts] = useState([]);
-	const [totalCount, setTotalCount] = useState(0);
-	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState(null);
-	const [lastFetchParams, setLastFetchParams] = useState(null);
+	const [ products, setProducts ] = useState([]);
+	const [ totalCount, setTotalCount ] = useState(0);
+	const [ loading, setLoading ] = useState(false);
+	const [ error, setError ] = useState(null);
+	const [ lastFetchParams, setLastFetchParams ] = useState(null);
 
 	/**
 	 * =============== fetch products from local database with filters and pagination ================
@@ -95,7 +95,7 @@ export default function useLocalProducts(options = {}) {
 			setLoading(false);
 
 			if (fetchedProducts && fetchedProducts.length > 0) {
-				return fetchedProducts[0];
+				return fetchedProducts[ 0 ];
 			}
 
 			return null;
@@ -106,6 +106,19 @@ export default function useLocalProducts(options = {}) {
 			return null;
 		}
 	}, []);
+
+	const addProduct = async (product) => {
+		setLoading(true);
+		setError(null);
+		try {
+			await window.dbAPI.upsertIntoTable("core_products", product);
+		} catch (error) {
+			console.error("Error adding product:", error);
+			setError(error);
+		} finally {
+			setLoading(false);
+		}
+	};
 
 	/**
 	 * =============== refetch products with last used parameters ================
@@ -119,7 +132,7 @@ export default function useLocalProducts(options = {}) {
 
 		const { condition, orderBy, queryOptions } = lastFetchParams;
 		return getLocalProducts(condition, orderBy, queryOptions);
-	}, [lastFetchParams, getLocalProducts]);
+	}, [ lastFetchParams, getLocalProducts ]);
 
 	// =============== auto-fetch on mount if enabled ================
 	useEffect(() => {
@@ -131,6 +144,7 @@ export default function useLocalProducts(options = {}) {
 
 	return {
 		products,
+		addProduct,
 		totalCount,
 		getLocalProducts,
 		getProductCount,

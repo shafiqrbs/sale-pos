@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
     ActionIcon,
     Box,
@@ -25,8 +25,11 @@ import AddProductDrawer from "@components/drawers/AddProductDrawer";
 import useLocalProducts from "@hooks/useLocalProducts";
 import useConfigData from "@hooks/useConfigData";
 import { useDisclosure } from "@mantine/hooks";
+import { formatCurrency } from "@utils/index";
+import { showNotification } from "@components/ShowNotificationComponent";
 
 export default function InvoiceForm({ purchaseForm }) {
+    const [ resetKey, setResetKey ] = useState(() => Date.now());
     const { configData } = useConfigData();
     const { products } = useLocalProducts();
     const { mainAreaHeight } = useMainAreaHeight();
@@ -37,6 +40,20 @@ export default function InvoiceForm({ purchaseForm }) {
             productId: "",
             purchasePrice: "",
             quantity: "",
+        },
+        validate: {
+            purchasePrice: (value) => {
+                if (!value) {
+                    return "Purchase price is required";
+                }
+                return null;
+            },
+            quantity: (value) => {
+                if (!value) {
+                    return "Quantity is required";
+                }
+                return null;
+            },
         },
     });
 
@@ -71,8 +88,8 @@ export default function InvoiceForm({ purchaseForm }) {
             0;
 
         const newItem = {
-            id: Date.now(),
-            productId: selectedProduct.id,
+            id: crypto.randomUUID(),
+            productId: String(selectedProduct.id),
             productName: selectedProduct.display_name,
             quantity: quantityNumber,
             price: priceNumber,
@@ -82,6 +99,8 @@ export default function InvoiceForm({ purchaseForm }) {
         purchaseForm.insertListItem("items", newItem);
 
         invoiceItemForm.reset();
+        setResetKey(Date.now())
+        showNotification("Item added successfully", "teal");
     };
 
     const invoiceSubTotal =
@@ -125,9 +144,10 @@ export default function InvoiceForm({ purchaseForm }) {
                             </Grid.Col>
                         </Grid>
 
-                        <Flex mt={4} gap="xs" align="flex-end">
+                        <Flex mt={4} gap="4" align="flex-end">
                             <Box style={{ flex: 1 }}>
                                 <SelectForm
+                                    key={resetKey}
                                     form={invoiceItemForm}
                                     name="productId"
                                     id="productId"
@@ -143,7 +163,7 @@ export default function InvoiceForm({ purchaseForm }) {
                                 variant="filled"
                                 color="var(--theme-primary-color-6)"
                                 radius="sm"
-                                size="lg"
+                                size={36}
                                 onClick={openProductDrawer}
                             >
                                 <IconPlus size={18} />
@@ -203,7 +223,7 @@ export default function InvoiceForm({ purchaseForm }) {
                     <Flex align="center" gap={4}>
                         <IconCurrencyTaka size={14} />
                         <Text fz="sm" fw={600}>
-                            {invoiceSubTotal.toFixed(2)}
+                            {formatCurrency(invoiceSubTotal)}
                         </Text>
                     </Flex>
                 </Flex>
