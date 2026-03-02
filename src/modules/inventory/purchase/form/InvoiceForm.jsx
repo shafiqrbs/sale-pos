@@ -97,6 +97,12 @@ export default function InvoiceForm({ purchaseForm }) {
 		setProductResetKey((prev) => prev + 1);
 	};
 
+	const handleProductSelect = (value, option) => {
+		invoiceItemForm.setFieldValue("productId", value);
+		invoiceItemForm.setFieldValue("purchasePrice", option?.purchase_price);
+		document.getElementById("quantity").focus();
+	};
+
 	return (
 		<>
 			<Box
@@ -141,10 +147,7 @@ export default function InvoiceForm({ purchaseForm }) {
 										data={productOptions}
 										searchable
 										{...invoiceItemForm.getInputProps("productId", { type: "search" })}
-										onChange={(value, option) => {
-											invoiceItemForm.setFieldValue("productId", value);
-											invoiceItemForm.setFieldValue("purchasePrice", option?.purchase_price);
-										}}
+										onChange={handleProductSelect}
 										nothingFoundMessage="No product found"
 									/>
 								</FormValidationWrapper>
@@ -167,7 +170,8 @@ export default function InvoiceForm({ purchaseForm }) {
 									name="purchasePrice"
 									id="purchasePrice"
 									label="Purchase Price"
-									placeholder="0"
+									nextField="quantity"
+									placeholder="0.00"
 									required={false}
 									tooltip={invoiceItemForm.errors.purchasePrice}
 									leftSection={<IconCurrencyTaka size={16} opacity={0.6} />}
@@ -179,7 +183,8 @@ export default function InvoiceForm({ purchaseForm }) {
 									name="quantity"
 									id="quantity"
 									label="Quantity"
-									placeholder="Quantity"
+									placeholder="0"
+									nextField="EntityFormSubmit"
 									required={false}
 									tooltip={invoiceItemForm.errors.quantity}
 									rightIcon={
@@ -231,7 +236,7 @@ export default function InvoiceForm({ purchaseForm }) {
 						color="white"
 						radius="sm"
 						type="submit"
-						id="InvoiceFormSubmit"
+						id="EntityFormSubmit"
 					>
 						Add
 					</Button>
