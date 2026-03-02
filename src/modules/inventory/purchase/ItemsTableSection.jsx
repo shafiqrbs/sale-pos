@@ -1,13 +1,18 @@
 import React from "react";
-import { ActionIcon, Box, Flex, NumberInput, Text } from "@mantine/core";
+import { ActionIcon, Box, Flex, NumberInput, Text, Button } from "@mantine/core";
 import { DataTable } from "mantine-datatable";
-import { IconTrashX } from "@tabler/icons-react";
+import { IconList, IconTrashX } from "@tabler/icons-react";
 import tableCss from "@assets/css/Table.module.css";
 import useConfigData from "@hooks/useConfigData";
 import useMainAreaHeight from "@hooks/useMainAreaHeight";
 import { formatCurrency } from "@utils/index";
+import { useNavigate } from "react-router";
+import { APP_NAVLINKS } from "@/routes/routes";
+import { useTranslation } from "react-i18next";
 
 export default function ItemsTableSection({ purchaseForm, itemsTotal }) {
+	const navigate = useNavigate();
+	const { t } = useTranslation();
 	const { mainAreaHeight } = useMainAreaHeight();
 	const tableHeight = mainAreaHeight - 394;
 	const { configData } = useConfigData();
@@ -40,17 +45,21 @@ export default function ItemsTableSection({ purchaseForm, itemsTotal }) {
 
 	return (
 		<Box bd="1px solid #dee2e6" bg="white" p="3xs" className="borderRadiusAll">
-			<Box
-				h={32}
-				px="xs"
-				fz="sm"
-				fw={600}
-				pt="xs"
-				mb="4xs"
-				className="boxBackground textColor borderRadiusAll"
-			>
-				Purchase Items
-			</Box>
+			<Flex justify="space-between" align="center" mb="4xs">
+				<Box px="xs" fz="sm" fw={600} className="boxBackground textColor borderRadiusAll">
+					{t("PurchaseItems")}
+				</Box>
+
+				<Button
+					onClick={() => navigate(APP_NAVLINKS.PURCHASE)}
+					w={170}
+					bg="var(--theme-primary-color-6)"
+					color="white"
+					leftSection={<IconList size={18} />}
+				>
+					{t("PurchaseList")}
+				</Button>
+			</Flex>
 
 			<DataTable
 				classNames={{

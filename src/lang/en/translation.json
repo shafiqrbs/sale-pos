@@ -1194,5 +1194,7 @@
 	"UnitsSold": "units sold",
 	"TotalInvoices": "Total Invoices",
 	"ResetPassword": "Reset Password",
-	"OutOfStock": "Out of Stock"
+	"OutOfStock": "Out of Stock",
+	"PurchaseList": "Purchase List",
+	"PurchaseItems": "Purchase Items"
 }

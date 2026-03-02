@@ -751,5 +751,7 @@
 	"LastUpdated": "শেষ আপডেট",
 	"BestSellingProduct": "সেরা বিক্রয় পণ্য",
 	"UnitsSold": "ইউনিট বিক্রি",
-	"TotalInvoices": "মোট ইনভয়েস"
+	"TotalInvoices": "মোট ইনভয়েস",
+	"PurchaseList": "পার্চেজ লিস্ট",
+	"PurchaseItems": "পার্চেজ আইটেম"
 }

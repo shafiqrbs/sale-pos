@@ -95,6 +95,9 @@ export default function InvoiceForm({ purchaseForm }) {
 	const handleResetInvoiceItemForm = () => {
 		invoiceItemForm.reset();
 		setProductResetKey((prev) => prev + 1);
+		requestAnimationFrame(() => {
+			document.getElementById("productId").focus();
+		});
 	};
 
 	const handleProductSelect = (value, option) => {
@@ -146,6 +149,7 @@ export default function InvoiceForm({ purchaseForm }) {
 										placeholder="Choose Product"
 										data={productOptions}
 										searchable
+										id="productId"
 										{...invoiceItemForm.getInputProps("productId", { type: "search" })}
 										onChange={handleProductSelect}
 										nothingFoundMessage="No product found"
