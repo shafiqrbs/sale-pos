@@ -124,7 +124,7 @@ export default function PaymentSection({ purchaseForm, itemsTotal, isAddingPurch
 										}}
 										nothingFoundMessage="No transaction mode found"
 										placeholder="Select transaction mode"
-										size="xs"
+										size="sm"
 									/>
 								</FormValidationWrapper>
 							</Box>
@@ -300,7 +300,7 @@ export default function PaymentSection({ purchaseForm, itemsTotal, isAddingPurch
 							>
 								<NumberInput
 									hideControls
-									size="xs"
+									size="sm"
 									placeholder="Amount"
 									leftSection={<IconCurrencyTaka size={14} />}
 									styles={{
