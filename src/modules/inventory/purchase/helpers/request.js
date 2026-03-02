@@ -44,6 +44,7 @@ const invoiceItemFormInitialValues = {
 	productId: "",
 	purchasePrice: "",
 	quantity: "",
+	unit: "",
 };
 
 export const invoiceItemFormRequest = () => {

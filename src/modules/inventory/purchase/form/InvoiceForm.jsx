@@ -31,7 +31,7 @@ import { invoiceItemFormRequest } from "../helpers/request";
 import FormValidationWrapper from "@components/form-builders/FormValidationWrapper";
 import { useState } from "react";
 
-export default function InvoiceForm({ purchaseForm }) {
+export default function InvoiceForm({ refetch }) {
 	const [productResetKey, setProductResetKey] = useState(0);
 	const { configData } = useConfigData();
 	const { products } = useLocalProducts();
@@ -43,15 +43,17 @@ export default function InvoiceForm({ purchaseForm }) {
 
 	const currencySymbol =
 		configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol;
+
 	const productOptions = products?.map((product) => ({
 		value: String(product.id),
 		label: `${product.display_name} [${product.quantity}] ${product.unit_name} - ${currencySymbol}${product.purchase_price}`,
 		purchase_price: product.purchase_price,
+		unit: product.unit_name,
 	}));
 
 	const containerHeight = mainAreaHeight - 170;
 
-	const handleAddItemToPurchaseForm = () => {
+	const handleAddItemToPurchaseForm = async () => {
 		const { productId, purchasePrice, quantity } = invoiceItemForm.values;
 
 		if (!productId || !quantity) {
@@ -74,15 +76,19 @@ export default function InvoiceForm({ purchaseForm }) {
 			0;
 
 		const newItem = {
-			id: crypto.randomUUID(),
-			productId: String(selectedProduct.id),
-			productName: selectedProduct.display_name,
+			product_id: selectedProduct.id,
+			display_name: selectedProduct.display_name,
 			quantity: quantityNumber,
-			price: priceNumber,
+			purchase_price: priceNumber,
+			sales_price: Number(selectedProduct.sales_price) || priceNumber,
+			sub_total: quantityNumber * priceNumber,
+			unit_name: selectedProduct.unit_name || invoiceItemForm.values.unit || "",
+			type: "purchase",
 		};
 
-		// =============== push new item into main purchase form list using mantine helpers ===============
-		purchaseForm.insertListItem("items", newItem);
+		// =============== persist new item into local temp_purchase_products table ===============
+		await window.dbAPI.upsertIntoTable("temp_purchase_products", newItem);
+		refetch();
 
 		handleResetInvoiceItemForm();
 		showNotification("Item added successfully", "teal");
@@ -103,6 +109,7 @@ export default function InvoiceForm({ purchaseForm }) {
 	const handleProductSelect = (value, option) => {
 		invoiceItemForm.setFieldValue("productId", value);
 		invoiceItemForm.setFieldValue("purchasePrice", option?.purchase_price);
+		invoiceItemForm.setFieldValue("unit", option?.unit);
 		document.getElementById("quantity").focus();
 	};
 
@@ -193,7 +200,7 @@ export default function InvoiceForm({ purchaseForm }) {
 									tooltip={invoiceItemForm.errors.quantity}
 									rightIcon={
 										<Text fz="xs" fw={500}>
-											Kg
+											{invoiceItemForm.values.unit || "Unit"}
 										</Text>
 									}
 								/>

@@ -10,7 +10,7 @@ import { useNavigate } from "react-router";
 import { APP_NAVLINKS } from "@/routes/routes";
 import { useTranslation } from "react-i18next";
 
-export default function ItemsTableSection({ purchaseForm, itemsTotal }) {
+export default function ItemsTableSection({ purchaseProducts, refetch, itemsTotal }) {
 	const navigate = useNavigate();
 	const { t } = useTranslation();
 	const { mainAreaHeight } = useMainAreaHeight();
@@ -20,27 +20,33 @@ export default function ItemsTableSection({ purchaseForm, itemsTotal }) {
 	const currencySymbol =
 		configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol;
 
-	const purchaseItems = purchaseForm.values.items || [];
-
-	const handleQuantityChange = (itemId, value) => {
+	const handleQuantityChange = async (itemId, value) => {
 		const numericValue = parseFloat(value) || 0;
-		const updatedItems = purchaseItems.map((item) =>
-			item.id === itemId ? { ...item, quantity: numericValue } : item
-		);
-		purchaseForm.setFieldValue("items", updatedItems);
+		const currentItem = purchaseProducts.find((item) => item.id === itemId);
+		const newSubTotal = numericValue * (currentItem?.purchase_price || 0);
+		await window.dbAPI.upsertIntoTable("temp_purchase_products", {
+			id: itemId,
+			quantity: numericValue,
+			sub_total: newSubTotal,
+		});
+		refetch();
 	};
 
-	const handlePriceChange = (itemId, value) => {
+	const handlePriceChange = async (itemId, value) => {
 		const numericValue = parseFloat(value) || 0;
-		const updatedItems = purchaseItems.map((item) =>
-			item.id === itemId ? { ...item, price: numericValue } : item
-		);
-		purchaseForm.setFieldValue("items", updatedItems);
+		const currentItem = purchaseProducts.find((item) => item.id === itemId);
+		const newSubTotal = (currentItem?.quantity || 0) * numericValue;
+		await window.dbAPI.upsertIntoTable("temp_purchase_products", {
+			id: itemId,
+			purchase_price: numericValue,
+			sub_total: newSubTotal,
+		});
+		refetch();
 	};
 
-	const handleRemoveItem = (itemId) => {
-		const updatedItems = purchaseItems.filter((item) => item.id !== itemId);
-		purchaseForm.setFieldValue("items", updatedItems);
+	const handleRemoveItem = async (itemId) => {
+		await window.dbAPI.deleteDataFromTable("temp_purchase_products", itemId);
+		refetch();
 	};
 
 	return (
@@ -75,7 +81,7 @@ export default function ItemsTableSection({ purchaseForm, itemsTotal }) {
 					},
 				}}
 				withColumnBorders={true}
-				records={purchaseItems}
+				records={purchaseProducts}
 				columns={[
 					{
 						accessor: "serial",
@@ -83,58 +89,58 @@ export default function ItemsTableSection({ purchaseForm, itemsTotal }) {
 						width: 60,
 						render: (_, index) => index + 1,
 					},
-					{
-						accessor: "productName",
-						title: "Product",
-						render: (record) => <Text size="sm">{record.productName}</Text>,
+				{
+					accessor: "display_name",
+					title: "Product",
+					render: (record) => <Text size="sm">{record.display_name}</Text>,
+				},
+				{
+					accessor: "quantity",
+					title: "Qty",
+					textAlign: "center",
+					width: 120,
+					render: (record) => (
+						<NumberInput
+							size="xs"
+							value={record.quantity}
+							min={0}
+							step={1}
+							hideControls
+							onChange={(value) => handleQuantityChange(record.id, value)}
+						/>
+					),
+				},
+				{
+					accessor: "purchase_price",
+					title: "Price",
+					textAlign: "right",
+					width: 140,
+					render: (record) => (
+						<NumberInput
+							size="xs"
+							value={record.purchase_price}
+							min={0}
+							step={1}
+							hideControls
+							thousandSeparator=","
+							onChange={(value) => handlePriceChange(record.id, value)}
+						/>
+					),
+				},
+				{
+					accessor: "sub_total",
+					title: "Sub Total",
+					textAlign: "right",
+					width: 160,
+					render: (record) => {
+						const subTotal = (record.quantity || 0) * (record.purchase_price || 0);
+						return (
+							<Text size="sm" fw={600}>
+								{currencySymbol} {formatCurrency(subTotal)}
+							</Text>
+						);
 					},
-					{
-						accessor: "quantity",
-						title: "Qty",
-						textAlign: "center",
-						width: 120,
-						render: (record) => (
-							<NumberInput
-								size="xs"
-								value={record.quantity}
-								min={0}
-								step={1}
-								hideControls
-								onChange={(value) => handleQuantityChange(record.id, value)}
-							/>
-						),
-					},
-					{
-						accessor: "price",
-						title: "Price",
-						textAlign: "right",
-						width: 140,
-						render: (record) => (
-							<NumberInput
-								size="xs"
-								value={record.price}
-								min={0}
-								step={1}
-								hideControls
-								thousandSeparator=","
-								onChange={(value) => handlePriceChange(record.id, value)}
-							/>
-						),
-					},
-					{
-						accessor: "subTotal",
-						title: "Sub Total",
-						textAlign: "right",
-						width: 160,
-						render: (record) => {
-							const subTotal = (record.quantity || 0) * (record.price || 0);
-							return (
-								<Text size="sm" fw={600}>
-									{currencySymbol} {formatCurrency(subTotal)}
-								</Text>
-							);
-						},
-					},
+				},
 					{
 						accessor: "action",
 						title: "",
@@ -161,7 +167,7 @@ export default function ItemsTableSection({ purchaseForm, itemsTotal }) {
 			<Box mt="les" px="xs" py="4xs" bg="var(--theme-tertiary-color-2)" className="borderRadiusAll">
 				<Flex justify="space-between" align="center">
 					<Text fz="sm" fw={600}>
-						Σ&nbsp; {purchaseItems.length} Item(s)
+						Σ&nbsp; {purchaseProducts.length} Item(s)
 					</Text>
 					<Flex align="center" gap={4}>
 						<Text fz="sm" fw={500}>

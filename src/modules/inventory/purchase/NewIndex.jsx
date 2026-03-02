@@ -7,14 +7,17 @@ import VendorOverview from "./Overview";
 import { vendorOverviewRequest } from "./helpers/request";
 import { useAddPurchaseMutation } from "@services/purchase";
 import { showNotification } from "@components/ShowNotificationComponent";
+import useTempPurchaseProducts from "@hooks/useTempPurchaseProducts";
 
 export default function NewIndex() {
 	const [addPurchase, { isLoading: isAddingPurchase }] = useAddPurchaseMutation();
 
 	const purchaseForm = useForm(vendorOverviewRequest());
 
+	const { purchaseProducts, refetch } = useTempPurchaseProducts({ type: "purchase" });
+
 	const handleSubmit = async (formValues) => {
-		if (!formValues.items?.length) {
+		if (!purchaseProducts?.length) {
 			showNotification("Add minimum one purchase item first", "red");
 			return;
 		}
@@ -32,9 +35,8 @@ export default function NewIndex() {
 			return;
 		}
 
-		const items = formValues.items || [];
-		const subTotal = items.reduce(
-			(sum, item) => sum + (Number(item.quantity) || 0) * (Number(item.price) || 0),
+		const subTotal = purchaseProducts.reduce(
+			(sum, item) => sum + (Number(item.quantity) || 0) * (Number(item.purchase_price) || 0),
 			0
 		);
 
@@ -64,15 +66,15 @@ export default function NewIndex() {
 			invoice_date: formValues.purchaseDate
 				? dayjs(formValues.purchaseDate).format("YYYY-MM-DD")
 				: dayjs().format("YYYY-MM-DD"),
-			items: items.map((item) => ({
-				product_id: item.productId,
-				warehouse_id: null,
+			items: purchaseProducts.map((item) => ({
+				product_id: item.product_id,
+				warehouse_id: item.warehouse_id || null,
 				quantity: Number(item.quantity) || 0,
-				purchase_price: Number(item.price) || 0,
-				sales_price: Number(item.price) || 0,
-				bonus_quantity: 0,
-				sub_total: (Number(item.quantity) || 0) * (Number(item.price) || 0),
-				name: item.productName ?? "",
+				purchase_price: Number(item.purchase_price) || 0,
+				sales_price: Number(item.sales_price) || Number(item.purchase_price) || 0,
+				bonus_quantity: item.bonus_quantity || 0,
+				sub_total: (Number(item.quantity) || 0) * (Number(item.purchase_price) || 0),
+				name: item.display_name ?? "",
 			})),
 		};
 
@@ -80,6 +82,9 @@ export default function NewIndex() {
 			const response = await addPurchase(payload).unwrap();
 			if (response.data) {
 				showNotification("Purchase added successfully", "teal");
+				// =============== clear persisted temp items after successful purchase submission ===============
+				await window.dbAPI.deleteDataFromTable("temp_purchase_products", { type: "purchase" });
+				refetch();
 				purchaseForm.reset();
 			} else {
 				showNotification(response.message, "red");
@@ -94,12 +99,17 @@ export default function NewIndex() {
 		<Grid columns={24} gutter={0}>
 			<Grid.Col span={6}>
 				<Box p="xs" pr={0}>
-					<InvoiceForm purchaseForm={purchaseForm} />
+					<InvoiceForm refetch={refetch} />
 				</Box>
 			</Grid.Col>
 			<Grid.Col span={18}>
 				<Box component="form" id="purchaseForm" onSubmit={purchaseForm.onSubmit(handleSubmit)}>
-					<VendorOverview isAddingPurchase={isAddingPurchase} purchaseForm={purchaseForm} />
+					<VendorOverview
+						isAddingPurchase={isAddingPurchase}
+						purchaseForm={purchaseForm}
+						purchaseProducts={purchaseProducts}
+						refetch={refetch}
+					/>
 				</Box>
 			</Grid.Col>
 		</Grid>

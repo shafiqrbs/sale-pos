@@ -3,19 +3,21 @@ import { Box } from "@mantine/core";
 import ItemsTableSection from "./ItemsTableSection";
 import PaymentSection from "./PaymentSection";
 
-export default function Overview({ purchaseForm, isAddingPurchase }) {
+export default function Overview({ purchaseForm, isAddingPurchase, purchaseProducts, refetch }) {
 	const itemsTotal = useMemo(() => {
-		const purchaseItems = purchaseForm.values.items || [];
-
-		return purchaseItems.reduce(
-			(accumulator, item) => accumulator + (item.quantity || 0) * (item.price || 0),
+		return (purchaseProducts || []).reduce(
+			(accumulator, item) => accumulator + (item.quantity || 0) * (item.purchase_price || 0),
 			0
 		);
-	}, [purchaseForm.values.items]);
+	}, [purchaseProducts]);
 
 	return (
 		<Box bg="var(--theme-tertiary-color-0)" p="xs">
-			<ItemsTableSection purchaseForm={purchaseForm} itemsTotal={itemsTotal} />
+			<ItemsTableSection
+				purchaseProducts={purchaseProducts || []}
+				refetch={refetch}
+				itemsTotal={itemsTotal}
+			/>
 
 			<PaymentSection
 				purchaseForm={purchaseForm}
