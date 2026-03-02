@@ -2,19 +2,30 @@ import { PasswordInput, Tooltip } from "@mantine/core";
 import { getHotkeyHandler } from "@mantine/hooks";
 
 function PasswordInputForm(props) {
-	const { label, placeholder, required, nextField, name, form, tooltip, mt, id } = props;
+	const {
+		label,
+		placeholder,
+		required,
+		nextField,
+		name,
+		form,
+		tooltip,
+		mt,
+		id,
+		color = "var(--theme-error-color)",
+	} = props;
 
 	return (
 		<>
 			{form && (
 				<Tooltip
 					label={tooltip}
-					opened={name in form.errors && !!form.errors[ name ]}
+					opened={name in form.errors && !!form.errors[name]}
 					px={16}
 					py={2}
 					position="top-end"
-					bg={`red.4`}
-					c={"white"}
+					bg={color}
+					c="white"
 					withArrow
 					offset={2}
 					transitionProps={{ transition: "pop-bottom-left", duration: 500 }}
@@ -36,7 +47,7 @@ function PasswordInputForm(props) {
 						])}
 						autoComplete={"off"}
 						withAsterisk={required}
-						inputWrapperOrder={[ "label", "input", "description" ]}
+						inputWrapperOrder={["label", "input", "description"]}
 					/>
 				</Tooltip>
 			)}

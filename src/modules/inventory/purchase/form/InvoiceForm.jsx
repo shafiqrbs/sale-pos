@@ -1,24 +1,24 @@
-import React, { useState } from "react";
 import {
-    ActionIcon,
-    Box,
-    Button,
-    Flex,
-    Grid,
-    ScrollArea,
-    Text,
+	ActionIcon,
+	Box,
+	Button,
+	Divider,
+	Flex,
+	Grid,
+	ScrollArea,
+	Select,
+	Text,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import {
-    IconBarcode,
-    IconCurrencyTaka,
-    IconPlus,
-    IconRefresh,
-    IconShoppingCart,
+	IconBarcode,
+	IconCurrencyTaka,
+	IconPlus,
+	IconRefresh,
+	IconShoppingCart,
 } from "@tabler/icons-react";
 
 import useMainAreaHeight from "@hooks/useMainAreaHeight";
-import SelectForm from "@components/form-builders/SelectForm";
 import InputNumberForm from "@components/form-builders/InputNumberForm";
 import InputForm from "@components/form-builders/InputForm";
 import AddProductDrawer from "@components/drawers/AddProductDrawer";
@@ -27,241 +27,224 @@ import useConfigData from "@hooks/useConfigData";
 import { useDisclosure } from "@mantine/hooks";
 import { formatCurrency } from "@utils/index";
 import { showNotification } from "@components/ShowNotificationComponent";
+import { invoiceItemFormRequest } from "../helpers/request";
+import FormValidationWrapper from "@components/form-builders/FormValidationWrapper";
+import { useState } from "react";
 
 export default function InvoiceForm({ purchaseForm }) {
-    const [ resetKey, setResetKey ] = useState(() => Date.now());
-    const { configData } = useConfigData();
-    const { products } = useLocalProducts();
-    const { mainAreaHeight } = useMainAreaHeight();
-    const [ isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer } ] = useDisclosure(false);
-    const invoiceItemForm = useForm({
-        initialValues: {
-            barcode: "",
-            productId: "",
-            purchasePrice: "",
-            quantity: "",
-        },
-        validate: {
-            purchasePrice: (value) => {
-                if (!value) {
-                    return "Purchase price is required";
-                }
-                return null;
-            },
-            quantity: (value) => {
-                if (!value) {
-                    return "Quantity is required";
-                }
-                return null;
-            },
-        },
-    });
+	const [productResetKey, setProductResetKey] = useState(0);
+	const { configData } = useConfigData();
+	const { products } = useLocalProducts();
+	const { mainAreaHeight } = useMainAreaHeight();
+	const [isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer }] =
+		useDisclosure(false);
 
-    const currencySymbol = configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol;
-    const productOptions = products?.map((product) => ({
-        value: String(product.id),
-        label: `${product.display_name} [${product.quantity}] ${product.unit_name} - ${currencySymbol}${product.sales_price}`,
-    }));
+	const invoiceItemForm = useForm(invoiceItemFormRequest());
 
-    const containerHeight = mainAreaHeight - 170;
+	const currencySymbol =
+		configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol;
+	const productOptions = products?.map((product) => ({
+		value: String(product.id),
+		label: `${product.display_name} [${product.quantity}] ${product.unit_name} - ${currencySymbol}${product.purchase_price}`,
+		purchase_price: product.purchase_price,
+	}));
 
-    const handleAddItemToPurchaseForm = () => {
-        const { productId, purchasePrice, quantity } = invoiceItemForm.values;
+	const containerHeight = mainAreaHeight - 170;
 
-        if (!productId || !quantity) {
-            return;
-        }
+	const handleAddItemToPurchaseForm = () => {
+		const { productId, purchasePrice, quantity } = invoiceItemForm.values;
 
-        const selectedProduct = products?.find(
-            (product) => String(product.id) === String(productId)
-        );
+		if (!productId || !quantity) {
+			showNotification("Product and quantity are required", "red");
+			return;
+		}
 
-        if (!selectedProduct) {
-            return;
-        }
+		const selectedProduct = products?.find((product) => String(product.id) === String(productId));
 
-        const quantityNumber = Number(quantity) || 0;
-        const priceNumber =
-            Number(purchasePrice) ||
-            Number(selectedProduct.purchase_price) ||
-            Number(selectedProduct.sales_price) ||
-            0;
+		if (!selectedProduct) {
+			showNotification("Product not found", "red");
+			return;
+		}
 
-        const newItem = {
-            id: crypto.randomUUID(),
-            productId: String(selectedProduct.id),
-            productName: selectedProduct.display_name,
-            quantity: quantityNumber,
-            price: priceNumber,
-        };
+		const quantityNumber = Number(quantity) || 0;
+		const priceNumber =
+			Number(purchasePrice) ||
+			Number(selectedProduct.purchase_price) ||
+			Number(selectedProduct.sales_price) ||
+			0;
 
-        // =============== push new item into main purchase form list using mantine helpers ===============
-        purchaseForm.insertListItem("items", newItem);
+		const newItem = {
+			id: crypto.randomUUID(),
+			productId: String(selectedProduct.id),
+			productName: selectedProduct.display_name,
+			quantity: quantityNumber,
+			price: priceNumber,
+		};
 
-        invoiceItemForm.reset();
-        setResetKey(Date.now())
-        showNotification("Item added successfully", "teal");
-    };
+		// =============== push new item into main purchase form list using mantine helpers ===============
+		purchaseForm.insertListItem("items", newItem);
 
-    const invoiceSubTotal =
-        (Number(invoiceItemForm.values.quantity) || 0) *
-        (Number(invoiceItemForm.values.purchasePrice) || 0);
+		handleResetInvoiceItemForm();
+		showNotification("Item added successfully", "teal");
+	};
 
-    return (
-        <>
-            <Box
-                bd="1px solid #dee2e6"
-                bg="white"
-                p="3xs"
-                className="borderRadiusAll"
-            >
-                <Box
-                    h={36}
-                    px="xs"
-                    fz="sm"
-                    fw={600}
-                    pt={6}
-                    mb={4}
-                    className="boxBackground textColor borderRadiusAll"
-                >
-                    Vendor Purchase Invoice
-                </Box>
+	const invoiceSubTotal =
+		(Number(invoiceItemForm.values.quantity) || 0) *
+		(Number(invoiceItemForm.values.purchasePrice) || 0);
 
-                <ScrollArea h={containerHeight} type="never">
-                    <Box px="xs" pb="xs">
-                        <Grid gutter={4}>
-                            <Grid.Col span={12}>
-                                <InputForm
-                                    form={invoiceItemForm}
-                                    name="barcode"
-                                    id="barcode"
-                                    label=""
-                                    placeholder="Barcode"
-                                    required={false}
-                                    tooltip=""
-                                    leftSection={<IconBarcode size={16} opacity={0.6} />}
-                                />
-                            </Grid.Col>
-                        </Grid>
+	const handleResetInvoiceItemForm = () => {
+		invoiceItemForm.reset();
+		setProductResetKey((prev) => prev + 1);
+	};
 
-                        <Flex mt={4} gap="4" align="flex-end">
-                            <Box style={{ flex: 1 }}>
-                                <SelectForm
-                                    key={resetKey}
-                                    form={invoiceItemForm}
-                                    name="productId"
-                                    id="productId"
-                                    label=""
-                                    placeholder="Choose Product"
-                                    required={false}
-                                    dropdownValue={productOptions}
-                                    searchable
-                                    tooltip=""
-                                />
-                            </Box>
-                            <ActionIcon
-                                variant="filled"
-                                color="var(--theme-primary-color-6)"
-                                radius="sm"
-                                size={36}
-                                onClick={openProductDrawer}
-                            >
-                                <IconPlus size={18} />
-                            </ActionIcon>
-                        </Flex>
+	return (
+		<>
+			<Box
+				component="form"
+				onSubmit={invoiceItemForm.onSubmit(handleAddItemToPurchaseForm)}
+				bd="1px solid #dee2e6"
+				bg="white"
+				className="borderRadiusAll"
+			>
+				<Box p="sm" fz="sm" fw={600} className="boxBackground textColor borderRadiusAll">
+					Vendor Purchase Invoice
+				</Box>
 
-                        <Grid gutter={4} mt="sm">
-                            <Grid.Col span={12}>
-                                <InputNumberForm
-                                    form={invoiceItemForm}
-                                    name="purchasePrice"
-                                    id="purchasePrice"
-                                    label="Purchase Price"
-                                    placeholder="0"
-                                    required={false}
-                                    tooltip=""
-                                    leftSection={
-                                        <IconCurrencyTaka
-                                            size={16}
-                                            opacity={0.6}
-                                        />
-                                    }
-                                />
-                            </Grid.Col>
-                            <Grid.Col span={12}>
-                                <InputNumberForm
-                                    form={invoiceItemForm}
-                                    name="quantity"
-                                    id="quantity"
-                                    label="Quantity"
-                                    placeholder="Quantity"
-                                    required={false}
-                                    tooltip=""
-                                    rightIcon={
-                                        <Text fz="xs" fw={500}>
-                                            Kg
-                                        </Text>
-                                    }
-                                />
-                            </Grid.Col>
-                        </Grid>
+				<Divider />
 
-                    </Box>
-                </ScrollArea>
-                <Flex
-                    mt="md"
-                    px={4}
-                    py={6}
-                    justify="space-between"
-                    align="center"
-                    bd="1px solid #e6e6e6"
-                    className="borderRadiusAll"
-                >
-                    <Text fz="sm" fw={500}>
-                        Sub Total
-                    </Text>
-                    <Flex align="center" gap={4}>
-                        <IconCurrencyTaka size={14} />
-                        <Text fz="sm" fw={600}>
-                            {formatCurrency(invoiceSubTotal)}
-                        </Text>
-                    </Flex>
-                </Flex>
+				<ScrollArea h={containerHeight} type="never">
+					<Box p="sm">
+						<Grid gutter={4}>
+							<Grid.Col span={12}>
+								<InputForm
+									form={invoiceItemForm}
+									name="barcode"
+									id="barcode"
+									label=""
+									placeholder="Barcode"
+									required={false}
+									tooltip=""
+									leftSection={<IconBarcode size={16} opacity={0.6} />}
+								/>
+							</Grid.Col>
+						</Grid>
 
-                <Flex mt="md" justify="space-between" align="center">
-                    <ActionIcon
-                        variant="outline"
-                        radius="xl"
-                        size="lg"
-                        color="var(--theme-primary-color-6)"
-                    >
-                        <IconRefresh size={18} />
-                    </ActionIcon>
+						<Flex mt="4xs" gap="4" align="flex-end">
+							<Box style={{ flex: 1 }}>
+								<FormValidationWrapper
+									errorMessage="Product is required"
+									opened={!!invoiceItemForm.errors.productId}
+								>
+									<Select
+										key={productResetKey}
+										placeholder="Choose Product"
+										data={productOptions}
+										searchable
+										{...invoiceItemForm.getInputProps("productId", { type: "search" })}
+										onChange={(value, option) => {
+											invoiceItemForm.setFieldValue("productId", value);
+											invoiceItemForm.setFieldValue("purchasePrice", option?.purchase_price);
+										}}
+										nothingFoundMessage="No product found"
+									/>
+								</FormValidationWrapper>
+							</Box>
+							<ActionIcon
+								variant="filled"
+								color="var(--theme-primary-color-6)"
+								radius="sm"
+								size={36}
+								onClick={openProductDrawer}
+							>
+								<IconPlus size={18} />
+							</ActionIcon>
+						</Flex>
 
-                    <Button
-                        id="EntityFormSubmit"
-                        leftSection={<IconPlus size={18} />}
-                        rightSection={
-                            <IconShoppingCart size={16} />
-                        }
-                        bg="var(--theme-primary-color-6)"
-                        color="white"
-                        radius="sm"
-                        type="button"
-                        onClick={handleAddItemToPurchaseForm}
-                    >
-                        Add
-                    </Button>
-                </Flex>
-            </Box>
+						<Grid gutter={4} mt="sm">
+							<Grid.Col span={12}>
+								<InputNumberForm
+									form={invoiceItemForm}
+									name="purchasePrice"
+									id="purchasePrice"
+									label="Purchase Price"
+									placeholder="0"
+									required={false}
+									tooltip={invoiceItemForm.errors.purchasePrice}
+									leftSection={<IconCurrencyTaka size={16} opacity={0.6} />}
+								/>
+							</Grid.Col>
+							<Grid.Col span={12}>
+								<InputNumberForm
+									form={invoiceItemForm}
+									name="quantity"
+									id="quantity"
+									label="Quantity"
+									placeholder="Quantity"
+									required={false}
+									tooltip={invoiceItemForm.errors.quantity}
+									rightIcon={
+										<Text fz="xs" fw={500}>
+											Kg
+										</Text>
+									}
+								/>
+							</Grid.Col>
+						</Grid>
+					</Box>
+				</ScrollArea>
+				<Flex
+					mt="md"
+					px="xs"
+					py="4xs"
+					justify="space-between"
+					align="center"
+					bd="1px solid #e6e6e6"
+					className="borderRadiusAll"
+					bg="var(--theme-primary-color-0)"
+				>
+					<Text fz="sm" fw={500}>
+						Sub Total
+					</Text>
+					<Flex align="center" gap="4">
+						<IconCurrencyTaka size={14} />
+						<Text fz="sm" fw={600}>
+							{formatCurrency(invoiceSubTotal)}
+						</Text>
+					</Flex>
+				</Flex>
 
-            <AddProductDrawer
-                productDrawer={isProductDrawerOpened}
-                closeProductDrawer={closeProductDrawer}
-                setStockProductRestore={() => { }}
-                focusField="productId"
-                fieldPrefix=""
-            />
-        </>
-    );
+				<Flex p="sm" justify="space-between" align="center">
+					<ActionIcon
+						onClick={handleResetInvoiceItemForm}
+						variant="outline"
+						radius="xl"
+						size="lg"
+						color="var(--theme-primary-color-6)"
+					>
+						<IconRefresh size={18} />
+					</ActionIcon>
+
+					<Button
+						leftSection={<IconPlus size={18} />}
+						rightSection={<IconShoppingCart size={16} />}
+						bg="var(--theme-primary-color-6)"
+						color="white"
+						radius="sm"
+						type="submit"
+						id="InvoiceFormSubmit"
+					>
+						Add
+					</Button>
+				</Flex>
+			</Box>
+
+			<AddProductDrawer
+				productDrawer={isProductDrawerOpened}
+				closeProductDrawer={closeProductDrawer}
+				setStockProductRestore={() => {}}
+				focusField="productId"
+				fieldPrefix=""
+			/>
+		</>
+	);
 }

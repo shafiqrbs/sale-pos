@@ -5,7 +5,7 @@ import inputCss from "@assets/css/InputField.module.css";
 const SelectForm = forwardRef((props, ref) => {
 	const {
 		position,
-		color,
+		color = "var(--theme-error-color)",
 		label,
 		placeholder,
 		required,
@@ -25,7 +25,7 @@ const SelectForm = forwardRef((props, ref) => {
 		rightSection,
 		pt,
 		comboboxProps,
-		rightSectionPointerEvents = "none"
+		rightSectionPointerEvents = "none",
 	} = props;
 
 	const handleChange = async (e) => {
@@ -49,11 +49,11 @@ const SelectForm = forwardRef((props, ref) => {
 			{form && (
 				<Tooltip
 					label={tooltip}
-					opened={name in form.errors && !!form.errors[ name ]}
+					opened={name in form.errors && !!form.errors[name]}
 					px={16}
 					py={2}
 					position={position && position ? position : "top-end"}
-					bg={color && color ? color : "red.4"}
+					bg={color}
 					c="white"
 					withArrow
 					offset={2}

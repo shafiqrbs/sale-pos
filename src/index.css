@@ -165,6 +165,15 @@ button[data-active="true"].mantine-focus-auto.mantine-active.mantine-datatable-p
 	opacity: 1 !important;
 }
 
+.mantine-InputWrapper-error {
+	&.mantine-Select-error {
+		display: none !important;
+	}
+	&.mantine-NumberInput-error {
+		display: none !important;
+	}
+}
+
 #transaction-mode-carousel {
 	.mantine-Carousel-slide {
 		align-items: center;

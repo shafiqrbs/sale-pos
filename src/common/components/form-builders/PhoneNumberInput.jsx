@@ -76,7 +76,8 @@ export default function PhoneNumber({
 				px={20}
 				py={3}
 				position="top-end"
-				color="red.4"
+				bg="var(--theme-error-color)"
+				c="white"
 				withArrow
 				offset={2}
 				transitionProps={{ transition: "pop-bottom-left", duration: 500 }}
