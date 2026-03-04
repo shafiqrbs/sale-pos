@@ -57,8 +57,13 @@ export default function AddVendorModal({ opened, onClose }) {
 		}
 	};
 
+	const handleOnClose = () => {
+		vendorForm.reset();
+		onClose();
+	};
+
 	return (
-		<GlobalModal opened={opened} onClose={onClose} title={t("AddVendor")} size="sm">
+		<GlobalModal opened={opened} onClose={handleOnClose} title={t("AddVendor")} size="sm">
 			<Box component="form" id="vendorForm">
 				<Grid gutter={6}>
 					<Grid.Col span={12}>

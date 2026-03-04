@@ -34,3 +34,64 @@
   color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
   font-family: Greycliff CF, var(--mantine-font-family);
 }
+
+/* =============== login form layout and visual refinements =============== */
+.formTitle {
+  margin-bottom: rem(40px) !important;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  position: relative;
+}
+
+.formTitle::after {
+  content: "";
+  display: block;
+  width: rem(48px);
+  height: rem(4px);
+  margin: rem(16px) auto 0;
+  background: linear-gradient(
+    90deg,
+    var(--theme-primary-color-6),
+    var(--theme-primary-color-4)
+  );
+  border-radius: rem(2px);
+}
+
+.inputWrapper {
+  margin-bottom: rem(4px);
+}
+
+.styledInput {
+  border-radius: rem(8px);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.styledInput:focus {
+  border-color: var(--theme-primary-color-5);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--theme-primary-color-6) 25%, transparent);
+}
+
+.loginButton {
+  border-radius: rem(8px);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.loginButton:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--theme-primary-color-6) 40%, transparent);
+}
+
+.resetLinks {
+  padding-top: rem(12px);
+  border-top: rem(1px) solid light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-5));
+}
+
+.resetLinks .cursor-pointer {
+  transition: opacity 0.15s ease;
+}
+
+.resetLinks .cursor-pointer:hover {
+  opacity: 0.85;
+}

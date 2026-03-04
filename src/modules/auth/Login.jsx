@@ -2,15 +2,11 @@ import {
 	Paper,
 	TextInput,
 	PasswordInput,
-	Checkbox,
 	Button,
 	Title,
-	Anchor,
 	Alert,
 	Tooltip,
-	Group,
 	Center,
-	rem,
 	Box,
 	Loader,
 	Flex,
@@ -20,7 +16,7 @@ import { modals } from "@mantine/modals";
 import LoginPage from "@assets/css/LoginPage.module.css";
 import classes from "@assets/css/AuthenticationImage.module.css";
 import { getHotkeyHandler, useHotkeys } from "@mantine/hooks";
-import { IconInfoCircle, IconLogin, IconArrowLeft, IconRefresh } from "@tabler/icons-react";
+import { IconInfoCircle, IconLogin } from "@tabler/icons-react";
 import { isNotEmpty, useForm } from "@mantine/form";
 import { Navigate, useNavigate } from "react-router";
 import { useEffect, useState } from "react";
@@ -150,10 +146,10 @@ export default function Login() {
 	};
 
 	return (
-		<div className={classes.wrapper}>
+		<Box className={classes.wrapper}>
 			<Box component="form" onSubmit={form.onSubmit(login)}>
 				<Paper className={classes.form} radius={0} p={30}>
-					<Title order={2} className={classes.title} ta="center" mt="md" mb={80}>
+					<Title order={2} className={`${classes.title} ${classes.formTitle}`} ta="center" mt="md">
 						{t("WelcomeBackToPOSH")}
 					</Title>
 					{errorMessage && (
@@ -166,68 +162,73 @@ export default function Login() {
 							mb="md"
 						/>
 					)}
-					<Tooltip
-						label={t("UserNameRequired")}
-						px={20}
-						py={3}
-						opened={!!form.errors.username}
-						position="top-end"
-						color="red"
-						withArrow
-						offset={2}
-						transitionProps={{ transition: "pop-bottom-left", duration: 500 }}
-					>
+					<Box className={classes.inputWrapper}>
+						<Tooltip
+							label={t("UserNameRequired")}
+							px={20}
+							py={3}
+							opened={!!form.errors.username}
+							position="top-end"
+							color="red"
+							withArrow
+							offset={2}
+							transitionProps={{ transition: "pop-bottom-left", duration: 500 }}
+						>
 						<TextInput
 							withAsterisk
 							label={t("UserName")}
 							placeholder={t("UserName")}
 							size="md"
 							id="Username"
+							classNames={{ input: classes.styledInput }}
 							{...form.getInputProps("username")}
 							onKeyDown={getHotkeyHandler([
 								["Enter", () => document.getElementById("Password")?.focus()],
 							])}
 						/>
-					</Tooltip>
+						</Tooltip>
+					</Box>
 
-					<Tooltip
-						label={t("RequiredPassword")}
-						px={20}
-						py={3}
-						opened={!!form.errors.password}
-						position="top-end"
-						color="red"
-						withArrow
-						offset={2}
-						transitionProps={{ transition: "pop-bottom-left", duration: 500 }}
-					>
+					<Box className={classes.inputWrapper} mt="md">
+						<Tooltip
+							label={t("RequiredPassword")}
+							px={20}
+							py={3}
+							opened={!!form.errors.password}
+							position="top-end"
+							color="red"
+							withArrow
+							offset={2}
+							transitionProps={{ transition: "pop-bottom-left", duration: 500 }}
+						>
 						<PasswordInput
 							withAsterisk
 							label={t("Password")}
 							placeholder={t("Password")}
-							mt="md"
 							size="md"
+							classNames={{ input: classes.styledInput }}
 							{...form.getInputProps("password")}
 							id="Password"
 							onKeyDown={getHotkeyHandler([
 								["Enter", () => document.getElementById("LoginSubmit")?.click()],
 							])}
 						/>
-					</Tooltip>
+						</Tooltip>
+					</Box>
 					<Button
 						fullWidth
-						mt="md"
+						mt="lg"
 						bg="var(--theme-primary-color-6)"
 						size="md"
 						type="submit"
 						id="LoginSubmit"
-						className={LoginPage.control}
+						className={`${LoginPage.control} ${classes.loginButton}`}
 						rightSection={<IconLogin />}
 						disabled={spinner}
 					>
 						{spinner ? <Loader color="white" type="dots" size={30} /> : "Login"}
 					</Button>
-					<Flex justify="flex-end" align="center" gap="4xs" mt="xs">
+					<Flex justify="flex-end" align="center" gap="4xs" mt="xs" className={classes.resetLinks}>
 						<Text
 							className="cursor-pointer"
 							fz="sm"
@@ -244,6 +245,6 @@ export default function Login() {
 				</Paper>
 			</Box>
 			<Box className={classes.wrapperImage} />
-		</div>
+		</Box>
 	);
 }
