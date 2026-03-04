@@ -31,15 +31,15 @@ import commonDataStoreIntoLocalStorage from "@utils/local-storage/commonDataStor
 import { APP_NAVLINKS, MASTER_APIS } from "@/routes/routes";
 
 export default function Login() {
-	const [ user, setUser ] = useState(null);
-	const [ loading, setLoading ] = useState(true);
+	const [user, setUser] = useState(null);
+	const [loading, setLoading] = useState(true);
 	const { t } = useTranslation();
 	const navigate = useNavigate();
 	const icon = <IconInfoCircle />;
 
-	const [ spinner, setSpinner ] = useState(false);
-	const [ errorMessage, setErrorMessage ] = useState("");
-	const [ activated, setActivated ] = useState({ is_activated: false });
+	const [spinner, setSpinner] = useState(false);
+	const [errorMessage, setErrorMessage] = useState("");
+	const [activated, setActivated] = useState({ is_activated: false });
 
 	useEffect(() => {
 		const checkAuth = async () => {
@@ -56,7 +56,7 @@ export default function Login() {
 			}
 		};
 		checkAuth();
-	}, [ navigate ]);
+	}, [navigate]);
 
 	useEffect(() => {
 		async function checkActivation() {
@@ -67,7 +67,7 @@ export default function Login() {
 		checkActivation();
 	}, []);
 
-	useHotkeys([ [ "alt+n", () => document.getElementById("Username")?.focus() ] ], []);
+	useHotkeys([["alt+n", () => document.getElementById("Username")?.focus()]], []);
 
 	const form = useForm({
 		initialValues: { username: "", password: "" },
@@ -133,12 +133,14 @@ export default function Login() {
 			title: "Reset local data?",
 			children: (
 				<Text size="sm">
-					Are you sure you want to reset your local data? This action is destructive and
-					you will lose all of your local data which aren&apos;t synced yet.
+					Are you sure you want to reset your local data? This action is destructive and you will
+					lose all of your local data which aren&apos;t synced yet.
 				</Text>
 			),
 			labels: { confirm: "Reset now", cancel: "No don't reset it" },
-			confirmProps: { color: "red" },
+			confirmProps: { bg: "var(--theme-tertiary-color-2)", c: "var(--theme-tertiary-color-7)" },
+			cancelProps: { bg: "var(--theme-primary-color-6)", c: "var(--theme-primary-color-0)" },
+
 			onCancel: () => console.info("Cancel"),
 			onConfirm: async () => {
 				await window.dbAPI.resetDatabase();
@@ -183,7 +185,7 @@ export default function Login() {
 							id="Username"
 							{...form.getInputProps("username")}
 							onKeyDown={getHotkeyHandler([
-								[ "Enter", () => document.getElementById("Password")?.focus() ],
+								["Enter", () => document.getElementById("Password")?.focus()],
 							])}
 						/>
 					</Tooltip>
@@ -208,49 +210,36 @@ export default function Login() {
 							{...form.getInputProps("password")}
 							id="Password"
 							onKeyDown={getHotkeyHandler([
-								[ "Enter", () => document.getElementById("LoginSubmit")?.click() ],
+								["Enter", () => document.getElementById("LoginSubmit")?.click()],
 							])}
 						/>
 					</Tooltip>
-					<Checkbox label="Keep me logged in" mt="xl" size="md" />
-					<Group justify="space-between" mt="lg" className={LoginPage.controls}>
-						<Anchor c="dimmed" size="sm" className={LoginPage.control}>
-							<Center inline>
-								<IconArrowLeft
-									style={{ width: rem(12), height: rem(12) }}
-									stroke={1.5}
-								/>
-								<Box ml={5}>Back to the sign-up page</Box>
-							</Center>
-						</Anchor>
-					</Group>
-					<Flex gap="6px">
-						<Button
-							fullWidth
-							mt="xl"
-							bg="red.5"
-							size="md"
-							type="button"
-							className={LoginPage.control}
-							rightSection={<IconRefresh />}
+					<Button
+						fullWidth
+						mt="md"
+						bg="var(--theme-primary-color-6)"
+						size="md"
+						type="submit"
+						id="LoginSubmit"
+						className={LoginPage.control}
+						rightSection={<IconLogin />}
+						disabled={spinner}
+					>
+						{spinner ? <Loader color="white" type="dots" size={30} /> : "Login"}
+					</Button>
+					<Flex justify="flex-end" align="center" gap="4xs" mt="xs">
+						<Text
+							className="cursor-pointer"
+							fz="sm"
+							fw={400}
+							c="var(--theme-tertiary-color-6)"
 							onClick={openResetModal}
 						>
-							Reset
-						</Button>
-						<Button
-							fullWidth
-							mt="xl"
-							bg="var(--theme-primary-color-6)"
-							size="md"
-							type="submit"
-							id="LoginSubmit"
-							className={LoginPage.control}
-							rightSection={<IconLogin />}
-							disabled={spinner}
-						>
-							{spinner ? <Loader color="white" type="dots" size={30} /> : "Login"}
-						</Button>
-
+							Reset local data?
+						</Text>
+						<Text className="cursor-pointer" fz="sm" fw={400} c="red.6" onClick={openResetModal}>
+							Reset now
+						</Text>
 					</Flex>
 				</Paper>
 			</Box>

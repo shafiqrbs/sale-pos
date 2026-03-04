@@ -36,6 +36,8 @@ export default function VendorInfoSection({ purchaseForm }) {
 							<IconUserPlus size={16} />
 						</ActionIcon>
 					}
+					// clearable={false}
+					// allowDeselect={false}
 					tooltip="Vendor is required"
 					rightSectionPointerEvents="pointer-events"
 				/>

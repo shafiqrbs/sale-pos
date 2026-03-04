@@ -48,18 +48,21 @@ import ChangePasswordDrawer from "@components/drawers/ChangePasswordDrawer";
 export default function Header({ isOnline, toggleNetwork }) {
 	const { user, roles } = useLoggedInUser();
 	const { configData } = useConfigData({ offlineFetch: !isOnline });
-	const [ openedPrinter, { open: openPrinter, close: closePrinter } ] = useDisclosure(false);
-	const [ changePasswordDrawerOpened, { open: openChangePasswordDrawer, close: closeChangePasswordDrawer } ] = useDisclosure(false);
+	const [openedPrinter, { open: openPrinter, close: closePrinter }] = useDisclosure(false);
+	const [
+		changePasswordDrawerOpened,
+		{ open: openChangePasswordDrawer, close: closeChangePasswordDrawer },
+	] = useDisclosure(false);
 	const { t, i18n } = useTranslation();
 	const navigate = useNavigate();
-	const location = useLocation()
+	const location = useLocation();
 	const { toggle, fullscreen } = useFullscreen();
-	const [ syncPanelOpen, setSyncPanelOpen ] = useState(false);
-	const [ languageOpened, setLanguageOpened ] = useState(false);
-	const [ languageSelected, setLanguageSelected ] = useState(
+	const [syncPanelOpen, setSyncPanelOpen] = useState(false);
+	const [languageOpened, setLanguageOpened] = useState(false);
+	const [languageSelected, setLanguageSelected] = useState(
 		LANGUAGES.find((item) => item.value === i18n.language)
 	);
-	const [ printerSetup, setPrinterSetup ] = useState({
+	const [printerSetup, setPrinterSetup] = useState({
 		printerName: "",
 		characterSet: "PC437_USA",
 		lineCharacter: "-",
@@ -70,9 +73,10 @@ export default function Header({ isOnline, toggleNetwork }) {
 		{ label: "POS", icon: <IconCalculator size={18} />, pathname: APP_NAVLINKS.BAKERY },
 		{ label: "Sales", icon: <IconCashBanknote size={18} />, pathname: APP_NAVLINKS.SALES },
 		{ label: "Stock", icon: <IconStack size={18} />, pathname: APP_NAVLINKS.STOCK },
-	]
+	];
 
-	const allowSync = roles.includes("role_sales_purchase_manager") || roles.includes("role_sales_purchase_admin");
+	const allowSync =
+		roles.includes("role_sales_purchase_manager") || roles.includes("role_sales_purchase_admin");
 
 	useEffect(() => {
 		const checkPrinterData = async () => {
@@ -89,7 +93,7 @@ export default function Header({ isOnline, toggleNetwork }) {
 		if (openedPrinter) {
 			checkPrinterData();
 		}
-	}, [ openedPrinter ]);
+	}, [openedPrinter]);
 
 	async function logout() {
 		await window.dbAPI.destroyTableData();
@@ -134,13 +138,23 @@ export default function Header({ isOnline, toggleNetwork }) {
 								const isActive = link.pathname === location?.pathname;
 
 								return (
-									<NavLink key={link.label} style={{ textDecoration: "none", display: "inline-block" }} to={link.pathname}>
-										<Flex className={`cursor-pointer nav-link ${isActive ? "active-navbar-link" : ""}`} c="white" key={link.label} align="center" gap="les">
+									<NavLink
+										key={link.label}
+										style={{ textDecoration: "none", display: "inline-block" }}
+										to={link.pathname}
+									>
+										<Flex
+											className={`cursor-pointer nav-link ${isActive ? "active-navbar-link" : ""}`}
+											c="white"
+											key={link.label}
+											align="center"
+											gap="les"
+										>
 											{link.icon}
 											<Text size="sm">{link.label}</Text>
 										</Flex>
 									</NavLink>
-								)
+								);
 							})}
 						</Flex>
 					</Flex>
@@ -164,25 +178,22 @@ export default function Header({ isOnline, toggleNetwork }) {
 							withArrow
 							arrowPosition="center"
 						>
-							{allowSync ? <Tooltip label="Sync Data" bg="red.5" withArrow>
-								<ActionIcon
-									disabled={!isOnline}
-									mt="4xs"
-									onClick={toggleSyncPanel}
-									variant="filled"
-									color="white"
-									bg={isOnline ? "green.8" : "gray.1"}
-								>
-									<IconRefresh size={20} />
-								</ActionIcon>
-							</Tooltip> : null}
+							{allowSync ? (
+								<Tooltip label="Sync Data" bg="red.5" withArrow>
+									<ActionIcon
+										disabled={!isOnline}
+										mt="4xs"
+										onClick={toggleSyncPanel}
+										variant="filled"
+										color="white"
+										bg={isOnline ? "green.8" : "gray.1"}
+									>
+										<IconRefresh size={20} />
+									</ActionIcon>
+								</Tooltip>
+							) : null}
 							<Tooltip label="Pos printer setup" bg="red.5" withArrow>
-								<ActionIcon
-									mt="4xs"
-									onClick={openPrinter}
-									variant="transparent"
-									color="white"
-								>
+								<ActionIcon mt="4xs" onClick={openPrinter} variant="transparent" color="white">
 									<IconPrinter size={20} />
 								</ActionIcon>
 							</Tooltip>
@@ -199,24 +210,16 @@ export default function Header({ isOnline, toggleNetwork }) {
 											width={18}
 											height={18}
 										/>
-										<span className={LanguagePickerStyle.label}>
-											{languageSelected?.label}
-										</span>
+										<span className={LanguagePickerStyle.label}>{languageSelected?.label}</span>
 									</Group>
-									<IconChevronDown
-										size="1rem"
-										className={LanguagePickerStyle.icon}
-										stroke={1}
-									/>
+									<IconChevronDown size="1rem" className={LanguagePickerStyle.icon} stroke={1} />
 								</UnstyledButton>
 							</Menu.Target>
 							<Menu.Dropdown p={4} className={LanguagePickerStyle.dropdown}>
 								{LANGUAGES.map((item) => (
 									<Menu.Item
 										p={4}
-										leftSection={
-											<Image src={item.flag} width={18} height={18} />
-										}
+										leftSection={<Image src={item.flag} width={18} height={18} />}
 										onClick={() => {
 											setLanguageSelected(item);
 											i18n.changeLanguage(item.value);
@@ -228,30 +231,13 @@ export default function Header({ isOnline, toggleNetwork }) {
 								))}
 							</Menu.Dropdown>
 						</Menu>
-						<Tooltip
-							label={fullscreen ? t("NormalScreen") : t("Fullscreen")}
-							bg="red.5"
-							withArrow
-						>
-							<ActionIcon
-								mt="4xs"
-								onClick={toggle}
-								variant="subtle"
-								color="white"
-							>
-								{fullscreen ? (
-									<IconWindowMinimize size={24} />
-								) : (
-									<IconWindowMaximize size={24} />
-								)}
+						<Tooltip label={fullscreen ? t("NormalScreen") : t("Fullscreen")} bg="red.5" withArrow>
+							<ActionIcon mt="4xs" onClick={toggle} variant="subtle" color="white">
+								{fullscreen ? <IconWindowMinimize size={24} /> : <IconWindowMaximize size={24} />}
 							</ActionIcon>
 						</Tooltip>
-						{isOnline ?
-							(<Tooltip
-								label={t("Setting")}
-								bg="red.5"
-								withArrow
-							>
+						{isOnline ? (
+							<Tooltip label={t("Setting")} bg="red.5" withArrow>
 								<ActionIcon
 									mt="6"
 									variant="subtle"
@@ -262,9 +248,8 @@ export default function Header({ isOnline, toggleNetwork }) {
 								>
 									<IconSettings size={24} />
 								</ActionIcon>
-							</Tooltip>)
-							: null
-						}
+							</Tooltip>
+						) : null}
 						<Menu shadow="md" width={200}>
 							<Menu.Target>
 								<ActionIcon variant="subtle" mt="6" color="white">
@@ -274,23 +259,21 @@ export default function Header({ isOnline, toggleNetwork }) {
 
 							<Menu.Dropdown>
 								<Menu.Label>
-									<Text fz={12}>{user?.name} ({user?.username})</Text>
-									<Text fz={12} c="gray.6">{roles.join(", ")}</Text>
+									<Text fz={12}>
+										{user?.name} ({user?.username})
+									</Text>
+									{/* <Text fz={12} c="gray.6">{roles.join(", ")}</Text> */}
 								</Menu.Label>
 								<Divider mt="es" />
-								{isOnline ?
+								{isOnline ? (
 									<Menu.Item
 										leftSection={<IconLock size={16} />}
 										onClick={openChangePasswordDrawer}
 									>
 										<Text size="sm">{t("ResetPassword")}</Text>
 									</Menu.Item>
-									: null
-								}
-								<Menu.Item
-									leftSection={<IconLogout size={16} />}
-									onClick={() => logout()}
-								>
+								) : null}
+								<Menu.Item leftSection={<IconLogout size={16} />} onClick={() => logout()}>
 									<Text size="sm">{t("Logout")}</Text>
 								</Menu.Item>
 							</Menu.Dropdown>
@@ -370,8 +353,15 @@ export default function Header({ isOnline, toggleNetwork }) {
 				</form>
 			</Modal>
 			{/* ----------- sync and reset password information ----------- */}
-			<SyncDrawer syncPanelOpen={syncPanelOpen} configData={configData} setSyncPanelOpen={setSyncPanelOpen} />
-			<ChangePasswordDrawer opened={changePasswordDrawerOpened} onClose={closeChangePasswordDrawer} />
+			<SyncDrawer
+				syncPanelOpen={syncPanelOpen}
+				configData={configData}
+				setSyncPanelOpen={setSyncPanelOpen}
+			/>
+			<ChangePasswordDrawer
+				opened={changePasswordDrawerOpened}
+				onClose={closeChangePasswordDrawer}
+			/>
 		</>
 	);
 }
