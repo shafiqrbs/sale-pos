@@ -29,17 +29,29 @@ import { formatCurrency } from "@utils/index";
 import { showNotification } from "@components/ShowNotificationComponent";
 import { invoiceItemFormRequest } from "../helpers/request";
 import FormValidationWrapper from "@components/form-builders/FormValidationWrapper";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useGetInventoryCategoryQuery } from "@services/settings";
 
 export default function InvoiceForm({ refetch }) {
+	const [products, setProducts] = useState([]);
 	const [productResetKey, setProductResetKey] = useState(0);
+	const [selectedCategoryId, setSelectedCategoryId] = useState(null);
 	const { configData } = useConfigData();
-	const { products } = useLocalProducts();
+	const invoiceItemForm = useForm(invoiceItemFormRequest());
+	const { getLocalProducts } = useLocalProducts({
+		fetchOnMount: false,
+	});
+
+	const { data: productCategoryData } = useGetInventoryCategoryQuery({ type: "parent" });
 	const { mainAreaHeight } = useMainAreaHeight();
 	const [isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer }] =
 		useDisclosure(false);
 
-	const invoiceItemForm = useForm(invoiceItemFormRequest());
+	useEffect(() => {
+		getLocalProducts({ category_id: selectedCategoryId }).then((products) => {
+			setProducts(products);
+		});
+	}, [selectedCategoryId]);
 
 	const currencySymbol =
 		configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol;
@@ -130,21 +142,33 @@ export default function InvoiceForm({ refetch }) {
 
 				<ScrollArea h={containerHeight} type="never">
 					<Box p="sm">
-						<Grid gutter={4}>
-							<Grid.Col span={12}>
-								<InputForm
-									form={invoiceItemForm}
-									name="barcode"
-									id="barcode"
-									label=""
-									placeholder="Barcode"
-									required={false}
-									tooltip=""
-									leftSection={<IconBarcode size={16} opacity={0.6} />}
-								/>
-							</Grid.Col>
-						</Grid>
-
+						<InputForm
+							form={invoiceItemForm}
+							name="barcode"
+							id="barcode"
+							label=""
+							placeholder="Barcode"
+							required={false}
+							tooltip=""
+							leftSection={<IconBarcode size={16} opacity={0.6} />}
+						/>
+						<Select
+							mt="4xs"
+							placeholder="All categories"
+							data={[
+								{ value: "", label: "All categories" },
+								...(productCategoryData?.data?.map((item) => ({
+									value: String(item.id),
+									label: item.name,
+								})) ?? []),
+							]}
+							value={selectedCategoryId ?? ""}
+							onChange={(value) =>
+								setSelectedCategoryId(value === "" || value == null ? null : value)
+							}
+							clearable
+							searchable
+						/>
 						<Flex mt="4xs" gap="4" align="flex-end">
 							<Box style={{ flex: 1 }}>
 								<FormValidationWrapper
