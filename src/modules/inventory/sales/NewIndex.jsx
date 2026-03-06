@@ -1,29 +1,64 @@
 import React, { useRef, useState } from "react";
-import { Box, Button, Flex, Text } from "@mantine/core";
+import { Box, Flex, Text } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import dayjs from "dayjs";
 
 import InvoiceForm from "./form/InvoiceForm";
 import SalesOverview from "./Overview";
 import { salesOverviewRequest } from "./helpers/request";
-import { useAddSalesMutation } from "@services/sales";
 import { showNotification } from "@components/ShowNotificationComponent";
 import useTempSalesProducts from "@hooks/useTempSalesProducts";
-import { generateInvoiceId } from "@utils/index";
+import useLoggedInUser from "@hooks/useLoggedInUser";
+import useConfigData from "@hooks/useConfigData";
+import { generateInvoiceId, formatDateTime } from "@utils/index";
 import { useTranslation } from "react-i18next";
-import { APP_NAVLINKS } from "@/routes/routes";
 import { NavLink } from "react-router";
-import { IconList } from "@tabler/icons-react";
 
 export default function NewIndex() {
     const { t } = useTranslation();
-    const [addSales, { isLoading: isAddingSales }] = useAddSalesMutation();
+    const { user } = useLoggedInUser();
+    const { configData } = useConfigData();
     const salesForm = useForm(salesOverviewRequest());
     const { salesProducts, refetch } = useTempSalesProducts({ type: "sales" });
     const [resetKey, setResetKey] = useState(0);
+    const [isAddingSales, setIsAddingSales] = useState(false);
 
     // =============== tracks whether the submit was triggered via POS Print ===============
     const withPosPrintRef = useRef(false);
+
+    // =============== update product quantities and sales after successful sale (same as POS Transaction) ===============
+    const updateProductsAfterSale = async () => {
+        try {
+            for (const cartItem of salesProducts) {
+                const productId = cartItem.product_id;
+                const currentProduct = await window.dbAPI.getDataFromTable("core_products", {
+                    id: productId,
+                });
+                const currentProductData = Array.isArray(currentProduct)
+                    ? currentProduct[0]
+                    : currentProduct;
+
+                if (!currentProductData) {
+                    console.error(`Product not found in database: ${productId}`);
+                    continue;
+                }
+
+                const soldQuantity = Number(cartItem.quantity) || 0;
+                const newQuantity = (currentProductData.quantity || 0) - soldQuantity;
+                const newTotalSales = (currentProductData.total_sales || 0) + soldQuantity;
+
+                await window.dbAPI.updateDataInTable("core_products", {
+                    condition: { id: productId },
+                    data: {
+                        quantity: newQuantity,
+                        total_sales: newTotalSales,
+                    },
+                });
+            }
+            window.dispatchEvent(new CustomEvent("products-updated"));
+        } catch (error) {
+            console.error("Error updating products after sale:", error);
+        }
+    };
 
     const handleSubmit = async (formValues) => {
         if (!salesProducts?.length) {
@@ -52,69 +87,99 @@ export default function NewIndex() {
 
         const vat = 0;
         const grandTotal = Math.max(subTotal - discountValue + vat, 0);
+        const fullAmount = Number(formValues.paymentAmount) || 0;
         const isSplitPaymentActive = payments.length > 1;
-        const primaryPayment = payments[0] ?? {};
+        const modeName =
+            isSplitPaymentActive ? "Multiple" : (payments[0]?.transaction_mode_name ?? "");
 
-        const payload = {
-            invoice: generateInvoiceId(),
-            customer_id: formValues.customer_id ?? "",
+        // =============== get customer info from database ===============
+        let customerName = "";
+        let customerMobile = "";
+        let customerAddress = "";
+        if (formValues.customer_id) {
+            const customers = await window.dbAPI.getDataFromTable("core_customers", {
+                id: formValues.customer_id,
+            });
+            const customerData = Array.isArray(customers) ? customers[0] : customers;
+            if (customerData) {
+                customerName = customerData.name ?? "";
+                customerMobile = customerData.mobile ?? "";
+                customerAddress = customerData.address ?? "";
+            }
+        }
+
+        const invoiceId = generateInvoiceId();
+        const salesItemsForDb = salesProducts.map((item) => ({
+            product_id: item.product_id,
+            display_name: item.display_name,
+            quantity: Number(item.quantity) || 0,
+            sales_price: Number(item.sales_price) || 0,
+            sub_total: (Number(item.quantity) || 0) * (Number(item.sales_price) || 0),
+        }));
+
+        const salesData = {
+            invoice: invoiceId,
             sub_total: subTotal,
+            total: Math.round(grandTotal),
+            approved_by_id: user?.id ?? null,
+            payment: fullAmount,
+            discount: discountValue,
+            discount_calculation: discountValue,
             discount_type:
                 formValues.discount_type === "flat"
                     ? "Flat"
                     : formValues.discount_type === "percentage"
                         ? "Percentage"
                         : "Coupon",
-            discount: Number(formValues.discount) || 0,
-            discount_calculation: discountValue,
-            coupon_code: formValues.coupon_code ?? "",
-            vat,
-            total: grandTotal,
-            payment: String(formValues.paymentAmount ?? ""),
-            transaction_mode_id: primaryPayment.transaction_mode_id ?? "",
-            mode_name: isSplitPaymentActive ? "Multiple" : (primaryPayment.transaction_mode_name ?? ""),
+            customerId: formValues.customer_id ?? null,
+            customerName,
+            customerMobile,
+            customer_address: customerAddress,
+            createdByUser: user?.username ?? "",
+            createdById: user?.id ?? null,
+            salesById: user?.id ?? null,
+            salesByUser: user?.username ?? "",
+            salesByName: user?.name ?? "",
+            process: "approved",
+            mode_name: modeName,
+            created: formatDateTime(new Date()),
+            sales_items: JSON.stringify(salesItemsForDb),
             multi_transaction: isSplitPaymentActive ? 1 : 0,
             payments: JSON.stringify(payments),
-            narration: formValues.salesNarration ?? "",
-            invoice_date: formValues.salesDate
-                ? dayjs(formValues.salesDate).format("YYYY-MM-DD")
-                : dayjs().format("YYYY-MM-DD"),
-            items: salesProducts.map((item) => ({
-                product_id: item.product_id,
-                warehouse_id: item.warehouse_id || null,
-                quantity: Number(item.quantity) || 0,
-                sales_price: Number(item.sales_price) || 0,
-                purchase_price: Number(item.purchase_price) || 0,
-                bonus_quantity: item.bonus_quantity || 0,
-                sub_total: (Number(item.quantity) || 0) * (Number(item.sales_price) || 0),
-                name: item.display_name ?? "",
-            })),
         };
 
+        setIsAddingSales(true);
         try {
-            const response = await addSales(payload).unwrap();
+            await window.dbAPI.upsertIntoTable("sales", salesData);
+            await updateProductsAfterSale();
 
-            if (response.data) {
-                const shouldPrint = withPosPrintRef.current;
+            const shouldPrint = withPosPrintRef.current;
 
-                showNotification("Sale added successfully", "teal");
+            showNotification("Sale added successfully", "teal");
 
-                // =============== clear local cart after successful submission ===============
-                await window.dbAPI.deleteDataFromTable("temp_sales_products", { type: "sales" });
-                refetch();
-                salesForm.reset();
-                setResetKey((previousKey) => previousKey + 1);
+            await window.dbAPI.deleteDataFromTable("temp_sales_products", { type: "sales" });
+            refetch();
+            salesForm.reset();
+            setResetKey((previousKey) => previousKey + 1);
 
-                if (shouldPrint) {
-                    window.deviceAPI.thermalPrint(response.data);
+            if (shouldPrint && window.deviceAPI?.thermalPrint) {
+                const setup = await window.dbAPI.getDataFromTable("printer");
+                if (setup?.printer_name) {
+                    await window.deviceAPI.thermalPrint({
+                        configData: { ...configData, user },
+                        salesItems: salesItemsForDb,
+                        salesViewData: salesData,
+                        setup,
+                    });
+                } else {
+                    showNotification(t("PrinterNotSetup"), "red");
                 }
-            } else {
-                showNotification(response.message, "red");
             }
         } catch (error) {
             console.error(error);
-            showNotification(error.data?.message || "Failed to save sale", "red");
+            showNotification(error?.message || "Failed to save sale", "red");
         } finally {
+            setIsAddingSales(false);
             withPosPrintRef.current = false;
         }
     };
