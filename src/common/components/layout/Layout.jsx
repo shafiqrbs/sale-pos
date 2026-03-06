@@ -102,7 +102,7 @@ export default function Layout() {
 					<Box
 						pos="fixed"
 						right={0}
-						top="50%"
+						top="40%"
 						style={{ transform: "translateY(-50%)", zIndex: 1000 }}
 					>
 						<Tooltip label="Options" position="left">

@@ -2,21 +2,22 @@ const salesOverviewInitialValues = {
 	customer_id: "",
 	customerName: "",
 	customerMobile: "",
-	transactionMode: "cash",
-	transactionModeId: "",
 	salesDate: new Date(),
 	salesNarration: "",
 	discountAmount: 0,
 	isDiscountPercentage: false,
 	paymentAmount: 0,
+	// =============== payments array supports both single and split payment modes ===============
+	payments: [],
+	splitPaymentDrawerOpened: false,
 };
 
 export const salesOverviewRequest = () => {
 	return {
 		initialValues: salesOverviewInitialValues,
 		validate: {
-			transactionModeId: (value) => {
-				if (!value) {
+			payments: (value) => {
+				if (!value?.length) {
 					return "Transaction mode is required";
 				}
 				return null;

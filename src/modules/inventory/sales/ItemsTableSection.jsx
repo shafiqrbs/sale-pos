@@ -52,22 +52,6 @@ export default function ItemsTableSection({ salesProducts, refetch, itemsTotal }
 
 	return (
 		<Box bd="1px solid #dee2e6" bg="white" p="3xs" className="borderRadiusAll">
-			<Flex justify="space-between" align="center" mb="4xs">
-				<Box px="xs" fz="sm" fw={600} className="boxBackground textColor borderRadiusAll">
-					{t("SalesItems")}
-				</Box>
-
-				<Button
-					onClick={() => navigate(APP_NAVLINKS.SALES)}
-					w={170}
-					bg="var(--theme-primary-color-6)"
-					color="white"
-					leftSection={<IconList size={18} />}
-				>
-					{t("SalesList")}
-				</Button>
-			</Flex>
-
 			<DataTable
 				classNames={{
 					root: tableCss.root,

@@ -10,6 +10,7 @@ import { useForm } from "@mantine/form";
 import {
 	IconBarcode,
 	IconCurrencyTaka,
+	IconPercentage,
 	IconPlus,
 	IconRefresh,
 	IconShoppingCart,
@@ -27,17 +28,19 @@ import { showNotification } from "@components/ShowNotificationComponent";
 import { salesItemFormRequest } from "../helpers/request";
 import FormValidationWrapper from "@components/form-builders/FormValidationWrapper";
 import { useGetInventoryCategoryQuery } from "@services/settings";
+import { useTranslation } from "react-i18next";
 
 export default function InvoiceForm({ refetch }) {
-	const [products, setProducts] = useState([]);
-	const [productResetKey, setProductResetKey] = useState(0);
-	const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+	const { t } = useTranslation()
+	const [ products, setProducts ] = useState([]);
+	const [ productResetKey, setProductResetKey ] = useState(0);
+	const [ selectedCategoryId, setSelectedCategoryId ] = useState(null);
 	const { configData } = useConfigData();
 	const salesItemForm = useForm(salesItemFormRequest());
 	const { getLocalProducts } = useLocalProducts({ fetchOnMount: false });
 
 	const { data: productCategoryData } = useGetInventoryCategoryQuery({ type: "parent" });
-	const [isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer }] =
+	const [ isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer } ] =
 		useDisclosure(false);
 
 	useEffect(() => {
@@ -45,7 +48,7 @@ export default function InvoiceForm({ refetch }) {
 			setProducts(fetchedProducts);
 		});
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [selectedCategoryId]);
+	}, [ selectedCategoryId ]);
 
 	const currencySymbol =
 		configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol;
@@ -146,7 +149,7 @@ export default function InvoiceForm({ refetch }) {
 					</Box>
 
 					{/* =============== category filter select =============== */}
-					<Box w={160} style={{ flexShrink: 0 }}>
+					{/* <Box w={160} style={{ flexShrink: 0 }}>
 						<Select
 							placeholder="All categories"
 							data={[
@@ -163,7 +166,7 @@ export default function InvoiceForm({ refetch }) {
 							clearable
 							searchable
 						/>
-					</Box>
+					</Box> */}
 
 					{/* =============== product search select with add-product drawer trigger =============== */}
 					<Flex gap={4} align="flex-end" style={{ flex: 1, minWidth: 200 }}>
@@ -196,21 +199,6 @@ export default function InvoiceForm({ refetch }) {
 						</ActionIcon>
 					</Flex>
 
-					{/* =============== sales price input =============== */}
-					<Box w={130} style={{ flexShrink: 0 }}>
-						<InputNumberForm
-							form={salesItemForm}
-							name="salesPrice"
-							id="salesPrice"
-							label=""
-							nextField="quantity"
-							placeholder="Price"
-							required={false}
-							tooltip={salesItemForm.errors.salesPrice}
-							leftSection={<IconCurrencyTaka size={16} opacity={0.6} />}
-						/>
-					</Box>
-
 					{/* =============== quantity input =============== */}
 					<Box w={110} style={{ flexShrink: 0 }}>
 						<InputNumberForm
@@ -230,8 +218,37 @@ export default function InvoiceForm({ refetch }) {
 						/>
 					</Box>
 
+					<Box w={130} style={{ flexShrink: 0 }}>
+						<InputNumberForm
+							form={salesItemForm}
+							name="salesPrice"
+							id="salesPrice"
+							label=""
+							nextField="quantity"
+							placeholder={t("Percent")}
+							required={false}
+							tooltip={salesItemForm.errors.salesPrice}
+							leftSection={<IconPercentage size={16} opacity={0.6} />}
+						/>
+					</Box>
+
+					{/* =============== sales price input =============== */}
+					<Box w={130} style={{ flexShrink: 0 }}>
+						<InputNumberForm
+							form={salesItemForm}
+							name="salesPrice"
+							id="salesPrice"
+							label=""
+							nextField="quantity"
+							placeholder={t("MRP")}
+							required={false}
+							tooltip={salesItemForm.errors.salesPrice}
+							leftSection={<IconCurrencyTaka size={16} opacity={0.6} />}
+						/>
+					</Box>
+
 					{/* =============== live sub total display =============== */}
-					<Flex
+					{/* <Flex
 						align="center"
 						gap={4}
 						px="xs"
@@ -248,7 +265,7 @@ export default function InvoiceForm({ refetch }) {
 						<Text fz="sm" fw={600}>
 							{formatCurrency(invoiceSubTotal)}
 						</Text>
-					</Flex>
+					</Flex> */}
 
 					{/* =============== reset and add buttons =============== */}
 					<ActionIcon
@@ -280,7 +297,7 @@ export default function InvoiceForm({ refetch }) {
 			<AddProductDrawer
 				productDrawer={isProductDrawerOpened}
 				closeProductDrawer={closeProductDrawer}
-				setStockProductRestore={() => {}}
+				setStockProductRestore={() => { }}
 				focusField="productId"
 				fieldPrefix=""
 			/>

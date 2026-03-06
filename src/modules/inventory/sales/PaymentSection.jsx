@@ -1,5 +1,6 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import {
+	ActionIcon,
 	Box,
 	Button,
 	Flex,
@@ -11,14 +12,16 @@ import {
 	Stack,
 	Text,
 	Textarea,
+	Tooltip,
 } from "@mantine/core";
-import { DateInput } from "@mantine/dates";
-import { IconCheck, IconCurrencyTaka, IconPrinter } from "@tabler/icons-react";
+import { Carousel } from "@mantine/carousel";
+import { IconCurrencyTaka, IconPrinter, IconScissors, IconUserPlus } from "@tabler/icons-react";
 import useConfigData from "@hooks/useConfigData";
 import useTransactionMode from "@hooks/useTransactionMode";
-import { formatCurrency } from "@utils/index";
+import { formatCurrency, calculateVATAmount } from "@utils/index";
 import FormValidationWrapper from "@components/form-builders/FormValidationWrapper";
-import CustomerInfoSection from "./CustomerInfoSection";
+import useGetCoreCustomers from "@hooks/useGetCoreCustomers";
+import SplitPaymentsDrawer from "@components/drawers/SplitPaymentsDrawer";
 
 export default function PaymentSection({
 	salesForm,
@@ -29,10 +32,18 @@ export default function PaymentSection({
 }) {
 	const { transactionMode } = useTransactionMode();
 	const { configData } = useConfigData();
+
+	const { coreCustomers } = useGetCoreCustomers();
+
+	const customerOptions = coreCustomers?.map((customer) => ({
+		value: String(customer.id),
+		label: customer.name,
+	})) ?? [];
+
 	const currencySymbol =
 		configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol;
 
-	const { discountAmount, isDiscountPercentage, salesDate, salesNarration, paymentAmount } =
+	const { discountAmount, isDiscountPercentage, salesNarration, paymentAmount } =
 		salesForm.values;
 
 	const vatAmount = 0;
@@ -45,60 +56,78 @@ export default function PaymentSection({
 			return (itemsTotal * discountAmount) / 100;
 		}
 		return discountAmount;
-	}, [discountAmount, isDiscountPercentage, itemsTotal]);
+	}, [ discountAmount, isDiscountPercentage, itemsTotal ]);
 
 	const grandTotal = useMemo(
 		() => Math.max(itemsTotal - discountValue + vatAmount, 0),
-		[itemsTotal, discountValue]
+		[ itemsTotal, discountValue ]
 	);
 
 	const dueAmount = useMemo(
 		() => Math.max(grandTotal - (paymentAmount || 0), 0),
-		[grandTotal, paymentAmount]
+		[ grandTotal, paymentAmount ]
 	);
 
-	// =============== group transaction modes by method_name for the grouped Select ===============
-	const groupedTransactionMode = useMemo(() => {
-		if (!transactionMode?.length) return [];
+	const payments = salesForm.values.payments ?? [];
+	const splitPaymentDrawerOpened = salesForm.values.splitPaymentDrawerOpened ?? false;
+	const isSplitPaymentActive = payments.length > 1;
 
-		const groupsMap = {};
-		transactionMode.forEach((mode) => {
-			const methodName = mode.method_name || "Others";
-			if (!groupsMap[methodName]) {
-				groupsMap[methodName] = [];
-			}
-			groupsMap[methodName].push({
-				value: String(mode.id),
-				label: mode.name,
-				path: mode.path,
-			});
-		});
-
-		return Object.entries(groupsMap).map(([group, items]) => ({
-			group,
-			items,
-		}));
+	// =============== set default payment mode (cash) once transaction modes are loaded ===============
+	useEffect(() => {
+		if (transactionMode?.length > 0 && payments.length === 0) {
+			const cashMethod = transactionMode.find((mode) => mode.slug === "cash");
+			const defaultMethod = cashMethod || transactionMode[0];
+			salesForm.setFieldValue("payments", [
+				{
+					transaction_mode_id: defaultMethod.id,
+					transaction_mode_name: defaultMethod.name,
+					amount: grandTotal,
+				},
+			]);
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [transactionMode]);
 
-	const iconProps = { stroke: 1.5, color: "currentColor", opacity: 0.6, size: 18 };
+	// =============== auto-sync paymentAmount and single payment amount with grandTotal ===============
+	useEffect(() => {
+		if (!isSplitPaymentActive) {
+			salesForm.setFieldValue("paymentAmount", grandTotal);
+			if (payments.length === 1) {
+				salesForm.setFieldValue("payments.0.amount", grandTotal);
+			}
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [grandTotal, isSplitPaymentActive]);
 
-	// =============== render each transaction mode option with its logo image ===============
-	const renderTransactionModeOption = ({ option, checked }) => (
-		<Group flex="1" gap="xs">
-			<Image
-				w={34}
-				h={24}
-				bd="1px solid #2f9e44"
-				fit="contain"
-				alt={option.label}
-				src={option.path}
-				radius="sm"
-				fallbackSrc={`https://placehold.co/60x60/FFFFFF/2f9e44?text=${encodeURIComponent(option.label || "")}`}
-			/>
-			{option.label}
-			{checked && <IconCheck style={{ marginInlineStart: "auto" }} {...iconProps} />}
-		</Group>
-	);
+	const handleSelectTransactionMode = (modeId, modeName) => {
+		if (isSplitPaymentActive) return;
+		salesForm.setFieldValue("payments", [
+			{ transaction_mode_id: modeId, transaction_mode_name: modeName, amount: grandTotal },
+		]);
+	};
+
+	const handleOpenSplitPaymentDrawer = () => {
+		salesForm.setFieldValue("splitPaymentDrawerOpened", true);
+	};
+
+	const handleSaveSplitPayments = (splitPayments) => {
+		const totalSplitAmount = splitPayments.reduce((sum, payment) => sum + payment.amount, 0);
+		salesForm.setFieldValue("payments", splitPayments);
+		salesForm.setFieldValue("paymentAmount", totalSplitAmount);
+	};
+
+	const clearSplitPayment = () => {
+		const cashMethod = transactionMode?.find((mode) => mode.slug === "cash");
+		const defaultMethod = cashMethod || transactionMode?.[0];
+		salesForm.setFieldValue("payments", [
+			{
+				transaction_mode_id: defaultMethod?.id,
+				transaction_mode_name: defaultMethod?.name,
+				amount: grandTotal,
+			},
+		]);
+		salesForm.setFieldValue("paymentAmount", grandTotal);
+	};
 
 	const handleDiscountTypeChange = (value) => {
 		salesForm.setFieldValue("isDiscountPercentage", value === "percentage");
@@ -107,50 +136,30 @@ export default function PaymentSection({
 
 	return (
 		<>
+			{/* =============== summary info bar — same layout as POS TransactionInformation =============== */}
+
+
 			<Grid columns={24} gutter={8} mt="xs">
 				<Grid.Col span={16}>
 					<Grid columns={16} gutter={8}>
-						<Grid.Col span={16}>
+						{/* <Grid.Col span={16}>
 							<CustomerInfoSection salesForm={salesForm} />
-						</Grid.Col>
-
-						<Grid.Col span={8}>
-							<Box bd="1px solid #dee2e6" bg="white" p="xs" className="borderRadiusAll" h="100%">
-								<Text fz="sm" fw={600} mb={6}>
-									Transaction mode
-								</Text>
-								<FormValidationWrapper
-									errorMessage="Transaction mode is required"
-									opened={!!salesForm.errors.transactionModeId}
-								>
-									<Select
-										data={groupedTransactionMode}
-										renderOption={renderTransactionModeOption}
-										searchable
-										{...salesForm.getInputProps("transactionModeId", { type: "search" })}
-										onChange={(value, option) => {
-											salesForm.setFieldValue("transactionMode", option.label);
-											salesForm.setFieldValue("transactionModeId", String(value));
-										}}
-										nothingFoundMessage="No transaction mode found"
-										placeholder="Select transaction mode"
-										size="sm"
-									/>
-								</FormValidationWrapper>
-							</Box>
-						</Grid.Col>
-
-						<Grid.Col span={8}>
+						</Grid.Col> */}
+						<Grid.Col span={7}>
 							<Box bd="1px solid #dee2e6" bg="white" p="xs" className="borderRadiusAll">
 								<Grid gutter={6}>
 									<Grid.Col span={12}>
-										<DateInput
-											value={salesDate}
-											onChange={(value) => salesForm.setFieldValue("salesDate", value)}
-											valueFormat="MMMM D, YYYY"
-											size="xs"
-											label={null}
-											placeholder="Select date"
+										<Select
+											placeholder="Search customer (optional)"
+											data={customerOptions}
+											searchable
+											clearable
+											value={salesForm.values.customer_id || null}
+											onChange={(value) => salesForm.setFieldValue("customer_id", value ?? "")}
+											nothingFoundMessage="No customer found"
+											rightSection={<ActionIcon>
+												<IconUserPlus size={16} />
+											</ActionIcon>}
 										/>
 									</Grid.Col>
 									<Grid.Col span={12}>
@@ -166,6 +175,170 @@ export default function PaymentSection({
 											size="xs"
 											minRows={2}
 										/>
+									</Grid.Col>
+								</Grid>
+							</Box>
+						</Grid.Col>
+						<Grid.Col span={9}>
+							<Grid columns={13} gutter={4} justify="center" align="center" pb={4} bg="gray.1" mt="xs">
+								<Grid.Col span={7} px={4}>
+									<Grid bg="gray.1" px={4}>
+										<Grid.Col span={6}>
+											<Stack gap={0}>
+												<Group justify="space-between" gap={0}>
+													<Text fz="sm" fw={500} c="black">
+														DIS.
+													</Text>
+													<Text fz="sm" fw={800} c="black">
+														{currencySymbol} {formatCurrency(discountValue)}
+													</Text>
+												</Group>
+												<Group justify="space-between">
+													<Text fz="sm" fw={500} c="black">
+														Type
+													</Text>
+													<Text fz="sm" fw={800} c="black">
+														{isDiscountPercentage ? "Percent" : "Flat"}
+													</Text>
+												</Group>
+											</Stack>
+										</Grid.Col>
+										<Grid.Col span={6}>
+											<Group justify="space-between">
+												<Text fz="sm" fw={500} c="black">
+													VAT {configData?.inventory_config?.config_vat?.vat_percent}%
+												</Text>
+												<Text fz="sm" fw={800} c="black">
+													{calculateVATAmount(itemsTotal, configData?.inventory_config?.config_vat)}
+												</Text>
+											</Group>
+											<Group justify="space-between">
+												<Text fz="sm" fw={500} c="black">
+													SD
+												</Text>
+												<Text fz="sm" fw={800} c="black">
+													{currencySymbol} 0
+												</Text>
+											</Group>
+										</Grid.Col>
+									</Grid>
+								</Grid.Col>
+								<Grid.Col span={3}>
+									<Stack gap={0} align="center" justify="center" bg="gray.8" py={4} bdrs={4}>
+										<Text fw={800} c="white" size="lg">
+											{currencySymbol} {grandTotal?.toFixed(2)}
+										</Text>
+										<Text fw={500} c="white" size="md">
+											Total
+										</Text>
+									</Stack>
+								</Grid.Col>
+								<Grid.Col span={3}>
+									<Stack gap={0} align="center" justify="center" bg="red" py={4} bdrs={4}>
+										<Text fw={800} c="white" size="lg">
+											{currencySymbol} {dueAmount?.toFixed(2)}
+										</Text>
+										<Text fw={500} c="white" size="md">
+											Due
+										</Text>
+									</Stack>
+								</Grid.Col>
+							</Grid>
+
+							<Box bd="1px solid #dee2e6" bg="white" p="xs" className="borderRadiusAll" h="100%">
+								<Grid columns={24} gutter={2} align="center" justify="center" mb={4}>
+									<Grid.Col span={21}>
+										<Tooltip
+											label="Transaction mode is required"
+											opened={!!salesForm.errors.payments}
+											px={16}
+											py={2}
+											bg="orange.8"
+											c="white"
+											withArrow
+											offset={{ mainAxis: 5, crossAxis: -364 }}
+											zIndex={999}
+											transitionProps={{ transition: "pop-bottom-left", duration: 500 }}
+										>
+											<Carousel
+												id="sales-transaction-mode-carousel"
+												slideSize="20%"
+												slideGap="es"
+												align="start"
+												height={60}
+												withIndicators={false}
+												controlSize={28}
+												controlsOffset={2}
+												emblaOptions={{ align: "start", slidesToScroll: 3 }}
+											>
+												{transactionMode?.map((mode) => (
+													<Carousel.Slide key={mode.id}>
+														<Box
+															onClick={() => handleSelectTransactionMode(mode.id, mode.name)}
+															pos="relative"
+															className={
+																isSplitPaymentActive ? "cursor-not-allowed" : "cursor-pointer"
+															}
+														>
+															<Flex
+																bg={
+																	payments.length === 1 &&
+																	payments[0]?.transaction_mode_id === mode.id
+																		? "green.8"
+																		: "white"
+																}
+																direction="column"
+																align="center"
+																justify="center"
+																c="black"
+																p={3}
+															>
+																<Tooltip
+																	label={mode.name}
+																	withArrow
+																	px={16}
+																	py={2}
+																	offset={2}
+																	zIndex={999}
+																	position="top"
+																	color="red"
+																>
+																	<Image
+																		w={80}
+																		fit="contain"
+																		alt={mode.name}
+																		src={mode.path}
+																		fallbackSrc={`https://placehold.co/120x80/FFFFFF/2f9e44?text=${mode.name}`}
+																	/>
+																</Tooltip>
+															</Flex>
+														</Box>
+													</Carousel.Slide>
+												))}
+											</Carousel>
+										</Tooltip>
+									</Grid.Col>
+									<Grid.Col span={3} style={{ textAlign: "right" }} pr="8">
+										<Tooltip
+											label="Split payment"
+											px={16}
+											py={2}
+											bg="gray.8"
+											c="white"
+											withArrow
+											zIndex={999}
+											transitionProps={{ transition: "pop-bottom-left", duration: 500 }}
+										>
+											<ActionIcon
+												size="xl"
+												bg={isSplitPaymentActive ? "green.6" : "gray.8"}
+												variant="filled"
+												onClick={handleOpenSplitPaymentDrawer}
+												disabled={!salesForm.values.paymentAmount}
+											>
+												<IconScissors style={{ width: "70%", height: "70%" }} stroke={1.5} />
+											</ActionIcon>
+										</Tooltip>
 									</Grid.Col>
 								</Grid>
 							</Box>
@@ -369,6 +542,16 @@ export default function PaymentSection({
 					Save
 				</Button>
 			</Button.Group>
+
+			{/* =============== split payments drawer =============== */}
+			<SplitPaymentsDrawer
+				opened={splitPaymentDrawerOpened}
+				onClose={() => salesForm.setFieldValue("splitPaymentDrawerOpened", false)}
+				totalAmount={grandTotal}
+				onSave={handleSaveSplitPayments}
+				onRemove={clearSplitPayment}
+				existingSplitPayments={payments}
+			/>
 		</>
 	);
 }

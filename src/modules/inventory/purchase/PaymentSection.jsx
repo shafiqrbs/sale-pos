@@ -13,7 +13,7 @@ import {
 	Textarea,
 } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
-import { IconCheck, IconCurrencyTaka, IconPercentage } from "@tabler/icons-react";
+import { IconCheck, IconCurrencyTaka } from "@tabler/icons-react";
 import useConfigData from "@hooks/useConfigData";
 import VendorInfoSection from "./VendorInfoSection";
 import useTransactionMode from "@hooks/useTransactionMode";
@@ -75,6 +75,11 @@ export default function PaymentSection({ purchaseForm, itemsTotal, isAddingPurch
 			items,
 		}));
 	}, [transactionMode]);
+
+	const handleDiscountTypeChange = (value) => {
+		purchaseForm.setFieldValue("isDiscountPercentage", value === "percentage");
+		purchaseForm.setFieldValue("discountAmount", 0);
+	};
 
 	// =============== render option with image and label ===============
 	const iconProps = { stroke: 1.5, color: "currentColor", opacity: 0.6, size: 18 };
@@ -240,10 +245,21 @@ export default function PaymentSection({ purchaseForm, itemsTotal, isAddingPurch
 						</Grid>
 
 						<Flex mt="xs" justify="space-between" align="center" gap={6}>
-							<Text fz="sm" fw={600}>
-								Discount:{" "}
+							<Text fz="sm" fw={600} style={{ whiteSpace: "nowrap" }}>
+								Discount:
 							</Text>
-							<Box sx={{ flex: 1 }}>
+							<Select
+								size="xs"
+								w={120}
+								data={[
+									{ value: "flat", label: "Flat" },
+									{ value: "percentage", label: "%" },
+								]}
+								value={isDiscountPercentage ? "percentage" : "flat"}
+								onChange={handleDiscountTypeChange}
+								allowDeselect={false}
+							/>
+							<Box style={{ flex: 1 }}>
 								<NumberInput
 									value={discountAmount}
 									onChange={(value) =>
@@ -251,25 +267,16 @@ export default function PaymentSection({ purchaseForm, itemsTotal, isAddingPurch
 									}
 									hideControls
 									size="xs"
-									placeholder="Discount"
-									leftSection={<IconCurrencyTaka size={14} />}
+									placeholder="0"
+									leftSection={
+										isDiscountPercentage ? (
+											<Text fz={12}>%</Text>
+										) : (
+											<IconCurrencyTaka size={14} />
+										)
+									}
 								/>
 							</Box>
-							{/* <Button
-                                variant={isDiscountPercentage ? "filled" : "outline"}
-                                color="var(--theme-warn-color-6)"
-                                size="xs"
-                                px={8}
-                                onClick={() =>
-                                    purchaseForm.setFieldValue(
-                                        "isDiscountPercentage",
-                                        !isDiscountPercentage
-                                    )
-                                }
-                                leftSection={<IconPercentage size={14} />}
-                            >
-                                %
-                            </Button> */}
 						</Flex>
 
 						<Flex
