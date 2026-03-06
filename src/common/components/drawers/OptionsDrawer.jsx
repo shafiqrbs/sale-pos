@@ -28,16 +28,17 @@ const DRAWER_MENU = [
 		label: "Sales & Purchases",
 		icon: IconShoppingCart,
 		submenu: [
-			{ label: "Sales", pathname: "/inventory/sales", icon: IconReceipt },
-			{ label: "Purchase", pathname: "/inventory/purchase", icon: IconShoppingCart },
-			{ label: "Sales return", pathname: "/inventory/sales-return", icon: IconArrowBack },
-			{ label: "New purchase", pathname: "/inventory/new-purchase", icon: IconPackage },
-			{ label: "Opening stock", pathname: "/inventory/opening-stock", icon: IconBox },
+			{ label: "Sales", pathname: APP_NAVLINKS.SALES, icon: IconReceipt },
+			{ label: "New Sale", pathname: APP_NAVLINKS.SALES_NEW, icon: IconReceipt },
+			{ label: "Purchase", pathname: APP_NAVLINKS.PURCHASE, icon: IconShoppingCart },
+			{ label: "Sales return", pathname: APP_NAVLINKS.SALES_RETURN, icon: IconArrowBack },
+			{ label: "New purchase", pathname: APP_NAVLINKS.PURCHASE_NEW, icon: IconPackage },
+			{ label: "Opening stock", pathname: APP_NAVLINKS.OPENING_STOCK, icon: IconBox },
 		],
 	},
 ];
 
-export default function LeftOptionsDrawer({ opened, onClose }) {
+export default function OptionsDrawer({ opened, onClose }) {
 	const navigate = useNavigate();
 	const location = useLocation();
 
@@ -51,7 +52,7 @@ export default function LeftOptionsDrawer({ opened, onClose }) {
 			opened={opened}
 			onClose={onClose}
 			title="Options"
-			position="left"
+			position="right"
 			size="280px"
 		>
 			<Divider mb="md" />

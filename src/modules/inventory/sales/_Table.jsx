@@ -1,7 +1,7 @@
-import { Box, Grid, Text, ActionIcon, Group, Menu, Flex } from '@mantine/core';
-import { IconDotsVertical, IconEye } from '@tabler/icons-react';
+import { Box, Grid, Text, ActionIcon, Group, Menu, Flex, Button } from '@mantine/core';
+import { IconDotsVertical, IconEye, IconPlus } from '@tabler/icons-react';
 import { useState } from 'react'
-import { useOutletContext } from 'react-router'
+import { useOutletContext, useNavigate } from 'react-router'
 import { DataTable } from 'mantine-datatable';
 import tableCss from "@assets/css/Table.module.css";
 import { useTranslation } from 'react-i18next';
@@ -11,12 +11,14 @@ import KeywordSearch from '@components/KeywordSearch';
 import GlobalModal from '@components/modals/GlobalModal';
 import { useForm } from '@mantine/form';
 import { useDisclosure } from '@mantine/hooks';
+import { APP_NAVLINKS } from '@/routes/routes';
 
 const PER_PAGE = 25;
 
 export default function Table() {
     const { t } = useTranslation();
     const [ opened, { open, close } ] = useDisclosure(false);
+    const navigate = useNavigate();
     const [ page, setPage ] = useState(1);
     const [ selectedRow, setSelectedRow ] = useState(null);
     const [ loading, setLoading ] = useState(false);
@@ -55,9 +57,12 @@ export default function Table() {
 
     return (
         <Box>
-            <Box mb="xs">
+            <Flex mb="xs" gap="sm" justify="space-between" align="center">
                 <KeywordSearch showStartEndDate form={form} />
-            </Box>
+                <Button w={140} leftSection={<IconPlus size={18} />} onClick={() => navigate(APP_NAVLINKS.SALES_NEW)}>
+                    {t("NewSale")}
+                </Button>
+            </Flex>
             <Grid columns={24} gutter={{ base: 8 }}>
                 <Grid.Col span={24}>
                     <Box bg="white" className="borderRadiusAll" bd="1px solid #e6e6e6">

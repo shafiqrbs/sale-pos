@@ -1,0 +1,74 @@
+import { Box, Flex, Grid, Select, Text } from "@mantine/core";
+import useConfigData from "@hooks/useConfigData";
+import useGetCoreCustomers from "@hooks/useGetCoreCustomers";
+
+export default function CustomerInfoSection({ salesForm }) {
+	const { configData } = useConfigData();
+	const { coreCustomers } = useGetCoreCustomers();
+
+	const currencySymbol =
+		configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol;
+
+	const customerOptions = coreCustomers?.map((customer) => ({
+		value: String(customer.id),
+		label: customer.name,
+	})) ?? [];
+
+	return (
+		<Box bd="1px solid #dee2e6" bg="white" p="3xs" className="borderRadiusAll">
+			<Select
+				placeholder="Search customer (optional)"
+				data={customerOptions}
+				searchable
+				clearable
+				value={salesForm.values.customer_id || null}
+				onChange={(value) => salesForm.setFieldValue("customer_id", value ?? "")}
+				nothingFoundMessage="No customer found"
+			/>
+
+			<Box mt="xs" className="boxBackground textColor borderRadiusAll">
+				<Grid columns={24} gutter={{ base: 8 }}>
+					<Grid.Col span={8}>
+						<Flex p="4xs" direction="column" gap={2} bg="var(--theme-tertiary-color-2)">
+							<Text fz="xs" fw={500}>
+								Outstanding
+							</Text>
+							<Flex align="center" gap={4}>
+								<Text fz="xs">{currencySymbol}</Text>
+								<Text fz="sm" fw={600}>
+									0.00
+								</Text>
+							</Flex>
+						</Flex>
+					</Grid.Col>
+					<Grid.Col span={8}>
+						<Flex p="4xs" direction="column" bg="var(--theme-tertiary-color-2)" gap={2}>
+							<Text fz="xs" fw={500}>
+								Total Sales
+							</Text>
+							<Flex align="center" gap={4}>
+								<Text fz="xs">{currencySymbol}</Text>
+								<Text fz="sm" fw={600}>
+									0.00
+								</Text>
+							</Flex>
+						</Flex>
+					</Grid.Col>
+					<Grid.Col span={8}>
+						<Flex p="4xs" direction="column" bg="var(--theme-tertiary-color-2)" gap={2}>
+							<Text fz="xs" fw={500}>
+								Discount
+							</Text>
+							<Flex align="center" gap={4}>
+								<Text fz="xs">{currencySymbol}</Text>
+								<Text fz="sm" fw={600}>
+									0.00
+								</Text>
+							</Flex>
+						</Flex>
+					</Grid.Col>
+				</Grid>
+			</Box>
+		</Box>
+	);
+}

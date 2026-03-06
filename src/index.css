@@ -157,11 +157,11 @@ button[data-active="true"].mantine-focus-auto.mantine-active.mantine-datatable-p
 	border-radius: 4px;
 }
 
-#left-options-drawer-button {
+#right-options-drawer-button {
 	transition: opacity 0.2s ease-in-out;
 }
 
-#left-options-drawer-button:hover {
+#right-options-drawer-button:hover {
 	opacity: 1 !important;
 }
 
@@ -169,6 +169,7 @@ button[data-active="true"].mantine-focus-auto.mantine-active.mantine-datatable-p
 	&.mantine-Select-error {
 		display: none !important;
 	}
+
 	&.mantine-NumberInput-error {
 		display: none !important;
 	}

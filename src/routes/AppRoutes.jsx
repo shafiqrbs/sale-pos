@@ -11,6 +11,7 @@ import StockIndex from '@modules/stock'
 import DashboardIndex from '@modules/dashboard'
 import CustomersIndex from '@modules/core/customers'
 import ConfigIndex from '@modules/inventory/config'
+import SalesNewIndex from '@modules/inventory/sales/NewIndex'
 
 export default function AppRoutes() {
     return (
@@ -22,7 +23,10 @@ export default function AppRoutes() {
                     <Route index path="customers" element={<CustomersIndex />} />
                 </Route>
                 <Route path="inventory">
-                    <Route path="sales" element={<SalesIndex />} />
+                    <Route path="sales">
+                        <Route index element={<SalesIndex />} />
+                        <Route path="new" element={<SalesNewIndex />} />
+                    </Route>
                     <Route path="purchase">
                         <Route index element={<PurchaseIndex />} />
                         <Route path="new" element={<PurchaseNewIndex />} />

@@ -8,7 +8,7 @@ import Footer from "./Footer";
 import { useNetwork } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { APP_NAVLINKS } from "@/routes/routes";
-import LeftOptionsDrawer from "@components/drawers/LeftOptionsDrawer";
+import OptionsDrawer from "@components/drawers/OptionsDrawer";
 import useMainAreaHeight from "@hooks/useMainAreaHeight";
 import { SHOW_PROGRESSIVE_WORKS } from "@constants/index";
 
@@ -101,18 +101,18 @@ export default function Layout() {
 				{isOnline && !leftDrawerOpened && SHOW_PROGRESSIVE_WORKS && (
 					<Box
 						pos="fixed"
-						left={0}
+						right={0}
 						top="50%"
 						style={{ transform: "translateY(-50%)", zIndex: 1000 }}
 					>
-						<Tooltip label="Options" position="right">
+						<Tooltip label="Options" position="left">
 							<ActionIcon
-								id="left-options-drawer-button"
+								id="right-options-drawer-button"
 								variant="filled"
 								size="lg"
-								opacity={leftDrawerOpened ? 1 : 0.5}
+								// opacity={leftDrawerOpened ? 1 : 0.5}
 								radius="md"
-								style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
+								style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
 								onClick={openLeftDrawer}
 								aria-label="Open options menu"
 							>
@@ -126,7 +126,7 @@ export default function Layout() {
 			<AppShell.Footer height={footerHeight}>
 				<Footer />
 			</AppShell.Footer>
-			<LeftOptionsDrawer opened={leftDrawerOpened} onClose={closeLeftDrawer} />
+			<OptionsDrawer opened={leftDrawerOpened} onClose={closeLeftDrawer} />
 		</AppShell>
 	);
 }

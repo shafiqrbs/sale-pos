@@ -1196,5 +1196,8 @@
 	"ResetPassword": "Reset Password",
 	"OutOfStock": "Out of Stock",
 	"PurchaseList": "Purchase List",
-	"PurchaseItems": "Purchase Items"
+	"PurchaseItems": "Purchase Items",
+	"NewSale": "New Sale",
+	"SalesList": "Sales List",
+	"SalesItems": "Sales Items"
 }
