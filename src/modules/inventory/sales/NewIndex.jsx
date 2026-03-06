@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { Box, Button, Flex, Text } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import dayjs from "dayjs";
@@ -12,15 +12,15 @@ import useTempSalesProducts from "@hooks/useTempSalesProducts";
 import { generateInvoiceId } from "@utils/index";
 import { useTranslation } from "react-i18next";
 import { APP_NAVLINKS } from "@/routes/routes";
-import { NavLink, useNavigate } from "react-router";
+import { NavLink } from "react-router";
 import { IconList } from "@tabler/icons-react";
 
 export default function NewIndex() {
-    const navigate = useNavigate()
     const { t } = useTranslation();
-    const [ addSales, { isLoading: isAddingSales } ] = useAddSalesMutation();
+    const [addSales, { isLoading: isAddingSales }] = useAddSalesMutation();
     const salesForm = useForm(salesOverviewRequest());
     const { salesProducts, refetch } = useTempSalesProducts({ type: "sales" });
+    const [resetKey, setResetKey] = useState(0);
 
     // =============== tracks whether the submit was triggered via POS Print ===============
     const withPosPrintRef = useRef(false);
@@ -47,22 +47,27 @@ export default function NewIndex() {
             0
         );
 
-        const discountValue = formValues.isDiscountPercentage
-            ? (subTotal * (Number(formValues.discountAmount) || 0)) / 100
-            : Number(formValues.discountAmount) || 0;
+        const discountValue =
+            formValues.discount_type === "coupon" ? 0 : Number(formValues.discount) || 0;
 
         const vat = 0;
         const grandTotal = Math.max(subTotal - discountValue + vat, 0);
         const isSplitPaymentActive = payments.length > 1;
-        const primaryPayment = payments[ 0 ] ?? {};
+        const primaryPayment = payments[0] ?? {};
 
         const payload = {
             invoice: generateInvoiceId(),
             customer_id: formValues.customer_id ?? "",
             sub_total: subTotal,
-            discount_type: formValues.isDiscountPercentage ? "Percentage" : "Flat",
-            discount: Number(formValues.discountAmount) || 0,
+            discount_type:
+                formValues.discount_type === "flat"
+                    ? "Flat"
+                    : formValues.discount_type === "percentage"
+                        ? "Percentage"
+                        : "Coupon",
+            discount: Number(formValues.discount) || 0,
             discount_calculation: discountValue,
+            coupon_code: formValues.coupon_code ?? "",
             vat,
             total: grandTotal,
             payment: String(formValues.paymentAmount ?? ""),
@@ -98,6 +103,7 @@ export default function NewIndex() {
                 await window.dbAPI.deleteDataFromTable("temp_sales_products", { type: "sales" });
                 refetch();
                 salesForm.reset();
+                setResetKey((previousKey) => previousKey + 1);
 
                 if (shouldPrint) {
                     window.deviceAPI.thermalPrint(response.data);
@@ -123,6 +129,7 @@ export default function NewIndex() {
         await window.dbAPI.deleteDataFromTable("temp_sales_products", { type: "sales" });
         refetch();
         salesForm.reset();
+        setResetKey((previousKey) => previousKey + 1);
     };
 
     return (
@@ -159,14 +166,15 @@ export default function NewIndex() {
                 <InvoiceForm refetch={refetch} />
             </Box>
             <Box component="form" id="salesForm" onSubmit={salesForm.onSubmit(handleSubmit)}>
-                <SalesOverview
-                    isAddingSales={isAddingSales}
-                    salesForm={salesForm}
-                    salesProducts={salesProducts}
-                    refetch={refetch}
-                    onPosPrint={handlePosPrint}
-                    onReset={handleReset}
-                />
+                    <SalesOverview
+                        isAddingSales={isAddingSales}
+                        salesForm={salesForm}
+                        salesProducts={salesProducts}
+                        refetch={refetch}
+                        onPosPrint={handlePosPrint}
+                        onReset={handleReset}
+                        resetKey={resetKey}
+                    />
             </Box>
         </Box>
     );

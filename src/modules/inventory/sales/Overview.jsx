@@ -10,6 +10,7 @@ export default function Overview({
 	refetch,
 	onPosPrint,
 	onReset,
+	resetKey = 0,
 }) {
 	const itemsTotal = useMemo(() => {
 		return (salesProducts || []).reduce(
@@ -32,6 +33,7 @@ export default function Overview({
 				isAddingSales={isAddingSales}
 				onPosPrint={onPosPrint}
 				onReset={onReset}
+				resetKey={resetKey}
 			/>
 		</Box>
 	);

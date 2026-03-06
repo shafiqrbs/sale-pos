@@ -4,8 +4,10 @@ const salesOverviewInitialValues = {
 	customerMobile: "",
 	salesDate: new Date(),
 	salesNarration: "",
-	discountAmount: 0,
-	isDiscountPercentage: false,
+	// =============== discount fields matching POS Transaction (flat | percentage | coupon) ===============
+	discount_type: "flat",
+	discount: 0,
+	coupon_code: "",
 	paymentAmount: 0,
 	// =============== payments array supports both single and split payment modes ===============
 	payments: [],
@@ -38,6 +40,7 @@ const salesItemFormInitialValues = {
 	salesPrice: "",
 	quantity: "",
 	unit: "",
+	discount: 0,
 };
 
 export const salesItemFormRequest = () => {

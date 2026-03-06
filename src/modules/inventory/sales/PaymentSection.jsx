@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
 	ActionIcon,
 	Box,
@@ -8,20 +8,31 @@ import {
 	Group,
 	Image,
 	NumberInput,
-	Select,
 	Stack,
 	Text,
 	Textarea,
+	TextInput,
 	Tooltip,
 } from "@mantine/core";
 import { Carousel } from "@mantine/carousel";
-import { IconCurrencyTaka, IconPrinter, IconScissors, IconUserPlus } from "@tabler/icons-react";
+import { useDisclosure } from "@mantine/hooks";
+import {
+	IconCurrencyTaka,
+	IconNumber123,
+	IconPercentage,
+	IconPlusMinus,
+	IconPrinter,
+	IconScissors,
+	IconTicket,
+	IconUserPlus,
+} from "@tabler/icons-react";
+import { useTranslation } from "react-i18next";
 import useConfigData from "@hooks/useConfigData";
 import useTransactionMode from "@hooks/useTransactionMode";
 import { formatCurrency, calculateVATAmount } from "@utils/index";
 import FormValidationWrapper from "@components/form-builders/FormValidationWrapper";
-import useGetCoreCustomers from "@hooks/useGetCoreCustomers";
 import SplitPaymentsDrawer from "@components/drawers/SplitPaymentsDrawer";
+import CustomerDrawer from "@components/drawers/CustomerDrawer";
 
 export default function PaymentSection({
 	salesForm,
@@ -29,34 +40,32 @@ export default function PaymentSection({
 	isAddingSales,
 	onPosPrint,
 	onReset,
+	resetKey = 0,
 }) {
+	const { t } = useTranslation();
 	const { transactionMode } = useTransactionMode();
 	const { configData } = useConfigData();
 
-	const { coreCustomers } = useGetCoreCustomers();
-
-	const customerOptions = coreCustomers?.map((customer) => ({
-		value: String(customer.id),
-		label: customer.name,
-	})) ?? [];
+	const [ customerObject, setCustomerObject ] = useState(null);
+	const [ customersDropdownData, setCustomersDropdownData ] = useState([]);
+	const [ discountMode, setDiscountMode ] = useState("discount");
+	const [ percentageValue, setPercentageValue ] = useState(0);
+	const [ customerDrawerOpened, { open: customerDrawerOpen, close: customerDrawerClose } ] =
+		useDisclosure(false);
 
 	const currencySymbol =
 		configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol;
 
-	const { discountAmount, isDiscountPercentage, salesNarration, paymentAmount } =
+	const { discount_type, discount, coupon_code, salesNarration, paymentAmount } =
 		salesForm.values;
 
 	const vatAmount = 0;
 
+	// =============== discount value: when flat/percentage use form discount; when coupon use 0 ===============
 	const discountValue = useMemo(() => {
-		if (!discountAmount) {
-			return 0;
-		}
-		if (isDiscountPercentage) {
-			return (itemsTotal * discountAmount) / 100;
-		}
-		return discountAmount;
-	}, [ discountAmount, isDiscountPercentage, itemsTotal ]);
+		if (discount_type === "coupon") return 0;
+		return Number(discount) || 0;
+	}, [ discount_type, discount ]);
 
 	const grandTotal = useMemo(
 		() => Math.max(itemsTotal - discountValue + vatAmount, 0),
@@ -76,7 +85,7 @@ export default function PaymentSection({
 	useEffect(() => {
 		if (transactionMode?.length > 0 && payments.length === 0) {
 			const cashMethod = transactionMode.find((mode) => mode.slug === "cash");
-			const defaultMethod = cashMethod || transactionMode[0];
+			const defaultMethod = cashMethod || transactionMode[ 0 ];
 			salesForm.setFieldValue("payments", [
 				{
 					transaction_mode_id: defaultMethod.id,
@@ -86,7 +95,7 @@ export default function PaymentSection({
 			]);
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [transactionMode]);
+	}, [ transactionMode ]);
 
 	// =============== auto-sync paymentAmount and single payment amount with grandTotal ===============
 	useEffect(() => {
@@ -97,7 +106,69 @@ export default function PaymentSection({
 			}
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [grandTotal, isSplitPaymentActive]);
+	}, [ grandTotal, isSplitPaymentActive ]);
+
+	// =============== fetch customers for drawer ===============
+	async function fetchCustomers() {
+		const data = await window.dbAPI.getDataFromTable("core_customers");
+		setCustomersDropdownData(data ?? []);
+	}
+
+	useEffect(() => {
+		fetchCustomers();
+	}, []);
+
+	useEffect(() => {
+		if (!customerDrawerOpened) {
+			fetchCustomers();
+		}
+	}, [ customerDrawerOpened ]);
+
+	// =============== reset local state when parent triggers reset ===============
+	useEffect(() => {
+		setCustomerObject(null);
+		setDiscountMode("discount");
+		setPercentageValue(0);
+	}, [ resetKey ]);
+
+	const handleCustomerSelect = (customer) => {
+		if (customer) {
+			setCustomerObject(customer);
+			salesForm.setFieldValue("customer_id", customer.id?.toString());
+		} else {
+			setCustomerObject(null);
+			salesForm.setFieldValue("customer_id", "");
+		}
+	};
+
+	const handleCustomerAdd = () => {
+		customerDrawerOpen();
+	};
+
+	const handlePercentageChange = (value) => {
+		setPercentageValue(value);
+		const discountAmount = (Math.round(itemsTotal) * value) / 100;
+		salesForm.setFieldValue("discount", Math.round(discountAmount));
+	};
+
+	const handleDiscountModeChange = () => {
+		if (discountMode === "coupon") {
+			setDiscountMode("discount");
+			salesForm.setFieldValue("discount_type", "flat");
+			salesForm.setFieldValue("coupon_code", "");
+		} else {
+			setDiscountMode("coupon");
+			salesForm.setFieldValue("discount_type", "coupon");
+			salesForm.setFieldValue("discount", 0);
+		}
+	};
+
+	const toggleDiscountMode = () => {
+		salesForm.setFieldValue("discount", 0);
+		setPercentageValue(0);
+		const newType = discount_type === "flat" ? "percentage" : "flat";
+		salesForm.setFieldValue("discount_type", newType);
+	};
 
 	const handleSelectTransactionMode = (modeId, modeName) => {
 		if (isSplitPaymentActive) return;
@@ -118,7 +189,7 @@ export default function PaymentSection({
 
 	const clearSplitPayment = () => {
 		const cashMethod = transactionMode?.find((mode) => mode.slug === "cash");
-		const defaultMethod = cashMethod || transactionMode?.[0];
+		const defaultMethod = cashMethod || transactionMode?.[ 0 ];
 		salesForm.setFieldValue("payments", [
 			{
 				transaction_mode_id: defaultMethod?.id,
@@ -129,54 +200,25 @@ export default function PaymentSection({
 		salesForm.setFieldValue("paymentAmount", grandTotal);
 	};
 
-	const handleDiscountTypeChange = (value) => {
-		salesForm.setFieldValue("isDiscountPercentage", value === "percentage");
-		salesForm.setFieldValue("discountAmount", 0);
-	};
-
 	return (
 		<>
-			{/* =============== summary info bar — same layout as POS TransactionInformation =============== */}
-
-
 			<Grid columns={24} gutter={8} mt="xs">
 				<Grid.Col span={16}>
 					<Grid columns={16} gutter={8}>
-						{/* <Grid.Col span={16}>
-							<CustomerInfoSection salesForm={salesForm} />
-						</Grid.Col> */}
 						<Grid.Col span={7}>
 							<Box bd="1px solid #dee2e6" bg="white" p="xs" className="borderRadiusAll">
-								<Grid gutter={6}>
-									<Grid.Col span={12}>
-										<Select
-											placeholder="Search customer (optional)"
-											data={customerOptions}
-											searchable
-											clearable
-											value={salesForm.values.customer_id || null}
-											onChange={(value) => salesForm.setFieldValue("customer_id", value ?? "")}
-											nothingFoundMessage="No customer found"
-											rightSection={<ActionIcon>
-												<IconUserPlus size={16} />
-											</ActionIcon>}
-										/>
-									</Grid.Col>
-									<Grid.Col span={12}>
-										<Textarea
-											value={salesNarration}
-											onChange={(event) =>
-												salesForm.setFieldValue(
-													"salesNarration",
-													event.currentTarget.value
-												)
-											}
-											placeholder="Narration"
-											size="xs"
-											minRows={2}
-										/>
-									</Grid.Col>
-								</Grid>
+								<Textarea
+									value={salesNarration}
+									onChange={(event) =>
+										salesForm.setFieldValue(
+											"salesNarration",
+											event.currentTarget.value
+										)
+									}
+									placeholder="Narration"
+									size="xs"
+									minRows={2}
+								/>
 							</Box>
 						</Grid.Col>
 						<Grid.Col span={9}>
@@ -198,7 +240,11 @@ export default function PaymentSection({
 														Type
 													</Text>
 													<Text fz="sm" fw={800} c="black">
-														{isDiscountPercentage ? "Percent" : "Flat"}
+														{discount_type === "percentage"
+															? "Percent"
+															: discount_type === "coupon"
+																? "Coupon"
+																: "Flat"}
 													</Text>
 												</Group>
 											</Stack>
@@ -283,7 +329,7 @@ export default function PaymentSection({
 															<Flex
 																bg={
 																	payments.length === 1 &&
-																	payments[0]?.transaction_mode_id === mode.id
+																		payments[ 0 ]?.transaction_mode_id === mode.id
 																		? "green.8"
 																		: "white"
 																}
@@ -357,7 +403,7 @@ export default function PaymentSection({
 						gap={0}
 					>
 						{/* =============== totals summary tiles =============== */}
-						<Grid columns={24} gutter={{ base: 4 }}>
+						{/* <Grid columns={24} gutter={{ base: 4 }}>
 							<Grid.Col span={8} h={66}>
 								<Flex
 									align="center"
@@ -424,45 +470,7 @@ export default function PaymentSection({
 									</Flex>
 								</Flex>
 							</Grid.Col>
-						</Grid>
-
-						{/* =============== discount input with flat/percentage toggle =============== */}
-						<Flex mt="xs" justify="space-between" align="center" gap={6}>
-							<Text fz="sm" fw={600} style={{ whiteSpace: "nowrap" }}>
-								Discount:
-							</Text>
-							<Select
-								size="xs"
-								w={120}
-								data={[
-									{ value: "flat", label: "Flat" },
-									{ value: "percentage", label: "%" },
-								]}
-								value={isDiscountPercentage ? "percentage" : "flat"}
-								onChange={handleDiscountTypeChange}
-								allowDeselect={false}
-							/>
-							<Box style={{ flex: 1 }}>
-								<NumberInput
-									value={discountAmount}
-									onChange={(value) =>
-										salesForm.setFieldValue("discountAmount", parseFloat(value) || 0)
-									}
-									hideControls
-									size="xs"
-									placeholder="0"
-									leftSection={
-										isDiscountPercentage ? (
-											<Text fz={12}>%</Text>
-										) : (
-											<IconCurrencyTaka size={14} />
-										)
-									}
-								/>
-							</Box>
-						</Flex>
-
-						{/* =============== due amount display and receivable input =============== */}
+						</Grid> */}
 						<Flex
 							mt="xs"
 							direction="column"
@@ -485,24 +493,167 @@ export default function PaymentSection({
 									</Text>
 								</Flex>
 							</Flex>
-							<FormValidationWrapper
-								errorMessage="Payment amount is required"
-								opened={!!salesForm.errors.paymentAmount}
-							>
-								<NumberInput
-									hideControls
-									size="sm"
-									placeholder="Receivable amount"
-									leftSection={<IconCurrencyTaka size={14} />}
-									styles={{
-										input: {
-											backgroundColor: "white",
-										},
-									}}
-									{...salesForm.getInputProps("paymentAmount", { type: "number" })}
-								/>
-							</FormValidationWrapper>
 						</Flex>
+						<Grid columns={24} gutter={{ base: 8 }} pr="2px" align="center" justify="center">
+							<Grid.Col span={6}>
+								<FormValidationWrapper
+									errorMessage={t("ChooseCustomer")}
+									opened={!!salesForm.errors.customer_id}
+								>
+									<Button
+										fullWidth
+										size="sm"
+										color="#0077b6"
+										px="2xs"
+										leftSection={
+											customerObject?.name ? (
+												<></>
+											) : (
+												<IconUserPlus height={14} width={14} stroke={2} />
+											)
+										}
+										onClick={handleCustomerAdd}
+									>
+										<Stack gap={0}>
+											<Text fw={600} size="xs">
+												{customerObject?.name ? customerObject?.name : t("Customer")}
+											</Text>
+											<Text size="xs">{customerObject?.mobile ?? ""}</Text>
+										</Stack>
+									</Button>
+								</FormValidationWrapper>
+							</Grid.Col>
+							<Grid.Col span={6}>
+								<FormValidationWrapper
+									errorMessage={t("ClickRightButtonForPercentFlat")}
+									opened={!!salesForm.errors.coupon_code}
+								>
+									<Button
+										fullWidth
+										onClick={handleDiscountModeChange}
+										variant="filled"
+										px="2xs"
+										fz="xs"
+										leftSection={
+											discountMode === "coupon" ? (
+												<IconTicket size={14} />
+											) : (
+												<IconPercentage size={14} />
+											)
+										}
+										color="gray"
+									>
+										{discountMode === "coupon" ? t("Coupon") : t("Discount")}
+									</Button>
+								</FormValidationWrapper>
+							</Grid.Col>
+							<Grid.Col
+								span={6}
+								bg={
+									discount_type === "flat"
+										? "red.3"
+										: discount_type === "percentage"
+											? "violet.3"
+											: "gray.3"
+								}
+							>
+								{discountMode === "coupon" ? (
+									<TextInput
+										type="text"
+										placeholder={t("CouponCode")}
+										value={coupon_code}
+										error={salesForm.errors.coupon_code}
+										size="sm"
+										onChange={(event) => {
+											salesForm.setFieldValue("coupon_code", event.target.value);
+										}}
+										rightSection={
+											<FormValidationWrapper
+												errorMessage={t("CouponCode")}
+												opened={!!salesForm.errors.coupon_code}
+												position="left"
+											>
+												<IconTicket size={16} opacity={0.5} />
+											</FormValidationWrapper>
+										}
+									/>
+								) : (
+									<FormValidationWrapper
+										errorMessage={t("ClickRightButtonForPercentFlat")}
+										opened={!!salesForm.errors.discount}
+										position="left"
+									>
+										{discount_type === "flat" ? (
+											<NumberInput
+												placeholder={t("Discount")}
+												value={discount}
+												error={salesForm.errors.discount}
+												size="sm"
+												onChange={(value) => salesForm.setFieldValue("discount", value)}
+												rightSection={
+													<ActionIcon
+														size={32}
+														bg="red.5"
+														variant="filled"
+														mr={10}
+														onClick={toggleDiscountMode}
+													>
+														<IconPercentage size={16} />
+													</ActionIcon>
+												}
+											/>
+										) : (
+											<NumberInput
+												placeholder={t("Discount")}
+												value={percentageValue}
+												error={salesForm.errors.discount}
+												size="sm"
+												suffix="%"
+												max={100}
+												min={0}
+												allowNegative={false}
+												step={1}
+												decimalScale={2}
+												hideControls
+												onChange={handlePercentageChange}
+												rightSection={
+													<ActionIcon
+														size={32}
+														bg="violet.5"
+														variant="filled"
+														mr={10}
+														onClick={toggleDiscountMode}
+													>
+														<IconNumber123 size={16} />
+													</ActionIcon>
+												}
+											/>
+										)}
+									</FormValidationWrapper>
+								)}
+							</Grid.Col>
+							<Grid.Col span={6} bg="green">
+								<FormValidationWrapper
+									errorMessage={t("ReceiveAmountValidateMessage")}
+									opened={!!salesForm.errors.paymentAmount}
+								>
+									<NumberInput
+										allowNegative={false}
+										hideControls
+										decimalScale={3}
+										placeholder={
+											isSplitPaymentActive ? t("SplitPaymentActive") : t("Amount")
+										}
+										size="sm"
+										min={0}
+										readOnly={isSplitPaymentActive}
+										disabled={isSplitPaymentActive}
+										leftSection={<IconPlusMinus size={16} opacity={0.5} />}
+										{...salesForm.getInputProps("paymentAmount", { type: "number" })}
+									/>
+								</FormValidationWrapper>
+							</Grid.Col>
+						</Grid>
 					</Stack>
 				</Grid.Col>
 			</Grid>
@@ -532,6 +683,17 @@ export default function PaymentSection({
 				</Button>
 				<Button
 					fullWidth
+					bg="var(--theme-hold-btn-color)"
+					color="white"
+					radius={0}
+					form="salesForm"
+					type="submit"
+					loading={isAddingSales}
+				>
+					{t("Hold")}
+				</Button>
+				<Button
+					fullWidth
 					bg="var(--theme-save-btn-color)"
 					color="white"
 					radius={0}
@@ -551,6 +713,15 @@ export default function PaymentSection({
 				onSave={handleSaveSplitPayments}
 				onRemove={clearSplitPayment}
 				existingSplitPayments={payments}
+			/>
+
+			{/* =============== customer drawer for selecting/adding customer =============== */}
+			<CustomerDrawer
+				opened={customerDrawerOpened}
+				onClose={customerDrawerClose}
+				form={salesForm}
+				customersDropdownData={customersDropdownData}
+				onCustomerSelect={handleCustomerSelect}
 			/>
 		</>
 	);

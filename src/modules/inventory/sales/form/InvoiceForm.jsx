@@ -3,6 +3,7 @@ import {
 	Box,
 	Button,
 	Flex,
+	NumberInput,
 	Select,
 	Text,
 } from "@mantine/core";
@@ -27,28 +28,25 @@ import { formatCurrency } from "@utils/index";
 import { showNotification } from "@components/ShowNotificationComponent";
 import { salesItemFormRequest } from "../helpers/request";
 import FormValidationWrapper from "@components/form-builders/FormValidationWrapper";
-import { useGetInventoryCategoryQuery } from "@services/settings";
 import { useTranslation } from "react-i18next";
 
 export default function InvoiceForm({ refetch }) {
 	const { t } = useTranslation()
-	const [ products, setProducts ] = useState([]);
-	const [ productResetKey, setProductResetKey ] = useState(0);
-	const [ selectedCategoryId, setSelectedCategoryId ] = useState(null);
+	const [products, setProducts] = useState([]);
+	const [productResetKey, setProductResetKey] = useState(0);
 	const { configData } = useConfigData();
 	const salesItemForm = useForm(salesItemFormRequest());
 	const { getLocalProducts } = useLocalProducts({ fetchOnMount: false });
 
-	const { data: productCategoryData } = useGetInventoryCategoryQuery({ type: "parent" });
-	const [ isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer } ] =
+	const [isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer }] =
 		useDisclosure(false);
 
 	useEffect(() => {
-		getLocalProducts({ category_id: selectedCategoryId }).then((fetchedProducts) => {
+		getLocalProducts({ category_id: null }).then((fetchedProducts) => {
 			setProducts(fetchedProducts);
 		});
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ selectedCategoryId ]);
+	}, []);
 
 	const currencySymbol =
 		configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol;
@@ -60,6 +58,11 @@ export default function InvoiceForm({ refetch }) {
 		purchase_price: product.purchase_price,
 		unit: product.unit_name,
 	}));
+
+	// =============== effective price = MRP * (1 - discount/100); used for sub_total and cart ===============
+	const baseMRP = Number(salesItemForm.values.salesPrice) || 0;
+	const discountPercent = Number(salesItemForm.values.discount) || 0;
+	const effectivePrice = baseMRP * (1 - discountPercent / 100);
 
 	const handleAddItemToSalesForm = async () => {
 		const { productId, salesPrice, quantity } = salesItemForm.values;
@@ -77,20 +80,22 @@ export default function InvoiceForm({ refetch }) {
 		}
 
 		const quantityNumber = Number(quantity) || 0;
-		const priceNumber = Number(salesPrice) || Number(selectedProduct.sales_price) || 0;
+		const mrpNumber = Number(salesPrice) || Number(selectedProduct.sales_price) || 0;
+		const percentNumber = Number(salesItemForm.values.discount) || 0;
+		const effectivePriceNumber = mrpNumber * (1 - percentNumber / 100);
 
 		// =============== build item matching temp_sales_products NOT NULL columns ===============
 		const newItem = {
 			product_id: selectedProduct.id,
 			display_name: selectedProduct.display_name,
-			sales_price: priceNumber,
-			price: priceNumber,
-			percent: 0,
+			sales_price: effectivePriceNumber,
+			price: mrpNumber,
+			percent: percentNumber,
 			stock: Number(selectedProduct.quantity) || 0,
 			quantity: quantityNumber,
 			unit_name: selectedProduct.unit_name || salesItemForm.values.unit || "",
 			purchase_price: Number(selectedProduct.purchase_price) || 0,
-			sub_total: quantityNumber * priceNumber,
+			sub_total: quantityNumber * effectivePriceNumber,
 			unit_id: selectedProduct.unit_id || null,
 			type: "sales",
 		};
@@ -104,8 +109,7 @@ export default function InvoiceForm({ refetch }) {
 	};
 
 	const invoiceSubTotal =
-		(Number(salesItemForm.values.quantity) || 0) *
-		(Number(salesItemForm.values.salesPrice) || 0);
+		(Number(salesItemForm.values.quantity) || 0) * effectivePrice;
 
 	const handleResetSalesItemForm = () => {
 		salesItemForm.reset();
@@ -118,6 +122,7 @@ export default function InvoiceForm({ refetch }) {
 	const handleProductSelect = (value, option) => {
 		salesItemForm.setFieldValue("productId", value);
 		salesItemForm.setFieldValue("salesPrice", option?.sales_price);
+		salesItemForm.setFieldValue("discount", 0);
 		salesItemForm.setFieldValue("unit", option?.unit);
 		document.getElementById("quantity").focus();
 	};
@@ -219,36 +224,30 @@ export default function InvoiceForm({ refetch }) {
 					</Box>
 
 					<Box w={130} style={{ flexShrink: 0 }}>
-						<InputNumberForm
-							form={salesItemForm}
-							name="salesPrice"
-							id="salesPrice"
-							label=""
-							nextField="quantity"
+						<NumberInput
+							{...salesItemForm.getInputProps("discount", { type: "number" })}
+							id="discount"
 							placeholder={t("Percent")}
-							required={false}
-							tooltip={salesItemForm.errors.salesPrice}
+							hideControls
+							max={100}
+							clampBehavior="strict"
 							leftSection={<IconPercentage size={16} opacity={0.6} />}
 						/>
 					</Box>
 
 					{/* =============== sales price input =============== */}
 					<Box w={130} style={{ flexShrink: 0 }}>
-						<InputNumberForm
-							form={salesItemForm}
-							name="salesPrice"
-							id="salesPrice"
-							label=""
-							nextField="quantity"
+						<NumberInput
+							{...salesItemForm.getInputProps("salesPrice", { type: "number" })}
+							id="mrp"
 							placeholder={t("MRP")}
-							required={false}
-							tooltip={salesItemForm.errors.salesPrice}
+							hideControls
 							leftSection={<IconCurrencyTaka size={16} opacity={0.6} />}
 						/>
 					</Box>
 
 					{/* =============== live sub total display =============== */}
-					{/* <Flex
+					<Flex
 						align="center"
 						gap={4}
 						px="xs"
@@ -265,7 +264,7 @@ export default function InvoiceForm({ refetch }) {
 						<Text fz="sm" fw={600}>
 							{formatCurrency(invoiceSubTotal)}
 						</Text>
-					</Flex> */}
+					</Flex>
 
 					{/* =============== reset and add buttons =============== */}
 					<ActionIcon

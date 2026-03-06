@@ -1,18 +1,13 @@
 import React from "react";
-import { ActionIcon, Box, Flex, NumberInput, Text, Button } from "@mantine/core";
+import { ActionIcon, Box, Flex, NumberInput, Text } from "@mantine/core";
 import { DataTable } from "mantine-datatable";
-import { IconList, IconTrashX } from "@tabler/icons-react";
+import { IconTrashX } from "@tabler/icons-react";
 import tableCss from "@assets/css/Table.module.css";
 import useConfigData from "@hooks/useConfigData";
 import useMainAreaHeight from "@hooks/useMainAreaHeight";
 import { formatCurrency } from "@utils/index";
-import { useNavigate } from "react-router";
-import { APP_NAVLINKS } from "@/routes/routes";
-import { useTranslation } from "react-i18next";
 
 export default function ItemsTableSection({ salesProducts, refetch, itemsTotal }) {
-	const navigate = useNavigate();
-	const { t } = useTranslation();
 	const { mainAreaHeight } = useMainAreaHeight();
 	// =============== account for invoice form top row (~55px) + payment section + spacing ===============
 	const tableHeight = mainAreaHeight - 460;
@@ -25,22 +20,49 @@ export default function ItemsTableSection({ salesProducts, refetch, itemsTotal }
 		const numericValue = parseFloat(value) || 0;
 		const currentItem = salesProducts.find((item) => item.id === itemId);
 		const newSubTotal = numericValue * (currentItem?.sales_price || 0);
-		await window.dbAPI.upsertIntoTable("temp_sales_products", {
+		await window.dbAPI.updateDataInTable("temp_sales_products", {
 			id: itemId,
-			quantity: numericValue,
-			sub_total: newSubTotal,
+			data: { quantity: numericValue, sub_total: newSubTotal },
 		});
 		refetch();
 	};
 
 	const handlePriceChange = async (itemId, value) => {
-		const numericValue = parseFloat(value) || 0;
+		const effectivePrice = parseFloat(value) || 0;
 		const currentItem = salesProducts.find((item) => item.id === itemId);
-		const newSubTotal = (currentItem?.quantity || 0) * numericValue;
-		await window.dbAPI.upsertIntoTable("temp_sales_products", {
-			id: itemId,
-			sales_price: numericValue,
+		const basePrice = Number(currentItem?.price) || Number(currentItem?.sales_price) || 0;
+		const newSubTotal = (currentItem?.quantity || 0) * effectivePrice;
+		// =============== derive percent from effective price; if base is 0, set price = effectivePrice ===============
+		const percentValue =
+			basePrice > 0 ? Math.round((1 - effectivePrice / basePrice) * 100) : 0;
+		const data = {
+			sales_price: effectivePrice,
+			percent: Math.max(0, percentValue),
 			sub_total: newSubTotal,
+		};
+		if (basePrice <= 0) {
+			data.price = effectivePrice;
+		}
+		await window.dbAPI.updateDataInTable("temp_sales_products", {
+			id: itemId,
+			data,
+		});
+		refetch();
+	};
+
+	const handleDiscountChange = async (itemId, value) => {
+		const percentValue = parseFloat(value) || 0;
+		const currentItem = salesProducts.find((item) => item.id === itemId);
+		const basePrice = Number(currentItem?.price) || Number(currentItem?.sales_price) || 0;
+		const effectivePrice = basePrice * (1 - percentValue / 100);
+		const newSubTotal = (currentItem?.quantity || 0) * effectivePrice;
+		await window.dbAPI.updateDataInTable("temp_sales_products", {
+			id: itemId,
+			data: {
+				percent: percentValue,
+				sales_price: effectivePrice,
+				sub_total: newSubTotal,
+			},
 		});
 		refetch();
 	};
@@ -82,7 +104,7 @@ export default function ItemsTableSection({ salesProducts, refetch, itemsTotal }
 					{
 						accessor: "quantity",
 						title: "Qty",
-						textAlign: "center",
+						textAlign: "left",
 						width: 120,
 						render: (record) => (
 							<NumberInput
@@ -96,9 +118,20 @@ export default function ItemsTableSection({ salesProducts, refetch, itemsTotal }
 						),
 					},
 					{
+						accessor: "stock",
+						title: "Stock",
+						textAlign: "right",
+						width: 90,
+						render: (record) => (
+							<Text size="sm" c="dimmed">
+								{record.stock ?? 0}
+							</Text>
+						),
+					},
+					{
 						accessor: "sales_price",
 						title: "Price",
-						textAlign: "right",
+						textAlign: "left",
 						width: 140,
 						render: (record) => (
 							<NumberInput
@@ -109,6 +142,24 @@ export default function ItemsTableSection({ salesProducts, refetch, itemsTotal }
 								hideControls
 								thousandSeparator=","
 								onChange={(value) => handlePriceChange(record.id, value)}
+							/>
+						),
+					},
+					{
+						accessor: "percent",
+						title: "Discount (%)",
+						textAlign: "center",
+						width: 110,
+						render: (record) => (
+							<NumberInput
+								size="xs"
+								value={record.percent ?? 0}
+								min={0}
+								max={100}
+								step={1}
+								hideControls
+								suffix="%"
+								onChange={(value) => handleDiscountChange(record.id, value)}
 							/>
 						),
 					},
