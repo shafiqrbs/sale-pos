@@ -45,6 +45,7 @@ const invoiceItemFormInitialValues = {
 	purchasePrice: "",
 	quantity: "",
 	unit: "",
+	expired_date: "",
 };
 
 export const invoiceItemFormRequest = () => {

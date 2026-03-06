@@ -15,10 +15,10 @@ export default function Details({ loading, viewData }) {
   const { configData } = useConfigData({ offlineFetch: !isOnline });
 
   const salesItems = isOnline
-    ? viewData?.sales_items
-    : Array.isArray(viewData?.sales_items)
-      ? viewData?.sales_items
-      : JSON.parse(viewData?.sales_items || "[]");
+    ? viewData?.purchase_items
+    : Array.isArray(viewData?.purchase_items)
+      ? viewData?.purchase_items
+      : JSON.parse(viewData?.purchase_items || "[]");
 
   const rows =
     Array.isArray(salesItems) &&
@@ -28,7 +28,7 @@ export default function Details({ loading, viewData }) {
           {index + 1}
         </Table.Td>
         <Table.Td ta="left" fz="xs" width="300">
-          {element?.name || element?.display_name || ""}
+          {element?.item_name || element?.display_name || ""}
         </Table.Td>
         <Table.Td ta="center" fz="xs" width="60">
           {element?.quantity}

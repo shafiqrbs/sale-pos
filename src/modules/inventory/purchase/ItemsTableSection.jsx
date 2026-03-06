@@ -1,11 +1,13 @@
 import React from "react";
 import { ActionIcon, Box, Flex, NumberInput, Text, Button } from "@mantine/core";
+import { DatePicker } from '@mantine/dates';
 import { DataTable } from "mantine-datatable";
 import { IconList, IconTrashX } from "@tabler/icons-react";
 import tableCss from "@assets/css/Table.module.css";
 import useConfigData from "@hooks/useConfigData";
 import useMainAreaHeight from "@hooks/useMainAreaHeight";
 import { formatCurrency } from "@utils/index";
+
 import { useNavigate } from "react-router";
 import { APP_NAVLINKS } from "@/routes/routes";
 import { useTranslation } from "react-i18next";
@@ -89,58 +91,75 @@ export default function ItemsTableSection({ purchaseProducts, refetch, itemsTota
 						width: 60,
 						render: (_, index) => index + 1,
 					},
-				{
-					accessor: "display_name",
-					title: "Product",
-					render: (record) => <Text size="sm">{record.display_name}</Text>,
-				},
-				{
-					accessor: "quantity",
-					title: "Qty",
-					textAlign: "center",
-					width: 120,
-					render: (record) => (
-						<NumberInput
-							size="xs"
-							value={record.quantity}
-							min={0}
-							step={1}
-							hideControls
-							onChange={(value) => handleQuantityChange(record.id, value)}
-						/>
-					),
-				},
-				{
-					accessor: "purchase_price",
-					title: "Price",
-					textAlign: "right",
-					width: 140,
-					render: (record) => (
-						<NumberInput
-							size="xs"
-							value={record.purchase_price}
-							min={0}
-							step={1}
-							hideControls
-							thousandSeparator=","
-							onChange={(value) => handlePriceChange(record.id, value)}
-						/>
-					),
-				},
-				{
-					accessor: "sub_total",
-					title: "Sub Total",
-					textAlign: "right",
-					width: 160,
-					render: (record) => {
-						const subTotal = (record.quantity || 0) * (record.purchase_price || 0);
-						return (
-							<Text size="sm" fw={600}>
-								{currencySymbol} {formatCurrency(subTotal)}
-							</Text>
-						);
+
+					{
+						accessor: "productName",
+						title: "Product",
+						render: (record) => <Text size="sm">{record.productName}</Text>,
 					},
-				},
+					{
+						accessor: "expired_date",
+						title: "Qty",
+						textAlign: "center",
+						width: 120,
+						render: (record) => (
+							<DatePicker
+								size="xs"
+								value={record.expired_date}
+								min={0}
+								step={1}
+								hideControls
+								onChange={(value) => handleQuantityChange(record.id, value)}
+							/>
+						),
+					},
+					{
+						accessor: "quantity",
+						title: "Qty",
+						textAlign: "center",
+						width: 120,
+						render: (record) => (
+							<NumberInput
+								size="xs"
+								value={record.quantity}
+								min={0}
+								step={1}
+								hideControls
+								onChange={(value) => handleQuantityChange(record.id, value)}
+							/>
+						),
+					},
+					{
+						accessor: "price",
+						title: "Price",
+						textAlign: "right",
+						width: 140,
+						render: (record) => (
+							<NumberInput
+								size="xs"
+								value={record.price}
+								min={0}
+								step={1}
+								hideControls
+								thousandSeparator=","
+								onChange={(value) => handlePriceChange(record.id, value)}
+							/>
+						),
+					},
+					{
+						accessor: "subTotal",
+						title: "Sub Total",
+						textAlign: "right",
+						width: 160,
+						render: (record) => {
+							const subTotal = (record.quantity || 0) * (record.price || 0);
+							return (
+								<Text size="sm" fw={600}>
+									{currencySymbol} {formatCurrency(subTotal)}
+								</Text>
+							);
+						},
+					},
 					{
 						accessor: "action",
 						title: "",

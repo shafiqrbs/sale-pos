@@ -29,8 +29,11 @@ import { formatCurrency } from "@utils/index";
 import { showNotification } from "@components/ShowNotificationComponent";
 import { invoiceItemFormRequest } from "../helpers/request";
 import FormValidationWrapper from "@components/form-builders/FormValidationWrapper";
+
 import { useEffect, useState } from "react";
 import { useGetInventoryCategoryQuery } from "@services/settings";
+import DatePickerForm from "@components/form-builders/DatePicker";
+
 
 export default function InvoiceForm({ refetch }) {
 	const [products, setProducts] = useState([]);
@@ -65,8 +68,8 @@ export default function InvoiceForm({ refetch }) {
 
 	const containerHeight = mainAreaHeight - 170;
 
-	const handleAddItemToPurchaseForm = async () => {
-		const { productId, purchasePrice, quantity } = invoiceItemForm.values;
+	const handleAddItemToPurchaseForm = () => {
+		const { productId, purchasePrice, quantity, expired_date } = invoiceItemForm.values;
 
 		if (!productId || !quantity) {
 			showNotification("Product and quantity are required", "red");
@@ -96,6 +99,8 @@ export default function InvoiceForm({ refetch }) {
 			sub_total: quantityNumber * priceNumber,
 			unit_name: selectedProduct.unit_name || invoiceItemForm.values.unit || "",
 			type: "purchase",
+			price: priceNumber,
+			expired_date: expired_date,
 		};
 
 		// =============== persist new item into local temp_purchase_products table ===============
@@ -227,6 +232,18 @@ export default function InvoiceForm({ refetch }) {
 											{invoiceItemForm.values.unit || "Unit"}
 										</Text>
 									}
+								/>
+							</Grid.Col>
+							<Grid.Col span={12}>
+								<DatePickerForm
+									form={invoiceItemForm}
+									name="expired_date"
+									id="expired_date"
+									label="ExpiredDate"
+									placeholder="Expired Date"
+									nextField="EntityFormSubmit"
+									required={false}
+									tooltip={invoiceItemForm.errors.quantity}
 								/>
 							</Grid.Col>
 						</Grid>
