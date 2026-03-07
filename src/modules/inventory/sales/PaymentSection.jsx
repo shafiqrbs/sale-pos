@@ -8,6 +8,7 @@ import {
 	Group,
 	Image,
 	NumberInput,
+	Select,
 	Stack,
 	Text,
 	Textarea,
@@ -17,7 +18,6 @@ import {
 import { Carousel } from "@mantine/carousel";
 import { useDisclosure } from "@mantine/hooks";
 import {
-	IconCurrencyTaka,
 	IconNumber123,
 	IconPercentage,
 	IconPlusMinus,
@@ -32,7 +32,8 @@ import useTransactionMode from "@hooks/useTransactionMode";
 import { formatCurrency, calculateVATAmount } from "@utils/index";
 import FormValidationWrapper from "@components/form-builders/FormValidationWrapper";
 import SplitPaymentsDrawer from "@components/drawers/SplitPaymentsDrawer";
-import CustomerDrawer from "@components/drawers/CustomerDrawer";
+import SalesCustomerDrawer from "@components/drawers/SalesCustomerDrawer";
+import { DateInput } from "@mantine/dates";
 
 export default function PaymentSection({
 	salesForm,
@@ -46,7 +47,6 @@ export default function PaymentSection({
 	const { transactionMode } = useTransactionMode();
 	const { configData } = useConfigData();
 
-	const [ customerObject, setCustomerObject ] = useState(null);
 	const [ customersDropdownData, setCustomersDropdownData ] = useState([]);
 	const [ discountMode, setDiscountMode ] = useState("discount");
 	const [ percentageValue, setPercentageValue ] = useState(0);
@@ -114,6 +114,11 @@ export default function PaymentSection({
 		setCustomersDropdownData(data ?? []);
 	}
 
+	const dropdownOptions = customersDropdownData.map((customer) => ({
+		label: `${customer.mobile || ''} -- ${customer.name || ''}`,
+		value: customer.id?.toString(),
+	}));
+
 	useEffect(() => {
 		fetchCustomers();
 	}, []);
@@ -126,20 +131,9 @@ export default function PaymentSection({
 
 	// =============== reset local state when parent triggers reset ===============
 	useEffect(() => {
-		setCustomerObject(null);
 		setDiscountMode("discount");
 		setPercentageValue(0);
 	}, [ resetKey ]);
-
-	const handleCustomerSelect = (customer) => {
-		if (customer) {
-			setCustomerObject(customer);
-			salesForm.setFieldValue("customer_id", customer.id?.toString());
-		} else {
-			setCustomerObject(null);
-			salesForm.setFieldValue("customer_id", "");
-		}
-	};
 
 	const handleCustomerAdd = () => {
 		customerDrawerOpen();
@@ -204,8 +198,41 @@ export default function PaymentSection({
 		<>
 			<Grid columns={24} gutter={8} mt="xs">
 				<Grid.Col span={16}>
-					<Grid columns={16} gutter={8}>
-						<Grid.Col span={7}>
+					<Grid gutter={8}>
+						<Grid.Col span={5}>
+							<FormValidationWrapper
+								errorMessage={t("ChooseCustomer")}
+								opened={!!salesForm.errors.customer_id}
+							>
+								<Select
+									placeholder={t('ChooseCustomer')}
+									data={dropdownOptions}
+									searchable
+									clearable
+									value={salesForm.values.customer_id}
+									onChange={(value) => salesForm.setFieldValue("customer_id", value ?? "")}
+									size="sm"
+									nothingFoundMessage={t('NoCustomerFound')}
+									rightSectionPointerEvents="pointer-events"
+									rightSection={
+										<ActionIcon
+											variant="filled"
+											onClick={handleCustomerAdd}
+										>
+											<IconUserPlus size={16} />
+										</ActionIcon>
+									}
+								/>
+							</FormValidationWrapper>
+							<DateInput
+								my='xs'
+								value={salesForm.values.salesDate}
+								onChange={(value) => salesForm.setFieldValue("salesDate", value)}
+								valueFormat="MMMM D, YYYY"
+								size="xs"
+								label={null}
+								placeholder="Select date"
+							/>
 							<Box bd="1px solid #dee2e6" bg="white" p="xs" className="borderRadiusAll">
 								<Textarea
 									value={salesNarration}
@@ -221,7 +248,7 @@ export default function PaymentSection({
 								/>
 							</Box>
 						</Grid.Col>
-						<Grid.Col span={9}>
+						<Grid.Col span={7}>
 							<Grid columns={13} gutter={4} justify="center" align="center" pb={4} bg="gray.1" mt="xs">
 								<Grid.Col span={7} px={4}>
 									<Grid bg="gray.1" px={4}>
@@ -495,35 +522,7 @@ export default function PaymentSection({
 							</Flex>
 						</Flex>
 						<Grid columns={24} gutter={{ base: 8 }} pr="2px" align="center" justify="center">
-							<Grid.Col span={6}>
-								<FormValidationWrapper
-									errorMessage={t("ChooseCustomer")}
-									opened={!!salesForm.errors.customer_id}
-								>
-									<Button
-										fullWidth
-										size="sm"
-										color="#0077b6"
-										px="2xs"
-										leftSection={
-											customerObject?.name ? (
-												<></>
-											) : (
-												<IconUserPlus height={14} width={14} stroke={2} />
-											)
-										}
-										onClick={handleCustomerAdd}
-									>
-										<Stack gap={0}>
-											<Text fw={600} size="xs">
-												{customerObject?.name ? customerObject?.name : t("Customer")}
-											</Text>
-											<Text size="xs">{customerObject?.mobile ?? ""}</Text>
-										</Stack>
-									</Button>
-								</FormValidationWrapper>
-							</Grid.Col>
-							<Grid.Col span={6}>
+							<Grid.Col span={8}>
 								<FormValidationWrapper
 									errorMessage={t("ClickRightButtonForPercentFlat")}
 									opened={!!salesForm.errors.coupon_code}
@@ -548,7 +547,7 @@ export default function PaymentSection({
 								</FormValidationWrapper>
 							</Grid.Col>
 							<Grid.Col
-								span={6}
+								span={8}
 								bg={
 									discount_type === "flat"
 										? "red.3"
@@ -598,7 +597,7 @@ export default function PaymentSection({
 														mr={10}
 														onClick={toggleDiscountMode}
 													>
-														<IconPercentage size={16} />
+														<IconNumber123 size={16} />
 													</ActionIcon>
 												}
 											/>
@@ -624,7 +623,7 @@ export default function PaymentSection({
 														mr={10}
 														onClick={toggleDiscountMode}
 													>
-														<IconNumber123 size={16} />
+														<IconPercentage size={16} />
 													</ActionIcon>
 												}
 											/>
@@ -632,7 +631,7 @@ export default function PaymentSection({
 									</FormValidationWrapper>
 								)}
 							</Grid.Col>
-							<Grid.Col span={6} bg="green">
+							<Grid.Col span={8} bg="green">
 								<FormValidationWrapper
 									errorMessage={t("ReceiveAmountValidateMessage")}
 									opened={!!salesForm.errors.paymentAmount}
@@ -716,12 +715,11 @@ export default function PaymentSection({
 			/>
 
 			{/* =============== customer drawer for selecting/adding customer =============== */}
-			<CustomerDrawer
+			<SalesCustomerDrawer
 				opened={customerDrawerOpened}
 				onClose={customerDrawerClose}
 				form={salesForm}
 				customersDropdownData={customersDropdownData}
-				onCustomerSelect={handleCustomerSelect}
 			/>
 		</>
 	);

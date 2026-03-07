@@ -598,7 +598,7 @@ export default function Transaction({ form, tableId = null }) {
 												mr={10}
 												onClick={toggleDiscountMode}
 											>
-												<IconPercentage size={16} />
+												<IconNumber123 size={16} />
 											</ActionIcon>
 										}
 									/>
@@ -624,7 +624,7 @@ export default function Transaction({ form, tableId = null }) {
 												mr={10}
 												onClick={toggleDiscountMode}
 											>
-												<IconNumber123 size={16} />
+												<IconPercentage size={16} />
 											</ActionIcon>
 										}
 									/>

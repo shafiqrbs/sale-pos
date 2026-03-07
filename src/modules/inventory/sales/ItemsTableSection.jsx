@@ -10,7 +10,7 @@ import { formatCurrency } from "@utils/index";
 export default function ItemsTableSection({ salesProducts, refetch, itemsTotal }) {
 	const { mainAreaHeight } = useMainAreaHeight();
 	// =============== account for invoice form top row (~55px) + payment section + spacing ===============
-	const tableHeight = mainAreaHeight - 460;
+	const tableHeight = mainAreaHeight - 380;
 	const { configData } = useConfigData();
 
 	const currencySymbol =
