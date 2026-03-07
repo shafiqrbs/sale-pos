@@ -4,7 +4,6 @@ import {
 	Button,
 	Flex,
 	NumberInput,
-	Select,
 	Text,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
@@ -28,6 +27,7 @@ import { formatCurrency } from "@utils/index";
 import { showNotification } from "@components/ShowNotificationComponent";
 import { salesItemFormRequest } from "../helpers/request";
 import FormValidationWrapper from "@components/form-builders/FormValidationWrapper";
+import VirtualSearchSelect from "@components/form-builders/VirtualSearchSelect";
 import { useTranslation } from "react-i18next";
 
 export default function InvoiceForm({ refetch }) {
@@ -41,8 +41,13 @@ export default function InvoiceForm({ refetch }) {
 	const [ isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer } ] =
 		useDisclosure(false);
 
+	// =============== fetch products in db entry order (id ASC), not by name or created_at ===============
 	useEffect(() => {
-		getLocalProducts({ category_id: null }).then((fetchedProducts) => {
+		getLocalProducts(
+			{ category_id: null },
+			"id",
+			{ orderBy: "id ASC" }
+		).then((fetchedProducts) => {
 			setProducts(fetchedProducts);
 		});
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -180,16 +185,15 @@ export default function InvoiceForm({ refetch }) {
 								errorMessage="Product is required"
 								opened={!!salesItemForm.errors.productId}
 							>
-								<Select
+								<VirtualSearchSelect
 									key={productResetKey}
+									value={salesItemForm.values.productId}
+									options={productOptions}
 									placeholder="Enter stock product name"
-									data={productOptions}
 									searchable
-									limit={200}
-									id="productId"
-									{...salesItemForm.getInputProps("productId", { type: "search" })}
-									onChange={handleProductSelect}
 									nothingFoundMessage="No product found"
+									onChange={handleProductSelect}
+									id="productId"
 								/>
 							</FormValidationWrapper>
 						</Box>

@@ -65,6 +65,7 @@ export default function ProductList() {
 				limit: ITEMS_PER_PAGE,
 				offset,
 				search: searchConditions,
+				orderBy: "id ASC"
 			});
 
 			await getProductCount(

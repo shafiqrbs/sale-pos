@@ -476,7 +476,20 @@ const getDataFromTable = (table, idOrConditions, property = "id", options = {}) 
 	let stmt;
 	let result;
 
-	const { limit, offset, search } = options || {};
+	const { limit, offset, search, orderBy } = options || {};
+
+	// =============== safe order by: "id ASC" or "created_at DESC" etc. (column name + optional ASC/DESC) ===============
+	const orderByClause = (() => {
+		if (!orderBy || typeof orderBy !== "string") return "ORDER BY created_at DESC";
+		const trimmed = orderBy.trim();
+		if (!trimmed) return "ORDER BY created_at DESC";
+		const parts = trimmed.split(/\s+/);
+		const column = parts[ 0 ];
+		const direction = (parts[ 1 ] || "ASC").toUpperCase();
+		if (!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(column)) return "ORDER BY created_at DESC";
+		if (direction !== "ASC" && direction !== "DESC") return "ORDER BY created_at DESC";
+		return `ORDER BY ${column} ${direction}`;
+	})();
 
 	const buildSearchClause = (initialConditions = [], initialValues = []) => {
 		const conditions = [ ...initialConditions ];
@@ -543,14 +556,14 @@ const getDataFromTable = (table, idOrConditions, property = "id", options = {}) 
 
 		if (useGet) {
 			const { query, values: finalValues } = buildPaginatedQuery(
-				`SELECT * FROM ${table} ${whereClause} ORDER BY created_at DESC`,
+				`SELECT * FROM ${table} ${whereClause} ${orderByClause}`,
 				values
 			);
 			stmt = db.prepare(query);
 			result = stmt.get(...finalValues);
 		} else {
 			const { query, values: finalValues } = buildPaginatedQuery(
-				`SELECT * FROM ${table} ${whereClause} ORDER BY created_at DESC`,
+				`SELECT * FROM ${table} ${whereClause} ${orderByClause}`,
 				values
 			);
 			stmt = db.prepare(query);
@@ -565,14 +578,14 @@ const getDataFromTable = (table, idOrConditions, property = "id", options = {}) 
 
 		if (useGet) {
 			const { query, values: finalValues } = buildPaginatedQuery(
-				`SELECT * FROM ${table} ${whereClause} ORDER BY created_at DESC`,
+				`SELECT * FROM ${table} ${whereClause} ${orderByClause}`,
 				values
 			);
 			stmt = db.prepare(query);
 			result = stmt.get(...finalValues);
 		} else {
 			const { query, values: finalValues } = buildPaginatedQuery(
-				`SELECT * FROM ${table} ${whereClause} ORDER BY created_at DESC`,
+				`SELECT * FROM ${table} ${whereClause} ${orderByClause}`,
 				values
 			);
 			stmt = db.prepare(query);

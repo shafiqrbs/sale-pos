@@ -57,7 +57,8 @@
 		"react-redux": "^9.2.0",
 		"react-router": "^7.12.0",
 		"react-to-print": "^3.2.0",
-		"recharts": "^3.6.0"
+		"recharts": "^3.6.0",
+		"virtual-select-plugin": "^1.1.0"
 	},
 	"devDependencies": {
 		"@electron-forge/cli": "^7.11.1",

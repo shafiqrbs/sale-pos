@@ -29,6 +29,7 @@ import { formatCurrency } from "@utils/index";
 import { showNotification } from "@components/ShowNotificationComponent";
 import { invoiceItemFormRequest } from "../helpers/request";
 import FormValidationWrapper from "@components/form-builders/FormValidationWrapper";
+import VirtualSearchSelect from "@components/form-builders/VirtualSearchSelect";
 
 import { useEffect, useState } from "react";
 import { useGetInventoryCategoryQuery } from "@services/settings";
@@ -52,10 +53,16 @@ export default function InvoiceForm({ refetch }) {
 	const [ isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer } ] =
 		useDisclosure(false);
 
+	// =============== fetch products in db entry order (id ASC), same as sales product select ===============
 	useEffect(() => {
-		getLocalProducts({ category_id: selectedCategoryId }).then((products) => {
-			setProducts(products);
+		getLocalProducts(
+			{ category_id: selectedCategoryId },
+			"id",
+			{ orderBy: "id ASC" }
+		).then((fetchedProducts) => {
+			setProducts(fetchedProducts);
 		});
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ selectedCategoryId ]);
 
 	const currencySymbol =
@@ -182,16 +189,15 @@ export default function InvoiceForm({ refetch }) {
 									errorMessage="Product is required"
 									opened={!!invoiceItemForm.errors.productId}
 								>
-									<Select
+									<VirtualSearchSelect
 										key={productResetKey}
+										value={invoiceItemForm.values.productId}
+										options={productOptions}
 										placeholder="Choose Product"
-										data={productOptions}
-										limit={200}
 										searchable
-										id="productId"
-										{...invoiceItemForm.getInputProps("productId", { type: "search" })}
-										onChange={handleProductSelect}
 										nothingFoundMessage="No product found"
+										onChange={handleProductSelect}
+										id="productId"
 									/>
 								</FormValidationWrapper>
 							</Box>
