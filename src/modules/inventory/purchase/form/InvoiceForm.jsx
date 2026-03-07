@@ -36,9 +36,9 @@ import DatePickerForm from "@components/form-builders/DatePicker";
 
 
 export default function InvoiceForm({ refetch }) {
-	const [products, setProducts] = useState([]);
-	const [productResetKey, setProductResetKey] = useState(0);
-	const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+	const [ products, setProducts ] = useState([]);
+	const [ productResetKey, setProductResetKey ] = useState(0);
+	const [ selectedCategoryId, setSelectedCategoryId ] = useState(null);
 	const { configData } = useConfigData();
 	const invoiceItemForm = useForm(invoiceItemFormRequest());
 	const { getLocalProducts } = useLocalProducts({
@@ -47,14 +47,14 @@ export default function InvoiceForm({ refetch }) {
 
 	const { data: productCategoryData } = useGetInventoryCategoryQuery({ type: "parent" });
 	const { mainAreaHeight } = useMainAreaHeight();
-	const [isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer }] =
+	const [ isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer } ] =
 		useDisclosure(false);
 
 	useEffect(() => {
 		getLocalProducts({ category_id: selectedCategoryId }).then((products) => {
 			setProducts(products);
 		});
-	}, [selectedCategoryId]);
+	}, [ selectedCategoryId ]);
 
 	const currencySymbol =
 		configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol;
@@ -68,7 +68,7 @@ export default function InvoiceForm({ refetch }) {
 
 	const containerHeight = mainAreaHeight - 170;
 
-	const handleAddItemToPurchaseForm = () => {
+	const handleAddItemToPurchaseForm = async () => {
 		const { productId, purchasePrice, quantity, expired_date } = invoiceItemForm.values;
 
 		if (!productId || !quantity) {
@@ -298,7 +298,7 @@ export default function InvoiceForm({ refetch }) {
 			<AddProductDrawer
 				productDrawer={isProductDrawerOpened}
 				closeProductDrawer={closeProductDrawer}
-				setStockProductRestore={() => {}}
+				setStockProductRestore={() => { }}
 				focusField="productId"
 				fieldPrefix=""
 			/>
