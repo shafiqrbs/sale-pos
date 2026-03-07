@@ -1199,5 +1199,6 @@
 	"PurchaseItems": "Purchase Items",
 	"NewSale": "New Sale",
 	"SalesList": "Sales List",
-	"SalesItems": "Sales Items"
+	"SalesItems": "Sales Items",
+	"ExpiredDate": "Expired Date"
 }

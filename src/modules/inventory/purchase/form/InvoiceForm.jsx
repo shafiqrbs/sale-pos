@@ -33,9 +33,11 @@ import FormValidationWrapper from "@components/form-builders/FormValidationWrapp
 import { useEffect, useState } from "react";
 import { useGetInventoryCategoryQuery } from "@services/settings";
 import DatePickerForm from "@components/form-builders/DatePicker";
+import { useTranslation } from "react-i18next";
 
 
 export default function InvoiceForm({ refetch }) {
+	const { t } = useTranslation();
 	const [ products, setProducts ] = useState([]);
 	const [ productResetKey, setProductResetKey ] = useState(0);
 	const [ selectedCategoryId, setSelectedCategoryId ] = useState(null);
@@ -184,6 +186,7 @@ export default function InvoiceForm({ refetch }) {
 										key={productResetKey}
 										placeholder="Choose Product"
 										data={productOptions}
+										limit={200}
 										searchable
 										id="productId"
 										{...invoiceItemForm.getInputProps("productId", { type: "search" })}
@@ -239,8 +242,8 @@ export default function InvoiceForm({ refetch }) {
 									form={invoiceItemForm}
 									name="expired_date"
 									id="expired_date"
-									label="ExpiredDate"
-									placeholder="Expired Date"
+									label={t("ExpiredDate")}
+									placeholder={t("ExpiredDate")}
 									nextField="EntityFormSubmit"
 									required={false}
 									tooltip={invoiceItemForm.errors.quantity}

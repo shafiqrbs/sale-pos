@@ -1,6 +1,6 @@
 import React from "react";
 import { ActionIcon, Box, Flex, NumberInput, Text, Button } from "@mantine/core";
-import { DatePicker } from '@mantine/dates';
+import { DatePicker, DatePickerInput } from '@mantine/dates';
 import { DataTable } from "mantine-datatable";
 import { IconList, IconTrashX } from "@tabler/icons-react";
 import tableCss from "@assets/css/Table.module.css";
@@ -11,6 +11,7 @@ import { formatCurrency } from "@utils/index";
 import { useNavigate } from "react-router";
 import { APP_NAVLINKS } from "@/routes/routes";
 import { useTranslation } from "react-i18next";
+import dayjs from "dayjs";
 
 export default function ItemsTableSection({ purchaseProducts, refetch, itemsTotal }) {
 	const navigate = useNavigate();
@@ -48,6 +49,14 @@ export default function ItemsTableSection({ purchaseProducts, refetch, itemsTota
 
 	const handleRemoveItem = async (itemId) => {
 		await window.dbAPI.deleteDataFromTable("temp_purchase_products", itemId);
+		refetch();
+	};
+
+	const handleExpiredDateChange = async (itemId, value) => {
+		await window.dbAPI.upsertIntoTable("temp_purchase_products", {
+			id: itemId,
+			expired_date: dayjs(value).format("YYYY-MM-DD"),
+		});
 		refetch();
 	};
 
@@ -99,17 +108,17 @@ export default function ItemsTableSection({ purchaseProducts, refetch, itemsTota
 					},
 					{
 						accessor: "expired_date",
-						title: "Qty",
+						title: t("ExpiredDate"),
 						textAlign: "center",
 						width: 120,
 						render: (record) => (
-							<DatePicker
+							<DatePickerInput
 								size="xs"
 								value={record.expired_date}
 								min={0}
 								step={1}
 								hideControls
-								onChange={(value) => handleQuantityChange(record.id, value)}
+								onChange={(value) => handleExpiredDateChange(record.id, value)}
 							/>
 						),
 					},

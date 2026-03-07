@@ -753,5 +753,6 @@
 	"UnitsSold": "ইউনিট বিক্রি",
 	"TotalInvoices": "মোট ইনভয়েস",
 	"PurchaseList": "পার্চেজ লিস্ট",
-	"PurchaseItems": "পার্চেজ আইটেম"
+	"PurchaseItems": "পার্চেজ আইটেম",
+	"ExpiredDate": "প্রাক্তিকৃত তারিখ"
 }

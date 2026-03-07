@@ -32,13 +32,13 @@ import { useTranslation } from "react-i18next";
 
 export default function InvoiceForm({ refetch }) {
 	const { t } = useTranslation()
-	const [products, setProducts] = useState([]);
-	const [productResetKey, setProductResetKey] = useState(0);
+	const [ products, setProducts ] = useState([]);
+	const [ productResetKey, setProductResetKey ] = useState(0);
 	const { configData } = useConfigData();
 	const salesItemForm = useForm(salesItemFormRequest());
 	const { getLocalProducts } = useLocalProducts({ fetchOnMount: false });
 
-	const [isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer }] =
+	const [ isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer } ] =
 		useDisclosure(false);
 
 	useEffect(() => {
@@ -185,6 +185,7 @@ export default function InvoiceForm({ refetch }) {
 									placeholder="Enter stock product name"
 									data={productOptions}
 									searchable
+									limit={200}
 									id="productId"
 									{...salesItemForm.getInputProps("productId", { type: "search" })}
 									onChange={handleProductSelect}
