@@ -19,8 +19,8 @@ export default function NewIndex() {
     const { configData } = useConfigData();
     const salesForm = useForm(salesOverviewRequest());
     const { salesProducts, refetch } = useTempSalesProducts({ type: "sales" });
-    const [resetKey, setResetKey] = useState(0);
-    const [isAddingSales, setIsAddingSales] = useState(false);
+    const [ resetKey, setResetKey ] = useState(0);
+    const [ isAddingSales, setIsAddingSales ] = useState(false);
 
     // =============== tracks whether the submit was triggered via POS Print ===============
     const withPosPrintRef = useRef(false);
@@ -34,7 +34,7 @@ export default function NewIndex() {
                     id: productId,
                 });
                 const currentProductData = Array.isArray(currentProduct)
-                    ? currentProduct[0]
+                    ? currentProduct[ 0 ]
                     : currentProduct;
 
                 if (!currentProductData) {
@@ -90,7 +90,7 @@ export default function NewIndex() {
         const fullAmount = Number(formValues.paymentAmount) || 0;
         const isSplitPaymentActive = payments.length > 1;
         const modeName =
-            isSplitPaymentActive ? "Multiple" : (payments[0]?.transaction_mode_name ?? "");
+            isSplitPaymentActive ? "Multiple" : (payments[ 0 ]?.transaction_mode_name ?? "");
 
         // =============== get customer info from database ===============
         let customerName = "";
@@ -100,7 +100,7 @@ export default function NewIndex() {
             const customers = await window.dbAPI.getDataFromTable("core_customers", {
                 id: formValues.customer_id,
             });
-            const customerData = Array.isArray(customers) ? customers[0] : customers;
+            const customerData = Array.isArray(customers) ? customers[ 0 ] : customers;
             if (customerData) {
                 customerName = customerData.name ?? "";
                 customerMobile = customerData.mobile ?? "";
@@ -231,15 +231,15 @@ export default function NewIndex() {
                 <InvoiceForm refetch={refetch} />
             </Box>
             <Box component="form" id="salesForm" onSubmit={salesForm.onSubmit(handleSubmit)}>
-                    <SalesOverview
-                        isAddingSales={isAddingSales}
-                        salesForm={salesForm}
-                        salesProducts={salesProducts}
-                        refetch={refetch}
-                        onPosPrint={handlePosPrint}
-                        onReset={handleReset}
-                        resetKey={resetKey}
-                    />
+                <SalesOverview
+                    isAddingSales={isAddingSales}
+                    salesForm={salesForm}
+                    salesProducts={salesProducts}
+                    refetch={refetch}
+                    onPosPrint={handlePosPrint}
+                    onReset={handleReset}
+                    resetKey={resetKey}
+                />
             </Box>
         </Box>
     );

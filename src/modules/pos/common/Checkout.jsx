@@ -10,6 +10,7 @@ import { IconSum } from "@tabler/icons-react";
 import Transaction from "./Transaction";
 import useCartOperation from "@hooks/useCartOperation";
 import useLoggedInUser from "@hooks/useLoggedInUser";
+import { formatCurrency } from "@utils/index";
 
 export default function Checkout() {
 	const { t } = useTranslation();
@@ -72,7 +73,7 @@ export default function Checkout() {
 				<Group gap="2xs" pr="sm" align="center">
 					<IconSum size="16" style={{ color: "black" }} />
 					<Text fw="bold" fz="sm" c="black">
-						{configData?.inventory_config?.currency?.symbol} {getCartTotal()?.toFixed(2)}
+						{configData?.inventory_config?.currency?.symbol} {formatCurrency(getCartTotal())}
 					</Text>
 				</Group>
 			</Group>

@@ -2,7 +2,7 @@ import useConfigData from "@hooks/useConfigData";
 import { ActionIcon, Grid, Box, Flex, Group, Image, Stack, Text, Tooltip } from "@mantine/core";
 import { Carousel } from "@mantine/carousel";
 import { IconScissors } from "@tabler/icons-react";
-import { calculateVATAmount } from "@utils/index";
+import { calculateVATAmount, formatCurrency } from "@utils/index";
 import { useTranslation } from "react-i18next";
 import { useOutletContext } from "react-router";
 import useCartOperation from "@hooks/useCartOperation";
@@ -117,7 +117,7 @@ export default function TransactionInformation({ form, transactionModeData }) {
 					<Stack gap={0} align="center" justify="center" bg="gray.8" py={4} bdrs={4}>
 						<Text fw={800} c="white" size="lg">
 							{configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol}{" "}
-							{totalAmount?.toFixed(2)}
+							{formatCurrency(totalAmount)}
 						</Text>
 						<Text fw={500} c="white" size="md">
 							{t("Total")}
@@ -128,7 +128,7 @@ export default function TransactionInformation({ form, transactionModeData }) {
 					<Stack gap={0} align="center" justify="center" bg="red" py={4} bdrs={4}>
 						<Text fw={800} c="white" size="lg">
 							{configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol}{" "}
-							{dueAmount?.toFixed(2)}
+							{formatCurrency(dueAmount)}
 						</Text>
 						<Text fw={500} c="white" size="md">
 							{returnOrDueText}

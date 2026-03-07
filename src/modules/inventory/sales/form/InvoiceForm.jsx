@@ -22,7 +22,7 @@ import InputForm from "@components/form-builders/InputForm";
 import AddProductDrawer from "@components/drawers/AddProductDrawer";
 import useLocalProducts from "@hooks/useLocalProducts";
 import useConfigData from "@hooks/useConfigData";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useHotkeys } from "@mantine/hooks";
 import { formatCurrency } from "@utils/index";
 import { showNotification } from "@components/ShowNotificationComponent";
 import { salesItemFormRequest } from "../helpers/request";
@@ -120,7 +120,7 @@ export default function InvoiceForm({ refetch }) {
 		salesItemForm.reset();
 		setProductResetKey((previousKey) => previousKey + 1);
 		requestAnimationFrame(() => {
-			document.getElementById("productId").focus();
+			document.getElementById('productId').open();
 		});
 	};
 
@@ -129,8 +129,10 @@ export default function InvoiceForm({ refetch }) {
 		salesItemForm.setFieldValue("salesPrice", option?.sales_price);
 		salesItemForm.setFieldValue("discount", 0);
 		salesItemForm.setFieldValue("unit", option?.unit);
-		document.getElementById("quantity").focus();
+		requestAnimationFrame(() => document.getElementById("quantity").focus())
 	};
+
+	useHotkeys([ [ "alt+a", () => document.getElementById("EntityFormSubmit")?.click() ] ])
 
 	return (
 		<>
@@ -185,16 +187,18 @@ export default function InvoiceForm({ refetch }) {
 								errorMessage="Product is required"
 								opened={!!salesItemForm.errors.productId}
 							>
-								<VirtualSearchSelect
-									key={productResetKey}
-									value={salesItemForm.values.productId}
-									options={productOptions}
-									placeholder="Enter stock product name"
-									searchable
-									nothingFoundMessage="No product found"
-									onChange={handleProductSelect}
-									id="productId"
-								/>
+								<Box pos="relative">
+									<VirtualSearchSelect
+										key={productResetKey}
+										value={salesItemForm.values.productId}
+										options={productOptions}
+										placeholder="Enter stock product name"
+										searchable
+										nothingFoundMessage="No product found"
+										onChange={handleProductSelect}
+										id="productId"
+									/>
+								</Box>
 							</FormValidationWrapper>
 						</Box>
 						<ActionIcon

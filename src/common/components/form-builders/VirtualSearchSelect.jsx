@@ -1,3 +1,4 @@
+import { Box } from "@mantine/core";
 import { useEffect, useMemo, useRef } from "react";
 
 // =============== load virtual-select-plugin once; script attaches VirtualSelect to window ===============
@@ -34,7 +35,7 @@ export default function VirtualSearchSelect({
 		const map = new Map();
 		options.forEach((option) => map.set(String(option.value), option));
 		return map;
-	}, [options]);
+	}, [ options ]);
 
 	const onChangeRef = useRef(onChange);
 	const optionMapRef = useRef(optionMap);
@@ -44,21 +45,17 @@ export default function VirtualSearchSelect({
 	// =============== init on mount, destroy on unmount; single init with initial options/value ===============
 	useEffect(() => {
 		const containerElement = containerRef.current;
-		if (
-			!containerElement ||
-			typeof window === "undefined" ||
-			!window.VirtualSelect
-		) {
+		if (!containerElement || typeof window === "undefined" || !window.VirtualSelect) {
 			return;
 		}
 
 		const VirtualSelect = window.VirtualSelect;
 		const normalizedOptions = Array.isArray(options)
 			? options.map((option) => ({
-					label: option.label,
-					value: String(option.value),
-					...option,
-				}))
+				label: option.label,
+				value: String(option.value),
+				...option,
+			}))
 			: [];
 
 		VirtualSelect.init({
@@ -77,9 +74,7 @@ export default function VirtualSearchSelect({
 
 		const handleChange = (event) => {
 			const selectedValue =
-				event.target != null && event.target.value != null
-					? String(event.target.value)
-					: "";
+				event.target != null && event.target.value != null ? String(event.target.value) : "";
 			const option = optionMapRef.current.get(selectedValue);
 			onChangeRef.current?.(selectedValue, option);
 		};
@@ -104,7 +99,7 @@ export default function VirtualSearchSelect({
 		}
 		const nextValue = value != null ? String(value) : "";
 		containerElement.setValue(nextValue, true);
-	}, [value]);
+	}, [ value ]);
 
 	// =============== update options when list changes (e.g. products refetched) ===============
 	useEffect(() => {
@@ -114,13 +109,13 @@ export default function VirtualSearchSelect({
 		}
 		const normalizedOptions = Array.isArray(options)
 			? options.map((option) => ({
-					label: option.label,
-					value: String(option.value),
-					...option,
-				}))
+				label: option.label,
+				value: String(option.value),
+				...option,
+			}))
 			: [];
 		containerElement.setOptions(normalizedOptions, true);
-	}, [options]);
+	}, [ options ]);
 
 	// =============== update disabled state when prop changes ===============
 	useEffect(() => {
@@ -135,7 +130,9 @@ export default function VirtualSearchSelect({
 				containerElement.enable();
 			}
 		}
-	}, [disabled]);
+	}, [ disabled ]);
 
-	return <div ref={containerRef} id={id} className="virtual-search-select-wrapper" />;
+	return (
+		<Box ref={containerRef} id={id} className="virtual-search-select-wrapper" />
+	);
 }

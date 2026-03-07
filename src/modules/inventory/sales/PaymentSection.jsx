@@ -16,7 +16,7 @@ import {
 	Tooltip,
 } from "@mantine/core";
 import { Carousel } from "@mantine/carousel";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useHotkeys } from "@mantine/hooks";
 import {
 	IconNumber123,
 	IconPercentage,
@@ -194,6 +194,8 @@ export default function PaymentSection({
 		salesForm.setFieldValue("paymentAmount", grandTotal);
 	};
 
+	useHotkeys([ [ "alt+s", () => document.getElementById("SalesFormSubmit")?.click() ] ])
+
 	return (
 		<>
 			<Grid columns={24} gutter={8} mt="xs">
@@ -282,7 +284,7 @@ export default function PaymentSection({
 													VAT {configData?.inventory_config?.config_vat?.vat_percent}%
 												</Text>
 												<Text fz="sm" fw={800} c="black">
-													{calculateVATAmount(itemsTotal, configData?.inventory_config?.config_vat)}
+													{formatCurrency(calculateVATAmount(itemsTotal, configData?.inventory_config?.config_vat))}
 												</Text>
 											</Group>
 											<Group justify="space-between">
@@ -299,7 +301,7 @@ export default function PaymentSection({
 								<Grid.Col span={3}>
 									<Stack gap={0} align="center" justify="center" bg="gray.8" py={4} bdrs={4}>
 										<Text fw={800} c="white" size="lg">
-											{currencySymbol} {grandTotal?.toFixed(2)}
+											{currencySymbol} {formatCurrency(grandTotal)}
 										</Text>
 										<Text fw={500} c="white" size="md">
 											Total
@@ -309,7 +311,7 @@ export default function PaymentSection({
 								<Grid.Col span={3}>
 									<Stack gap={0} align="center" justify="center" bg="red" py={4} bdrs={4}>
 										<Text fw={800} c="white" size="lg">
-											{currencySymbol} {dueAmount?.toFixed(2)}
+											{currencySymbol} {formatCurrency(dueAmount)}
 										</Text>
 										<Text fw={500} c="white" size="md">
 											Due
@@ -687,6 +689,7 @@ export default function PaymentSection({
 					radius={0}
 					form="salesForm"
 					type="submit"
+					id="SalesHoldFormSubmit"
 					loading={isAddingSales}
 				>
 					{t("Hold")}
@@ -698,6 +701,7 @@ export default function PaymentSection({
 					radius={0}
 					form="salesForm"
 					type="submit"
+					id="SalesFormSubmit"
 					loading={isAddingSales}
 				>
 					Save

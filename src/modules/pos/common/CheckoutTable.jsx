@@ -11,15 +11,16 @@ import { useDisclosure } from "@mantine/hooks";
 import { RESTRICT_PRODUCT_QUANTITY_LIMIT } from "@constants/index";
 import { showNotification } from "@components/ShowNotificationComponent";
 import useLocalProducts from "@hooks/useLocalProducts";
+import { formatCurrency } from "@utils/index";
 
 export default function CheckoutTable() {
 	const { mainAreaHeight } = useOutletContext();
 	const { t } = useTranslation();
 	const { invoiceData, increment, decrement, remove, updateQuantity } = useCartOperation();
-	const [selectedProduct, setSelectedProduct] = useState(null);
-	const [batchModalOpened, { open: openBatchModal, close: closeBatchModal }] = useDisclosure(false);
+	const [ selectedProduct, setSelectedProduct ] = useState(null);
+	const [ batchModalOpened, { open: openBatchModal, close: closeBatchModal } ] = useDisclosure(false);
 	const { getProduct } = useLocalProducts({ fetchOnMount: false });
-	const [inputValues, setInputValues] = useState({});
+	const [ inputValues, setInputValues ] = useState({});
 
 	// =============== sync input values with cart data ================
 	useEffect(() => {
@@ -27,8 +28,8 @@ export default function CheckoutTable() {
 			const newInputValues = {};
 			invoiceData.forEach((item) => {
 				// =============== only update if value has changed to avoid unnecessary renders ================
-				if (inputValues[item.stock_item_id] !== item.quantity) {
-					newInputValues[item.stock_item_id] = item.quantity;
+				if (inputValues[ item.stock_item_id ] !== item.quantity) {
+					newInputValues[ item.stock_item_id ] = item.quantity;
 				}
 			});
 
@@ -38,7 +39,7 @@ export default function CheckoutTable() {
 			}
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [invoiceData]);
+	}, [ invoiceData ]);
 
 	const handleClick = () => {
 		console.info("handleClick");
@@ -72,10 +73,10 @@ export default function CheckoutTable() {
 				if (cartItems && cartItems.length > 0) {
 					try {
 						currentBatches =
-							typeof cartItems[0].batches === "string"
-								? JSON.parse(cartItems[0].batches)
-								: Array.isArray(cartItems[0].batches)
-									? cartItems[0].batches
+							typeof cartItems[ 0 ].batches === "string"
+								? JSON.parse(cartItems[ 0 ].batches)
+								: Array.isArray(cartItems[ 0 ].batches)
+									? cartItems[ 0 ].batches
 									: [];
 					} catch {
 						currentBatches = [];
@@ -127,13 +128,13 @@ export default function CheckoutTable() {
 		const maxLimit = data.quantity_limit;
 
 		if (RESTRICT_PRODUCT_QUANTITY_LIMIT && numberValue > maxLimit) {
-			setInputValues((prev) => ({ ...prev, [data.stock_item_id]: maxLimit }));
+			setInputValues((prev) => ({ ...prev, [ data.stock_item_id ]: maxLimit }));
 			showNotification(`Maximum available quantity is ${maxLimit}`, "red", "", "", true, 800, true);
 			updateQuantity(data, maxLimit);
 			return;
 		}
 
-		setInputValues((prev) => ({ ...prev, [data.stock_item_id]: numberValue }));
+		setInputValues((prev) => ({ ...prev, [ data.stock_item_id ]: numberValue }));
 		updateQuantity(data, numberValue);
 	};
 
@@ -183,7 +184,7 @@ export default function CheckoutTable() {
 									ta="center"
 									fw={600}
 									maw={80}
-									value={inputValues[data.stock_item_id] ?? data.quantity}
+									value={inputValues[ data.stock_item_id ] ?? data.quantity}
 									min={0}
 									max={RESTRICT_PRODUCT_QUANTITY_LIMIT ? data.quantity_limit : undefined}
 									step={1}
@@ -216,13 +217,13 @@ export default function CheckoutTable() {
 						accessor: "price",
 						title: t("Price"),
 						textAlign: "right",
-						render: (data) => <>{data.sales_price}</>,
+						render: (data) => <>{formatCurrency(data.sales_price)}</>,
 					},
 					{
 						accessor: "subtotal",
 						title: "Subtotal",
 						textAlign: "right",
-						render: (data) => <>{data.sub_total.toFixed(2)}</>,
+						render: (data) => <>{formatCurrency(data.sub_total)}</>,
 					},
 					{
 						accessor: "action",

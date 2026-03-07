@@ -19,6 +19,7 @@ import VendorInfoSection from "./VendorInfoSection";
 import useTransactionMode from "@hooks/useTransactionMode";
 import { formatCurrency } from "@utils/index";
 import FormValidationWrapper from "@components/form-builders/FormValidationWrapper";
+import { useHotkeys } from "@mantine/hooks";
 
 export default function PaymentSection({ purchaseForm, itemsTotal, isAddingPurchase }) {
 	const { transactionMode } = useTransactionMode();
@@ -41,16 +42,16 @@ export default function PaymentSection({ purchaseForm, itemsTotal, isAddingPurch
 		}
 
 		return discountAmount;
-	}, [discountAmount, isDiscountPercentage, itemsTotal]);
+	}, [ discountAmount, isDiscountPercentage, itemsTotal ]);
 
 	const grandTotal = useMemo(
 		() => Math.max(itemsTotal - discountValue + vatAmount, 0),
-		[itemsTotal, discountValue]
+		[ itemsTotal, discountValue ]
 	);
 
 	const dueAmount = useMemo(
 		() => Math.max(grandTotal - (paymentAmount || 0), 0),
-		[grandTotal, paymentAmount]
+		[ grandTotal, paymentAmount ]
 	);
 
 	// =============== group transaction modes by method_name ===============
@@ -60,21 +61,21 @@ export default function PaymentSection({ purchaseForm, itemsTotal, isAddingPurch
 		const groupsMap = {};
 		transactionMode.forEach((mode) => {
 			const methodName = mode.method_name || "Others";
-			if (!groupsMap[methodName]) {
-				groupsMap[methodName] = [];
+			if (!groupsMap[ methodName ]) {
+				groupsMap[ methodName ] = [];
 			}
-			groupsMap[methodName].push({
+			groupsMap[ methodName ].push({
 				value: String(mode.id),
 				label: mode.name,
 				path: mode.path,
 			});
 		});
 
-		return Object.entries(groupsMap).map(([group, items]) => ({
+		return Object.entries(groupsMap).map(([ group, items ]) => ({
 			group,
 			items,
 		}));
-	}, [transactionMode]);
+	}, [ transactionMode ]);
 
 	const handleDiscountTypeChange = (value) => {
 		purchaseForm.setFieldValue("isDiscountPercentage", value === "percentage");
@@ -99,6 +100,8 @@ export default function PaymentSection({ purchaseForm, itemsTotal, isAddingPurch
 			{checked && <IconCheck style={{ marginInlineStart: "auto" }} {...iconProps} />}
 		</Group>
 	);
+
+	useHotkeys([ [ "alt+s", () => document.getElementById("PurchaseFormSubmit")?.click() ] ])
 
 	return (
 		<>
@@ -324,16 +327,16 @@ export default function PaymentSection({ purchaseForm, itemsTotal, isAddingPurch
 			</Grid>
 
 			<Button.Group mt="xs">
-				<Button fullWidth bg="var(--theme-reset-btn-color)" color="white" radius={0} type="button">
+				<Button fullWidth bg="var(--theme-reset-btn-color)" color="white" radius={0} type="button" id="PurchaseResetFormSubmit">
 					Reset
 				</Button>
-				<Button fullWidth bg="var(--theme-hold-btn-color)" color="white" radius={0} type="button">
+				<Button fullWidth bg="var(--theme-hold-btn-color)" color="white" radius={0} type="button" id="PurchaseHoldFormSubmit">
 					Hold
 				</Button>
-				<Button fullWidth bg="var(--theme-print-btn-color)" color="white" radius={0} type="button">
+				<Button fullWidth bg="var(--theme-print-btn-color)" color="white" radius={0} type="button" id="PurchasePrintFormSubmit">
 					Print
 				</Button>
-				<Button fullWidth bg="var(--theme-pos-btn-color)" color="white" radius={0} type="button">
+				<Button fullWidth bg="var(--theme-pos-btn-color)" color="white" radius={0} type="button" id="PurchasePosFormSubmit">
 					Pos
 				</Button>
 				<Button
@@ -344,6 +347,7 @@ export default function PaymentSection({ purchaseForm, itemsTotal, isAddingPurch
 					form="purchaseForm"
 					type="submit"
 					loading={isAddingPurchase}
+					id="PurchaseFormSubmit"
 				>
 					Save
 				</Button>

@@ -645,6 +645,7 @@ export default function Transaction({ form, tableId = null }) {
 								value={form.values.receive_amount}
 								error={form.errors.receive_amount}
 								size="sm"
+								thousandSeparator=","
 								min={form.values.total}
 								readOnly={isSplitPaymentActive}
 								disabled={isSplitPaymentActive}

@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next"
 import useConfigData from "@hooks/useConfigData"
 import { useOutletContext } from "react-router"
 import GlobalDrawer from "../drawers/GlobalDrawer"
+import { formatCurrency } from "@utils/index"
 
 export default function SplitPaymentsDrawer({ opened, onClose, totalAmount, onSave, onRemove, existingSplitPayments = [] }) {
     const { t } = useTranslation()
@@ -87,13 +88,13 @@ export default function SplitPaymentsDrawer({ opened, onClose, totalAmount, onSa
                         <Group justify="space-between" mb="xs">
                             <Text size="lg" fw={600}>{t("Total")}</Text>
                             <Text size="lg" fw={700} c="var(--theme-primary-color-6)">
-                                {configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol} {totalAmount?.toFixed(2)}
+                                {configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol} {formatCurrency(totalAmount)}
                             </Text>
                         </Group>
                         <Group justify="space-between">
                             <Text size="md" fw={500}>{t("Due")}</Text>
                             <Text size="md" fw={600} c={dueAmount > 0 ? "red" : "green"}>
-                                {configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol} {dueAmount?.toFixed(2)}
+                                {configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol} {formatCurrency(dueAmount)}
                             </Text>
                         </Group>
                     </Box>
@@ -126,6 +127,7 @@ export default function SplitPaymentsDrawer({ opened, onClose, totalAmount, onSa
                                         size="sm"
                                         style={{ flex: 1 }}
                                         min={0}
+                                        thousandSeparator=","
                                     />
                                 </Flex>
                             ))}

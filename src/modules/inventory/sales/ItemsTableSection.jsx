@@ -139,6 +139,7 @@ export default function ItemsTableSection({ salesProducts, refetch, itemsTotal }
 								value={record.sales_price}
 								min={0}
 								step={1}
+								decimalScale={2}
 								hideControls
 								thousandSeparator=","
 								onChange={(value) => handlePriceChange(record.id, value)}
@@ -156,6 +157,7 @@ export default function ItemsTableSection({ salesProducts, refetch, itemsTotal }
 								value={record.percent ?? 0}
 								min={0}
 								max={100}
+								clampBehavior="strict"
 								step={1}
 								hideControls
 								suffix="%"
