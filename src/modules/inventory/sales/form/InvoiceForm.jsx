@@ -144,7 +144,7 @@ export default function InvoiceForm({ refetch }) {
 				className="borderRadiusAll"
 				px="sm"
 				py="xs"
-				bg={'blue.4'}
+				bg={'blue.1'}
 			>
 				<Flex gap="xs" align="flex-end" wrap="nowrap">
 					{/* =============== barcode input =============== */}
@@ -293,7 +293,7 @@ export default function InvoiceForm({ refetch }) {
 					<Button
 						leftSection={<IconPlus size={16} />}
 						rightSection={<IconShoppingCart size={15} />}
-						bg="red"
+						bg="#16a34a"
 						color="white"
 						radius="sm"
 						type="submit"

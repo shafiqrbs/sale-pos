@@ -10,7 +10,7 @@ import { formatCurrency } from "@utils/index";
 export default function ItemsTableSection({ salesProducts, refetch, itemsTotal }) {
 	const { mainAreaHeight } = useMainAreaHeight();
 	// =============== account for invoice form top row (~55px) + payment section + spacing ===============
-	const tableHeight = mainAreaHeight - 380;
+	const tableHeight = mainAreaHeight - 342;
 	const { configData } = useConfigData();
 
 	const currencySymbol =
@@ -120,7 +120,7 @@ export default function ItemsTableSection({ salesProducts, refetch, itemsTotal }
 					{
 						accessor: "stock",
 						title: "Stock",
-						textAlign: "right",
+						textAlign: "center",
 						width: 90,
 						render: (record) => (
 							<Text size="sm" c="dimmed">
@@ -210,10 +210,10 @@ export default function ItemsTableSection({ salesProducts, refetch, itemsTotal }
 						</Text>
 					</Badge>
 					<Flex align="center" gap={4}>
-						<Badge size="xl">
-						<Text fz="xl" fw={700}>
-							{currencySymbol}&nbsp;{formatCurrency(itemsTotal)}
-						</Text>
+						<Badge size="xl" radius="sm" bg="#1e40af">
+							<Text fz="xl" fw={700}>
+								{currencySymbol}&nbsp;{formatCurrency(itemsTotal)}
+							</Text>
 						</Badge>
 					</Flex>
 				</Flex>
