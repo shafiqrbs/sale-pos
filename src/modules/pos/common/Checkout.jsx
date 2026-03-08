@@ -51,7 +51,7 @@ export default function Checkout() {
 		if (user) {
 			form.setFieldValue("sales_by_id", user?.id?.toString());
 		}
-	}, [ user ]);
+	}, [user]);
 
 	return (
 		<Box pr="3xs">
@@ -71,7 +71,7 @@ export default function Checkout() {
 					{t("SubTotal")}
 				</Text>
 				<Group gap="2xs" pr="sm" align="center">
-					<IconSum size="16" style={{ color: "black" }} />
+					<IconSum size="16" style={{ color: "inherit" }} />
 					<Text fw="bold" fz="sm" c="black">
 						{configData?.inventory_config?.currency?.symbol} {formatCurrency(getCartTotal())}
 					</Text>

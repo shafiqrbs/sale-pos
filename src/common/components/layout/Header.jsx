@@ -13,6 +13,7 @@ import {
 	Select,
 	TextInput,
 	Divider,
+	useMantineColorScheme,
 } from "@mantine/core";
 
 import { useDisclosure, useFullscreen } from "@mantine/hooks";
@@ -32,6 +33,9 @@ import {
 	IconSettings,
 	IconUserHexagon,
 	IconLock,
+	IconDeviceDesktop,
+	IconSun,
+	IconMoon,
 } from "@tabler/icons-react";
 import { NavLink, useLocation, useNavigate } from "react-router";
 import LanguagePickerStyle from "@assets/css/LanguagePicker.module.css";
@@ -44,6 +48,18 @@ import { APP_NAVLINKS } from "@/routes/routes.js";
 import useConfigData from "@hooks/useConfigData";
 import useLoggedInUser from "@hooks/useLoggedInUser";
 import ChangePasswordDrawer from "@components/drawers/ChangePasswordDrawer";
+
+const COLOR_SCHEME_STORAGE_KEY = "mantine-color-scheme";
+
+const COLOR_SCHEME_CONFIG = {
+	auto: { next: "light", Icon: IconDeviceDesktop, label: "System" },
+	light: { next: "dark", Icon: IconSun, label: "Light" },
+	dark: { next: "auto", Icon: IconMoon, label: "Dark" },
+};
+
+function getColorSchemeMeta(scheme) {
+	return COLOR_SCHEME_CONFIG[scheme] ?? COLOR_SCHEME_CONFIG.auto;
+}
 
 export default function Header({ isOnline, toggleNetwork }) {
 	const { user, roles } = useLoggedInUser();
@@ -67,6 +83,30 @@ export default function Header({ isOnline, toggleNetwork }) {
 		characterSet: "PC437_USA",
 		lineCharacter: "-",
 	});
+
+	const { colorScheme, setColorScheme } = useMantineColorScheme({ keepTransitions: true });
+
+	function handleToggleColorScheme() {
+		const nextScheme = getColorSchemeMeta(colorScheme).next;
+		setColorScheme(nextScheme);
+		try {
+			localStorage.setItem(COLOR_SCHEME_STORAGE_KEY, nextScheme);
+		} catch (error) {
+			console.error("Error in handleToggleColorScheme:", error);
+		}
+	}
+
+	useEffect(() => {
+		try {
+			const savedScheme = localStorage.getItem(COLOR_SCHEME_STORAGE_KEY);
+			if (savedScheme === "auto" || savedScheme === "light" || savedScheme === "dark") {
+				setColorScheme(savedScheme);
+			}
+		} catch (error) {
+			console.error("Error in useEffect:", error);
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
 	const modalLinks = [
 		{ label: "Dashboard", icon: <IconDashboard size={18} />, pathname: APP_NAVLINKS.DASHBOARD },
@@ -118,6 +158,18 @@ export default function Header({ isOnline, toggleNetwork }) {
 			console.error("Error in handlePrinterSetup:", error);
 		}
 	};
+
+	const handleLanguageChange = (item) => {
+		setLanguageSelected(item);
+		i18n.changeLanguage(item.value);
+		try {
+			localStorage.setItem("language", item.value);
+		} catch (error) {
+			console.error("Error in handleLanguageChange:", error);
+		}
+	};
+
+	const { Icon: SchemeIcon, label: schemeLabel } = getColorSchemeMeta(colorScheme);
 
 	return (
 		<>
@@ -220,10 +272,7 @@ export default function Header({ isOnline, toggleNetwork }) {
 									<Menu.Item
 										p={4}
 										leftSection={<Image src={item.flag} width={18} height={18} />}
-										onClick={() => {
-											setLanguageSelected(item);
-											i18n.changeLanguage(item.value);
-										}}
+										onClick={() => handleLanguageChange(item)}
 										key={item.label}
 									>
 										{item.label}
@@ -231,6 +280,11 @@ export default function Header({ isOnline, toggleNetwork }) {
 								))}
 							</Menu.Dropdown>
 						</Menu>
+						<Tooltip label={`Theme: ${schemeLabel}`} bg="red.5" withArrow>
+							<ActionIcon mt="4xs" onClick={handleToggleColorScheme} variant="subtle" color="white">
+								<SchemeIcon size={24} />
+							</ActionIcon>
+						</Tooltip>
 						<Tooltip label={fullscreen ? t("NormalScreen") : t("Fullscreen")} bg="red.5" withArrow>
 							<ActionIcon mt="4xs" onClick={toggle} variant="subtle" color="white">
 								{fullscreen ? <IconWindowMinimize size={24} /> : <IconWindowMaximize size={24} />}

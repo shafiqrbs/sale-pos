@@ -115,11 +115,11 @@ export default function TransactionInformation({ form, transactionModeData }) {
 				</Grid.Col>
 				<Grid.Col span={3}>
 					<Stack gap={0} align="center" justify="center" bg="gray.8" py={4} bdrs={4}>
-						<Text fw={800} c="white" size="lg">
+						<Text fw={800} c="#dad6d6" size="lg">
 							{configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol}{" "}
 							{formatCurrency(totalAmount)}
 						</Text>
-						<Text fw={500} c="white" size="md">
+						<Text fw={500} c="#dad6d6" size="md">
 							{t("Total")}
 						</Text>
 					</Stack>
@@ -178,7 +178,7 @@ export default function TransactionInformation({ form, transactionModeData }) {
 										>
 											<Flex
 												bg={
-													payments.length === 1 && payments[ 0 ]?.transaction_mode_id === mode.id
+													payments.length === 1 && payments[0]?.transaction_mode_id === mode.id
 														? "green.8"
 														: "white"
 												}

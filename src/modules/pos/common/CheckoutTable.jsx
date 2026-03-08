@@ -17,10 +17,10 @@ export default function CheckoutTable() {
 	const { mainAreaHeight } = useOutletContext();
 	const { t } = useTranslation();
 	const { invoiceData, increment, decrement, remove, updateQuantity } = useCartOperation();
-	const [ selectedProduct, setSelectedProduct ] = useState(null);
-	const [ batchModalOpened, { open: openBatchModal, close: closeBatchModal } ] = useDisclosure(false);
+	const [selectedProduct, setSelectedProduct] = useState(null);
+	const [batchModalOpened, { open: openBatchModal, close: closeBatchModal }] = useDisclosure(false);
 	const { getProduct } = useLocalProducts({ fetchOnMount: false });
-	const [ inputValues, setInputValues ] = useState({});
+	const [inputValues, setInputValues] = useState({});
 
 	// =============== sync input values with cart data ================
 	useEffect(() => {
@@ -28,8 +28,8 @@ export default function CheckoutTable() {
 			const newInputValues = {};
 			invoiceData.forEach((item) => {
 				// =============== only update if value has changed to avoid unnecessary renders ================
-				if (inputValues[ item.stock_item_id ] !== item.quantity) {
-					newInputValues[ item.stock_item_id ] = item.quantity;
+				if (inputValues[item.stock_item_id] !== item.quantity) {
+					newInputValues[item.stock_item_id] = item.quantity;
 				}
 			});
 
@@ -39,7 +39,7 @@ export default function CheckoutTable() {
 			}
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ invoiceData ]);
+	}, [invoiceData]);
 
 	const handleClick = () => {
 		console.info("handleClick");
@@ -73,10 +73,10 @@ export default function CheckoutTable() {
 				if (cartItems && cartItems.length > 0) {
 					try {
 						currentBatches =
-							typeof cartItems[ 0 ].batches === "string"
-								? JSON.parse(cartItems[ 0 ].batches)
-								: Array.isArray(cartItems[ 0 ].batches)
-									? cartItems[ 0 ].batches
+							typeof cartItems[0].batches === "string"
+								? JSON.parse(cartItems[0].batches)
+								: Array.isArray(cartItems[0].batches)
+									? cartItems[0].batches
 									: [];
 					} catch {
 						currentBatches = [];
@@ -128,13 +128,13 @@ export default function CheckoutTable() {
 		const maxLimit = data.quantity_limit;
 
 		if (RESTRICT_PRODUCT_QUANTITY_LIMIT && numberValue > maxLimit) {
-			setInputValues((prev) => ({ ...prev, [ data.stock_item_id ]: maxLimit }));
+			setInputValues((prev) => ({ ...prev, [data.stock_item_id]: maxLimit }));
 			showNotification(`Maximum available quantity is ${maxLimit}`, "red", "", "", true, 800, true);
 			updateQuantity(data, maxLimit);
 			return;
 		}
 
-		setInputValues((prev) => ({ ...prev, [ data.stock_item_id ]: numberValue }));
+		setInputValues((prev) => ({ ...prev, [data.stock_item_id]: numberValue }));
 		updateQuantity(data, numberValue);
 	};
 
@@ -160,7 +160,7 @@ export default function CheckoutTable() {
 						accessor: "display_name",
 						title: t("Product"),
 						render: (data) => (
-							<Text variant="subtle" onClick={handleClick} c={"red"} fz={"xs"}>
+							<Text variant="subtle" onClick={handleClick} c={"red.7"} fz={"xs"}>
 								{data.display_name}
 							</Text>
 						),
@@ -177,14 +177,14 @@ export default function CheckoutTable() {
 									disabled={data.quantity === 1}
 									onClick={() => handleQuantityChange(data, "decrement")}
 								>
-									<IconMinus height="12" width="12" />
+									<IconMinus style={{ color: "inherit" }} height="12" width="12" />
 								</ActionIcon>
 								<NumberInput
 									size="xs"
 									ta="center"
 									fw={600}
 									maw={80}
-									value={inputValues[ data.stock_item_id ] ?? data.quantity}
+									value={inputValues[data.stock_item_id] ?? data.quantity}
 									min={0}
 									max={RESTRICT_PRODUCT_QUANTITY_LIMIT ? data.quantity_limit : undefined}
 									step={1}
@@ -208,7 +208,7 @@ export default function CheckoutTable() {
 									disabled={RESTRICT_PRODUCT_QUANTITY_LIMIT && data.quantity >= data.quantity_limit}
 									onClick={() => handleQuantityChange(data, "increment")}
 								>
-									<IconPlus height="12" width="12" />
+									<IconPlus style={{ color: "inherit" }} height="12" width="12" />
 								</ActionIcon>
 							</Group>
 						),
@@ -233,13 +233,13 @@ export default function CheckoutTable() {
 							<ActionIcon
 								size="sm"
 								variant="white"
-								color="red.8"
+								color="red.6"
 								aria-label="delete"
 								onClick={() => {
 									remove(data);
 								}}
 							>
-								<IconTrash height={20} width={20} stroke={1.5} />
+								<IconTrash style={{ color: "inherit" }} height="20" width="20" stroke={1.5} />
 							</ActionIcon>
 						),
 					},
