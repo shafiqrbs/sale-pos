@@ -837,20 +837,40 @@ const getJoinedTableData = ({
 	}
 };
 
-const clearAndInsertBulk = (table, dataArray) => {
+const clearAndInsertBulk = (table, dataArray, options = {}) => {
+	const { batchSize = 500, onProgress = null } = options;
+
 	try {
 		table = convertTableName(table);
+		const total = dataArray.length;
 
-		const transaction = db.transaction(() => {
-			destroyTableData(table);
+		// =============== clear the table once before starting batch inserts ================
+		destroyTableData(table);
 
-			for (const data of dataArray) {
+		const insertBatch = db.transaction((batch) => {
+			for (const data of batch) {
 				upsertIntoTable(table, data);
 			}
 		});
 
-		transaction();
-		console.log(`Successfully cleared and inserted ${dataArray.length} records into ${table}`);
+		let inserted = 0;
+
+		for (let offset = 0; offset < total; offset += batchSize) {
+			const batch = dataArray.slice(offset, offset + batchSize);
+			insertBatch(batch);
+			inserted += batch.length;
+
+			if (typeof onProgress === "function") {
+				onProgress({
+					table,
+					inserted,
+					total,
+					percent: Math.round((inserted / total) * 100),
+				});
+			}
+		}
+
+		console.log(`Successfully cleared and inserted ${total} records into ${table}`);
 	} catch (error) {
 		console.error(`Error in clearAndInsertBulk for table ${table}:`, error);
 		throw error;

@@ -30,8 +30,8 @@ try {
 			console.log("Calling destroyTableData...");
 			return ipcRenderer.invoke("destroy-table-data", table);
 		},
-		clearAndInsertBulk: (table, dataArray) => {
-			return ipcRenderer.invoke("clear-and-insert-bulk", table, dataArray);
+		clearAndInsertBulk: (table, dataArray, options) => {
+			return ipcRenderer.invoke("clear-and-insert-bulk", table, dataArray, options);
 		},
 		resetDatabase: () => {
 			console.log("Calling resetDatabase...");
@@ -39,6 +39,14 @@ try {
 		},
 		relaunchApp: () => {
 			return ipcRenderer.invoke("relaunch-app");
+		},
+		onDBProgress: (callback) => {
+			ipcRenderer.on("db-progress", (event, progress) => {
+				callback(progress);
+			});
+		},
+		removeDBProgressListener: () => {
+			ipcRenderer.removeAllListeners("db-progress");
 		},
 	});
 	console.info("dbAPI exposed successfully");

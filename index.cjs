@@ -57,9 +57,16 @@ ipcMain.handle("destroy-table-data", async (event, table) => {
 	}
 });
 
-ipcMain.handle("clear-and-insert-bulk", async (event, table, dataArray) => {
+ipcMain.handle("clear-and-insert-bulk", async (event, table, dataArray, options = {}) => {
 	try {
-		return dbModule.clearAndInsertBulk(table, dataArray);
+		return dbModule.clearAndInsertBulk(table, dataArray, {
+			batchSize: options.batchSize ?? 500,
+			onProgress: (progress) => {
+				if (!event.sender.isDestroyed()) {
+					event.sender.send("db-progress", progress);
+				}
+			},
+		});
 	} catch (error) {
 		console.error(`Error clearing and inserting bulk data for ${table}:`, error);
 		throw error;

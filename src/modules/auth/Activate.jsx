@@ -14,13 +14,15 @@ import {
 	LoadingOverlay,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { IconKey, IconCheck, IconInfoCircle } from "@tabler/icons-react";
+import { IconKey, IconCheck, IconInfoCircle, IconCircleKey } from "@tabler/icons-react";
 import axios from "axios";
 import { useNavigate } from "react-router";
 import { useEffect, useState } from "react";
 import { MASTER_APIS } from "@/routes/routes";
 import { useTranslation } from "react-i18next";
+import DatabaseInsertProgress from "@components/DatabaseInsertProgress";
 
+// =============== tables synced from the server on activation ================
 const dataMap = {
 	core_customers: "customers",
 	core_users: "users",
@@ -30,10 +32,15 @@ const dataMap = {
 	core_products: "stock_item",
 };
 
+// =============== threshold: arrays longer than this use clearAndInsertBulk ================
+const BULK_INSERT_THRESHOLD = 1000;
+
 export default function Activate() {
 	const { t } = useTranslation();
 	const [spinner, setSpinner] = useState(false);
 	const [errorMessage, setErrorMessage] = useState("");
+	const [insertProgress, setInsertProgress] = useState(null);
+	const [isInserting, setIsInserting] = useState(false);
 	const navigate = useNavigate();
 
 	const form = useForm({
@@ -46,6 +53,60 @@ export default function Activate() {
 			activeKey: (value) => (value.length < 10 ? t("ActivationKeyMustBe10Characters") : null),
 		},
 	});
+
+	// =============== insert all tables sequentially so progress is displayed per-table ================
+	const insertAllTables = async (responseData) => {
+		window.dbAPI.onDBProgress((progress) => {
+			setInsertProgress(progress);
+		});
+
+		setIsInserting(true);
+
+		try {
+			for (const [table, property] of Object.entries(dataMap)) {
+				// =============== config_data comes as a single object, not an array ================
+				if (table === "config_data") {
+					const configData = {
+						data: JSON.stringify(responseData[property]),
+					};
+					await window.dbAPI.upsertIntoTable(table, configData);
+					continue;
+				}
+
+				const dataList = Array.isArray(responseData[property])
+					? responseData[property]
+					: [responseData[property]];
+
+				if (dataList.length > BULK_INSERT_THRESHOLD) {
+					// =============== large dataset: use batched bulk insert with progress reporting ================
+					await window.dbAPI.clearAndInsertBulk(table, dataList, { batchSize: 500 });
+				} else {
+					// =============== small dataset: upsert row by row, report progress manually ================
+					const total = dataList.length;
+					for (let index = 0; index < total; index++) {
+						await window.dbAPI.upsertIntoTable(table, dataList[index]);
+						setInsertProgress({
+							table,
+							inserted: index + 1,
+							total,
+							percent: Math.round(((index + 1) / total) * 100),
+						});
+					}
+				}
+			}
+
+			// =============== insert default printer config after all table data ================
+			await window.dbAPI.upsertIntoTable("printer", {
+				printer_name: "POS-PRINT",
+				line_character: "-",
+				character_set: "PC437_USA",
+			});
+		} finally {
+			window.dbAPI.removeDBProgressListener();
+			setIsInserting(false);
+			setInsertProgress(null);
+		}
+	};
 
 	const handleSubmit = form.onSubmit(async (values) => {
 		setSpinner(true);
@@ -60,46 +121,25 @@ export default function Activate() {
 			});
 
 			if (response.data.status === 200) {
-				window.dbAPI.upsertIntoTable("license_activate", {
+				await window.dbAPI.upsertIntoTable("license_activate", {
 					license_key: licenseKey,
 					active_key: activeKey,
 					is_activated: 1,
 				});
 
-				const operations = Object.entries(dataMap).map(([table, property]) => {
-					const dataList = Array.isArray(response.data.data[property])
-						? response.data.data[property]
-						: [response.data.data[property]];
-
-					return dataList.map((data) => {
-						if (table === "config_data") {
-							data = {
-								data: JSON.stringify(data),
-							};
-						}
-						return window.dbAPI.upsertIntoTable(table, data);
-					});
-				});
-
-				const setPrinter = window.dbAPI.upsertIntoTable("printer", {
-					printer_name: "POS-PRINT",
-					line_character: "-",
-					character_set: "PC437_USA",
-				});
-
-				await Promise.all([...operations, setPrinter]);
+				setSpinner(false);
+				await insertAllTables(response.data.data);
 
 				navigate("/login", { replace: true });
 			} else {
 				setErrorMessage(response.data.message);
+				setSpinner(false);
 			}
 		} catch (error) {
 			setErrorMessage(
 				error?.response?.data.message || error?.message || "Account activation failed"
 			);
-
 			console.error(error);
-		} finally {
 			setSpinner(false);
 		}
 	});
@@ -122,12 +162,16 @@ export default function Activate() {
 		>
 			<Container size="sm" py="xl" pos="relative">
 				<LoadingOverlay visible={spinner} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
+
+				{/* =============== progress overlay shown during bulk db inserts ================ */}
+				<DatabaseInsertProgress visible={isInserting} progress={insertProgress} />
+
 				<Paper radius="md" p="xl" withBorder shadow="lg">
 					<Box ta="center" mb="md">
 						<img src="./sandra.jpg" height="90px" alt="Sandra" />
 					</Box>
 
-					<Stack spacing="lg">
+					<Stack gap="lg">
 						<Box ta="center" mb="md">
 							<Title order={2} fw={700} c="red.7">
 								{t("ActivateYourAccount")}
@@ -148,7 +192,7 @@ export default function Activate() {
 									mb="md"
 								/>
 							)}
-							<Stack spacing="md">
+							<Stack gap="md">
 								<Tooltip
 									label={form.errors.licenseKey}
 									px={20}
@@ -166,7 +210,7 @@ export default function Activate() {
 									<TextInput
 										label={t("EnterLicenseKey")}
 										placeholder="XXX-XXXXX-XXX"
-										icon={<IconKey size={16} />}
+										leftSection={<IconCircleKey stroke={1.2} size={24} />}
 										withAsterisk
 										{...form.getInputProps("licenseKey")}
 										error={!!form.errors.licenseKey}
@@ -196,7 +240,7 @@ export default function Activate() {
 											duration: 500,
 										}}
 									>
-										<Group position="center" mb={5}>
+										<Group justify="center" mb={5}>
 											<PinInput
 												withAsterisk
 												name="activeKey"
@@ -222,7 +266,7 @@ export default function Activate() {
 									size="md"
 									radius="md"
 									mt="md"
-									leftIcon={<IconCheck size={18} />}
+									leftSection={<IconCheck size={18} />}
 									gradient={{
 										from: "var(--theme-secondary-color-6)",
 										to: "var(--theme-secondary-color-8)",

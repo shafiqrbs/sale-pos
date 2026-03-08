@@ -174,18 +174,19 @@ export default function Login() {
 							offset={2}
 							transitionProps={{ transition: "pop-bottom-left", duration: 500 }}
 						>
-						<TextInput
-							withAsterisk
-							label={t("UserName")}
-							placeholder={t("UserName")}
-							size="md"
-							id="Username"
-							classNames={{ input: classes.styledInput }}
-							{...form.getInputProps("username")}
-							onKeyDown={getHotkeyHandler([
-								["Enter", () => document.getElementById("Password")?.focus()],
-							])}
-						/>
+							<TextInput
+								withAsterisk
+								label={t("UserName")}
+								placeholder="your username"
+								size="md"
+								id="Username"
+								classNames={{ input: classes.styledInput }}
+								disabled={spinner}
+								{...form.getInputProps("username")}
+								onKeyDown={getHotkeyHandler([
+									["Enter", () => document.getElementById("Password")?.focus()],
+								])}
+							/>
 						</Tooltip>
 					</Box>
 
@@ -201,18 +202,19 @@ export default function Login() {
 							offset={2}
 							transitionProps={{ transition: "pop-bottom-left", duration: 500 }}
 						>
-						<PasswordInput
-							withAsterisk
-							label={t("Password")}
-							placeholder={t("Password")}
-							size="md"
-							classNames={{ input: classes.styledInput }}
-							{...form.getInputProps("password")}
-							id="Password"
-							onKeyDown={getHotkeyHandler([
-								["Enter", () => document.getElementById("LoginSubmit")?.click()],
-							])}
-						/>
+							<PasswordInput
+								withAsterisk
+								label={t("Password")}
+								placeholder="ex. abc1234"
+								size="md"
+								classNames={{ input: classes.styledInput }}
+								disabled={spinner}
+								{...form.getInputProps("password")}
+								id="Password"
+								onKeyDown={getHotkeyHandler([
+									["Enter", () => document.getElementById("LoginSubmit")?.click()],
+								])}
+							/>
 						</Tooltip>
 					</Box>
 					<Button
