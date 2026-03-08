@@ -23,6 +23,7 @@ export default function VirtualSearchSelect({
 	placeholder = "Select",
 	searchable = true,
 	disabled = false,
+	showOptionsOnlyOnSearch = false,
 	nothingFoundMessage = "No results found",
 	onChange,
 	id,
@@ -59,6 +60,7 @@ export default function VirtualSearchSelect({
 			: [];
 
 		VirtualSelect.init({
+			showOptionsOnlyOnSearch: showOptionsOnlyOnSearch,
 			ele: containerElement,
 			options: normalizedOptions,
 			search: !!searchable,
