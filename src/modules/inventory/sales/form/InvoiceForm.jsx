@@ -195,7 +195,7 @@ export default function InvoiceForm({ refetch }) {
 										options={productOptions}
 										placeholder="Enter stock product name"
 										searchable
-										showOptionsOnlyOnSearch={true}
+										showOptionsOnlyOnSearch={false}
 										nothingFoundMessage="No product found"
 										onChange={handleProductSelect}
 										id="productId"
