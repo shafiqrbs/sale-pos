@@ -32,6 +32,7 @@ import { useTranslation } from "react-i18next";
 import axios from "axios";
 import { APP_NAVLINKS, MASTER_APIS } from "@/routes/routes";
 import commonDataStoreIntoLocalStorage from "@utils/local-storage/commonDataStoreIntoLocalStorage";
+import DatabaseInsertProgress from "@components/DatabaseInsertProgress";
 
 const TABLE_MAPPING = {
 	sales: "sales",
@@ -63,6 +64,8 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 		}, {});
 	});
 	const [ platformSyncing, setPlatformSyncing ] = useState(false);
+	const [ isInserting, setIsInserting ] = useState(false);
+	const [ insertProgress, setInsertProgress ] = useState(null);
 	const lastSyncRecord = useMemo(() => getLastSyncRecord(syncRecords), [ syncRecords ]);
 
 	const buildSalesSyncPayload = (sale) => {
@@ -306,27 +309,37 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 				return;
 			}
 
-			// =============== clear and repopulate tables except license_activate and users ================
-			const syncOperations = Object.entries(PLATFORM_SYNC_DATA_MAP).map(
-				async ([ table, property ]) => {
+			// =============== register progress listener before sequential inserts begin ================
+			window.dbAPI.onDBProgress((progress) => {
+				setInsertProgress(progress);
+			});
+
+			setIsInserting(true);
+			setPlatformSyncing(false);
+
+			try {
+				// =============== insert tables one by one so progress displays per-table ================
+				for (const [ table, property ] of Object.entries(PLATFORM_SYNC_DATA_MAP)) {
 					const dataList = Array.isArray(response.data.data[ property ])
 						? response.data.data[ property ]
 						: [ response.data.data[ property ] ];
 
-					// =============== handle config_data special formatting ================
+					// =============== config_data is a single object, format it before inserting ================
 					if (table === "config_data") {
 						const formattedData = dataList.map((data) => ({
 							id: 1,
 							data: JSON.stringify(data),
 						}));
-						await window.dbAPI.clearAndInsertBulk(table, formattedData);
+						await window.dbAPI.clearAndInsertBulk(table, formattedData, { batchSize: 500 });
 					} else {
-						await window.dbAPI.clearAndInsertBulk(table, dataList);
+						await window.dbAPI.clearAndInsertBulk(table, dataList, { batchSize: 500 });
 					}
 				}
-			);
-
-			await Promise.all(syncOperations);
+			} finally {
+				window.dbAPI.removeDBProgressListener();
+				setIsInserting(false);
+				setInsertProgress(null);
+			}
 
 			// =============== clear tables that will be populated by commonDataStoreIntoLocalStorage ================
 			await window.dbAPI.destroyTableData("categories");
@@ -374,18 +387,24 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 		return `Last synced: ${formatDateTime(new Date(lastModeRecord.syncedAt))}`;
 	};
 
-	const loadingOverlayNode = (
-		<LoadingOverlay
-			h="100vh"
-			zIndex={999}
-			visible={platformSyncing}
-			style={{ position: "fixed", inset: 0 }}
-		/>
-	);
-
 	return (
 		<>
-			{createPortal(loadingOverlayNode, document.body)}
+			{/* =============== full-screen spinner while fetching data from the server ================ */}
+			{createPortal(
+				<LoadingOverlay
+					h="100vh"
+					zIndex={999}
+					visible={platformSyncing}
+					style={{ position: "fixed", inset: 0 }}
+				/>,
+				document.body
+			)}
+
+			{/* =============== progress overlay while writing batches into the local db ================ */}
+			{createPortal(
+				<DatabaseInsertProgress visible={isInserting} progress={insertProgress} />,
+				document.body
+			)}
 			<GlobalDrawer
 				opened={syncPanelOpen}
 				onClose={() => setSyncPanelOpen(false)}
