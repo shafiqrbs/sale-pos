@@ -46,7 +46,7 @@ export default function InvoiceForm({ refetch }) {
 		getLocalProducts(
 			{ category_id: null },
 			"id",
-			{ orderBy: "id ASC" }
+			{ orderBy: "product_name ASC" }
 		).then((fetchedProducts) => {
 			setProducts(fetchedProducts);
 		});
@@ -144,10 +144,11 @@ export default function InvoiceForm({ refetch }) {
 				className="borderRadiusAll"
 				px="sm"
 				py="xs"
+				bg={'blue.4'}
 			>
 				<Flex gap="xs" align="flex-end" wrap="nowrap">
 					{/* =============== barcode input =============== */}
-					<Box w={130} style={{ flexShrink: 0 }}>
+					<Box w={200} style={{ flexShrink: 0 }}>
 						<InputForm
 							form={salesItemForm}
 							name="barcode"
@@ -194,6 +195,7 @@ export default function InvoiceForm({ refetch }) {
 										options={productOptions}
 										placeholder="Enter stock product name"
 										searchable
+										showOptionsOnlyOnSearch={true}
 										nothingFoundMessage="No product found"
 										onChange={handleProductSelect}
 										id="productId"
@@ -202,8 +204,8 @@ export default function InvoiceForm({ refetch }) {
 							</FormValidationWrapper>
 						</Box>
 						<ActionIcon
-							variant="filled"
-							color="var(--theme-primary-color-6)"
+							variant="outline"
+							bg="white"
 							radius="sm"
 							size={36}
 							onClick={openProductDrawer}
@@ -280,6 +282,7 @@ export default function InvoiceForm({ refetch }) {
 						onClick={handleResetSalesItemForm}
 						variant="outline"
 						radius="xl"
+						bg="white"
 						size={36}
 						color="var(--theme-primary-color-6)"
 						style={{ flexShrink: 0 }}
@@ -290,7 +293,7 @@ export default function InvoiceForm({ refetch }) {
 					<Button
 						leftSection={<IconPlus size={16} />}
 						rightSection={<IconShoppingCart size={15} />}
-						bg="var(--theme-primary-color-6)"
+						bg="red"
 						color="white"
 						radius="sm"
 						type="submit"

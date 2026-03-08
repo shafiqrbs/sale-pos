@@ -199,7 +199,7 @@ export default function NewIndex() {
 
     return (
         <Box>
-            <Flex justify="space-between" align="center" mb="4xs">
+           {/* <Flex justify="space-between" align="center" mb="4xs">
                 <Box px="xs" fz="sm" fw={600} className="boxBackground textColor borderRadiusAll">
                     {t("SalesItems")}
                 </Box>
@@ -226,7 +226,7 @@ export default function NewIndex() {
                         </Text>
                     </NavLink>
                 </Flex>
-            </Flex>
+            </Flex>*/}
             <Box p="xs" pb={0}>
                 <InvoiceForm refetch={refetch} />
             </Box>

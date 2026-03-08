@@ -18,10 +18,11 @@ import {
 import { Carousel } from "@mantine/carousel";
 import { useDisclosure, useHotkeys } from "@mantine/hooks";
 import {
+	IconCashPlus, IconEyeDollar,
 	IconNumber123,
 	IconPercentage,
 	IconPlusMinus,
-	IconPrinter,
+	IconPrinter, IconPrinterOff,
 	IconScissors,
 	IconTicket,
 	IconUserPlus,
@@ -202,119 +203,57 @@ export default function PaymentSection({
 				<Grid columns={24} gutter={8} mt="xs">
 					<Grid.Col span={12}>
 						<Grid columns={18} gutter={4} justify="center" align="center" p={'xs'} bg="gray.1">
-							<Grid.Col span={5}>
-								<FormValidationWrapper
-									errorMessage={t("ClickRightButtonForPercentFlat")}
-									opened={!!salesForm.errors.coupon_code}
-								>
-									<Button
-										fullWidth
-										onClick={handleDiscountModeChange}
-										variant="light"
-										bg={'orange.1'}
-										px="md"
-										fz="md"
-										size={'xl'}
-										leftSection={
-											discountMode === "coupon" ? (
-												<IconTicket size={14} />
-											) : (
-												<IconPercentage size={14} />
+							<Grid.Col span={9} px={4} pb={'10'}>
+								<Box>
+									<FormValidationWrapper
+										errorMessage={t("ChooseCustomer")}
+										opened={!!salesForm.errors.customer_id}
+									>
+										<Select
+											placeholder={t('ChooseCustomer')}
+											data={dropdownOptions}
+											searchable
+											clearable
+											value={salesForm.values.customer_id}
+											onChange={(value) => salesForm.setFieldValue("customer_id", value ?? "")}
+											size="sm"
+											nothingFoundMessage={t('NoCustomerFound')}
+											rightSectionPointerEvents="pointer-events"
+											rightSection={
+												<ActionIcon
+													variant="filled"
+													onClick={handleCustomerAdd}
+												>
+													<IconUserPlus size={16} />
+												</ActionIcon>
+											}
+										/>
+									</FormValidationWrapper>
+									<DateInput
+										my='4'
+										value={salesForm.values.salesDate}
+										onChange={(value) => salesForm.setFieldValue("salesDate", value)}
+										valueFormat="MMMM D, YYYY"
+										size="xs"
+										label={null}
+										placeholder="Select date"
+									/>
+									<Textarea
+										value={salesNarration}
+										onChange={(event) =>
+											salesForm.setFieldValue(
+												"salesNarration",
+												event.currentTarget.value
 											)
 										}
-										color="orange"
-									>
-										{discountMode === "coupon" ? t("Coupon") : t("Discount")}
-									</Button>
-								</FormValidationWrapper>
-							</Grid.Col>
-							<Grid.Col
-								span={4}
-								bg={
-									discount_type === "flat"
-										? "red.3"
-										: discount_type === "percentage"
-										? "violet.3"
-										: "gray.3"
-								}
-							>
-								{discountMode === "coupon" ? (
-									<TextInput
-										type="text"
-										placeholder={t("CouponCode")}
-										value={coupon_code}
-										error={salesForm.errors.coupon_code}
-										size={'xl'}
-										onChange={(event) => {
-											salesForm.setFieldValue("coupon_code", event.target.value);
-										}}
-										rightSection={
-											<FormValidationWrapper
-												errorMessage={t("CouponCode")}
-												opened={!!salesForm.errors.coupon_code}
-												position="left"
-											>
-												<IconTicket size={16} opacity={0.5} />
-											</FormValidationWrapper>
-										}
+										placeholder="Narration"
+										size="md"
+										minRows={6}
 									/>
-								) : (
-									<FormValidationWrapper
-										errorMessage={t("ClickRightButtonForPercentFlat")}
-										opened={!!salesForm.errors.discount}
-										position="left"
-									>
-										{discount_type === "flat" ? (
-											<NumberInput
-												placeholder={t("Discount")}
-												value={discount}
-												error={salesForm.errors.discount}
-												size={'xl'}
-												onChange={(value) => salesForm.setFieldValue("discount", value)}
-												rightSection={
-													<ActionIcon
-														size={32}
-														bg="red.5"
-														variant="filled"
-														mr={10}
-														onClick={toggleDiscountMode}
-													>
-														<IconNumber123 size={16} />
-													</ActionIcon>
-												}
-											/>
-										) : (
-											<NumberInput
-												placeholder={t("Discount")}
-												value={percentageValue}
-												error={salesForm.errors.discount}
-												size="sm"
-												suffix="%"
-												max={99}
-												min={0}
-												allowNegative={false}
-												step={1}
-												decimalScale={2}
-												hideControls
-												onChange={handlePercentageChange}
-												rightSection={
-													<ActionIcon
-														size={32}
-														bg="violet.5"
-														variant="filled"
-														mr={10}
-														onClick={toggleDiscountMode}
-													>
-														<IconPercentage size={16} />
-													</ActionIcon>
-												}
-											/>
-										)}
-									</FormValidationWrapper>
-								)}
+								</Box>
 							</Grid.Col>
-							<Grid.Col span={9} px={4} pb={'10'}>
-								<Grid columns={18} bg="gray.1" p={'xs'}>
+							<Grid.Col span={9} px={4} pb={'xs'} bg={'white'}>
+								<Grid columns={18} bg="gray.2" p={'xs'} >
 									<Grid.Col span={6}>
 										<Stack gap={0}>
 											<Group justify="space-between" gap={0}>
@@ -358,7 +297,7 @@ export default function PaymentSection({
 										</Group>
 									</Grid.Col>
 									<Grid.Col span={6}>
-										<Stack gap={0} align="center" justify="center"  bg="gray.4" bdrs={4}>
+										<Stack gap={0} align="center" justify="center" p={'4'}  bg="gray.4" bdrs={4}>
 											<Text fw={800} c="black" size="lg">
 												{currencySymbol} {formatCurrency(itemsTotal)}
 											</Text>
@@ -368,64 +307,126 @@ export default function PaymentSection({
 										</Stack>
 									</Grid.Col>
 								</Grid>
-							</Grid.Col>
-							<Grid.Col span={9}>
-								<Textarea
-									value={salesNarration}
-									onChange={(event) =>
-										salesForm.setFieldValue(
-											"salesNarration",
-											event.currentTarget.value
-										)
-									}
-									placeholder="Narration"
-									size="lg"
-									minRows={8}
-								/>
-							</Grid.Col>
-							<Grid.Col span={9}>
-								<Box>
-									<FormValidationWrapper
-										errorMessage={t("ChooseCustomer")}
-										opened={!!salesForm.errors.customer_id}
+								<Grid columns={18}  mt={'md'} pt={'xs'} pr={'8'}>
+									<Grid.Col span={10}>
+										<FormValidationWrapper
+											errorMessage={t("ClickRightButtonForPercentFlat")}
+											opened={!!salesForm.errors.coupon_code}
+										>
+											<Button
+												fullWidth
+												onClick={handleDiscountModeChange}
+												variant="light"
+												bg={'orange.1'}
+												px="md"
+												fz="md"
+												size={'md'}
+												leftSection={
+													discountMode === "coupon" ? (
+														<IconTicket size={14} />
+													) : (
+														<IconPercentage size={14} />
+													)
+												}
+												color="orange"
+											>
+												{discountMode === "coupon" ? t("Coupon") : t("Discount")}
+											</Button>
+										</FormValidationWrapper>
+									</Grid.Col>
+									<Grid.Col
+										span={8}
+										bg={
+											discount_type === "flat"
+												? "red.1"
+												: discount_type === "percentage"
+												? "violet.1"
+												: "gray.3"
+										}
 									>
-										<Select
-											placeholder={t('ChooseCustomer')}
-											data={dropdownOptions}
-											searchable
-											clearable
-											value={salesForm.values.customer_id}
-											onChange={(value) => salesForm.setFieldValue("customer_id", value ?? "")}
-											size="sm"
-											nothingFoundMessage={t('NoCustomerFound')}
-											rightSectionPointerEvents="pointer-events"
-											rightSection={
-												<ActionIcon
-													variant="filled"
-													onClick={handleCustomerAdd}
-												>
-													<IconUserPlus size={16} />
-												</ActionIcon>
-											}
-										/>
-									</FormValidationWrapper>
-									<DateInput
-										my='4'
-										value={salesForm.values.salesDate}
-										onChange={(value) => salesForm.setFieldValue("salesDate", value)}
-										valueFormat="MMMM D, YYYY"
-										size="xs"
-										label={null}
-										placeholder="Select date"
-									/>
-								</Box>
+										{discountMode === "coupon" ? (
+											<TextInput
+												type="text"
+												placeholder={t("CouponCode")}
+												value={coupon_code}
+												error={salesForm.errors.coupon_code}
+												size="sm"
+												onChange={(event) => {
+													salesForm.setFieldValue("coupon_code", event.target.value);
+												}}
+												rightSection={
+													<FormValidationWrapper
+														errorMessage={t("CouponCode")}
+														opened={!!salesForm.errors.coupon_code}
+														position="left"
+													>
+														<IconTicket size={16} opacity={0.5} />
+													</FormValidationWrapper>
+												}
+											/>
+										) : (
+											<FormValidationWrapper
+												errorMessage={t("ClickRightButtonForPercentFlat")}
+												opened={!!salesForm.errors.discount}
+												position="left"
+											>
+												{discount_type === "flat" ? (
+													<NumberInput
+														placeholder={t("Discount")}
+														value={discount}
+														error={salesForm.errors.discount}
+														size="sm"
+														onChange={(value) => salesForm.setFieldValue("discount", value)}
+														rightSection={
+															<ActionIcon
+																size={32}
+																bg="red.5"
+																variant="filled"
+																mr={10}
+																onClick={toggleDiscountMode}
+															>
+																<IconNumber123 size={16} />
+															</ActionIcon>
+														}
+													/>
+												) : (
+													<NumberInput
+														placeholder={t("Discount")}
+														value={percentageValue}
+														error={salesForm.errors.discount}
+														size="sm"
+														suffix="%"
+														max={99}
+														min={0}
+														allowNegative={false}
+														step={1}
+														decimalScale={2}
+														hideControls
+														onChange={handlePercentageChange}
+														rightSection={
+															<ActionIcon
+																size={32}
+																bg="violet.5"
+																variant="filled"
+																mr={10}
+																onClick={toggleDiscountMode}
+															>
+																<IconPercentage size={16} />
+															</ActionIcon>
+														}
+													/>
+												)}
+											</FormValidationWrapper>
+										)}
+									</Grid.Col>
+								</Grid>
 							</Grid.Col>
 						</Grid>
 					</Grid.Col>
 					<Grid.Col span={12}>
-						<Grid columns={24} gutter={2} bg="gray.1">
+						<Grid columns={24} gutter={2} bg="white">
 
-							<Grid.Col span={12}>
+							<Grid.Col span={16}>
 								<Stack
 									p={'xs'}
 									bg={'white'}
@@ -602,16 +603,27 @@ export default function PaymentSection({
 													readOnly={isSplitPaymentActive}
 													disabled={isSplitPaymentActive}
 													leftSection={<IconPlusMinus size={16} opacity={0.5} />}
+													rightSection={
+														<Tooltip
+															label="Profit"
+															c="white"
+															bg={'red'}
+															withArrow
+															zIndex={999}
+															transitionProps={{ transition: "pop-bottom-left", duration: 500 }}
+														>
+														<IconEyeDollar size={16} opacity={0.5} />
+														</Tooltip>
+														}
 													{...salesForm.getInputProps("paymentAmount", { type: "number" })}
+
 												/>
 											</FormValidationWrapper>
 										</Grid.Col>
 										<Grid.Col span={8} >
 											<Stack gap={0} align="center" justify="center"  py={'1'} bdrs={4}>
 												<Tooltip
-													label="Split payment"
-													px={16}
-													py={2}
+													label="Digital Payment"
 													c="white"
 													bg={'green'}
 													withArrow
@@ -625,16 +637,16 @@ export default function PaymentSection({
 														onClick={handleOpenSplitPaymentDrawer}
 														disabled={!salesForm.values.paymentAmount}
 													>
-														<IconScissors style={{ width: "70%", height: "70%" }} stroke={1.5} />
+														<IconCashPlus style={{ width: "70%", height: "70%" }} stroke={1.5} />
 													</ActionIcon>
 												</Tooltip>
-												<Text fz={'xs'} c={'gray.6'}>Multiple Payment</Text>
+												<Text fz={'xs'} c={'gray.6'}>Digital Payment</Text>
 											</Stack>
 										</Grid.Col>
 									</Grid>
 								</Stack>
 							</Grid.Col>
-							<Grid.Col span={6}>
+							{/*<Grid.Col span={6}>
 								<Stack
 									h="100%"
 									justify="space-between"
@@ -687,40 +699,60 @@ export default function PaymentSection({
 										))}
 									</ScrollArea>
 								</Stack>
-							</Grid.Col>
-							<Grid.Col span={6}>
+							</Grid.Col>*/}
+							<Grid.Col span={8}>
+
 								<Stack
 									p={'xs'}
+									bg={'gray.1'}
 									className="borderRadiusAll"
 									h="100%"
 									justify="space-between"
 									gap={0}
 								>
-									<Button
-										fullWidth
-										variant="outline" color="red"
-										radius={0}
-										size="lg"
-										form="salesForm"
-										type="submit"
-										id="SalesHoldFormSubmit"
-										loading={isAddingSales}
-									>
-										{t("Hold")}
-									</Button>
+									<Button.Group>
+										<Button
+											fullWidth
+											variant="outline"
+											color="green"
+											radius={0}
+											size="lg"
+											form="salesForm"
+											type="submit"
+											id="SalesFormSubmit"
+											loading={isAddingSales}
+										>
+											Save
+										</Button>
+										<Button
+											fullWidth
+											variant="outline"
+											color="red"
+											radius={0}
+											size="lg"
+											form="salesForm"
+											type="submit"
+											id="SalesHoldFormSubmit"
+											loading={isAddingSales}
+										>
+											{t("Hold")}
+										</Button>
+									</Button.Group>
 
 									<Button
 										fullWidth
-										variant="outline" color="blue"
+										variant="light" color="blue"
 										radius={0}
 										size="lg"
 										form="salesForm"
 										type="submit"
 										id="SalesFormSubmit"
 										loading={isAddingSales}
+										leftSection={<IconPrinterOff size={16} />}
 									>
-										Save
+										Print
 									</Button>
+
 									<Button
 										fullWidth
 										bg="var(--theme-pos-btn-color)"

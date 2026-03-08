@@ -58,7 +58,7 @@ export default function InvoiceForm({ refetch }) {
 		getLocalProducts(
 			{ category_id: selectedCategoryId },
 			"id",
-			{ orderBy: "id ASC" }
+			{ orderBy: "product_name ASC" }
 		).then((fetchedProducts) => {
 			setProducts(fetchedProducts);
 		});
@@ -198,7 +198,7 @@ export default function InvoiceForm({ refetch }) {
 											options={productOptions}
 											placeholder="Choose Product"
 											searchable
-											showOptionsOnlyOnSearch={false}
+											showOptionsOnlyOnSearch={true}
 											nothingFoundMessage="No product found"
 											onChange={handleProductSelect}
 											id="productId"

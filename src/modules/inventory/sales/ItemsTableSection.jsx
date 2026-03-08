@@ -1,5 +1,5 @@
 import React from "react";
-import { ActionIcon, Box, Flex, NumberInput, Text } from "@mantine/core";
+import {ActionIcon, Badge, Box, Flex, NumberInput, Text} from "@mantine/core";
 import { DataTable } from "mantine-datatable";
 import { IconTrashX } from "@tabler/icons-react";
 import tableCss from "@assets/css/Table.module.css";
@@ -10,7 +10,7 @@ import { formatCurrency } from "@utils/index";
 export default function ItemsTableSection({ salesProducts, refetch, itemsTotal }) {
 	const { mainAreaHeight } = useMainAreaHeight();
 	// =============== account for invoice form top row (~55px) + payment section + spacing ===============
-	const tableHeight = mainAreaHeight - 360;
+	const tableHeight = mainAreaHeight - 380;
 	const { configData } = useConfigData();
 
 	const currencySymbol =
@@ -202,18 +202,19 @@ export default function ItemsTableSection({ salesProducts, refetch, itemsTotal }
 				noRecordsText="No items added"
 			/>
 
-			<Box mt="les" px="xs" py="4xs" bg="var(--theme-tertiary-color-2)" className="borderRadiusAll">
+			<Box mt="les" px="xs" py="xs" bg="gray.1" className="borderRadiusAll">
 				<Flex justify="space-between" align="center">
-					<Text fz="sm" fw={600}>
-						Σ&nbsp; {salesProducts.length} Item(s)
-					</Text>
+					<Badge size="xl" bg={'red'}>
+						<Text fz="sm" fw={600}>
+							Σ&nbsp; {salesProducts.length} Item(s)
+						</Text>
+					</Badge>
 					<Flex align="center" gap={4}>
-						<Text fz="sm" fw={500}>
-							{currencySymbol}
+						<Badge size="xl">
+						<Text fz="xl" fw={700}>
+							{currencySymbol}&nbsp;{formatCurrency(itemsTotal)}
 						</Text>
-						<Text fz="sm" fw={700}>
-							{formatCurrency(itemsTotal)}
-						</Text>
+						</Badge>
 					</Flex>
 				</Flex>
 			</Box>

@@ -1,10 +1,11 @@
 import { useEffect, useState, useMemo } from "react"
-import { Stack, Text, Group, NumberInput, Button, Box, Image, Flex, Divider, ScrollArea } from "@mantine/core"
+import {Stack, Text, Group, NumberInput, Button, Box, Image, Flex, Divider, ScrollArea, TextInput} from "@mantine/core"
 import { useTranslation } from "react-i18next"
 import useConfigData from "@hooks/useConfigData"
 import { useOutletContext } from "react-router"
 import GlobalDrawer from "../drawers/GlobalDrawer"
 import { formatCurrency } from "@utils/index"
+import InputForm from "@components/form-builders/InputForm";
 
 export default function SplitPaymentsDrawer({ opened, onClose, totalAmount, onSave, onRemove, existingSplitPayments = [] }) {
     const { t } = useTranslation()
@@ -77,9 +78,9 @@ export default function SplitPaymentsDrawer({ opened, onClose, totalAmount, onSa
         <GlobalDrawer
             opened={opened}
             onClose={onClose}
-            title={t("SplitPayments")}
+            title={t("Digital & Multi Payments")}
             position="right"
-            size="md"
+            size="xl"
         >
             <Box>
                 <Stack gap="md">
@@ -118,6 +119,7 @@ export default function SplitPaymentsDrawer({ opened, onClose, totalAmount, onSa
                                         {method.name}
                                     </Text>
                                     <NumberInput
+                                        width={'100'}
                                         placeholder={t("Amount")}
                                         value={paymentInputs[ method.id ] || ""}
                                         onChange={(value) => handleInputChange(method.id, value)}
@@ -128,6 +130,11 @@ export default function SplitPaymentsDrawer({ opened, onClose, totalAmount, onSa
                                         style={{ flex: 1 }}
                                         min={0}
                                         thousandSeparator=","
+                                    />
+                                    <TextInput
+                                        placeholder={t("Transaction/Mobile/Remark")}
+                                        size="sm"
+                                        style={{ flex: 1 }}
                                     />
                                 </Flex>
                             ))}
