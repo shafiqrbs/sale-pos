@@ -1,6 +1,6 @@
 import React from "react";
 import { ActionIcon, Box, Flex, NumberInput, Text, Button } from "@mantine/core";
-import { DatePicker, DatePickerInput } from '@mantine/dates';
+import { DateInput } from "@mantine/dates";
 import { DataTable } from "mantine-datatable";
 import { IconList, IconTrashX } from "@tabler/icons-react";
 import tableCss from "@assets/css/Table.module.css";
@@ -11,7 +11,10 @@ import { formatCurrency } from "@utils/index";
 import { useNavigate } from "react-router";
 import { APP_NAVLINKS } from "@/routes/routes";
 import { useTranslation } from "react-i18next";
+import customParseFormat from "dayjs/plugin/customParseFormat";
 import dayjs from "dayjs";
+
+dayjs.extend(customParseFormat);
 
 export default function ItemsTableSection({ purchaseProducts, refetch, itemsTotal }) {
 	const navigate = useNavigate();
@@ -53,9 +56,10 @@ export default function ItemsTableSection({ purchaseProducts, refetch, itemsTota
 	};
 
 	const handleExpiredDateChange = async (itemId, value) => {
+		const dateValue = value ? dayjs(value).format("YYYY-MM-DD") : null;
 		await window.dbAPI.upsertIntoTable("temp_purchase_products", {
 			id: itemId,
-			expired_date: dayjs(value).format("YYYY-MM-DD"),
+			expired_date: dateValue,
 		});
 		refetch();
 	};
@@ -102,31 +106,36 @@ export default function ItemsTableSection({ purchaseProducts, refetch, itemsTota
 					},
 
 					{
-						accessor: "productName",
+						accessor: "display_name",
 						title: "Product",
-						render: (record) => <Text size="sm">{record.productName}</Text>,
+						render: (record) => <Text size="sm">{record.display_name}</Text>,
 					},
 					{
 						accessor: "expired_date",
 						title: t("ExpiredDate"),
 						textAlign: "center",
-						width: 120,
+						width: 130,
 						render: (record) => (
-							<DatePickerInput
-								size="xs"
-								value={record.expired_date}
-								min={0}
-								step={1}
-								hideControls
-								onChange={(value) => handleExpiredDateChange(record.id, value)}
-							/>
+						<DateInput
+							size="xs"
+							value={
+								record.expired_date &&
+								dayjs(record.expired_date, "YYYY-MM-DD", true).isValid()
+									? dayjs(record.expired_date, "YYYY-MM-DD", true).toDate()
+									: null
+							}
+							placeholder="DD-MM-YYYY"
+							valueFormat="DD-MM-YYYY"
+							clearable
+							onChange={(dateValue) => handleExpiredDateChange(record.id, dateValue)}
+						/>
 						),
 					},
 					{
 						accessor: "quantity",
 						title: "Qty",
-						textAlign: "center",
-						width: 120,
+						textAlign: "left",
+						width: 80,
 						render: (record) => (
 							<NumberInput
 								size="xs"
@@ -141,12 +150,12 @@ export default function ItemsTableSection({ purchaseProducts, refetch, itemsTota
 					{
 						accessor: "price",
 						title: "Price",
-						textAlign: "right",
+						textAlign: "left",
 						width: 140,
 						render: (record) => (
 							<NumberInput
 								size="xs"
-								value={record.price}
+								value={record.price ?? 0}
 								min={0}
 								step={1}
 								hideControls

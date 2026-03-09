@@ -30,18 +30,15 @@ import { showNotification } from "@components/ShowNotificationComponent";
 import { invoiceItemFormRequest } from "../helpers/request";
 import FormValidationWrapper from "@components/form-builders/FormValidationWrapper";
 import VirtualSearchSelect from "@components/form-builders/VirtualSearchSelect";
+import DateInputForm from "@components/form-builders/DateInputForm";
 
 import { useEffect, useState } from "react";
 import { useGetInventoryCategoryQuery } from "@services/settings";
-import DatePickerForm from "@components/form-builders/DatePicker";
-import { useTranslation } from "react-i18next";
-
 
 export default function InvoiceForm({ refetch }) {
-	const { t } = useTranslation();
-	const [ products, setProducts ] = useState([]);
-	const [ productResetKey, setProductResetKey ] = useState(0);
-	const [ selectedCategoryId, setSelectedCategoryId ] = useState(null);
+	const [products, setProducts] = useState([]);
+	const [productResetKey, setProductResetKey] = useState(0);
+	const [selectedCategoryId, setSelectedCategoryId] = useState(null);
 	const { configData } = useConfigData();
 	const invoiceItemForm = useForm(invoiceItemFormRequest());
 	const { getLocalProducts } = useLocalProducts({
@@ -50,20 +47,18 @@ export default function InvoiceForm({ refetch }) {
 
 	const { data: productCategoryData } = useGetInventoryCategoryQuery({ type: "parent" });
 	const { mainAreaHeight } = useMainAreaHeight();
-	const [ isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer } ] =
+	const [isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer }] =
 		useDisclosure(false);
 
 	// =============== fetch products in db entry order (id ASC), same as sales product select ===============
 	useEffect(() => {
-		getLocalProducts(
-			{ category_id: selectedCategoryId },
-			"id",
-			{ orderBy: "product_name ASC" }
-		).then((fetchedProducts) => {
+		getLocalProducts({ category_id: selectedCategoryId }, "id", {
+			orderBy: "product_name ASC",
+		}).then((fetchedProducts) => {
 			setProducts(fetchedProducts);
 		});
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ selectedCategoryId ]);
+	}, [selectedCategoryId]);
 
 	const currencySymbol =
 		configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol;
@@ -109,7 +104,7 @@ export default function InvoiceForm({ refetch }) {
 			unit_name: selectedProduct.unit_name || invoiceItemForm.values.unit || "",
 			type: "purchase",
 			price: priceNumber,
-			expired_date: expired_date,
+			expired_date,
 		};
 
 		// =============== persist new item into local temp_purchase_products table ===============
@@ -139,7 +134,7 @@ export default function InvoiceForm({ refetch }) {
 		requestAnimationFrame(() => document.getElementById("quantity").focus());
 	};
 
-	useHotkeys([ [ "alt+a", () => document.getElementById("EntityFormSubmit")?.click() ] ]);
+	useHotkeys([["alt+a", () => document.getElementById("EntityFormSubmit")?.click()]]);
 
 	return (
 		<>
@@ -198,8 +193,7 @@ export default function InvoiceForm({ refetch }) {
 											options={productOptions}
 											placeholder="Choose Product"
 											searchable
-											showOptionsOnlyOnSearch={true}
-											nothingFoundMessage="No product found"
+											nothingFoundMessage="Change the search term to find a product"
 											onChange={handleProductSelect}
 											id="productId"
 										/>
@@ -249,15 +243,14 @@ export default function InvoiceForm({ refetch }) {
 								/>
 							</Grid.Col>
 							<Grid.Col span={12}>
-								<DatePickerForm
+								<DateInputForm
 									form={invoiceItemForm}
 									name="expired_date"
 									id="expired_date"
-									label={t("ExpiredDate")}
-									placeholder={t("ExpiredDate")}
-									nextField="EntityFormSubmit"
-									required={false}
-									tooltip={invoiceItemForm.errors.quantity}
+									placeholder="DD-MM-YYYY"
+									valueFormat="DD-MM-YYYY"
+									clearable
+									tooltip={invoiceItemForm.errors.expired_date}
 								/>
 							</Grid.Col>
 						</Grid>
@@ -312,7 +305,7 @@ export default function InvoiceForm({ refetch }) {
 			<AddProductDrawer
 				productDrawer={isProductDrawerOpened}
 				closeProductDrawer={closeProductDrawer}
-				setStockProductRestore={() => { }}
+				setStockProductRestore={() => {}}
 				focusField="productId"
 				fieldPrefix=""
 			/>

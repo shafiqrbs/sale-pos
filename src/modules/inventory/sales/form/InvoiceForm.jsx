@@ -1,11 +1,4 @@
-import {
-	ActionIcon,
-	Box,
-	Button,
-	Flex,
-	NumberInput,
-	Text,
-} from "@mantine/core";
+import { ActionIcon, Box, Button, Flex, NumberInput, Text } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import {
 	IconBarcode,
@@ -31,25 +24,23 @@ import VirtualSearchSelect from "@components/form-builders/VirtualSearchSelect";
 import { useTranslation } from "react-i18next";
 
 export default function InvoiceForm({ refetch }) {
-	const { t } = useTranslation()
-	const [ products, setProducts ] = useState([]);
-	const [ productResetKey, setProductResetKey ] = useState(0);
+	const { t } = useTranslation();
+	const [products, setProducts] = useState([]);
+	const [productResetKey, setProductResetKey] = useState(0);
 	const { configData } = useConfigData();
 	const salesItemForm = useForm(salesItemFormRequest());
 	const { getLocalProducts } = useLocalProducts({ fetchOnMount: false });
 
-	const [ isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer } ] =
+	const [isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer }] =
 		useDisclosure(false);
 
 	// =============== fetch products in db entry order (id ASC), not by name or created_at ===============
 	useEffect(() => {
-		getLocalProducts(
-			{ category_id: null },
-			"id",
-			{ orderBy: "product_name ASC" }
-		).then((fetchedProducts) => {
-			setProducts(fetchedProducts);
-		});
+		getLocalProducts({ category_id: null }, "id", { orderBy: "product_name ASC" }).then(
+			(fetchedProducts) => {
+				setProducts(fetchedProducts);
+			}
+		);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
@@ -113,14 +104,13 @@ export default function InvoiceForm({ refetch }) {
 		showNotification("Item added successfully", "teal");
 	};
 
-	const invoiceSubTotal =
-		(Number(salesItemForm.values.quantity) || 0) * effectivePrice;
+	const invoiceSubTotal = (Number(salesItemForm.values.quantity) || 0) * effectivePrice;
 
 	const handleResetSalesItemForm = () => {
 		salesItemForm.reset();
 		setProductResetKey((previousKey) => previousKey + 1);
 		requestAnimationFrame(() => {
-			document.getElementById('productId').open();
+			document.getElementById("productId").open();
 		});
 	};
 
@@ -129,10 +119,10 @@ export default function InvoiceForm({ refetch }) {
 		salesItemForm.setFieldValue("salesPrice", option?.sales_price);
 		salesItemForm.setFieldValue("discount", 0);
 		salesItemForm.setFieldValue("unit", option?.unit);
-		requestAnimationFrame(() => document.getElementById("quantity").focus())
+		requestAnimationFrame(() => document.getElementById("quantity").focus());
 	};
 
-	useHotkeys([ [ "alt+a", () => document.getElementById("EntityFormSubmit")?.click() ] ])
+	useHotkeys([["alt+a", () => document.getElementById("EntityFormSubmit")?.click()]]);
 
 	return (
 		<>
@@ -140,11 +130,10 @@ export default function InvoiceForm({ refetch }) {
 				component="form"
 				onSubmit={salesItemForm.onSubmit(handleAddItemToSalesForm)}
 				bd="1px solid #dee2e6"
-				bg="white"
 				className="borderRadiusAll"
 				px="sm"
 				py="xs"
-				bg={'blue.1'}
+				bg="blue.1"
 			>
 				<Flex gap="xs" align="flex-end" wrap="nowrap">
 					{/* =============== barcode input =============== */}
@@ -195,8 +184,8 @@ export default function InvoiceForm({ refetch }) {
 										options={productOptions}
 										placeholder="Enter stock product name"
 										searchable
-										showOptionsOnlyOnSearch={false}
-										nothingFoundMessage="No product found"
+										showOptionsOnlyOnSearch={true}
+										nothingFoundMessage="Change the search term to find a product"
 										onChange={handleProductSelect}
 										id="productId"
 									/>
@@ -308,7 +297,7 @@ export default function InvoiceForm({ refetch }) {
 			<AddProductDrawer
 				productDrawer={isProductDrawerOpened}
 				closeProductDrawer={closeProductDrawer}
-				setStockProductRestore={() => { }}
+				setStockProductRestore={() => {}}
 				focusField="productId"
 				fieldPrefix=""
 			/>

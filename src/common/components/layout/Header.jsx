@@ -98,7 +98,7 @@ export default function Header({ isOnline, toggleNetwork }) {
 
 	useEffect(() => {
 		try {
-			const savedScheme = localStorage.getItem(COLOR_SCHEME_STORAGE_KEY);
+			const savedScheme = localStorage.getItem(COLOR_SCHEME_STORAGE_KEY) || "auto";
 			if (savedScheme === "auto" || savedScheme === "light" || savedScheme === "dark") {
 				setColorScheme(savedScheme);
 			}

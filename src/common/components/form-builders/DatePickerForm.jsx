@@ -1,13 +1,12 @@
-import dayjs from "dayjs";
-// import customParseFormat from 'dayjs/plugin/customParseFormat';
 import { DateInput } from "@mantine/dates";
-import { TextInput, Tooltip } from "@mantine/core";
+import { Tooltip } from "@mantine/core";
 import { getHotkeyHandler } from "@mantine/hooks";
 import { IconInfoCircle, IconX } from "@tabler/icons-react";
-import React from "react";
 import { useTranslation } from "react-i18next";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import dayjs from "dayjs";
 
-// dayjs.extend(customParseFormat);
+dayjs.extend(customParseFormat);
 
 function DatePickerForm(props) {
 	const {
@@ -21,9 +20,9 @@ function DatePickerForm(props) {
 		tooltip,
 		mt,
 		id,
-		sm,
-		lg,
 		closeIcon,
+		valueFormat,
+		minDate,
 	} = props;
 	const { t } = useTranslation();
 
@@ -43,19 +42,26 @@ function DatePickerForm(props) {
 				transitionProps={{ transition: "pop-bottom-left", duration: 500 }}
 			>
 				<DateInput
+					id={id}
 					clearable
-					defaultValue={new Date()}
 					size="sm"
-					minDate={new Date()}
+					minDate={minDate ? dayjs(minDate).toDate() : undefined}
 					label={label}
 					placeholder={placeholder}
+					valueFormat={valueFormat}
 					mt={mt}
 					autoComplete="off"
-					{...form.getInputProps(name)}
+					dateParser={(input) => {
+						const parsed = dayjs(input, ["DD-MM-YYYY", "D-M-YYYY", "DD-M-YYYY", "D-MM-YYYY"], true);
+						return parsed.isValid() ? parsed.toDate() : null;
+					}}
+					value={form.values[name] || null}
+					onChange={(value) => form.setFieldValue(name, value)}
+					error={form.errors[name]}
 					onKeyDown={getHotkeyHandler([
 						[
 							"Enter",
-							(e) => {
+							() => {
 								nextField === "EntityFormSubmit"
 									? document.getElementById(nextField).click()
 									: document.getElementById(nextField).focus();
@@ -65,9 +71,9 @@ function DatePickerForm(props) {
 					leftSection={props.leftSection}
 					rightSection={
 						form.values[name] && closeIcon ? (
-							<Tooltip label={t("Close")} withArrow bg={`red.1`} c={"red.3"}>
+							<Tooltip label={t("Close")} withArrow bg="red.1" c="red.3">
 								<IconX
-									color={`red.5`}
+									color="red.5"
 									size={16}
 									opacity={0.5}
 									onClick={() => {
@@ -81,12 +87,16 @@ function DatePickerForm(props) {
 								px={16}
 								py={2}
 								withArrow
-								position={"left"}
-								c={"black"}
-								bg={`gray.1`}
+								position="left"
+								c="black"
+								bg="gray.1"
 								transitionProps={{ transition: "pop-bottom-left", duration: 500 }}
 							>
-								{props.rightIcon ? props.rightIcon : <IconInfoCircle size={16} opacity={0.5} />}
+								{props.rightIcon ? (
+									props.rightIcon
+								) : (
+									<IconInfoCircle size={16} opacity={0.5} color="inherit" />
+								)}
 							</Tooltip>
 						)
 					}
