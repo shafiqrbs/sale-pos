@@ -86,6 +86,7 @@ export default function InvoiceForm({ refetch }) {
 			display_name: selectedProduct.display_name,
 			sales_price: effectivePriceNumber,
 			price: mrpNumber,
+			mrp: selectedProduct.sales_price,
 			percent: percentNumber,
 			stock: Number(selectedProduct.quantity) || 0,
 			quantity: quantityNumber,
@@ -212,7 +213,7 @@ export default function InvoiceForm({ refetch }) {
 							id="quantity"
 							label=""
 							placeholder="QTY"
-							nextField="EntityFormSubmit"
+							nextField="salesPrice"
 							required={false}
 							tooltip={salesItemForm.errors.quantity}
 							rightIcon={
@@ -237,13 +238,23 @@ export default function InvoiceForm({ refetch }) {
 
 					{/* =============== sales price input =============== */}
 					<Box w={130} style={{ flexShrink: 0 }}>
-						<NumberInput
-							{...salesItemForm.getInputProps("salesPrice", { type: "number" })}
-							id="mrp"
-							placeholder={t("MRP")}
-							hideControls
-							leftSection={<IconCurrencyTaka size={16} opacity={0.6} />}
-						/>
+						<FormValidationWrapper
+							errorMessage="Sales price is required"
+							opened={!!salesItemForm.errors.salesPrice}
+						>
+							<NumberInput
+								{...salesItemForm.getInputProps("salesPrice", { type: "number" })}
+								id="salesPrice"
+								placeholder={t("SalesPrice")}
+								hideControls
+								onKeyDown={(event) => {
+									if (event.key === "Enter") {
+										document.getElementById("EntityFormSubmit").click();
+									}
+								}}
+								leftSection={<IconCurrencyTaka size={16} opacity={0.6} />}
+							/>
+						</FormValidationWrapper>
 					</Box>
 
 					{/* =============== live sub total display =============== */}

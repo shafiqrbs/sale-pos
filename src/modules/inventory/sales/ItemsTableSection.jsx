@@ -1,5 +1,5 @@
 import React from "react";
-import {ActionIcon, Badge, Box, Flex, NumberInput, Text} from "@mantine/core";
+import { ActionIcon, Badge, Box, Flex, NumberInput, Text } from "@mantine/core";
 import { DataTable } from "mantine-datatable";
 import { IconTrashX } from "@tabler/icons-react";
 import tableCss from "@assets/css/Table.module.css";
@@ -33,8 +33,7 @@ export default function ItemsTableSection({ salesProducts, refetch, itemsTotal }
 		const basePrice = Number(currentItem?.price) || Number(currentItem?.sales_price) || 0;
 		const newSubTotal = (currentItem?.quantity || 0) * effectivePrice;
 		// =============== derive percent from effective price; if base is 0, set price = effectivePrice ===============
-		const percentValue =
-			basePrice > 0 ? Math.round((1 - effectivePrice / basePrice) * 100) : 0;
+		const percentValue = basePrice > 0 ? Math.round((1 - effectivePrice / basePrice) * 100) : 0;
 		const data = {
 			sales_price: effectivePrice,
 			percent: Math.max(0, percentValue),
@@ -100,6 +99,17 @@ export default function ItemsTableSection({ salesProducts, refetch, itemsTotal }
 						accessor: "display_name",
 						title: "Product",
 						render: (record) => <Text size="sm">{record.display_name}</Text>,
+					},
+					{
+						accessor: "mrp",
+						title: "MRP",
+						textAlign: "center",
+						width: 100,
+						render: (record) => (
+							<Text size="sm" c="dimmed">
+								{currencySymbol} {formatCurrency(record.mrp ?? 0)}
+							</Text>
+						),
 					},
 					{
 						accessor: "quantity",
@@ -204,7 +214,7 @@ export default function ItemsTableSection({ salesProducts, refetch, itemsTotal }
 
 			<Box mt="les" px="xs" py="xs" bg="gray.1" className="borderRadiusAll">
 				<Flex justify="space-between" align="center">
-					<Badge size="xl" bg={'red'}>
+					<Badge size="xl" bg={"red"}>
 						<Text fz="sm" fw={600}>
 							Σ&nbsp; {salesProducts.length} Item(s)
 						</Text>

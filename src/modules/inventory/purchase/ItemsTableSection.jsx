@@ -116,19 +116,29 @@ export default function ItemsTableSection({ purchaseProducts, refetch, itemsTota
 						textAlign: "center",
 						width: 130,
 						render: (record) => (
-						<DateInput
-							size="xs"
-							value={
-								record.expired_date &&
-								dayjs(record.expired_date, "YYYY-MM-DD", true).isValid()
-									? dayjs(record.expired_date, "YYYY-MM-DD", true).toDate()
-									: null
-							}
-							placeholder="DD-MM-YYYY"
-							valueFormat="DD-MM-YYYY"
-							clearable
-							onChange={(dateValue) => handleExpiredDateChange(record.id, dateValue)}
-						/>
+							<DateInput
+								size="xs"
+								value={
+									record.expired_date && dayjs(record.expired_date, "YYYY-MM-DD", true).isValid()
+										? dayjs(record.expired_date, "YYYY-MM-DD", true).toDate()
+										: null
+								}
+								placeholder="DD-MM-YYYY"
+								valueFormat="DD-MM-YYYY"
+								clearable
+								onChange={(dateValue) => handleExpiredDateChange(record.id, dateValue)}
+							/>
+						),
+					},
+					{
+						accessor: "mrp",
+						title: "MRP",
+						textAlign: "center",
+						width: 100,
+						render: (record) => (
+							<Text size="sm" c="dimmed">
+								{currencySymbol} {formatCurrency(record.mrp ?? 0)}
+							</Text>
 						),
 					},
 					{
@@ -155,7 +165,7 @@ export default function ItemsTableSection({ purchaseProducts, refetch, itemsTota
 						render: (record) => (
 							<NumberInput
 								size="xs"
-								value={record.price ?? 0}
+								value={record.purchase_price ?? 0}
 								min={0}
 								step={1}
 								hideControls
@@ -170,7 +180,7 @@ export default function ItemsTableSection({ purchaseProducts, refetch, itemsTota
 						textAlign: "right",
 						width: 160,
 						render: (record) => {
-							const subTotal = (record.quantity || 0) * (record.price || 0);
+							const subTotal = (record.quantity || 0) * (record.purchase_price || 0);
 							return (
 								<Text size="sm" fw={600}>
 									{currencySymbol} {formatCurrency(subTotal)}

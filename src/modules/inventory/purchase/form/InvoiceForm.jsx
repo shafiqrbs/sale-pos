@@ -99,6 +99,7 @@ export default function InvoiceForm({ refetch }) {
 			display_name: selectedProduct.display_name,
 			quantity: quantityNumber,
 			purchase_price: priceNumber,
+			mrp: Number(selectedProduct.purchase_price) || 0,
 			sales_price: Number(selectedProduct.sales_price) || priceNumber,
 			sub_total: quantityNumber * priceNumber,
 			unit_name: selectedProduct.unit_name || invoiceItemForm.values.unit || "",
@@ -220,7 +221,6 @@ export default function InvoiceForm({ refetch }) {
 									label="Purchase Price"
 									nextField="quantity"
 									placeholder="0.00"
-									required={false}
 									tooltip={invoiceItemForm.errors.purchasePrice}
 									leftSection={<IconCurrencyTaka size={16} opacity={0.6} />}
 								/>
