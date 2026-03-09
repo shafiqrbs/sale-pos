@@ -87,6 +87,7 @@ export default function SalesCustomerDrawer({ opened, onClose, form }) {
 
     return (
         <GlobalDrawer
+			position='left'
             opened={opened}
             onClose={onClose}
             title={t('CreateCustomer')}

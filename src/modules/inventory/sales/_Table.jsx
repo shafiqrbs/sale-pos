@@ -1,29 +1,28 @@
-import { Box, Grid, Text, ActionIcon, Group, Menu, Flex, Button } from "@mantine/core";
-import { IconDotsVertical, IconEye, IconPlus } from "@tabler/icons-react";
-import { useState } from "react";
-import { useOutletContext, useNavigate } from "react-router";
-import { DataTable } from "mantine-datatable";
+import { Box, Grid, Text, ActionIcon, Group, Menu, Flex, Button } from '@mantine/core';
+import { IconDotsVertical, IconEye, IconPlus } from '@tabler/icons-react';
+import { useState } from 'react'
+import { useOutletContext, useNavigate } from 'react-router'
+import { DataTable } from 'mantine-datatable';
 import tableCss from "@assets/css/Table.module.css";
-import { useTranslation } from "react-i18next";
-import Details from "./__Details";
-import useSalesList from "@hooks/useSalesList";
-import KeywordSearch from "@components/KeywordSearch";
-import GlobalModal from "@components/modals/GlobalModal";
-import { useForm } from "@mantine/form";
-import { useDisclosure } from "@mantine/hooks";
-import { APP_NAVLINKS } from "@/routes/routes";
-import { formatCurrency } from "@utils/index";
+import { useTranslation } from 'react-i18next';
+import Details from './__Details';
+import useSalesList from '@hooks/useSalesList';
+import KeywordSearch from '@components/KeywordSearch';
+import GlobalModal from '@components/modals/GlobalModal';
+import { useForm } from '@mantine/form';
+import { useDisclosure } from '@mantine/hooks';
+import { APP_NAVLINKS } from '@/routes/routes';
 
 const PER_PAGE = 25;
 
 export default function Table() {
 	const { t } = useTranslation();
-	const [opened, { open, close }] = useDisclosure(false);
+	const [ opened, { open, close } ] = useDisclosure(false);
 	const navigate = useNavigate();
-	const [page, setPage] = useState(1);
-	const [selectedRow, setSelectedRow] = useState(null);
-	const [loading, setLoading] = useState(false);
-	const [salesViewData, setSalesViewData] = useState(null);
+	const [ page, setPage ] = useState(1);
+	const [ selectedRow, setSelectedRow ] = useState(null);
+	const [ loading, setLoading ] = useState(false);
+	const [ salesViewData, setSalesViewData ] = useState(null);
 	const { mainAreaHeight, isOnline } = useOutletContext();
 	const form = useForm({
 		initialValues: {
@@ -39,9 +38,9 @@ export default function Table() {
 			start_date: form.values.start_date,
 			end_date: form.values.end_date,
 			page,
-			offset: PER_PAGE,
+			offset: PER_PAGE
 		},
-		offlineFetch: !isOnline,
+		offlineFetch: !isOnline
 	});
 
 	const handleShowDetails = (item) => {
@@ -53,18 +52,14 @@ export default function Table() {
 
 		setTimeout(() => {
 			setLoading(false);
-		}, 700);
-	};
+		}, 700)
+	}
 
 	return (
 		<Box>
 			<Flex mb="xs" gap="sm" justify="space-between" align="center">
 				<KeywordSearch showStartEndDate form={form} />
-				<Button
-					w={140}
-					leftSection={<IconPlus size={18} />}
-					onClick={() => navigate(APP_NAVLINKS.SALES_NEW)}
-				>
+				<Button w={140} leftSection={<IconPlus size={18} />} onClick={() => navigate(APP_NAVLINKS.SALES_NEW)}>
 					{t("NewSale")}
 				</Button>
 			</Flex>
@@ -97,46 +92,61 @@ export default function Table() {
 									accessor: "invoice",
 									title: t("Invoice"),
 									render: (item) => (
-										<Text component="a" size="sm" variant="subtle" c="var(--theme-primary-color-6)">
+										<Text
+											component="a"
+											size="sm"
+											variant="subtle"
+											c="var(--theme-primary-color-6)"
+										>
 											{item.invoice}
 										</Text>
 									),
 								},
 								{
-									accessor: "customerName",
-									title: t("Customer"),
-									render: (item) => <Text size="sm">{item?.customerName || "N/A"}</Text>,
+									accessor: "customerName", title: t("Customer"), render: (item) => (
+										<Text size="sm">
+											{item?.customerName || "N/A"}
+										</Text>
+									)
 								},
 								{
 									accessor: "subtotal",
 									title: t("Sub Total"),
 									textAlign: "right",
-									render: (data) => <>{formatCurrency(data.sub_total || 0)}</>,
+									render: (data) => (
+										<>{data.sub_total}</>
+									),
 								},
 								{
 									accessor: "discount",
 									title: t("Discount"),
 									textAlign: "right",
-									render: (data) => <>{formatCurrency(data.discount)}</>,
+									render: (data) => (
+										<>{data.discount ? Number(data.discount).toFixed(2) : "0.00"}</>
+									),
 								},
 								{
 									accessor: "total",
 									title: t("Total"),
 									textAlign: "right",
-									render: (data) => <>{formatCurrency(data.total)}</>,
+									render: (data) => (
+										<>{data.total ? Number(data.total).toFixed(2) : "0.00"}</>
+									),
 								},
 								{
 									accessor: "payment",
 									title: t("Receive"),
 									textAlign: "right",
-									render: (data) => <>{formatCurrency(data.payment)}</>,
+									render: (data) => (
+										<>{data.payment ? Number(data.payment).toFixed(2) : "0.00"}</>
+									),
 								},
 								{
 									accessor: "due",
 									title: t("Due"),
 									textAlign: "right",
 									render: (data) => {
-										return <>{formatCurrency(Number(data.total) - Number(data.payment))}</>;
+										return <>{Number(data.total) - Number(data.payment)}</>;
 									},
 								},
 								{
@@ -162,7 +172,11 @@ export default function Table() {
 														aria-label="Settings"
 														onClick={(e) => e.preventDefault()}
 													>
-														<IconDotsVertical height="18" width="18" stroke={1.5} />
+														<IconDotsVertical
+															height="18"
+															width="18"
+															stroke={1.5}
+														/>
 													</ActionIcon>
 												</Menu.Target>
 												<Menu.Dropdown>
@@ -215,5 +229,6 @@ export default function Table() {
 				<Details loading={loading} salesViewData={salesViewData} salesData={salesData} />
 			</GlobalModal>
 		</Box>
-	);
+
+	)
 }
