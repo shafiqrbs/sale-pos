@@ -171,6 +171,7 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 							transaction_mode_name: payment?.transaction_mode_name ?? null,
 							invoice_id: sale?.invoice ?? "",
 							amount: payment?.amount ?? 0,
+							remark: payment?.remark ?? "",
 						})),
 					})),
 				};

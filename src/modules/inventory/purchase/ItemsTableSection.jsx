@@ -158,6 +158,17 @@ export default function ItemsTableSection({ purchaseProducts, refetch, itemsTota
 						),
 					},
 					{
+						accessor: "average_price",
+						title: "Avg. Price",
+						textAlign: "center",
+						width: 120,
+						render: (record) => (
+							<Text size="sm" c="dimmed">
+								{currencySymbol} {formatCurrency(record.average_price ?? 0)}
+							</Text>
+						),
+					},
+					{
 						accessor: "price",
 						title: "Price",
 						textAlign: "left",

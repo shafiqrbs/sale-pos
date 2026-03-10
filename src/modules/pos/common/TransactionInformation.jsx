@@ -39,6 +39,7 @@ export default function TransactionInformation({ form, transactionModeData }) {
 				transaction_mode_id: cashMethod?.id,
 				transaction_mode_name: cashMethod?.name,
 				amount: totalAmount,
+				remark: "",
 			},
 		]);
 	};
@@ -63,6 +64,7 @@ export default function TransactionInformation({ form, transactionModeData }) {
 				transaction_mode_id: id,
 				transaction_mode_name: name,
 				amount: totalAmount,
+				remark: "",
 			},
 		]);
 	};

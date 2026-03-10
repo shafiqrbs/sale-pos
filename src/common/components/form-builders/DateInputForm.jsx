@@ -2,11 +2,13 @@ import { DateInput } from "@mantine/dates";
 import { Tooltip } from "@mantine/core";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import dayjs from "dayjs";
+import { getHotkeyHandler } from "@mantine/hooks";
 
 dayjs.extend(customParseFormat);
 
 function DateInputForm(props) {
 	const {
+		label,
 		tooltip,
 		color = "var(--theme-error-color)",
 		form,
@@ -16,6 +18,7 @@ function DateInputForm(props) {
 		placeholder = "DD-MM-YYYY",
 		valueFormat = "DD-MM-YYYY",
 		clearable = true,
+		nextField,
 		...restProps
 	} = props;
 
@@ -35,6 +38,7 @@ function DateInputForm(props) {
 		>
 			<DateInput
 				id={id ?? name}
+				label={label}
 				placeholder={placeholder}
 				valueFormat={valueFormat}
 				clearable={clearable}
@@ -46,6 +50,16 @@ function DateInputForm(props) {
 				minDate={minDate ? dayjs(minDate).toDate() : undefined}
 				onChange={(dateValue) => form.setFieldValue(name, dateValue)}
 				error={form.errors[name]}
+				onKeyDown={getHotkeyHandler([
+					[
+						"Enter",
+						() => {
+							nextField === "EntityFormSubmit"
+								? document.getElementById(nextField).click()
+								: document.getElementById(nextField).focus();
+						},
+					],
+				])}
 				{...restProps}
 			/>
 		</Tooltip>

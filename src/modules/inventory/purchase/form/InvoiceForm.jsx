@@ -99,8 +99,9 @@ export default function InvoiceForm({ refetch }) {
 			display_name: selectedProduct.display_name,
 			quantity: quantityNumber,
 			purchase_price: priceNumber,
-			mrp: Number(selectedProduct.purchase_price) || 0,
-			sales_price: Number(selectedProduct.sales_price) || priceNumber,
+			mrp: Number(selectedProduct.purchase_price ?? 0),
+			average_price: Number(selectedProduct.average_price ?? 0),
+			sales_price: Number(selectedProduct.sales_price ?? 0),
 			sub_total: quantityNumber * priceNumber,
 			unit_name: selectedProduct.unit_name || invoiceItemForm.values.unit || "",
 			type: "purchase",
@@ -232,7 +233,7 @@ export default function InvoiceForm({ refetch }) {
 									id="quantity"
 									label="Quantity"
 									placeholder="0"
-									nextField="EntityFormSubmit"
+									nextField="expired_date"
 									required={false}
 									tooltip={invoiceItemForm.errors.quantity}
 									rightIcon={
@@ -244,11 +245,13 @@ export default function InvoiceForm({ refetch }) {
 							</Grid.Col>
 							<Grid.Col span={12}>
 								<DateInputForm
+									label="Expired Date"
 									form={invoiceItemForm}
 									name="expired_date"
 									id="expired_date"
 									placeholder="DD-MM-YYYY"
 									valueFormat="DD-MM-YYYY"
+									nextField="EntityFormSubmit"
 									clearable
 									tooltip={invoiceItemForm.errors.expired_date}
 								/>

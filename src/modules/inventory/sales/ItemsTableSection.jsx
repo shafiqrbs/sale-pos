@@ -131,10 +131,10 @@ export default function ItemsTableSection({ salesProducts, refetch, itemsTotal }
 						accessor: "stock",
 						title: "Stock",
 						textAlign: "center",
-						width: 90,
+						width: 110,
 						render: (record) => (
 							<Text size="sm" c="dimmed">
-								{record.stock ?? 0}
+								{record.stock ?? 0} {record.unit_name || ""}
 							</Text>
 						),
 					},
@@ -154,6 +154,17 @@ export default function ItemsTableSection({ salesProducts, refetch, itemsTotal }
 								thousandSeparator=","
 								onChange={(value) => handlePriceChange(record.id, value)}
 							/>
+						),
+					},
+					{
+						accessor: "average_price",
+						title: "Avg. Price",
+						textAlign: "center",
+						width: 120,
+						render: (record) => (
+							<Text size="sm" c="dimmed">
+								{currencySymbol} {formatCurrency(record.average_price ?? 0)}
+							</Text>
 						),
 					},
 					{

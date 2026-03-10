@@ -74,6 +74,7 @@ export default function Transaction({ form, tableId = null }) {
 						transaction_mode_id: cashMethod?.id,
 						transaction_mode_name: cashMethod?.name,
 						amount: 0,
+						remark: "",
 					},
 				]);
 			}
@@ -269,6 +270,7 @@ export default function Transaction({ form, tableId = null }) {
 						transaction_mode_id: firstMode.id,
 						transaction_mode_name: firstMode.name,
 						amount: 0,
+						remark: "",
 					},
 				]);
 			}

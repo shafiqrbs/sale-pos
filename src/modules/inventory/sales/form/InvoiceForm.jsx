@@ -86,12 +86,13 @@ export default function InvoiceForm({ refetch }) {
 			display_name: selectedProduct.display_name,
 			sales_price: effectivePriceNumber,
 			price: mrpNumber,
-			mrp: selectedProduct.sales_price,
+			mrp: Number(selectedProduct.sales_price ?? 0),
 			percent: percentNumber,
-			stock: Number(selectedProduct.quantity) || 0,
+			stock: Number(selectedProduct.quantity ?? 0),
 			quantity: quantityNumber,
 			unit_name: selectedProduct.unit_name || salesItemForm.values.unit || "",
-			purchase_price: Number(selectedProduct.purchase_price) || 0,
+			purchase_price: Number(selectedProduct.purchase_price ?? 0),
+			average_price: Number(selectedProduct.average_price ?? 0),
 			sub_total: quantityNumber * effectivePriceNumber,
 			unit_id: selectedProduct.unit_id || null,
 			type: "sales",
@@ -249,6 +250,7 @@ export default function InvoiceForm({ refetch }) {
 								hideControls
 								onKeyDown={(event) => {
 									if (event.key === "Enter") {
+										event.preventDefault();
 										document.getElementById("EntityFormSubmit").click();
 									}
 								}}
