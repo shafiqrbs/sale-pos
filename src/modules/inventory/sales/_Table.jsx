@@ -1,5 +1,5 @@
 import { Box, Grid, Text, ActionIcon, Group, Menu, Flex, Button } from "@mantine/core";
-import { IconDotsVertical, IconEye, IconPlus } from "@tabler/icons-react";
+import { IconDotsVertical, IconEdit, IconEye, IconPlus } from "@tabler/icons-react";
 import { useState } from "react";
 import { useOutletContext, useNavigate } from "react-router";
 import { DataTable } from "mantine-datatable";
@@ -176,6 +176,18 @@ export default function Table() {
 														<Flex gap={4} align="center">
 															<IconEye size={18} />
 															<Text size="sm">{t("Show")}</Text>
+														</Flex>
+													</Menu.Item>
+													<Menu.Item
+														onClick={(e) => {
+															e.preventDefault();
+															navigate(`${APP_NAVLINKS.SALES_EDIT}/${data.id}`);
+														}}
+														w="140"
+													>
+														<Flex gap={4} align="center">
+															<IconEdit size={18} />
+															<Text size="sm">{t("Edit")}</Text>
 														</Flex>
 													</Menu.Item>
 												</Menu.Dropdown>

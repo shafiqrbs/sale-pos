@@ -11,6 +11,11 @@ export default function Overview({
 	onPosPrint,
 	onReset,
 	resetKey = 0,
+	onQuantityChange,
+	onPriceChange,
+	onDiscountChange,
+	onRemoveItem,
+	isEditMode = false,
 }) {
 	const itemsTotal = useMemo(() => {
 		return (salesProducts || []).reduce(
@@ -25,16 +30,21 @@ export default function Overview({
 				salesProducts={salesProducts || []}
 				refetch={refetch}
 				itemsTotal={itemsTotal}
+				onQuantityChange={onQuantityChange}
+				onPriceChange={onPriceChange}
+				onDiscountChange={onDiscountChange}
+				onRemoveItem={onRemoveItem}
 			/>
 
-			<PaymentSection
-				salesForm={salesForm}
-				itemsTotal={itemsTotal}
-				isAddingSales={isAddingSales}
-				onPosPrint={onPosPrint}
-				onReset={onReset}
-				resetKey={resetKey}
-			/>
+		<PaymentSection
+			salesForm={salesForm}
+			itemsTotal={itemsTotal}
+			isAddingSales={isAddingSales}
+			onPosPrint={onPosPrint}
+			onReset={onReset}
+			resetKey={resetKey}
+			isEditMode={isEditMode}
+		/>
 		</Box>
 	);
 }

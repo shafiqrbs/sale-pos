@@ -42,6 +42,7 @@ export default function PaymentSection({
 	isAddingSales,
 	onPosPrint,
 	resetKey = 0,
+	isEditMode = false,
 }) {
 	const { t } = useTranslation();
 	const { transactionMode } = useTransactionMode();
@@ -737,7 +738,7 @@ export default function PaymentSection({
 											leftSection={<IconCheck size={16} />}
 											loading={isAddingSales}
 										>
-											Save
+											{isEditMode ? "Update" : "Save"}
 										</Button>
 										<Button
 											fullWidth

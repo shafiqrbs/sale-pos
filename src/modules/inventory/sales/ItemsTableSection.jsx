@@ -7,7 +7,15 @@ import useConfigData from "@hooks/useConfigData";
 import useMainAreaHeight from "@hooks/useMainAreaHeight";
 import { formatCurrency } from "@utils/index";
 
-export default function ItemsTableSection({ salesProducts, refetch, itemsTotal }) {
+export default function ItemsTableSection({
+	salesProducts,
+	refetch,
+	itemsTotal,
+	onQuantityChange,
+	onPriceChange,
+	onDiscountChange,
+	onRemoveItem,
+}) {
 	const { mainAreaHeight } = useMainAreaHeight();
 	// =============== account for invoice form top row (~55px) + payment section + spacing ===============
 	const tableHeight = mainAreaHeight - 342;
@@ -20,11 +28,17 @@ export default function ItemsTableSection({ salesProducts, refetch, itemsTotal }
 		const numericValue = parseFloat(value) || 0;
 		const currentItem = salesProducts.find((item) => item.id === itemId);
 		const newSubTotal = numericValue * (currentItem?.sales_price || 0);
-		await window.dbAPI.updateDataInTable("temp_sales_products", {
-			id: itemId,
-			data: { quantity: numericValue, sub_total: newSubTotal },
-		});
-		refetch();
+		const updatedData = { quantity: numericValue, sub_total: newSubTotal };
+
+		if (onQuantityChange) {
+			onQuantityChange(itemId, updatedData);
+		} else {
+			await window.dbAPI.updateDataInTable("temp_sales_products", {
+				id: itemId,
+				data: updatedData,
+			});
+			refetch();
+		}
 	};
 
 	const handlePriceChange = async (itemId, value) => {
@@ -34,19 +48,24 @@ export default function ItemsTableSection({ salesProducts, refetch, itemsTotal }
 		const newSubTotal = (currentItem?.quantity || 0) * effectivePrice;
 		// =============== derive percent from effective price; if base is 0, set price = effectivePrice ===============
 		const percentValue = basePrice > 0 ? Math.round((1 - effectivePrice / basePrice) * 100) : 0;
-		const data = {
+		const updatedData = {
 			sales_price: effectivePrice,
 			percent: Math.max(0, percentValue),
 			sub_total: newSubTotal,
 		};
 		if (basePrice <= 0) {
-			data.price = effectivePrice;
+			updatedData.price = effectivePrice;
 		}
-		await window.dbAPI.updateDataInTable("temp_sales_products", {
-			id: itemId,
-			data,
-		});
-		refetch();
+
+		if (onPriceChange) {
+			onPriceChange(itemId, updatedData);
+		} else {
+			await window.dbAPI.updateDataInTable("temp_sales_products", {
+				id: itemId,
+				data: updatedData,
+			});
+			refetch();
+		}
 	};
 
 	const handleDiscountChange = async (itemId, value) => {
@@ -55,20 +74,30 @@ export default function ItemsTableSection({ salesProducts, refetch, itemsTotal }
 		const basePrice = Number(currentItem?.price) || Number(currentItem?.sales_price) || 0;
 		const effectivePrice = basePrice * (1 - percentValue / 100);
 		const newSubTotal = (currentItem?.quantity || 0) * effectivePrice;
-		await window.dbAPI.updateDataInTable("temp_sales_products", {
-			id: itemId,
-			data: {
-				percent: percentValue,
-				sales_price: effectivePrice,
-				sub_total: newSubTotal,
-			},
-		});
-		refetch();
+		const updatedData = {
+			percent: percentValue,
+			sales_price: effectivePrice,
+			sub_total: newSubTotal,
+		};
+
+		if (onDiscountChange) {
+			onDiscountChange(itemId, updatedData);
+		} else {
+			await window.dbAPI.updateDataInTable("temp_sales_products", {
+				id: itemId,
+				data: updatedData,
+			});
+			refetch();
+		}
 	};
 
 	const handleRemoveItem = async (itemId) => {
-		await window.dbAPI.deleteDataFromTable("temp_sales_products", itemId);
-		refetch();
+		if (onRemoveItem) {
+			onRemoveItem(itemId);
+		} else {
+			await window.dbAPI.deleteDataFromTable("temp_sales_products", itemId);
+			refetch();
+		}
 	};
 
 	return (

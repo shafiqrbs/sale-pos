@@ -23,7 +23,7 @@ import FormValidationWrapper from "@components/form-builders/FormValidationWrapp
 import VirtualSearchSelect from "@components/form-builders/VirtualSearchSelect";
 import { useTranslation } from "react-i18next";
 
-export default function InvoiceForm({ refetch }) {
+export default function InvoiceForm({ refetch, onAddItem }) {
 	const { t } = useTranslation();
 	const [products, setProducts] = useState([]);
 	const [productResetKey, setProductResetKey] = useState(0);
@@ -98,9 +98,14 @@ export default function InvoiceForm({ refetch }) {
 			type: "sales",
 		};
 
-		// =============== persist item into local temp_sales_products table ===============
-		await window.dbAPI.upsertIntoTable("temp_sales_products", newItem);
-		refetch();
+		if (onAddItem) {
+			// =============== edit mode: delegate to parent state, skip temp table entirely ===============
+			onAddItem(newItem);
+		} else {
+			// =============== create mode: persist item into local temp_sales_products table ===============
+			await window.dbAPI.upsertIntoTable("temp_sales_products", newItem);
+			refetch();
+		}
 
 		handleResetSalesItemForm();
 		showNotification("Item added successfully", "teal");
