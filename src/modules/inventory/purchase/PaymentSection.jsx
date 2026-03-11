@@ -20,6 +20,7 @@ import useTransactionMode from "@hooks/useTransactionMode";
 import { formatCurrency } from "@utils/index";
 import FormValidationWrapper from "@components/form-builders/FormValidationWrapper";
 import { useHotkeys } from "@mantine/hooks";
+import DateInputForm from "@components/form-builders/DateInputForm";
 
 export default function PaymentSection({ purchaseForm, itemsTotal, isAddingPurchase }) {
 	const { transactionMode } = useTransactionMode();
@@ -144,13 +145,16 @@ export default function PaymentSection({ purchaseForm, itemsTotal, isAddingPurch
 										</Box>
 									</Grid.Col>
 									<Grid.Col span={12}>
-										<DateInput
-											value={purchaseDate}
-											onChange={(value) => purchaseForm.setFieldValue("purchaseDate", value)}
-											valueFormat="MMMM D, YYYY"
-											size="xs"
-											label={null}
-											placeholder="Select date"
+
+										<DateInputForm
+											name="purchaseDate"
+											form={purchaseForm}
+											id="expired_date"
+											placeholder="DD-MM-YYYY"
+											valueFormat="DD-MM-YYYY"
+											clearable
+											tooltip={purchaseForm.errors.purchaseDate}
+											{...purchaseForm.getInputProps("purchaseDate")}
 										/>
 									</Grid.Col>
 									<Grid.Col span={12}>
