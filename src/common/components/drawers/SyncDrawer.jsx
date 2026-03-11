@@ -88,6 +88,9 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 				is_print: item?.is_print ?? 0,
 				sub_total: item?.sub_total ?? 0,
 
+				category_id: item?.category_id ?? null,
+				category_name: item?.category_name ?? "",
+
 				purchase_item_id: null,
 
 				created_at: item?.created_at ?? "",

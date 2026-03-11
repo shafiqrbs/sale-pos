@@ -130,6 +130,17 @@ export default function ItemsTableSection({
 						render: (record) => <Text size="sm">{record.display_name}</Text>,
 					},
 					{
+						accessor: "category_name",
+						title: "Category",
+						textAlign: "center",
+						width: 120,
+						render: (record) => (
+							<Text size="sm" c="dimmed">
+								{record.category_name || "—"}
+							</Text>
+						),
+					},
+					{
 						accessor: "mrp",
 						title: "MRP",
 						textAlign: "center",

@@ -1,5 +1,5 @@
-import { Box, Grid, Text, ActionIcon, Group, Menu, Flex, Button } from "@mantine/core";
-import { IconDotsVertical, IconEdit, IconEye, IconPlus } from "@tabler/icons-react";
+import { Box, Grid, Text, ActionIcon, Group, Menu, Flex, Button, Stack } from "@mantine/core";
+import { IconDotsVertical, IconEdit, IconEye, IconPlus, IconTrash } from "@tabler/icons-react";
 import { useState } from "react";
 import { useOutletContext, useNavigate } from "react-router";
 import { DataTable } from "mantine-datatable";
@@ -13,17 +13,21 @@ import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import { APP_NAVLINKS } from "@/routes/routes";
 import { formatCurrency } from "@utils/index";
+import { showNotification } from "@components/ShowNotificationComponent";
+import { modals } from "@mantine/modals";
 
 const PER_PAGE = 25;
 
 export default function Table() {
 	const { t } = useTranslation();
 	const [opened, { open, close }] = useDisclosure(false);
+	useDisclosure(false);
 	const navigate = useNavigate();
 	const [page, setPage] = useState(1);
 	const [selectedRow, setSelectedRow] = useState(null);
 	const [loading, setLoading] = useState(false);
 	const [salesViewData, setSalesViewData] = useState(null);
+	const [deletedSaleIds, setDeletedSaleIds] = useState(new Set());
 	const { mainAreaHeight, isOnline } = useOutletContext();
 	const form = useForm({
 		initialValues: {
@@ -43,6 +47,23 @@ export default function Table() {
 		},
 		offlineFetch: !isOnline,
 	});
+
+	const handleDeleteClick = (record) => {
+		modals.openConfirmModal({
+			title: <Text size="md"> {t("FormConfirmationTitle")}</Text>,
+			children: <Text size="sm"> {t("FormConfirmationMessage")}</Text>,
+			confirmProps: { color: "red.6" },
+			labels: { confirm: "Confirm", cancel: "Cancel" },
+			onCancel: () => console.log("Cancel"),
+			onConfirm: () => handleConfirmDelete(record),
+		});
+	};
+
+	const handleConfirmDelete = async (record) => {
+		await window.dbAPI.deleteDataFromTable("sales", { id: record.id });
+		setDeletedSaleIds((previousIds) => new Set([...previousIds, record.id]));
+		showNotification(`Invoice ${record.invoice} deleted`, "teal");
+	};
 
 	const handleShowDetails = (item) => {
 		console.info("item:", item);
@@ -82,7 +103,7 @@ export default function Table() {
 							onRowClick={(rowData) => {
 								handleShowDetails(rowData.record);
 							}}
-							records={salesData?.data}
+							records={(salesData?.data ?? []).filter((item) => !deletedSaleIds.has(item.id))}
 							columns={[
 								{
 									accessor: "created",
@@ -188,6 +209,19 @@ export default function Table() {
 														<Flex gap={4} align="center">
 															<IconEdit size={18} />
 															<Text size="sm">{t("Edit")}</Text>
+														</Flex>
+													</Menu.Item>
+													<Menu.Item
+														onClick={(e) => {
+															e.stopPropagation();
+															handleDeleteClick(data);
+														}}
+														w="140"
+														color="red"
+													>
+														<Flex gap={4} align="center">
+															<IconTrash size={18} />
+															<Text size="sm">{t("Delete")}</Text>
 														</Flex>
 													</Menu.Item>
 												</Menu.Dropdown>

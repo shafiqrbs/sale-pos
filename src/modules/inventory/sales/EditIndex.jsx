@@ -45,9 +45,6 @@ export default function EditIndex() {
 			return {
 				...item,
 				id: editItemIdCounter.current,
-				// =============== price acts as the base MRP for per-item discount calculations;
-				// item.mrp is the real MRP stored at the time of the original sale — it can differ
-				// from item.sales_price when a per-item discount was applied ===============
 				price: item.mrp ?? item.sales_price,
 				percent: 0,
 				stock: 0,
@@ -214,6 +211,8 @@ export default function EditIndex() {
 			mrp: Number(item.mrp ?? item.price ?? item.sales_price) || 0,
 			sales_price: Number(item.sales_price) || 0,
 			sub_total: (Number(item.quantity) || 0) * (Number(item.sales_price) || 0),
+			category_id: item.category_id ?? null,
+			category_name: item.category_name ?? "",
 		}));
 
 		// =============== keep the original invoice number unchanged; only recalculate financials ===============

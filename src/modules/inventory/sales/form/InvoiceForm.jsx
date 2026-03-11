@@ -14,6 +14,7 @@ import InputNumberForm from "@components/form-builders/InputNumberForm";
 import InputForm from "@components/form-builders/InputForm";
 import AddProductDrawer from "@components/drawers/AddProductDrawer";
 import useLocalProducts from "@hooks/useLocalProducts";
+import useGetCategories from "@hooks/useGetCategories";
 import useConfigData from "@hooks/useConfigData";
 import { useDisclosure, useHotkeys } from "@mantine/hooks";
 import { formatCurrency } from "@utils/index";
@@ -30,6 +31,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 	const { configData } = useConfigData();
 	const salesItemForm = useForm(salesItemFormRequest());
 	const { getLocalProducts } = useLocalProducts({ fetchOnMount: false });
+	const { categories } = useGetCategories();
 
 	const [isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer }] =
 		useDisclosure(false);
@@ -80,6 +82,11 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 		const percentNumber = Number(salesItemForm.values.discount) || 0;
 		const effectivePriceNumber = mrpNumber * (1 - percentNumber / 100);
 
+		// =============== resolve category_name from category_id using local categories ===============
+		const categoryId = selectedProduct.category_id ?? null;
+		const categoryName =
+			categories?.find((cat) => cat.id === categoryId)?.name ?? "";
+
 		// =============== build item matching temp_sales_products NOT NULL columns ===============
 		const newItem = {
 			product_id: selectedProduct.id,
@@ -95,6 +102,8 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 			average_price: Number(selectedProduct.average_price ?? 0),
 			sub_total: quantityNumber * effectivePriceNumber,
 			unit_id: selectedProduct.unit_id || null,
+			category_id: categoryId,
+			category_name: categoryName,
 			type: "sales",
 		};
 

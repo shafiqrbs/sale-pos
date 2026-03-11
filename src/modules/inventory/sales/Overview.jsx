@@ -36,15 +36,15 @@ export default function Overview({
 				onRemoveItem={onRemoveItem}
 			/>
 
-		<PaymentSection
-			salesForm={salesForm}
-			itemsTotal={itemsTotal}
-			isAddingSales={isAddingSales}
-			onPosPrint={onPosPrint}
-			onReset={onReset}
-			resetKey={resetKey}
-			isEditMode={isEditMode}
-		/>
+			<PaymentSection
+				salesForm={salesForm}
+				itemsTotal={itemsTotal}
+				isAddingSales={isAddingSales}
+				onPosPrint={onPosPrint}
+				onReset={onReset}
+				resetKey={resetKey}
+				isEditMode={isEditMode}
+			/>
 		</Box>
 	);
 }

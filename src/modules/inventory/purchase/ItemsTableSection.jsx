@@ -111,6 +111,17 @@ export default function ItemsTableSection({ purchaseProducts, refetch, itemsTota
 						render: (record) => <Text size="sm">{record.display_name}</Text>,
 					},
 					{
+						accessor: "category_name",
+						title: "Category",
+						textAlign: "center",
+						width: 120,
+						render: (record) => (
+							<Text size="sm" c="dimmed">
+								{record.category_name || "—"}
+							</Text>
+						),
+					},
+					{
 						accessor: "expired_date",
 						title: t("ExpiredDate"),
 						textAlign: "center",

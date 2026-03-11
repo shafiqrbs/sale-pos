@@ -23,6 +23,7 @@ import InputNumberForm from "@components/form-builders/InputNumberForm";
 import InputForm from "@components/form-builders/InputForm";
 import AddProductDrawer from "@components/drawers/AddProductDrawer";
 import useLocalProducts from "@hooks/useLocalProducts";
+import useGetCategories from "@hooks/useGetCategories";
 import useConfigData from "@hooks/useConfigData";
 import { useDisclosure, useHotkeys } from "@mantine/hooks";
 import { formatCurrency } from "@utils/index";
@@ -44,6 +45,7 @@ export default function InvoiceForm({ refetch }) {
 	const { getLocalProducts } = useLocalProducts({
 		fetchOnMount: false,
 	});
+	const { categories } = useGetCategories();
 
 	const { data: productCategoryData } = useGetInventoryCategoryQuery({ type: "parent" });
 	const { mainAreaHeight } = useMainAreaHeight();
@@ -94,6 +96,11 @@ export default function InvoiceForm({ refetch }) {
 			Number(selectedProduct.sales_price) ||
 			0;
 
+		// =============== resolve category_name from category_id using local categories ===============
+		const categoryId = selectedProduct.category_id ?? null;
+		const categoryName =
+			categories?.find((cat) => cat.id === categoryId)?.name ?? "";
+
 		const newItem = {
 			product_id: selectedProduct.id,
 			display_name: selectedProduct.display_name,
@@ -104,6 +111,8 @@ export default function InvoiceForm({ refetch }) {
 			sales_price: Number(selectedProduct.sales_price ?? 0),
 			sub_total: quantityNumber * priceNumber,
 			unit_name: selectedProduct.unit_name || invoiceItemForm.values.unit || "",
+			category_id: categoryId,
+			category_name: categoryName,
 			type: "purchase",
 			price: priceNumber,
 			expired_date,

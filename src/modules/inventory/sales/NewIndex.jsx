@@ -108,14 +108,16 @@ export default function NewIndex() {
 		}
 
 		const invoiceId = generateInvoiceId();
-		const salesItemsForDb = salesProducts.map((item) => ({
-			product_id: item.product_id,
-			display_name: item.display_name,
-			quantity: Number(item.quantity) || 0,
-			mrp: Number(item.mrp ?? item.price ?? item.sales_price) || 0,
-			sales_price: Number(item.sales_price) || 0,
-			sub_total: (Number(item.quantity) || 0) * (Number(item.sales_price) || 0),
-		}));
+        const salesItemsForDb = salesProducts.map((item) => ({
+            product_id: item.product_id,
+            display_name: item.display_name,
+            quantity: Number(item.quantity) || 0,
+            mrp: Number(item.mrp ?? item.price ?? item.sales_price) || 0,
+            sales_price: Number(item.sales_price) || 0,
+            sub_total: (Number(item.quantity) || 0) * (Number(item.sales_price) || 0),
+            category_id: item.category_id ?? null,
+            category_name: item.category_name ?? "",
+        }));
 
 		const salesData = {
 			invoice: invoiceId,

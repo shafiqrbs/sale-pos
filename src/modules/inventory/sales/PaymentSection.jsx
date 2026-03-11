@@ -98,8 +98,13 @@ export default function PaymentSection({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [transactionMode]);
 
-	// =============== auto-sync paymentAmount and single payment amount with grandTotal ===============
+	// =============== auto-sync paymentAmount and single payment amount with grandTotal;
+	// skipped in edit mode because paymentAmount is pre-populated from the stored sale
+	// and overwriting it on every grandTotal change would reset the stored value to 0
+	// on the initial render before editSaleItems are loaded ===============
 	useEffect(() => {
+		if (isEditMode) return;
+
 		if (!isSplitPaymentActive) {
 			salesForm.setFieldValue("paymentAmount", grandTotal);
 			if (payments.length === 1) {
@@ -613,7 +618,6 @@ export default function PaymentSection({
 														color={isSplitPaymentActive ? "green" : "red"}
 														variant="transparent"
 														onClick={handleOpenSplitPaymentDrawer}
-														disabled={!salesForm.values.paymentAmount}
 													>
 														<IconCashPlus style={{ width: "70%", height: "70%" }} stroke={1.5} />
 													</ActionIcon>
@@ -637,17 +641,17 @@ export default function PaymentSection({
 													allowNegative={false}
 													hideControls
 													decimalScale={3}
+													thousandSeparator=","
 													placeholder={isSplitPaymentActive ? t("SplitPaymentActive") : t("Amount")}
 													size={"lg"}
 													min={0}
 													readOnly={isSplitPaymentActive}
-													disabled={isSplitPaymentActive}
 													leftSection={<IconPlusMinus size={16} opacity={0.5} />}
 													rightSection={
 														<Tooltip
 															label="Profit"
 															c="white"
-															bg={"red"}
+															bg="red"
 															withArrow
 															zIndex={999}
 															transitionProps={{ transition: "pop-bottom-left", duration: 500 }}

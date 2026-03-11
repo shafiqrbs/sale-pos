@@ -75,6 +75,8 @@ export default function NewIndex() {
 				bonus_quantity: item.bonus_quantity || 0,
 				sub_total: (Number(item.quantity) || 0) * (Number(item.purchase_price) || 0),
 				name: item.display_name ?? "",
+				category_id: item.category_id ?? null,
+				category_name: item.category_name ?? "",
 			})),
 		};
 
