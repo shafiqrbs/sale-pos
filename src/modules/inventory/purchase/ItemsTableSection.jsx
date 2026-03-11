@@ -114,7 +114,6 @@ export default function ItemsTableSection({ purchaseProducts, refetch, itemsTota
 						accessor: "category_name",
 						title: "Category",
 						textAlign: "center",
-						width: 120,
 						render: (record) => (
 							<Text size="sm" c="dimmed">
 								{record.category_name || "—"}
@@ -148,26 +147,16 @@ export default function ItemsTableSection({ purchaseProducts, refetch, itemsTota
 						width: 100,
 						render: (record) => (
 							<Text size="sm" c="dimmed">
-								{currencySymbol} {formatCurrency(record.mrp ?? 0)}
+								<Badge
+									variant="light"
+									color={record.mrp > record.purchase_price ? "red" : "blue"}
+									radius="sm">
+									{currencySymbol} {formatCurrency(record.mrp ?? 0)}
+								</Badge>
 							</Text>
 						),
 					},
-					{
-						accessor: "quantity",
-						title: "Qty",
-						textAlign: "left",
-						width: 80,
-						render: (record) => (
-							<NumberInput
-								size="xs"
-								value={record.quantity}
-								min={0}
-								step={1}
-								hideControls
-								onChange={(value) => handleQuantityChange(record.id, value)}
-							/>
-						),
-					},
+
 					{
 						accessor: "average_price",
 						title: "Avg. Price",
@@ -197,10 +186,26 @@ export default function ItemsTableSection({ purchaseProducts, refetch, itemsTota
 						),
 					},
 					{
+						accessor: "quantity",
+						title: "Qty",
+						textAlign: "left",
+						width: 120,
+						render: (record) => (
+							<NumberInput
+								size="xs"
+								value={record.quantity}
+								min={0}
+								step={1}
+								hideControls
+								onChange={(value) => handleQuantityChange(record.id, value)}
+							/>
+						),
+					},
+					{
 						accessor: "subTotal",
 						title: "Sub Total",
 						textAlign: "right",
-						width: 160,
+						width: 120,
 						render: (record) => {
 							const subTotal = (record.quantity || 0) * (record.purchase_price || 0);
 							return (
