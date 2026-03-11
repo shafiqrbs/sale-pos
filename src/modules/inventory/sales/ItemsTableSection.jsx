@@ -133,7 +133,6 @@ export default function ItemsTableSection({
 						accessor: "category_name",
 						title: "Category",
 						textAlign: "center",
-						width: 120,
 						render: (record) => (
 							<Text size="sm" c="dimmed">
 								{record.category_name || "—"}
@@ -147,7 +146,23 @@ export default function ItemsTableSection({
 						width: 100,
 						render: (record) => (
 							<Text size="sm" c="dimmed">
-								{currencySymbol} {formatCurrency(record.mrp ?? 0)}
+								<Badge
+									variant="light"
+									color={record?.average_price > record?.mrp ? "red" : "blue"}
+									radius="sm">
+									{currencySymbol} {formatCurrency(record?.mrp ?? 0)}
+								</Badge>
+							</Text>
+						),
+					},
+					{
+						accessor: "average_price",
+						title: "Avg. Price",
+						textAlign: "center",
+						width: 120,
+						render: (record) => (
+							<Text size="sm" c="dimmed">
+								{currencySymbol} {formatCurrency(record?.average_price ?? 0)}
 							</Text>
 						),
 					},
@@ -174,7 +189,12 @@ export default function ItemsTableSection({
 						width: 110,
 						render: (record) => (
 							<Text size="sm" c="dimmed">
-								{record.stock ?? 0} {record.unit_name || ""}
+								<Badge
+									variant="light"
+									color={record.stock < 0 ? "red" : "blue"}
+									radius="sm">
+									{record.stock ?? 0} {record.unit_name || ""}
+								</Badge>
 							</Text>
 						),
 					},
@@ -196,17 +216,7 @@ export default function ItemsTableSection({
 							/>
 						),
 					},
-					{
-						accessor: "average_price",
-						title: "Avg. Price",
-						textAlign: "center",
-						width: 120,
-						render: (record) => (
-							<Text size="sm" c="dimmed">
-								{currencySymbol} {formatCurrency(record.average_price ?? 0)}
-							</Text>
-						),
-					},
+
 					{
 						accessor: "percent",
 						title: "Discount (%)",

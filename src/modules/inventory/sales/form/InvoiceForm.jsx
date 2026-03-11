@@ -149,7 +149,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 				className="borderRadiusAll"
 				px="sm"
 				py="xs"
-				bg="blue.1"
+				bg="#1e40af"
 			>
 				<Flex gap="xs" align="flex-end" wrap="nowrap">
 					{/* =============== barcode input =============== */}
@@ -223,6 +223,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 					{/* =============== quantity input =============== */}
 					<Box w={110} style={{ flexShrink: 0 }}>
 						<InputNumberForm
+							classNames={{ input: "sales-price-input" }}
 							form={salesItemForm}
 							name="quantity"
 							id="quantity"

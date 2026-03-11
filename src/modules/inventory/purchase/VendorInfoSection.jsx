@@ -16,7 +16,7 @@ export default function VendorInfoSection({ purchaseForm }) {
 		useDisclosure(false);
 
 	return (
-		<Box bd="1px solid #dee2e6" bg="white" p="3xs" className="borderRadiusAll">
+		<Box  bg="white">
 			<Box>
 				<SelectForm
 					name="vendor_id"
@@ -44,7 +44,7 @@ export default function VendorInfoSection({ purchaseForm }) {
 
 				<Box mt="xs" className="boxBackground textColor borderRadiusAll">
 					<Grid columns={24} gutter={{ base: 8 }}>
-						<Grid.Col span={6}>
+						<Grid.Col span={12}>
 							<Flex p="4xs" direction="column" gap={2} bg="var(--theme-tertiary-color-2)">
 								<Text fz="xs" fw={500}>
 									Outstanding
@@ -57,33 +57,7 @@ export default function VendorInfoSection({ purchaseForm }) {
 								</Flex>
 							</Flex>
 						</Grid.Col>
-						<Grid.Col span={6}>
-							<Flex p="4xs" direction="column" bg="var(--theme-tertiary-color-2)" gap={2}>
-								<Text fz="xs" fw={500}>
-									Purchase
-								</Text>
-								<Flex align="center" gap={4}>
-									<Text fz="xs">{currencySymbol}</Text>
-									<Text fz="sm" fw={600}>
-										0.00
-									</Text>
-								</Flex>
-							</Flex>
-						</Grid.Col>
-						<Grid.Col span={6}>
-							<Flex p="4xs" direction="column" bg="var(--theme-tertiary-color-2)" gap={2}>
-								<Text fz="xs" fw={500}>
-									Discount
-								</Text>
-								<Flex align="center" gap={4}>
-									<Text fz="xs">{currencySymbol}</Text>
-									<Text fz="sm" fw={600}>
-										0.00
-									</Text>
-								</Flex>
-							</Flex>
-						</Grid.Col>
-						<Grid.Col span={6}>
+						<Grid.Col span={12}>
 							<Flex p="4xs" direction="column" bg="var(--theme-tertiary-color-2)" gap={2}>
 								<Text fz="xs" fw={500}>
 									Credit Limit

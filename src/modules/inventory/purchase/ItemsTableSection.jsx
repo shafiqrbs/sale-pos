@@ -1,5 +1,5 @@
 import React from "react";
-import { ActionIcon, Box, Flex, NumberInput, Text, Button } from "@mantine/core";
+import {ActionIcon, Box, Flex, NumberInput, Text, Button, Badge} from "@mantine/core";
 import { DateInput } from "@mantine/dates";
 import { DataTable } from "mantine-datatable";
 import { IconList, IconTrashX } from "@tabler/icons-react";
@@ -20,7 +20,7 @@ export default function ItemsTableSection({ purchaseProducts, refetch, itemsTota
 	const navigate = useNavigate();
 	const { t } = useTranslation();
 	const { mainAreaHeight } = useMainAreaHeight();
-	const tableHeight = mainAreaHeight - 394;
+	const tableHeight = mainAreaHeight - 348;
 	const { configData } = useConfigData();
 
 	const currencySymbol =
@@ -235,16 +235,17 @@ export default function ItemsTableSection({ purchaseProducts, refetch, itemsTota
 
 			<Box mt="les" px="xs" py="4xs" bg="var(--theme-tertiary-color-2)" className="borderRadiusAll">
 				<Flex justify="space-between" align="center">
-					<Text fz="sm" fw={600}>
-						Σ&nbsp; {purchaseProducts.length} Item(s)
-					</Text>
+					<Badge size="xl" bg={"red"}>
+						<Text fz="sm" fw={600}>
+							Σ&nbsp; {purchaseProducts.length} Item(s)
+						</Text>
+					</Badge>
 					<Flex align="center" gap={4}>
-						<Text fz="sm" fw={500}>
-							{currencySymbol}
-						</Text>
-						<Text fz="sm" fw={700}>
-							{formatCurrency(itemsTotal)}
-						</Text>
+						<Badge size="xl" radius="sm" bg="#1e40af">
+							<Text fz="xl" fw={700}>
+								{currencySymbol}&nbsp;{formatCurrency(itemsTotal)}
+							</Text>
+						</Badge>
 					</Flex>
 				</Flex>
 			</Box>

@@ -8,7 +8,7 @@ import {
 	Image,
 	NumberInput,
 	Select,
-	Stack,
+	Stack, Switch,
 	Text,
 	Textarea,
 } from "@mantine/core";
@@ -105,42 +105,44 @@ export default function PaymentSection({ purchaseForm, itemsTotal, isAddingPurch
 
 	return (
 		<>
-			<Grid columns={24} gutter={8} mt="xs">
+			<Box bg={'gray.2'} p={'xs'}>
+			<Grid columns={24} gutter={8}>
 				<Grid.Col span={16}>
 					<Grid columns={16} gutter={8}>
-						<Grid.Col span={16}>
-							<VendorInfoSection purchaseForm={purchaseForm} />
-						</Grid.Col>
-
 						<Grid.Col span={8}>
-							<Box bd="1px solid #dee2e6" bg="white" p="xs" className="borderRadiusAll" h="100%">
-								<Text fz="sm" fw={600} mb={6}>
-									Transaction mode
-								</Text>
-								<FormValidationWrapper
-									errorMessage="Transaction mode is required"
-									opened={!!purchaseForm.errors.transactionModeId}
-								>
-									<Select
-										data={groupedTransactionMode}
-										renderOption={renderTransactionModeOption}
-										searchable
-										{...purchaseForm.getInputProps("transactionModeId", { type: "search" })}
-										onChange={(value, option) => {
-											purchaseForm.setFieldValue("transactionMode", option.label);
-											purchaseForm.setFieldValue("transactionModeId", String(value));
-										}}
-										nothingFoundMessage="No transaction mode found"
-										placeholder="Select transaction mode"
-										size="sm"
-									/>
-								</FormValidationWrapper>
+							<Box bd="1px solid #dee2e6" bg="white" p="xs"  h="100%">
+								<VendorInfoSection purchaseForm={purchaseForm} />
 							</Box>
 						</Grid.Col>
 
 						<Grid.Col span={8}>
 							<Box bd="1px solid #dee2e6" bg="white" p="xs" className="borderRadiusAll">
 								<Grid gutter={6}>
+									<Grid.Col span={12}>
+										<Box bg="white" h="100%">
+											<Text fz="sm" fw={600} mb={6}>
+												Transaction mode
+											</Text>
+											<FormValidationWrapper
+												errorMessage="Transaction mode is required"
+												opened={!!purchaseForm.errors.transactionModeId}
+											>
+												<Select
+													data={groupedTransactionMode}
+													renderOption={renderTransactionModeOption}
+													searchable
+													{...purchaseForm.getInputProps("transactionModeId", { type: "search" })}
+													onChange={(value, option) => {
+														purchaseForm.setFieldValue("transactionMode", option.label);
+														purchaseForm.setFieldValue("transactionModeId", String(value));
+													}}
+													nothingFoundMessage="No transaction mode found"
+													placeholder="Select transaction mode"
+													size="sm"
+												/>
+											</FormValidationWrapper>
+										</Box>
+									</Grid.Col>
 									<Grid.Col span={12}>
 										<DateInput
 											value={purchaseDate}
@@ -167,7 +169,6 @@ export default function PaymentSection({ purchaseForm, itemsTotal, isAddingPurch
 						</Grid.Col>
 					</Grid>
 				</Grid.Col>
-
 				<Grid.Col span={8}>
 					<Stack
 						bd="1px solid #dee2e6"
@@ -246,82 +247,86 @@ export default function PaymentSection({ purchaseForm, itemsTotal, isAddingPurch
 								</Flex>
 							</Grid.Col>
 						</Grid>
-
-						<Flex mt="xs" justify="space-between" align="center" gap={6}>
-							<Text fz="sm" fw={600} style={{ whiteSpace: "nowrap" }}>
-								Discount:
-							</Text>
-							<Select
-								size="xs"
-								w={120}
-								data={[
-									{ value: "flat", label: "Flat" },
-									{ value: "percentage", label: "%" },
-								]}
-								value={isDiscountPercentage ? "percentage" : "flat"}
-								onChange={handleDiscountTypeChange}
-								allowDeselect={false}
-							/>
-							<Box style={{ flex: 1 }}>
-								<NumberInput
-									value={discountAmount}
-									onChange={(value) =>
-										purchaseForm.setFieldValue("discountAmount", parseFloat(value) || 0)
-									}
-									hideControls
-									size="xs"
-									placeholder="0"
-									leftSection={
-										isDiscountPercentage ? (
-											<Text fz={12}>%</Text>
-										) : (
-											<IconCurrencyTaka size={14} />
-										)
-									}
-								/>
-							</Box>
-						</Flex>
-
-						<Flex
-							mt="xs"
-							direction="column"
-							gap={6}
-							bg="var(--theme-primary-color-1)"
-							className="borderRadiusAll"
-							px="xs"
-							py={6}
-						>
-							<Flex py={8} justify="space-between" align="center">
-								<Text fz="sm" fw={600}>
-									Due
-								</Text>
-								<Flex align="center" gap={4}>
-									<Text fz="sm" fw={500}>
-										{currencySymbol}
-									</Text>
-									<Text fz="sm" fw={700}>
-										{formatCurrency(dueAmount)}
-									</Text>
+						<Grid columns={24} gutter={{ base: 1 }} >
+							<Grid.Col span={12}>
+								<Flex
+									direction="column"
+									gap={6}
+									className="borderRadiusAll"
+									px="xs"
+									py={6}
+									bg={"#fffbeb85"}
+								>
+									<Flex py={8} justify="space-between" align="center">
+										<Text fz="sm" fw={600}>
+											Discount
+										</Text>
+									</Flex>
+									<Flex justify="space-between" align="center" gap={4}>
+										<Box style={{ flex: 1 }}>
+											<NumberInput
+												value={discountAmount}
+												onChange={(value) =>
+													purchaseForm.setFieldValue("discountAmount", parseFloat(value) || 0)
+												}
+												hideControls
+												size="sm"
+												placeholder="0"
+												leftSection={
+													isDiscountPercentage ? (
+														<Text fz={12}>%</Text>
+													) : (
+														<IconCurrencyTaka size={14} />
+													)
+												}
+											/>
+										</Box>
+									</Flex>
 								</Flex>
-							</Flex>
-							<FormValidationWrapper
-								errorMessage="Payment amount is required"
-								opened={!!purchaseForm.errors.paymentAmount}
-							>
-								<NumberInput
-									hideControls
-									size="sm"
-									placeholder="Amount"
-									leftSection={<IconCurrencyTaka size={14} />}
-									styles={{
-										input: {
-											backgroundColor: "white",
-										},
-									}}
-									{...purchaseForm.getInputProps("paymentAmount", { type: "number" })}
-								/>
-							</FormValidationWrapper>
-						</Flex>
+							</Grid.Col>
+							<Grid.Col span={12} >
+								<Flex
+									direction="column"
+									gap={6}
+									bg="var(--theme-primary-card-color)"
+									color={'white'}
+									className="borderRadiusAll"
+									px="xs"
+									py={6}
+								>
+									<Flex py={8} justify="space-between" align="center">
+										<Text fz="sm" c={'white'} fw={600}>
+											Due
+										</Text>
+										<Flex align="center" gap={4}>
+											<Text fz="sm" c={'white'} fw={500}>
+												{currencySymbol}
+											</Text>
+											<Text fz="sm" c={'white'} fw={700}>
+												{formatCurrency(dueAmount)}
+											</Text>
+										</Flex>
+									</Flex>
+									<FormValidationWrapper
+										errorMessage="Payment amount is required"
+										opened={!!purchaseForm.errors.paymentAmount}
+									>
+										<NumberInput
+											hideControls
+											size="sm"
+											placeholder="Amount"
+											leftSection={<IconCurrencyTaka size={14} />}
+											styles={{
+												input: {
+													backgroundColor: "white",
+												},
+											}}
+											{...purchaseForm.getInputProps("paymentAmount", { type: "number" })}
+										/>
+									</FormValidationWrapper>
+								</Flex>
+							</Grid.Col>
+						</Grid>
 					</Stack>
 				</Grid.Col>
 			</Grid>
@@ -336,9 +341,6 @@ export default function PaymentSection({ purchaseForm, itemsTotal, isAddingPurch
 				<Button fullWidth bg="var(--theme-print-btn-color)" color="white" radius={0} type="button" id="PurchasePrintFormSubmit">
 					Print
 				</Button>
-				<Button fullWidth bg="var(--theme-pos-btn-color)" color="white" radius={0} type="button" id="PurchasePosFormSubmit">
-					Pos
-				</Button>
 				<Button
 					fullWidth
 					bg="var(--theme-save-btn-color)"
@@ -352,6 +354,7 @@ export default function PaymentSection({ purchaseForm, itemsTotal, isAddingPurch
 					Save
 				</Button>
 			</Button.Group>
+			</Box>
 		</>
 	);
 }

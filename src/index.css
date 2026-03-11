@@ -89,7 +89,13 @@
 	--theme-carousel-item-color: var(--mantine-color-green-8);
 
 	--theme-menu-three-dot: var(--mantine-color-red-6);
+
+	--theme-primary-card-color: #1e40af;
 }
+
+
+
+
 
 .cursor-pointer {
 	cursor: pointer !important;
@@ -163,6 +169,14 @@ button[data-active="true"].mantine-focus-auto.mantine-active.mantine-datatable-p
 
 #right-options-drawer-button:hover {
 	opacity: 1 !important;
+}
+.NumberInputStylesNames{
+	border: 3px solid #e5dcff!important;
+}
+
+.sales-price-input {
+	border: 3px solid #e5dcff!important;
+	border-radius: 4px;
 }
 
 .mantine-InputWrapper-error {

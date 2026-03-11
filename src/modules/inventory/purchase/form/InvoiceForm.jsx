@@ -12,10 +12,10 @@ import {
 import { useForm } from "@mantine/form";
 import {
 	IconBarcode,
-	IconCurrencyTaka,
+	IconCurrencyTaka, IconNumber,
 	IconPlus,
 	IconRefresh,
-	IconShoppingCart,
+	IconShoppingCart, IconSortAscendingNumbers,
 } from "@tabler/icons-react";
 
 import useMainAreaHeight from "@hooks/useMainAreaHeight";
@@ -33,7 +33,7 @@ import FormValidationWrapper from "@components/form-builders/FormValidationWrapp
 import VirtualSearchSelect from "@components/form-builders/VirtualSearchSelect";
 import DateInputForm from "@components/form-builders/DateInputForm";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useGetInventoryCategoryQuery } from "@services/settings";
 
 export default function InvoiceForm({ refetch }) {
@@ -72,7 +72,7 @@ export default function InvoiceForm({ refetch }) {
 		unit: product.unit_name,
 	}));
 
-	const containerHeight = mainAreaHeight - 170;
+	const containerHeight = mainAreaHeight - 160;
 
 	const handleAddItemToPurchaseForm = async () => {
 		const { productId, purchasePrice, quantity, expired_date } = invoiceItemForm.values;
@@ -156,13 +156,11 @@ export default function InvoiceForm({ refetch }) {
 				bg="white"
 				className="borderRadiusAll"
 			>
-				<Box p="sm" fz="sm" fw={600} className="boxBackground textColor borderRadiusAll">
+				<Box p="sm" fz="sm" fw={600} bg={'#1e40af'} c={'white'} className="boxBackground textColor borderRadiusAll">
 					Vendor Purchase Invoice
 				</Box>
-
 				<Divider />
-
-				<ScrollArea h={containerHeight} type="never">
+				<ScrollArea h={containerHeight} bg={'#f0f4f83d'} type="never">
 					<Box p="sm">
 						<InputForm
 							form={invoiceItemForm}
@@ -175,7 +173,7 @@ export default function InvoiceForm({ refetch }) {
 							leftSection={<IconBarcode size={16} opacity={0.6} />}
 						/>
 						<Select
-							mt="4xs"
+							mt="xs"
 							placeholder="All categories"
 							data={[
 								{ value: "", label: "All categories" },
@@ -191,8 +189,8 @@ export default function InvoiceForm({ refetch }) {
 							clearable
 							searchable
 						/>
-						<Flex mt="4xs" gap="4" align="flex-end">
-							<Box style={{ flex: 1 }}>
+						<Flex mt="md" gap="4" align="flex-end" bg={'#1e40af'} p={'xs'} ml={'-xs'} mr={'-xs'} >
+							<Box style={{ flex: 1 }} >
 								<FormValidationWrapper
 									errorMessage="Product is required"
 									opened={!!invoiceItemForm.errors.productId}
@@ -207,6 +205,7 @@ export default function InvoiceForm({ refetch }) {
 											nothingFoundMessage="Change the search term to find a product"
 											onChange={handleProductSelect}
 											id="productId"
+											nextField="quantity"
 										/>
 									</Box>
 								</FormValidationWrapper>
@@ -245,6 +244,7 @@ export default function InvoiceForm({ refetch }) {
 									nextField="expired_date"
 									required={false}
 									tooltip={invoiceItemForm.errors.quantity}
+									leftSection={<IconSortAscendingNumbers size={16} opacity={0.6} />}
 									rightIcon={
 										<Text fz="xs" fw={500}>
 											{invoiceItemForm.values.unit || "Unit"}
@@ -276,20 +276,22 @@ export default function InvoiceForm({ refetch }) {
 					align="center"
 					bd="1px solid #e6e6e6"
 					className="borderRadiusAll"
-					bg="var(--theme-primary-color-0)"
+					bg="var(--theme-primary-card-color)"
 				>
-					<Text fz="sm" fw={500}>
+					<Text fz="sm" fw={500} c={'white'}>
 						Sub Total
 					</Text>
-					<Flex align="center" gap="4">
-						<IconCurrencyTaka size={14} />
-						<Text fz="sm" fw={600}>
+					<Flex align="center" gap="4" pr={'md'}>
+						<Text fz="sm" c={'white'} fw={500}>
+							{currencySymbol}
+						</Text>
+						<Text fz="sm" fw={600} c={'white'}>
 							{formatCurrency(invoiceSubTotal)}
 						</Text>
 					</Flex>
 				</Flex>
 
-				<Flex p="sm" justify="space-between" align="center">
+				<Flex p="sm" justify="space-between" align="center" bg={"#fffbeb85"}>
 					<ActionIcon
 						onClick={handleResetInvoiceItemForm}
 						variant="outline"
