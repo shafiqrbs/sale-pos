@@ -343,7 +343,7 @@ export default function PaymentSection({ purchaseForm, itemsTotal, isAddingPurch
 				</Button>
 				<Button
 					fullWidth
-					bg="var(--theme-save-btn-color)"
+					bg="var(--theme-pos-btn-color)"
 					color="white"
 					radius={0}
 					form="purchaseForm"
