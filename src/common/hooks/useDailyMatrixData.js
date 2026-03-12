@@ -1,36 +1,66 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { useGetDailySummaryQuery } from "@services/report";
+import { useGetSalesQuery } from "@services/sales";
 
-export default function useDailyMatrixData() {
-	const [dailyData, setDailyData] = useState({
-		totalSales: 0,
-		totalDiscount: 0,
-		totalPayment: 0,
-		totalDue: 0,
-		totalInvoices: 0,
-		transactionModes: [],
-		topProducts: [],
-		salesList: [],
-	});
-	const [isLoading, setIsLoading] = useState(false);
-	const [error, setError] = useState(null);
+function getTodayFormatted() {
+	const today = new Date();
+	const day = String(today.getDate()).padStart(2, "0");
+	const month = String(today.getMonth() + 1).padStart(2, "0");
+	const year = today.getFullYear();
+	return { ddmmyyyy: `${day}-${month}-${year}`, yyyymmdd: `${year}-${month}-${day}` };
+}
 
+const INITIAL_DATA = {
+	totalSales: 0,
+	totalDiscount: 0,
+	totalPayment: 0,
+	totalDue: 0,
+	totalInvoices: 0,
+	transactionModes: [],
+	topProducts: [],
+	salesList: [],
+};
+
+export default function useDailyMatrixData({ offlineFetch = true } = {}) {
+	// =============== offline state ================
+	const [offlineData, setOfflineData] = useState(INITIAL_DATA);
+	const [offlineLoading, setOfflineLoading] = useState(false);
+	const [offlineError, setOfflineError] = useState(null);
+
+	// =============== online RTK Query hooks (skip when offline) ================
+	const { yyyymmdd } = getTodayFormatted();
+
+	const {
+		data: summaryResponse,
+		isLoading: summaryLoading,
+		error: summaryError,
+		refetch: refetchSummary,
+	} = useGetDailySummaryQuery(
+		{ start_date: yyyymmdd, end_date: yyyymmdd },
+		{ skip: offlineFetch }
+	);
+
+	const {
+		data: salesListResponse,
+		isLoading: salesListLoading,
+		error: salesListError,
+		refetch: refetchSalesList,
+	} = useGetSalesQuery(undefined, { skip: offlineFetch });
+
+	// =============== offline fetch logic ================
 	useEffect(() => {
-		fetchDailyData();
-	}, []);
+		if (offlineFetch) {
+			fetchOfflineData();
+		}
+	}, [offlineFetch]);
 
-	const fetchDailyData = async () => {
-		setIsLoading(true);
-		setError(null);
+	const fetchOfflineData = async () => {
+		setOfflineLoading(true);
+		setOfflineError(null);
 
 		try {
-			// =============== get today's date in the format used in the database ================
-			const today = new Date();
-			const day = String(today.getDate()).padStart(2, "0");
-			const month = String(today.getMonth() + 1).padStart(2, "0");
-			const year = today.getFullYear();
-			const formattedDate = `${day}-${month}-${year}`; // DD-MM-YYYY format to match "08-02-2026, 12:53 pm"
+			const { ddmmyyyy: formattedDate } = getTodayFormatted();
 
-			// =============== fetch sales data for today using database query ================
 			const salesData = await window.dbAPI.getDataFromTable("sales", null, "id", {
 				search: {
 					startsWith: {
@@ -39,27 +69,14 @@ export default function useDailyMatrixData() {
 				},
 			});
 
-			console.log(salesData);
-
-			// =============== fetch transaction modes for reference ================
 			const transactionModes = await window.dbAPI.getDataFromTable("accounting_transaction_mode");
 
 			if (!salesData || salesData.length === 0) {
-				setDailyData({
-					totalSales: 0,
-					totalDiscount: 0,
-					totalPayment: 0,
-					totalDue: 0,
-					totalInvoices: 0,
-					transactionModes: [],
-					topProducts: [],
-					salesList: [],
-				});
-				setIsLoading(false);
+				setOfflineData(INITIAL_DATA);
+				setOfflineLoading(false);
 				return;
 			}
 
-			// =============== calculate total sales, discount, payment, and due ================
 			let totalSales = 0;
 			let totalDiscount = 0;
 			let totalPayment = 0;
@@ -81,10 +98,10 @@ export default function useDailyMatrixData() {
 			// =============== aggregate transaction modes from payments array ================
 			if (sale.payments) {
 				try {
-					const payments = typeof sale.payments === "string" 
-						? JSON.parse(sale.payments) 
+					const payments = typeof sale.payments === "string"
+						? JSON.parse(sale.payments)
 						: sale.payments;
-					
+
 					if (Array.isArray(payments) && payments.length > 0) {
 						payments.forEach((payment) => {
 							const modeId = payment.transaction_mode_id;
@@ -139,16 +156,15 @@ export default function useDailyMatrixData() {
 				}
 			});
 
-			// =============== convert maps to arrays and sort ================
 			const transactionModesArray = Object.values(transactionModeMap).sort(
 				(a, b) => b.amount - a.amount
 			);
 
 			const topProductsArray = Object.values(productMap)
 				.sort((a, b) => b.totalQuantity - a.totalQuantity)
-				.slice(0, 20); // =============== top 20 products ================
+				.slice(0, 20);
 
-			setDailyData({
+			setOfflineData({
 				totalSales,
 				totalDiscount,
 				totalPayment,
@@ -160,16 +176,54 @@ export default function useDailyMatrixData() {
 			});
 		} catch (error) {
 			console.error("Error fetching daily matrix data:", error);
-			setError(error);
+			setOfflineError(error);
 		} finally {
-			setIsLoading(false);
+			setOfflineLoading(false);
 		}
 	};
 
+	// =============== map online API response to the same shape ================
+	const onlineData = useMemo(() => {
+		if (offlineFetch || !summaryResponse?.data) return INITIAL_DATA;
+
+		const { sales, transactionModes: modes, topSalesItem } = summaryResponse.data;
+
+		return {
+			totalSales: Number(sales?.totalSales) || 0,
+			totalDiscount: Number(sales?.totalDiscount) || 0,
+			totalPayment: Number(sales?.totalPayment) || 0,
+			totalDue: Number(sales?.totalDue) || 0,
+			totalInvoices: Number(sales?.totalInvoices) || 0,
+			transactionModes: Array.isArray(modes) ? modes : [],
+			topProducts: Array.isArray(topSalesItem)
+				? topSalesItem.map((item) => ({
+						name: item.name || "Unknown",
+						totalQuantity: Number(item.totalQuantity) || 0,
+						totalAmount: Number(item.totalAmount) || 0,
+						salesPrice: Number(item.salesPrice) || 0,
+				  }))
+				: [],
+			salesList: salesListResponse?.data || [],
+		};
+	}, [offlineFetch, summaryResponse, salesListResponse]);
+
+	// =============== return based on mode ================
+	if (offlineFetch) {
+		return {
+			dailyData: offlineData,
+			isLoading: offlineLoading,
+			error: offlineError,
+			refetch: fetchOfflineData,
+		};
+	}
+
 	return {
-		dailyData,
-		isLoading,
-		error,
-		refetch: fetchDailyData,
+		dailyData: onlineData,
+		isLoading: summaryLoading || salesListLoading,
+		error: summaryError || salesListError,
+		refetch: () => {
+			refetchSummary();
+			refetchSalesList();
+		},
 	};
 }

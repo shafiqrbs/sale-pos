@@ -255,6 +255,7 @@ db.prepare(
 		createdById INTEGER,
 		process TEXT,
 		mode_name TEXT,
+		transaction_mode_id INTEGER,
 		balance REAL,
 		purchase_items TEXT,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,

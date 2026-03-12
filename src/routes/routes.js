@@ -47,4 +47,5 @@ export const APP_APIS = {
 	PURCHASE: "/inventory/purchase",
 	CHANGE_PASSWORD: "/core/change-password",
 	PURCHASE_CONFIG: "/domain/config/inventory-purchase",
+	DAILY_SUMMARY: "/inventory/report/daily-summary",
 };

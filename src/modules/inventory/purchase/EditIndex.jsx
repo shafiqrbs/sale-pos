@@ -57,7 +57,7 @@ export default function EditIndex() {
 			discountAmount: purchase.discount ?? 0,
 			isDiscountPercentage: discountTypeMapped,
 			paymentAmount: purchase.payment ?? 0,
-			transactionModeId: "",
+			transactionModeId: purchase.transaction_mode_id ? String(purchase.transaction_mode_id) : "",
 			transactionMode: purchase.mode_name ?? "",
 		};
 
@@ -191,6 +191,7 @@ export default function EditIndex() {
 			category_name: item.category_name ?? "",
 			unit_name: item.unit_name ?? "",
 			average_price: Number(item.average_price) || 0,
+			expired_date: item.expired_date ?? null,
 		}));
 
 		// =============== keep the original invoice number unchanged; only recalculate financials ===============
@@ -210,6 +211,7 @@ export default function EditIndex() {
 			createdById: user?.id ?? null,
 			process: purchase.process ?? "",
 			mode_name: formValues.transactionMode ?? purchase.mode_name ?? "",
+			transaction_mode_id: formValues.transactionModeId ? Number(formValues.transactionModeId) : null,
 			purchase_items: JSON.stringify(purchaseItemsForDb),
 		};
 

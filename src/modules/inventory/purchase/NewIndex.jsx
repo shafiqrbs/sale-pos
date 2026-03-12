@@ -102,6 +102,7 @@ export default function NewIndex() {
 			category_name: item.category_name ?? "",
 			unit_name: item.unit_name ?? "",
 			average_price: Number(item.average_price) || 0,
+			expired_date: item.expired_date ?? null,
 		}));
 
 		const localPurchaseRecord = {
@@ -120,6 +121,7 @@ export default function NewIndex() {
 			createdById: user?.id ?? null,
 			process: "",
 			mode_name: formValues.transactionMode ?? "",
+			transaction_mode_id: formValues.transactionModeId ? Number(formValues.transactionModeId) : null,
 			purchase_items: JSON.stringify(purchaseItemsForDb),
 			created: formatDateTime(new Date()),
 		};
@@ -134,7 +136,20 @@ export default function NewIndex() {
 			// =============== clear persisted temp items after successful purchase submission ===============
 			await window.dbAPI.deleteDataFromTable("temp_purchase_products", { type: "purchase" });
 			refetch();
+
+			// =============== partial reset: preserve vendor + transaction mode ===============
+			const preservedValues = {
+				vendor_id: purchaseForm.values.vendor_id,
+				vendorName: purchaseForm.values.vendorName,
+				vendorPhone: purchaseForm.values.vendorPhone,
+				vendorEmail: purchaseForm.values.vendorEmail,
+				transactionMode: purchaseForm.values.transactionMode,
+				transactionModeId: purchaseForm.values.transactionModeId,
+			};
 			purchaseForm.reset();
+			Object.entries(preservedValues).forEach(([key, value]) => {
+				purchaseForm.setFieldValue(key, value);
+			});
 		} catch (error) {
 			console.error(error);
 			showNotification(error?.message || "Failed to save purchase", "red");
