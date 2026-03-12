@@ -2,6 +2,7 @@ import { Box, Paper, Text, Badge } from "@mantine/core";
 import { DataTable } from "mantine-datatable";
 import { useTranslation } from "react-i18next";
 import tableCss from "@assets/css/Table.module.css";
+import { formatCurrency } from "@utils/index";
 
 export default function TopSellingProductsCard({ dailyData, cardHeight }) {
     const { t } = useTranslation();
@@ -32,7 +33,7 @@ export default function TopSellingProductsCard({ dailyData, cardHeight }) {
                             textAlign: "center",
                             render: (item) => (
                                 <Badge color="blue" variant="light">
-                                    {item.totalQuantity}
+                                    {formatCurrency(item.totalQuantity)}
                                 </Badge>
                             ),
                         },
@@ -42,7 +43,7 @@ export default function TopSellingProductsCard({ dailyData, cardHeight }) {
                             textAlign: "right",
                             render: (item) => (
                                 <Text size="sm" fw={600}>
-                                    ৳ {item.totalAmount.toFixed(2)}
+                                    ৳ {formatCurrency(item.totalAmount)}
                                 </Text>
                             ),
                         },

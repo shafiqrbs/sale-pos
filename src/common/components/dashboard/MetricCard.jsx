@@ -1,4 +1,5 @@
 import { Box, Paper, Text, Group } from "@mantine/core";
+import { formatCurrency } from "@utils/index";
 
 export default function MetricCard({ label, value, icon, color, subValue }) {
     return (

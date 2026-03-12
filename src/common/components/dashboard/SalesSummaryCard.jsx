@@ -2,6 +2,7 @@ import { Grid, Paper, ScrollArea, Text } from "@mantine/core";
 import { IconCurrencyTaka, IconDiscount, IconReceipt } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 import StatCard from "./StatCard";
+import { formatCurrency } from "@utils/index";
 
 const STAT_ITEMS = [
     { icon: IconCurrencyTaka, labelKey: "TotalSales", valueKey: "totalSales", format: "currency", color: "blue" },
@@ -20,7 +21,7 @@ export default function SalesSummaryCard({ dailyData, cardHeight }) {
             <ScrollArea scrollbarSize={4} scrollbars="y" type="hover" h={cardHeight}>
                 <Grid gutter="md">
                     {STAT_ITEMS.map((item) => {
-                        const value = item.format === "currency" ? `৳ ${dailyData[ item.valueKey ].toFixed(2)}` : dailyData[ item.valueKey ];
+                        const value = item.format === "currency" ? `৳ ${formatCurrency(dailyData[ item.valueKey ])}` : dailyData[ item.valueKey ];
                         const IconComponent = item.icon;
                         return (
                             <Grid.Col key={item.labelKey} span={6}>

@@ -2,6 +2,7 @@ import { Paper, Text, Stack, ScrollArea } from "@mantine/core";
 import { IconCurrencyTaka, IconDiscount, IconReceipt, IconClock } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 import MetricCard from "./MetricCard";
+import { formatCurrency } from "@utils/index";
 
 export default function TodaysOverviewCard({ dailyData, cardHeight }) {
     const { t } = useTranslation();
@@ -14,7 +15,7 @@ export default function TodaysOverviewCard({ dailyData, cardHeight }) {
                     {/* =============== average invoice value ================ */}
                     <MetricCard
                         label={t("AverageInvoiceValue")}
-                        value={`৳ ${dailyData.totalInvoices > 0 ? (dailyData.totalSales / dailyData.totalInvoices).toFixed(2) : '0.00'}`}
+                        value={`৳ ${dailyData.totalInvoices > 0 ? formatCurrency(dailyData.totalSales / dailyData.totalInvoices) : '0.00'}`}
                         icon={<IconReceipt size={20} />}
                         color="blue"
                     />
@@ -22,7 +23,7 @@ export default function TodaysOverviewCard({ dailyData, cardHeight }) {
                     {/* =============== average discount per invoice ================ */}
                     <MetricCard
                         label={t("AverageDiscountPerInvoice")}
-                        value={`৳ ${dailyData.totalInvoices > 0 ? (dailyData.totalDiscount / dailyData.totalInvoices).toFixed(2) : '0.00'}`}
+                        value={`৳ ${dailyData.totalInvoices > 0 ? formatCurrency(dailyData.totalDiscount / dailyData.totalInvoices) : '0.00'}`}
                         icon={<IconDiscount size={20} />}
                         color="orange"
                     />

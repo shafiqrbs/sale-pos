@@ -186,7 +186,47 @@ export default function useDailyMatrixData({ offlineFetch = true } = {}) {
 	const onlineData = useMemo(() => {
 		if (offlineFetch || !summaryResponse?.data) return INITIAL_DATA;
 
-		const { sales, transactionModes: modes, topSalesItem } = summaryResponse.data;
+		const apiData = summaryResponse.data;
+		const { sales } = apiData;
+
+		// =============== handle multiple possible key names the api may use for transaction modes ================
+		const rawModes = apiData.transactionModes || apiData.transaction_modes || apiData.methods || [];
+		const normalizedTransactionModes = Array.isArray(rawModes)
+			? rawModes.map((mode) => ({
+					name:
+						mode.name ||
+						mode.method ||
+						mode.transaction_mode_name ||
+						mode.modeName ||
+						mode.mode_name ||
+						"Unknown",
+					amount: Number(
+						mode.amount ?? mode.total ?? mode.total_amount ?? 0
+					),
+					count: Number(mode.count ?? mode.total_count ?? mode.sales_count ?? 0),
+			  }))
+			: [];
+
+		// =============== handle multiple possible key names the api may use for top products ================
+		const rawTopProducts =
+			apiData.topSalesItem ||
+			apiData.top_products ||
+			apiData.topProducts ||
+			apiData.top_selling_items ||
+			[];
+		const normalizedTopProducts = Array.isArray(rawTopProducts)
+			? rawTopProducts.map((item) => ({
+					name:
+						item.name ||
+						item.product_name ||
+						item.item_name ||
+						item.display_name ||
+						"Unknown",
+					totalQuantity: Number(item.totalQuantity ?? item.total_quantity ?? 0),
+					totalAmount: Number(item.totalAmount ?? item.total_amount ?? 0),
+					salesPrice: Number(item.salesPrice ?? item.sales_price ?? 0),
+			  }))
+			: [];
 
 		return {
 			totalSales: Number(sales?.totalSales) || 0,
@@ -194,15 +234,8 @@ export default function useDailyMatrixData({ offlineFetch = true } = {}) {
 			totalPayment: Number(sales?.totalPayment) || 0,
 			totalDue: Number(sales?.totalDue) || 0,
 			totalInvoices: Number(sales?.totalInvoices) || 0,
-			transactionModes: Array.isArray(modes) ? modes : [],
-			topProducts: Array.isArray(topSalesItem)
-				? topSalesItem.map((item) => ({
-						name: item.name || "Unknown",
-						totalQuantity: Number(item.totalQuantity) || 0,
-						totalAmount: Number(item.totalAmount) || 0,
-						salesPrice: Number(item.salesPrice) || 0,
-				  }))
-				: [],
+			transactionModes: normalizedTransactionModes,
+			topProducts: normalizedTopProducts,
 			salesList: salesListResponse?.data || [],
 		};
 	}, [offlineFetch, summaryResponse, salesListResponse]);

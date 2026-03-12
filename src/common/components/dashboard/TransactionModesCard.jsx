@@ -1,7 +1,7 @@
 import { Box, Paper, Text, Stack, Group, Badge, Center, ScrollArea, Flex, Divider } from "@mantine/core";
 import { PieChart } from "@mantine/charts";
 import { useTranslation } from "react-i18next";
-import { getRandomColor } from "@/common/utils";
+import { formatCurrency, getRandomColor } from "@/common/utils";
 
 export default function TransactionModesCard({ dailyData, cardHeight }) {
     const { t } = useTranslation();
@@ -32,7 +32,7 @@ export default function TransactionModesCard({ dailyData, cardHeight }) {
                             />
                             <Text size="sm" fw={600}>{data.name}</Text>
                         </Group>
-                        <Text size="sm">৳ {data.value}</Text>
+                        <Text size="sm">৳ {formatCurrency(data.value)}</Text>
                     </Stack>
                 </Paper>
             );
@@ -71,7 +71,7 @@ export default function TransactionModesCard({ dailyData, cardHeight }) {
                                         <Text size="sm">{mode.name}</Text>
                                         <Badge size="sm" variant="light">{mode.count}</Badge>
                                     </Group>
-                                    <Text size="sm" fw={600}>৳ {mode.amount.toFixed(2)}</Text>
+                                    <Text size="sm" fw={600}>৳ {formatCurrency(mode.amount)}</Text>
                                 </Group>
                             ))}
                         </Stack>
