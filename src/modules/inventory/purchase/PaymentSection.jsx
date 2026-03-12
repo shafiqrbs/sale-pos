@@ -22,7 +22,7 @@ import FormValidationWrapper from "@components/form-builders/FormValidationWrapp
 import { useHotkeys } from "@mantine/hooks";
 import DateInputForm from "@components/form-builders/DateInputForm";
 
-export default function PaymentSection({ purchaseForm, itemsTotal, isAddingPurchase }) {
+export default function PaymentSection({ purchaseForm, itemsTotal, isAddingPurchase, isEditMode = false }) {
 	const { transactionMode } = useTransactionMode();
 	const { configData } = useConfigData();
 	const currencySymbol =
@@ -355,7 +355,7 @@ export default function PaymentSection({ purchaseForm, itemsTotal, isAddingPurch
 					loading={isAddingPurchase}
 					id="PurchaseFormSubmit"
 				>
-					Save
+					{isEditMode ? "Update" : "Save"}
 				</Button>
 			</Button.Group>
 			</Box>

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Box, Grid, Text, ActionIcon, Group, Menu, Flex, Button, Badge } from "@mantine/core";
-import { IconCopy, IconDotsVertical, IconEye, IconPlus, IconTrashX } from "@tabler/icons-react";
+import { Box, Grid, Text, ActionIcon, Group, Menu, Flex, Button, Badge, SegmentedControl } from "@mantine/core";
+import { IconCopy, IconDotsVertical, IconEdit, IconEye, IconPlus, IconTrashX } from "@tabler/icons-react";
 import { useNavigate, useOutletContext } from "react-router";
 import { DataTable } from "mantine-datatable";
 import tableCss from "@assets/css/Table.module.css";
@@ -14,9 +14,8 @@ import { APP_NAVLINKS } from "@/routes/routes";
 import {
 	useApprovePurchaseMutation,
 	useCopyPurchaseMutation,
-	useGetPurchaseQuery,
-	useDeletePurchaseMutation,
 } from "@services/purchase";
+import usePurchaseList from "@hooks/usePurchaseList";
 import { modals } from "@mantine/modals";
 import { showNotification } from "@components/ShowNotificationComponent";
 import { formatCurrency } from "@utils/index";
@@ -26,7 +25,6 @@ const PER_PAGE = 25;
 export default function Table() {
 	const [approvePurchase] = useApprovePurchaseMutation();
 	const [copyPurchase] = useCopyPurchaseMutation();
-	const [deletePurchase] = useDeletePurchaseMutation();
 	const navigate = useNavigate();
 	const { t } = useTranslation();
 	const [opened, { open, close }] = useDisclosure(false);
@@ -34,7 +32,11 @@ export default function Table() {
 	const [selectedRow, setSelectedRow] = useState(null);
 	const [loading, setLoading] = useState(false);
 	const [viewData, setViewData] = useState(null);
-	const { mainAreaHeight } = useOutletContext();
+	const [deletedPurchaseIds, setDeletedPurchaseIds] = useState(new Set());
+	const [dataSource, setDataSource] = useState("offline");
+	const { mainAreaHeight, isOnline } = useOutletContext();
+	// =============== when offline, always use offline data (online segment disabled) ===============
+	const effectiveDataSource = isOnline ? dataSource : "offline";
 
 	const form = useForm({
 		initialValues: {
@@ -44,7 +46,7 @@ export default function Table() {
 		},
 	});
 
-	const { data: purchaseData, isLoading } = useGetPurchaseQuery({
+	const { purchases: purchaseData, isLoading } = usePurchaseList({
 		params: {
 			term: form.values.term,
 			start_date: form.values.start_date,
@@ -52,6 +54,7 @@ export default function Table() {
 			page,
 			offset: PER_PAGE,
 		},
+		offlineFetch: effectiveDataSource === "offline",
 	});
 
 	const handlePurchaseApprove = (id) => {
@@ -124,31 +127,51 @@ export default function Table() {
 		handleShowDetails(purchaseData);
 	};
 
-	// =============== open delete purchase confirmation modal ===============
-	const handleOpenDeleteConfirmModal = (purchaseId) => {
+	// =============== delete purchase with confirmation (local SQLite) ===============
+	const handleDeleteClick = (record) => {
 		modals.openConfirmModal({
 			title: <Text size="md"> {t("FormConfirmationTitle")}</Text>,
 			children: <Text size="sm"> {t("FormConfirmationMessage")}</Text>,
-			labels: { confirm: "Confirm", cancel: "Cancel" },
 			confirmProps: { color: "red.6" },
+			labels: { confirm: "Confirm", cancel: "Cancel" },
 			onCancel: () => console.log("Cancel"),
-			onConfirm: () => deletePurchase(purchaseId),
+			onConfirm: () => handleConfirmDelete(record),
 		});
+	};
+
+	const handleConfirmDelete = async (record) => {
+		await window.dbAPI.deleteDataFromTable("purchase", { id: record.id });
+		setDeletedPurchaseIds((previousIds) => new Set([...previousIds, record.id]));
+		showNotification(`Invoice ${record.invoice} deleted`, "teal");
 	};
 
 	return (
 		<Box>
-			<Flex mb="xs" gap="sm">
+			<Flex mb="xs" gap="sm" justify="space-between" align="center">
 				<KeywordSearch showStartEndDate form={form} />
-				<Button
-					onClick={() => navigate(APP_NAVLINKS.PURCHASE_NEW)}
-					w={150}
-					bg="var(--theme-primary-color-6)"
-					color="white"
-					leftSection={<IconPlus size={18} />}
-				>
-					{t("Purchase")}
-				</Button>
+				<Group gap="sm" wrap="nowrap">
+					<SegmentedControl
+						value={effectiveDataSource}
+						onChange={(value) => {
+							setDataSource(value);
+							setPage(1);
+						}}
+						color="var(--theme-primary-color-6)"
+						data={[
+							{ value: "online", label: t("Online"), disabled: !isOnline },
+							{ value: "offline", label: t("Offline") },
+						]}
+					/>
+					<Button
+						onClick={() => navigate(APP_NAVLINKS.PURCHASE_NEW)}
+						w={150}
+						bg="var(--theme-primary-color-6)"
+						color="white"
+						leftSection={<IconPlus size={18} />}
+					>
+						{t("Purchase")}
+					</Button>
+				</Group>
 			</Flex>
 			<Grid columns={24} gutter={{ base: 8 }}>
 				<Grid.Col span={24}>
@@ -164,7 +187,7 @@ export default function Table() {
 							onRowClick={(rowData) => {
 								handleShowDetails(rowData.record);
 							}}
-							records={purchaseData?.data}
+							records={(purchaseData?.data ?? []).filter((item) => !deletedPurchaseIds.has(item.id))}
 							columns={[
 								{
 									accessor: "created",
@@ -276,6 +299,16 @@ export default function Table() {
 													</ActionIcon>
 												</Menu.Target>
 												<Menu.Dropdown>
+													<Menu.Item
+														onClick={(event) => {
+															event.stopPropagation();
+															navigate(`${APP_NAVLINKS.PURCHASE_EDIT}/${data.id}`);
+														}}
+														w="200"
+														leftSection={<IconEdit height={"18"} width={"18"} stroke={1.5} />}
+													>
+														{t("Edit")}
+													</Menu.Item>
 													{
 														<Menu.Item
 															onClick={() => handleOpenCopyConfirmModal(data.id)}
@@ -293,15 +326,17 @@ export default function Table() {
 														{t("Show")}
 													</Menu.Item>
 
-													{!data.approved_by_id && data.is_requisition !== 1 && (
-														<Menu.Item
-															onClick={() => handleOpenDeleteConfirmModal(data.id)}
-															w={200}
-															leftSection={<IconTrashX height={"18"} width={"18"} stroke={1.5} />}
-														>
-															{t("Delete")}
-														</Menu.Item>
-													)}
+													<Menu.Item
+														onClick={(event) => {
+															event.stopPropagation();
+															handleDeleteClick(data);
+														}}
+														w={200}
+														color="red"
+														leftSection={<IconTrashX height={"18"} width={"18"} stroke={1.5} />}
+													>
+														{t("Delete")}
+													</Menu.Item>
 												</Menu.Dropdown>
 											</Menu>
 										</Group>

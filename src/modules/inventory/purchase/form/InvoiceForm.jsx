@@ -36,7 +36,7 @@ import DateInputForm from "@components/form-builders/DateInputForm";
 import React, { useEffect, useState } from "react";
 import { useGetInventoryCategoryQuery } from "@services/settings";
 
-export default function InvoiceForm({ refetch }) {
+export default function InvoiceForm({ refetch, onAddItem }) {
 	const [products, setProducts] = useState([]);
 	const [productResetKey, setProductResetKey] = useState(0);
 	const [selectedCategoryId, setSelectedCategoryId] = useState(null);
@@ -118,9 +118,13 @@ export default function InvoiceForm({ refetch }) {
 			expired_date,
 		};
 
-		// =============== persist new item into local temp_purchase_products table ===============
-		await window.dbAPI.upsertIntoTable("temp_purchase_products", newItem);
-		refetch();
+		// =============== persist new item into local temp_purchase_products table or pass to edit state ===============
+		if (onAddItem) {
+			onAddItem(newItem);
+		} else {
+			await window.dbAPI.upsertIntoTable("temp_purchase_products", newItem);
+			refetch();
+		}
 
 		handleResetInvoiceItemForm();
 		showNotification("Item added successfully", "teal");

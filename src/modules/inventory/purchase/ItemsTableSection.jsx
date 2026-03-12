@@ -16,7 +16,7 @@ import dayjs from "dayjs";
 
 dayjs.extend(customParseFormat);
 
-export default function ItemsTableSection({ purchaseProducts, refetch, itemsTotal }) {
+export default function ItemsTableSection({ purchaseProducts, refetch, itemsTotal, onQuantityChange, onPriceChange, onRemoveItem }) {
 	const navigate = useNavigate();
 	const { t } = useTranslation();
 	const { mainAreaHeight } = useMainAreaHeight();
@@ -30,29 +30,35 @@ export default function ItemsTableSection({ purchaseProducts, refetch, itemsTota
 		const numericValue = parseFloat(value) || 0;
 		const currentItem = purchaseProducts.find((item) => item.id === itemId);
 		const newSubTotal = numericValue * (currentItem?.purchase_price || 0);
-		await window.dbAPI.upsertIntoTable("temp_purchase_products", {
-			id: itemId,
-			quantity: numericValue,
-			sub_total: newSubTotal,
-		});
-		refetch();
+		const updatedData = { quantity: numericValue, sub_total: newSubTotal };
+		if (onQuantityChange) {
+			onQuantityChange(itemId, updatedData);
+		} else {
+			await window.dbAPI.upsertIntoTable("temp_purchase_products", { id: itemId, ...updatedData });
+			refetch();
+		}
 	};
 
 	const handlePriceChange = async (itemId, value) => {
 		const numericValue = parseFloat(value) || 0;
 		const currentItem = purchaseProducts.find((item) => item.id === itemId);
 		const newSubTotal = (currentItem?.quantity || 0) * numericValue;
-		await window.dbAPI.upsertIntoTable("temp_purchase_products", {
-			id: itemId,
-			purchase_price: numericValue,
-			sub_total: newSubTotal,
-		});
-		refetch();
+		const updatedData = { purchase_price: numericValue, sub_total: newSubTotal };
+		if (onPriceChange) {
+			onPriceChange(itemId, updatedData);
+		} else {
+			await window.dbAPI.upsertIntoTable("temp_purchase_products", { id: itemId, ...updatedData });
+			refetch();
+		}
 	};
 
 	const handleRemoveItem = async (itemId) => {
-		await window.dbAPI.deleteDataFromTable("temp_purchase_products", itemId);
-		refetch();
+		if (onRemoveItem) {
+			onRemoveItem(itemId);
+		} else {
+			await window.dbAPI.deleteDataFromTable("temp_purchase_products", itemId);
+			refetch();
+		}
 	};
 
 	const handleExpiredDateChange = async (itemId, value) => {

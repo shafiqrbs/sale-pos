@@ -1,4 +1,14 @@
-import { Box, Grid, Text, ActionIcon, Group, Menu, Flex, Button, Stack } from "@mantine/core";
+import {
+	Box,
+	Grid,
+	Text,
+	ActionIcon,
+	Group,
+	Menu,
+	Flex,
+	Button,
+	SegmentedControl,
+} from "@mantine/core";
 import { IconDotsVertical, IconEdit, IconEye, IconPlus, IconTrash } from "@tabler/icons-react";
 import { useState } from "react";
 import { useOutletContext, useNavigate } from "react-router";
@@ -28,7 +38,10 @@ export default function Table() {
 	const [loading, setLoading] = useState(false);
 	const [salesViewData, setSalesViewData] = useState(null);
 	const [deletedSaleIds, setDeletedSaleIds] = useState(new Set());
+	const [dataSource, setDataSource] = useState("offline");
 	const { mainAreaHeight, isOnline } = useOutletContext();
+	// =============== when offline, always use offline data (online segment disabled) ===============
+	const effectiveDataSource = isOnline ? dataSource : "offline";
 	const form = useForm({
 		initialValues: {
 			term: "",
@@ -45,7 +58,7 @@ export default function Table() {
 			page,
 			offset: PER_PAGE,
 		},
-		offlineFetch: !isOnline,
+		offlineFetch: effectiveDataSource === "offline",
 	});
 
 	const handleDeleteClick = (record) => {
@@ -81,13 +94,27 @@ export default function Table() {
 		<Box>
 			<Flex mb="xs" gap="sm" justify="space-between" align="center">
 				<KeywordSearch showStartEndDate form={form} />
-				<Button
-					w={140}
-					leftSection={<IconPlus size={18} />}
-					onClick={() => navigate(APP_NAVLINKS.SALES_NEW)}
-				>
-					{t("NewSale")}
-				</Button>
+				<Group gap="sm" wrap="nowrap">
+					<SegmentedControl
+						value={effectiveDataSource}
+						onChange={(value) => {
+							setDataSource(value);
+							setPage(1);
+						}}
+						color="var(--theme-primary-color-6)"
+						data={[
+							{ value: "online", label: t("Online"), disabled: !isOnline },
+							{ value: "offline", label: t("Offline") },
+						]}
+					/>
+					<Button
+						w={140}
+						leftSection={<IconPlus size={18} />}
+						onClick={() => navigate(APP_NAVLINKS.SALES_NEW)}
+					>
+						{t("NewSale")}
+					</Button>
+				</Group>
 			</Flex>
 			<Grid columns={24} gutter={{ base: 8 }}>
 				<Grid.Col span={24}>

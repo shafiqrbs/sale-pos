@@ -13,6 +13,7 @@ export const APP_NAVLINKS = {
 	SALES_RETURN: "/inventory/sales/return",
 	PURCHASE: "/inventory/purchase",
 	PURCHASE_NEW: "/inventory/purchase/new",
+	PURCHASE_EDIT: "/inventory/purchase/edit",
 	OPENING_STOCK: "/inventory/opening-stock",
 	STOCK: "/inventory/stock",
 	ACTIVATE: "/activate",
