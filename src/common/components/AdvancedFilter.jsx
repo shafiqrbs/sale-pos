@@ -112,6 +112,7 @@ export default function AdvancedFilter({ mainAreaHeight, bd = "1px solid var(--t
 						label={t("AdvanceSearch")}
 					>
 						<ActionIcon
+							size="lg"
 							c="var(--theme-success-color)"
 							bg="var(--mantine-color-white)"
 							onClick={() =>

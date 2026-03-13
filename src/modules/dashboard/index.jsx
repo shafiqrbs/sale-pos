@@ -50,25 +50,39 @@ export default function DashboardIndex() {
 	return (
 		<Box p="md">
 			<Grid gutter="md" mb="md">
+				<Grid.Col span={{ base: 12, md: 6 }} >
+					<Grid gutter="md" mb="md">
+						<Grid.Col span={{ base: 12}}>
+							<SalesSummaryCard dailyData={dailyData} cardHeight={height-64} />
+						</Grid.Col>
+					</Grid>
+				</Grid.Col>
+				<Grid.Col span={{ base: 12, md: 6 }}>
+					<Grid gutter="md" mb="md">
+						{/* =============== transaction modes ================ */}
+						<Grid.Col span={{ base: 12}}>
+							<TransactionModesCard dailyData={dailyData} cardHeight={cardHeight} />
+						</Grid.Col>
+						{/* =============== top selling products ================ */}
+						<Grid.Col span={{ base: 12}}>
+							<TopSellingProductsCard dailyData={dailyData} cardHeight={cardHeight} />
+						</Grid.Col>
+						{/* =============== today's overview ================ */}
+						<Grid.Col span={{ base: 12}}>
+							<TodaysOverviewCard dailyData={dailyData} cardHeight={cardHeight} />
+						</Grid.Col>
+					</Grid>
+				</Grid.Col>
+			</Grid>
+			<Grid gutter="md" mb="md">
 				{/* =============== sales summary ================ */}
-				<Grid.Col span={{ base: 12, md: 6 }}>
-					<SalesSummaryCard dailyData={dailyData} cardHeight={cardHeight} />
-				</Grid.Col>
 
-				{/* =============== transaction modes ================ */}
-				<Grid.Col span={{ base: 12, md: 6 }}>
-					<TransactionModesCard dailyData={dailyData} cardHeight={cardHeight} />
-				</Grid.Col>
 
-				{/* =============== top selling products ================ */}
-				<Grid.Col span={{ base: 12, md: 6 }}>
-					<TopSellingProductsCard dailyData={dailyData} cardHeight={cardHeight} />
-				</Grid.Col>
 
-				{/* =============== today's overview ================ */}
-				<Grid.Col span={{ base: 12, md: 6 }}>
-					<TodaysOverviewCard dailyData={dailyData} cardHeight={cardHeight} />
-				</Grid.Col>
+
+
+
+
 			</Grid>
 
 			{/* =============== floating online/offline toggle ================ */}

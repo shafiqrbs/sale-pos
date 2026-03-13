@@ -1,5 +1,5 @@
 :root {
-	--theme-primary-color-0: var(--mantine-color-blue-0);
+	/*--theme-primary-color-0: var(--mantine-color-blue-0);
 	--theme-primary-color-1: var(--mantine-color-blue-1);
 	--theme-primary-color-2: var(--mantine-color-blue-2);
 	--theme-primary-color-3: var(--mantine-color-blue-3);
@@ -8,7 +8,19 @@
 	--theme-primary-color-6: var(--mantine-color-blue-6);
 	--theme-primary-color-7: var(--mantine-color-blue-7);
 	--theme-primary-color-8: var(--mantine-color-blue-8);
-	--theme-primary-color-9: var(--mantine-color-blue-9);
+	--theme-primary-color-9: var(--mantine-color-blue-9);*/
+
+	--theme-primary-color-0: #e0e7ff; /* lightest */
+	--theme-primary-color-1: #c7d2fe;
+	--theme-primary-color-2: #a5b4fc;
+	--theme-primary-color-3: #818cf8;
+	--theme-primary-color-4: #6366f1;
+	--theme-primary-color-5: #4f46e5;
+	--theme-primary-color-6: #4338ca;
+	--theme-primary-color-7: #3730a3;
+	--theme-primary-color-8: #1e40af; /* main color you want */
+	--theme-primary-color-9: #1e3a8a; /* darkest */
+
 
 	--theme-secondary-color-0: var(--mantine-color-green-0);
 	--theme-secondary-color-1: var(--mantine-color-green-1);

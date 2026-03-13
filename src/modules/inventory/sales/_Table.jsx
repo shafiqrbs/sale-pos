@@ -94,22 +94,32 @@ export default function Table() {
 		<Box>
 			<Flex mb="xs" gap="sm" justify="space-between" align="center">
 				<KeywordSearch showStartEndDate form={form} />
-				<Group gap="sm" wrap="nowrap">
+				<Group gap="sm" wrap="nowrap" >
 					<SegmentedControl
 						value={effectiveDataSource}
 						onChange={(value) => {
 							setDataSource(value);
 							setPage(1);
 						}}
-						color="var(--theme-primary-color-6)"
+						color={effectiveDataSource === "online" ? "green" : "orange"}
 						data={[
-							{ value: "online", label: t("Online"), disabled: !isOnline },
-							{ value: "offline", label: t("Offline") },
+							{
+								value: "online",
+								label: "🌐 " + t("Online"),
+								disabled: !isOnline,
+							},
+							{
+								value: "offline",
+								label: "📡 " + t("Offline"),
+							},
 						]}
 					/>
 					<Button
-						w={140}
-						leftSection={<IconPlus size={18} />}
+						w={170}
+						size="md"
+						color="red"
+						variant="filled"
+						leftSection={<IconPlus size={20} />}
 						onClick={() => navigate(APP_NAVLINKS.SALES_NEW)}
 					>
 						{t("NewSale")}

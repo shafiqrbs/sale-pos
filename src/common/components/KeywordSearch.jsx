@@ -1,4 +1,4 @@
-import { ActionIcon, Flex, Select, TextInput } from "@mantine/core";
+import { ActionIcon, Flex, Select, TextInput,Button } from "@mantine/core";
 import { IconFileTypeXls, IconRestore, IconSearch, IconX } from "@tabler/icons-react";
 import AdvancedFilter from "@components/AdvancedFilter";
 import { useState, useEffect } from "react";
@@ -165,7 +165,7 @@ export default function KeywordSearch({
 				tooltip={tooltip}
 				name="keywordSearch"
 				value={term}
-				rightSection={
+				leftSection={
 					term ? (
 						<IconX size={16} stroke={1.5} color="var(--theme-error-color)" onClick={handleReset} />
 					) : (
@@ -181,17 +181,20 @@ export default function KeywordSearch({
 				}}
 			/>
 			<Flex gap="3xs" align="center">
-				<ActionIcon
+				<Button
 					c="var(--theme-primary-color-6)"
 					bg="var(--mantine-color-white)"
-					onClick={() => handleSearch()}
 					bd="1px solid var(--theme-grey-color-1)"
+					variant="filled"
+					leftSection={<IconSearch size={16} stroke={1.5} />}
+					onClick={() => handleSearch()}
 				>
-					<IconSearch size={16} stroke={1.5} />
-				</ActionIcon>
+					Search
+				</Button>
 
 				{showReset && (
 					<ActionIcon
+						size="lg"
 						c="var(--theme-tertiary-color-8)"
 						bg="var(--mantine-color-white)"
 						onClick={handleReset}
@@ -204,6 +207,7 @@ export default function KeywordSearch({
 				{showAdvancedFilter && <AdvancedFilter />}
 
 				<ActionIcon
+					size="lg"
 					c="var(--theme-success-color-3)"
 					bg="var(--mantine-color-white)"
 					onClick={handleCSVDownload}

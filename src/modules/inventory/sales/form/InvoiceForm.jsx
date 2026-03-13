@@ -149,8 +149,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 				className="borderRadiusAll"
 				px="sm"
 				py="xs"
-				bg="#1e40af"
-			>
+				bg="var(--theme-primary-card-color)">
 				<Flex gap="xs" align="flex-end" wrap="nowrap">
 					{/* =============== barcode input =============== */}
 					<Box w={200} style={{ flexShrink: 0 }}>
@@ -310,12 +309,10 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 					<Button
 						leftSection={<IconPlus size={16} />}
 						rightSection={<IconShoppingCart size={15} />}
-						bg="#16a34a"
-						color="white"
+						bg={'red'}
 						radius="sm"
 						type="submit"
 						id="EntityFormSubmit"
-						style={{ flexShrink: 0 }}
 					>
 						Add
 					</Button>

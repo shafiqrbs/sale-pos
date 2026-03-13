@@ -732,7 +732,6 @@ export default function PaymentSection({
 									<Button.Group>
 										<Button
 											fullWidth
-											variant="light"
 											color="green"
 											radius={0}
 											size="xs"
