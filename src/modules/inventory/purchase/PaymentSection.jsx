@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo } from "react";
 import {
+	ActionIcon,
 	Box,
 	Button,
 	Flex,
@@ -9,12 +10,11 @@ import {
 	NumberInput,
 	Select,
 	Stack,
-	Switch,
 	Text,
 	Textarea,
 } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
-import { IconCheck, IconCurrencyTaka } from "@tabler/icons-react";
+import { IconCheck, IconCurrencyTaka, IconNumber123, IconPercentage } from "@tabler/icons-react";
 import useConfigData from "@hooks/useConfigData";
 import VendorInfoSection from "./VendorInfoSection";
 import useTransactionMode from "@hooks/useTransactionMode";
@@ -102,9 +102,10 @@ export default function PaymentSection({
 		purchaseForm.setFieldValue("paymentAmount", grandTotal);
 	}, [grandTotal]);
 
-	const handleDiscountTypeChange = (value) => {
-		purchaseForm.setFieldValue("isDiscountPercentage", value === "percentage");
+	// =============== toggle between flat and percentage discount; reset amount on switch ===============
+	const toggleDiscountType = () => {
 		purchaseForm.setFieldValue("discountAmount", 0);
+		purchaseForm.setFieldValue("isDiscountPercentage", !isDiscountPercentage);
 	};
 
 	// =============== render option with image and label ===============
@@ -208,26 +209,29 @@ export default function PaymentSection({
 						>
 							<Grid columns={24} gutter={{ base: 4 }}>
 								<Grid.Col span={8} h={66}>
-									<Flex
-										align="center"
-										justify="center"
-										bg="var(--theme-primary-color-1)"
-										className="borderRadiusAll"
-										px="xs"
-										py={4}
-										h="100%"
-										direction="column"
-									>
-										<Text ta="center" fz={12} fw={500}>
-											Discount
+								<Flex
+									align="center"
+									justify="center"
+									bg="var(--theme-primary-color-1)"
+									className="borderRadiusAll"
+									px="xs"
+									py={4}
+									h="100%"
+									direction="column"
+								>
+									<Text ta="center" fz={12} fw={500}>
+										Discount
+									</Text>
+									<Flex justify="center" align="center" gap={4}>
+										<Text fz={11}>{currencySymbol}</Text>
+										<Text fz={12} fw={600}>
+											{formatCurrency(discountValue)}
 										</Text>
-										<Flex justify="center" align="center" gap={4}>
-											<Text fz={11}>{currencySymbol}</Text>
-											<Text fz={12} fw={600}>
-												{formatCurrency(discountValue)}
-											</Text>
-										</Flex>
 									</Flex>
+									<Text fz={10} c="dimmed">
+										{isDiscountPercentage ? "Percent" : "Flat"}
+									</Text>
+								</Flex>
 								</Grid.Col>
 								<Grid.Col span={8}>
 									<Flex
@@ -289,8 +293,9 @@ export default function PaymentSection({
 												Discount
 											</Text>
 										</Flex>
-										<Flex justify="space-between" align="center" gap={4}>
-											<Box style={{ flex: 1 }}>
+									<Flex justify="space-between" align="center" gap={4}>
+										<Box style={{ flex: 1 }}>
+											{isDiscountPercentage ? (
 												<NumberInput
 													value={discountAmount}
 													onChange={(value) =>
@@ -299,16 +304,48 @@ export default function PaymentSection({
 													hideControls
 													size="sm"
 													placeholder="0"
-													leftSection={
-														isDiscountPercentage ? (
-															<Text fz={12}>%</Text>
-														) : (
-															<IconCurrencyTaka size={14} />
-														)
+													suffix="%"
+													max={99}
+													min={0}
+													allowNegative={false}
+													decimalScale={2}
+													rightSection={
+														<ActionIcon
+															size={32}
+															bg="violet.5"
+															variant="filled"
+															mr={10}
+															onClick={toggleDiscountType}
+														>
+															<IconPercentage size={16} />
+														</ActionIcon>
 													}
 												/>
-											</Box>
-										</Flex>
+											) : (
+												<NumberInput
+													value={discountAmount}
+													onChange={(value) =>
+														purchaseForm.setFieldValue("discountAmount", parseFloat(value) || 0)
+													}
+													hideControls
+													size="sm"
+													placeholder="0"
+													leftSection={<IconCurrencyTaka size={14} />}
+													rightSection={
+														<ActionIcon
+															size={32}
+															bg="red.5"
+															variant="filled"
+															mr={10}
+															onClick={toggleDiscountType}
+														>
+															<IconNumber123 size={16} />
+														</ActionIcon>
+													}
+												/>
+											)}
+										</Box>
+									</Flex>
 									</Flex>
 								</Grid.Col>
 								<Grid.Col span={12}>
