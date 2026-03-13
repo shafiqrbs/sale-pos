@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import {
 	ActionIcon,
 	Box,
@@ -13,7 +13,6 @@ import {
 	Text,
 	Textarea,
 } from "@mantine/core";
-import { DateInput } from "@mantine/dates";
 import { IconCheck, IconCurrencyTaka, IconNumber123, IconPercentage } from "@tabler/icons-react";
 import useConfigData from "@hooks/useConfigData";
 import VendorInfoSection from "./VendorInfoSection";
@@ -34,7 +33,7 @@ export default function PaymentSection({
 	const currencySymbol =
 		configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol;
 
-	const { discountAmount, isDiscountPercentage, purchaseDate, purchaseNarration, paymentAmount } =
+	const { discountAmount, isDiscountPercentage, purchaseNarration, paymentAmount } =
 		purchaseForm.values;
 
 	const vatAmount = 0;
@@ -49,16 +48,16 @@ export default function PaymentSection({
 		}
 
 		return discountAmount;
-	}, [discountAmount, isDiscountPercentage, itemsTotal]);
+	}, [ discountAmount, isDiscountPercentage, itemsTotal ]);
 
 	const grandTotal = useMemo(
 		() => Math.max(itemsTotal - discountValue + vatAmount, 0),
-		[itemsTotal, discountValue]
+		[ itemsTotal, discountValue ]
 	);
 
 	const dueAmount = useMemo(
 		() => Math.max(grandTotal - (paymentAmount || 0), 0),
-		[grandTotal, paymentAmount]
+		[ grandTotal, paymentAmount ]
 	);
 
 	// =============== group transaction modes by method_name ===============
@@ -68,21 +67,21 @@ export default function PaymentSection({
 		const groupsMap = {};
 		transactionMode.forEach((mode) => {
 			const methodName = mode.method_name || "Others";
-			if (!groupsMap[methodName]) {
-				groupsMap[methodName] = [];
+			if (!groupsMap[ methodName ]) {
+				groupsMap[ methodName ] = [];
 			}
-			groupsMap[methodName].push({
+			groupsMap[ methodName ].push({
 				value: String(mode.id),
 				label: mode.name,
 				path: mode.path,
 			});
 		});
 
-		return Object.entries(groupsMap).map(([group, items]) => ({
+		return Object.entries(groupsMap).map(([ group, items ]) => ({
 			group,
 			items,
 		}));
-	}, [transactionMode]);
+	}, [ transactionMode ]);
 
 	// =============== auto-set cash transaction mode on load ===============
 	useEffect(() => {
@@ -94,13 +93,13 @@ export default function PaymentSection({
 			purchaseForm.setFieldValue("transactionModeId", String(cashMethod.id));
 			purchaseForm.setFieldValue("transactionMode", cashMethod.name);
 		}
-	}, [transactionMode]);
+	}, [ transactionMode ]);
 
 	// =============== auto-populate payment amount with grand total ===============
 	useEffect(() => {
 		if (isEditMode) return;
 		purchaseForm.setFieldValue("paymentAmount", grandTotal);
-	}, [grandTotal]);
+	}, [ grandTotal ]);
 
 	// =============== toggle between flat and percentage discount; reset amount on switch ===============
 	const toggleDiscountType = () => {
@@ -127,7 +126,7 @@ export default function PaymentSection({
 		</Group>
 	);
 
-	useHotkeys([["alt+s", () => document.getElementById("PurchaseFormSubmit")?.click()]]);
+	useHotkeys([ [ "alt+s", () => document.getElementById("PurchaseFormSubmit")?.click() ] ]);
 
 	return (
 		<>
@@ -209,29 +208,29 @@ export default function PaymentSection({
 						>
 							<Grid columns={24} gutter={{ base: 4 }}>
 								<Grid.Col span={8} h={66}>
-								<Flex
-									align="center"
-									justify="center"
-									bg="var(--theme-primary-color-1)"
-									className="borderRadiusAll"
-									px="xs"
-									py={4}
-									h="100%"
-									direction="column"
-								>
-									<Text ta="center" fz={12} fw={500}>
-										Discount
-									</Text>
-									<Flex justify="center" align="center" gap={4}>
-										<Text fz={11}>{currencySymbol}</Text>
-										<Text fz={12} fw={600}>
-											{formatCurrency(discountValue)}
+									<Flex
+										align="center"
+										justify="center"
+										bg="var(--theme-primary-color-1)"
+										className="borderRadiusAll"
+										px="xs"
+										py={4}
+										h="100%"
+										direction="column"
+									>
+										<Text ta="center" fz={12} fw={500}>
+											Discount
+										</Text>
+										<Flex justify="center" align="center" gap={4}>
+											<Text fz={11}>{currencySymbol}</Text>
+											<Text fz={12} fw={600}>
+												{formatCurrency(discountValue)}
+											</Text>
+										</Flex>
+										<Text fz={10} c="dimmed">
+											{isDiscountPercentage ? "Percent" : "Flat"}
 										</Text>
 									</Flex>
-									<Text fz={10} c="dimmed">
-										{isDiscountPercentage ? "Percent" : "Flat"}
-									</Text>
-								</Flex>
 								</Grid.Col>
 								<Grid.Col span={8}>
 									<Flex
@@ -293,59 +292,59 @@ export default function PaymentSection({
 												Discount
 											</Text>
 										</Flex>
-									<Flex justify="space-between" align="center" gap={4}>
-										<Box style={{ flex: 1 }}>
-											{isDiscountPercentage ? (
-												<NumberInput
-													value={discountAmount}
-													onChange={(value) =>
-														purchaseForm.setFieldValue("discountAmount", parseFloat(value) || 0)
-													}
-													hideControls
-													size="sm"
-													placeholder="0"
-													suffix="%"
-													max={99}
-													min={0}
-													allowNegative={false}
-													decimalScale={2}
-													rightSection={
-														<ActionIcon
-															size={32}
-															bg="violet.5"
-															variant="filled"
-															mr={10}
-															onClick={toggleDiscountType}
-														>
-															<IconPercentage size={16} />
-														</ActionIcon>
-													}
-												/>
-											) : (
-												<NumberInput
-													value={discountAmount}
-													onChange={(value) =>
-														purchaseForm.setFieldValue("discountAmount", parseFloat(value) || 0)
-													}
-													hideControls
-													size="sm"
-													placeholder="0"
-													leftSection={<IconCurrencyTaka size={14} />}
-													rightSection={
-														<ActionIcon
-															size={32}
-															bg="red.5"
-															variant="filled"
-															mr={10}
-															onClick={toggleDiscountType}
-														>
-															<IconNumber123 size={16} />
-														</ActionIcon>
-													}
-												/>
-											)}
-										</Box>
-									</Flex>
+										<Flex justify="space-between" align="center" gap={4}>
+											<Box style={{ flex: 1 }}>
+												{isDiscountPercentage ? (
+													<NumberInput
+														value={discountAmount}
+														onChange={(value) =>
+															purchaseForm.setFieldValue("discountAmount", parseFloat(value) || 0)
+														}
+														hideControls
+														size="sm"
+														placeholder="0"
+														suffix="%"
+														max={99}
+														min={0}
+														allowNegative={false}
+														decimalScale={2}
+														rightSection={
+															<ActionIcon
+																size={32}
+																bg="violet.5"
+																variant="filled"
+																mr={10}
+																onClick={toggleDiscountType}
+															>
+																<IconPercentage size={16} />
+															</ActionIcon>
+														}
+													/>
+												) : (
+													<NumberInput
+														value={discountAmount}
+														onChange={(value) =>
+															purchaseForm.setFieldValue("discountAmount", parseFloat(value) || 0)
+														}
+														hideControls
+														size="sm"
+														placeholder="0"
+														leftSection={<IconCurrencyTaka size={14} />}
+														rightSection={
+															<ActionIcon
+																size={32}
+																bg="red.5"
+																variant="filled"
+																mr={10}
+																onClick={toggleDiscountType}
+															>
+																<IconNumber123 size={16} />
+															</ActionIcon>
+														}
+													/>
+												)}
+											</Box>
+										</Flex>
 									</Flex>
 								</Grid.Col>
 								<Grid.Col span={12}>

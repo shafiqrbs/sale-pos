@@ -37,9 +37,9 @@ import React, { useEffect, useState } from "react";
 import { useGetInventoryCategoryQuery } from "@services/settings";
 
 export default function InvoiceForm({ refetch, onAddItem }) {
-	const [products, setProducts] = useState([]);
-	const [productResetKey, setProductResetKey] = useState(0);
-	const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+	const [ products, setProducts ] = useState([]);
+	const [ productResetKey, setProductResetKey ] = useState(0);
+	const [ selectedCategoryId, setSelectedCategoryId ] = useState(null);
 	const { configData } = useConfigData();
 	const invoiceItemForm = useForm(invoiceItemFormRequest());
 	const { getLocalProducts } = useLocalProducts({
@@ -49,7 +49,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 
 	const { data: productCategoryData } = useGetInventoryCategoryQuery({ type: "parent" });
 	const { mainAreaHeight } = useMainAreaHeight();
-	const [isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer }] =
+	const [ isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer } ] =
 		useDisclosure(false);
 
 	// =============== fetch products in db entry order (id ASC), same as sales product select ===============
@@ -60,7 +60,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 			setProducts(fetchedProducts);
 		});
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [selectedCategoryId]);
+	}, [ selectedCategoryId ]);
 
 	const currencySymbol =
 		configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol;
@@ -146,10 +146,10 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 		invoiceItemForm.setFieldValue("productId", value);
 		invoiceItemForm.setFieldValue("purchasePrice", option?.purchase_price);
 		invoiceItemForm.setFieldValue("unit", option?.unit);
-		requestAnimationFrame(() => document.getElementById("quantity").focus());
+		setTimeout(() => document.getElementById("quantity")?.focus(), 0);
 	};
 
-	useHotkeys([["alt+a", () => document.getElementById("EntityFormSubmit")?.click()]]);
+	useHotkeys([ [ "alt+a", () => document.getElementById("EntityFormSubmit")?.click() ] ]);
 
 	return (
 		<>
@@ -194,7 +194,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 							searchable
 						/>
 						<Flex mt="md" gap="4" align="flex-end" bg={'#1e40af'} p={'xs'} ml={'-xs'} mr={'-xs'} >
-							<Box style={{ flex: 1 }} >
+							<Box w="100%">
 								<FormValidationWrapper
 									errorMessage="Product is required"
 									opened={!!invoiceItemForm.errors.productId}
@@ -323,7 +323,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 			<AddProductDrawer
 				productDrawer={isProductDrawerOpened}
 				closeProductDrawer={closeProductDrawer}
-				setStockProductRestore={() => {}}
+				setStockProductRestore={() => { }}
 				focusField="productId"
 				fieldPrefix=""
 			/>

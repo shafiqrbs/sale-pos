@@ -66,6 +66,7 @@ export default function VirtualSearchSelect({
 			search: !!searchable,
 			placeholder: placeholder || "Select",
 			maxWidth: "100%",
+			overflow: "hidden",
 			selectedValue: value != null ? String(value) : "",
 			noOptionsText: nothingFoundMessage || "No options found",
 			noSearchResultsText: nothingFoundMessage || "No results found",
