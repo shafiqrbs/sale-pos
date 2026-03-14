@@ -4,9 +4,9 @@ import ItemsTableSection from "./ItemsTableSection";
 import PaymentSection from "./PaymentSection";
 
 export default function Overview({
-	purchaseForm,
-	isAddingPurchase,
-	purchaseProducts,
+	itemsForm,
+	isAddingItem,
+	itemsProducts,
 	refetch,
 	onQuantityChange,
 	onPriceChange,
@@ -14,16 +14,16 @@ export default function Overview({
 	isEditMode = false,
 }) {
 	const itemsTotal = useMemo(() => {
-		return (purchaseProducts || []).reduce(
+		return (itemsProducts || []).reduce(
 			(accumulator, item) => accumulator + (item.quantity || 0) * (item.purchase_price || 0),
 			0
 		);
-	}, [purchaseProducts]);
+	}, [itemsProducts]);
 
 	return (
 		<Box bg="var(--theme-tertiary-color-0)" p="xs">
 			<ItemsTableSection
-				purchaseProducts={purchaseProducts || []}
+				itemsProducts={itemsProducts || []}
 				refetch={refetch}
 				itemsTotal={itemsTotal}
 				onQuantityChange={onQuantityChange}
@@ -32,9 +32,9 @@ export default function Overview({
 			/>
 
 			<PaymentSection
-				purchaseForm={purchaseForm}
+				itemsForm={itemsForm}
 				itemsTotal={itemsTotal}
-				isAddingPurchase={isAddingPurchase}
+				isAddingItem={isAddingItem}
 				isEditMode={isEditMode}
 			/>
 		</Box>

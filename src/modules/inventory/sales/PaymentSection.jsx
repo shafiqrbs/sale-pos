@@ -37,9 +37,9 @@ import SalesCustomerDrawer from "@components/drawers/SalesCustomerDrawer";
 import { DateInput } from "@mantine/dates";
 
 export default function PaymentSection({
-	salesForm,
+	itemsForm,
 	itemsTotal,
-	isAddingSales,
+	isAddingItem,
 	onPosPrint,
 	resetKey = 0,
 	isEditMode = false,
@@ -57,7 +57,7 @@ export default function PaymentSection({
 	const currencySymbol =
 		configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol;
 
-	const { discount_type, discount, coupon_code, salesNarration, paymentAmount } = salesForm.values;
+	const { discount_type, discount, coupon_code, salesNarration, paymentAmount } = itemsForm.values;
 
 	const vatAmount = 0;
 
@@ -77,8 +77,8 @@ export default function PaymentSection({
 		[grandTotal, paymentAmount]
 	);
 
-	const payments = salesForm.values.payments ?? [];
-	const splitPaymentDrawerOpened = salesForm.values.splitPaymentDrawerOpened ?? false;
+	const payments = itemsForm.values.payments ?? [];
+	const splitPaymentDrawerOpened = itemsForm.values.splitPaymentDrawerOpened ?? false;
 	const isSplitPaymentActive = payments.length > 1;
 
 	// =============== set default payment mode (cash) once transaction modes are loaded ===============
@@ -86,7 +86,7 @@ export default function PaymentSection({
 		if (transactionMode?.length > 0 && payments.length === 0) {
 			const cashMethod = transactionMode.find((mode) => mode.slug === "cash");
 			const defaultMethod = cashMethod || transactionMode[0];
-			salesForm.setFieldValue("payments", [
+			itemsForm.setFieldValue("payments", [
 				{
 					transaction_mode_id: defaultMethod.id,
 					transaction_mode_name: defaultMethod.name,
@@ -101,14 +101,14 @@ export default function PaymentSection({
 	// =============== auto-sync paymentAmount and single payment amount with grandTotal;
 	// skipped in edit mode because paymentAmount is pre-populated from the stored sale
 	// and overwriting it on every grandTotal change would reset the stored value to 0
-	// on the initial render before editSaleItems are loaded ===============
+	// on the initial render before editItems are loaded ===============
 	useEffect(() => {
 		if (isEditMode) return;
 
 		if (!isSplitPaymentActive) {
-			salesForm.setFieldValue("paymentAmount", grandTotal);
+			itemsForm.setFieldValue("paymentAmount", grandTotal);
 			if (payments.length === 1) {
-				salesForm.setFieldValue("payments.0.amount", grandTotal);
+				itemsForm.setFieldValue("payments.0.amount", grandTotal);
 			}
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -148,42 +148,42 @@ export default function PaymentSection({
 	const handlePercentageChange = (value) => {
 		setPercentageValue(value);
 		const discountAmount = (Math.round(itemsTotal) * value) / 100;
-		salesForm.setFieldValue("discount", Math.round(discountAmount));
+		itemsForm.setFieldValue("discount", Math.round(discountAmount));
 	};
 
 	const handleDiscountModeChange = () => {
 		if (discountMode === "coupon") {
 			setDiscountMode("discount");
-			salesForm.setFieldValue("discount_type", "flat");
-			salesForm.setFieldValue("coupon_code", "");
+			itemsForm.setFieldValue("discount_type", "flat");
+			itemsForm.setFieldValue("coupon_code", "");
 		} else {
 			setDiscountMode("coupon");
-			salesForm.setFieldValue("discount_type", "coupon");
-			salesForm.setFieldValue("discount", 0);
+			itemsForm.setFieldValue("discount_type", "coupon");
+			itemsForm.setFieldValue("discount", 0);
 		}
 	};
 
 	const toggleDiscountMode = () => {
-		salesForm.setFieldValue("discount", 0);
+		itemsForm.setFieldValue("discount", 0);
 		setPercentageValue(0);
 		const newType = discount_type === "flat" ? "percentage" : "flat";
-		salesForm.setFieldValue("discount_type", newType);
+		itemsForm.setFieldValue("discount_type", newType);
 	};
 
 	const handleOpenSplitPaymentDrawer = () => {
-		salesForm.setFieldValue("splitPaymentDrawerOpened", true);
+		itemsForm.setFieldValue("splitPaymentDrawerOpened", true);
 	};
 
 	const handleSaveSplitPayments = (splitPayments) => {
 		const totalSplitAmount = splitPayments.reduce((sum, payment) => sum + payment.amount, 0);
-		salesForm.setFieldValue("payments", splitPayments);
-		salesForm.setFieldValue("paymentAmount", totalSplitAmount);
+		itemsForm.setFieldValue("payments", splitPayments);
+		itemsForm.setFieldValue("paymentAmount", totalSplitAmount);
 	};
 
 	const clearSplitPayment = () => {
 		const cashMethod = transactionMode?.find((mode) => mode.slug === "cash");
 		const defaultMethod = cashMethod || transactionMode?.[0];
-		salesForm.setFieldValue("payments", [
+		itemsForm.setFieldValue("payments", [
 			{
 				transaction_mode_id: defaultMethod?.id,
 				transaction_mode_name: defaultMethod?.name,
@@ -191,10 +191,10 @@ export default function PaymentSection({
 				remark: "",
 			},
 		]);
-		salesForm.setFieldValue("paymentAmount", grandTotal);
+		itemsForm.setFieldValue("paymentAmount", grandTotal);
 	};
 
-	useHotkeys([["alt+s", () => document.getElementById("SalesFormSubmit")?.click()]]);
+	useHotkeys([["alt+s", () => document.getElementById("ItemsFormSubmit")?.click()]]);
 
 	return (
 		<>
@@ -206,15 +206,15 @@ export default function PaymentSection({
 								<Box bg={"gray.2"} p={"4"} pt={"4"} pr={"4"}>
 									<FormValidationWrapper
 										errorMessage={t("ChooseCustomer")}
-										opened={!!salesForm.errors.customer_id}
+										opened={!!itemsForm.errors.customer_id}
 									>
 										<Select
 											placeholder={t("ChooseCustomer")}
 											data={dropdownOptions}
 											searchable
 											clearable
-											value={salesForm.values.customer_id}
-											onChange={(value) => salesForm.setFieldValue("customer_id", value ?? "")}
+											value={itemsForm.values.customer_id}
+											onChange={(value) => itemsForm.setFieldValue("customer_id", value ?? "")}
 											size="sm"
 											nothingFoundMessage={t("NoCustomerFound")}
 											rightSectionPointerEvents="pointer-events"
@@ -227,8 +227,8 @@ export default function PaymentSection({
 									</FormValidationWrapper>
 									<DateInput
 										my="4"
-										value={salesForm.values.salesDate}
-										onChange={(value) => salesForm.setFieldValue("salesDate", value)}
+										value={itemsForm.values.salesDate}
+										onChange={(value) => itemsForm.setFieldValue("salesDate", value)}
 										valueFormat="MMMM D, YYYY"
 										size="xs"
 										label={null}
@@ -237,7 +237,7 @@ export default function PaymentSection({
 									<Textarea
 										value={salesNarration}
 										onChange={(event) =>
-											salesForm.setFieldValue("salesNarration", event.currentTarget.value)
+											itemsForm.setFieldValue("salesNarration", event.currentTarget.value)
 										}
 										placeholder="Narration"
 										size="md"
@@ -311,7 +311,7 @@ export default function PaymentSection({
 											<Box w={"50%"}>
 												<FormValidationWrapper
 													errorMessage={t("ClickRightButtonForPercentFlat")}
-													opened={!!salesForm.errors.coupon_code}
+													opened={!!itemsForm.errors.coupon_code}
 												>
 													<Tooltip
 														label="Click here for change mode"
@@ -349,15 +349,15 @@ export default function PaymentSection({
 														type="text"
 														placeholder={t("CouponCode")}
 														value={coupon_code}
-														error={salesForm.errors.coupon_code}
+														error={itemsForm.errors.coupon_code}
 														size="sm"
 														onChange={(event) => {
-															salesForm.setFieldValue("coupon_code", event.target.value);
+															itemsForm.setFieldValue("coupon_code", event.target.value);
 														}}
 														rightSection={
 															<FormValidationWrapper
 																errorMessage={t("CouponCode")}
-																opened={!!salesForm.errors.coupon_code}
+																opened={!!itemsForm.errors.coupon_code}
 																position="left"
 															>
 																<IconTicket size={16} opacity={0.5} />
@@ -367,16 +367,16 @@ export default function PaymentSection({
 												) : (
 													<FormValidationWrapper
 														errorMessage={t("ClickRightButtonForPercentFlat")}
-														opened={!!salesForm.errors.discount}
+														opened={!!itemsForm.errors.discount}
 														position="left"
 													>
 														{discount_type === "flat" ? (
 															<NumberInput
 																placeholder={t("Discount")}
 																value={discount}
-																error={salesForm.errors.discount}
+																error={itemsForm.errors.discount}
 																size="sm"
-																onChange={(value) => salesForm.setFieldValue("discount", value)}
+																onChange={(value) => itemsForm.setFieldValue("discount", value)}
 																rightSection={
 																	<ActionIcon
 																		size={32}
@@ -393,7 +393,7 @@ export default function PaymentSection({
 															<NumberInput
 																placeholder={t("Discount")}
 																value={percentageValue}
-																error={salesForm.errors.discount}
+																error={itemsForm.errors.discount}
 																size="sm"
 																suffix="%"
 																max={99}
@@ -477,7 +477,7 @@ export default function PaymentSection({
 								<Grid.Col span={8}>
 									<FormValidationWrapper
 										errorMessage={t("ClickRightButtonForPercentFlat")}
-										opened={!!salesForm.errors.coupon_code}
+										opened={!!itemsForm.errors.coupon_code}
 									>
 										<Button
 											fullWidth
@@ -514,15 +514,15 @@ export default function PaymentSection({
 											type="text"
 											placeholder={t("CouponCode")}
 											value={coupon_code}
-											error={salesForm.errors.coupon_code}
+											error={itemsForm.errors.coupon_code}
 											size={'xl'}
 											onChange={(event) => {
-												salesForm.setFieldValue("coupon_code", event.target.value);
+												itemsForm.setFieldValue("coupon_code", event.target.value);
 											}}
 											rightSection={
 												<FormValidationWrapper
 													errorMessage={t("CouponCode")}
-													opened={!!salesForm.errors.coupon_code}
+													opened={!!itemsForm.errors.coupon_code}
 													position="left"
 												>
 													<IconTicket size={16} opacity={0.5} />
@@ -532,16 +532,16 @@ export default function PaymentSection({
 									) : (
 										<FormValidationWrapper
 											errorMessage={t("ClickRightButtonForPercentFlat")}
-											opened={!!salesForm.errors.discount}
+											opened={!!itemsForm.errors.discount}
 											position="left"
 										>
 											{discount_type === "flat" ? (
 												<NumberInput
 													placeholder={t("Discount")}
 													value={discount}
-													error={salesForm.errors.discount}
+													error={itemsForm.errors.discount}
 													size={'xl'}
-													onChange={(value) => salesForm.setFieldValue("discount", value)}
+													onChange={(value) => itemsForm.setFieldValue("discount", value)}
 													rightSection={
 														<ActionIcon
 															size={32}
@@ -558,7 +558,7 @@ export default function PaymentSection({
 												<NumberInput
 													placeholder={t("Discount")}
 													value={percentageValue}
-													error={salesForm.errors.discount}
+													error={itemsForm.errors.discount}
 													size="sm"
 													suffix="%"
 													max={100}
@@ -635,7 +635,7 @@ export default function PaymentSection({
 										<Grid.Col span={8} bg="#405bb112">
 											<FormValidationWrapper
 												errorMessage={t("ReceiveAmountValidateMessage")}
-												opened={!!salesForm.errors.paymentAmount}
+												opened={!!itemsForm.errors.paymentAmount}
 											>
 												<NumberInput
 													allowNegative={false}
@@ -659,7 +659,7 @@ export default function PaymentSection({
 															<IconEyeDollar size={16} opacity={0.5} />
 														</Tooltip>
 													}
-													{...salesForm.getInputProps("paymentAmount", { type: "number" })}
+													{...itemsForm.getInputProps("paymentAmount", { type: "number" })}
 												/>
 											</FormValidationWrapper>
 										</Grid.Col>
@@ -735,11 +735,11 @@ export default function PaymentSection({
 											color="green"
 											radius={0}
 											size="xs"
-											form="salesForm"
+											form="itemsForm"
 											type="submit"
-											id="SalesFormSubmit"
+											id="ItemsFormSubmit"
 											leftSection={<IconCheck size={16} />}
-											loading={isAddingSales}
+											loading={isAddingItem}
 										>
 											{isEditMode ? "Update" : "Save"}
 										</Button>
@@ -749,11 +749,11 @@ export default function PaymentSection({
 											color="red"
 											radius={0}
 											size="xs"
-											form="salesForm"
+											form="itemsForm"
 											type="submit"
-											id="SalesHoldFormSubmit"
+											id="ItemsHoldFormSubmit"
 											leftSection={<IconPlayerPause size={16} />}
-											loading={isAddingSales}
+											loading={isAddingItem}
 										>
 											{t("Hold")}
 										</Button>
@@ -766,10 +766,10 @@ export default function PaymentSection({
 										color="gray"
 										radius={0}
 										size="lg"
-										form="salesForm"
+										form="itemsForm"
 										type="submit"
-										id="SalesFormSubmit"
-										loading={isAddingSales}
+										id="ItemsFormSubmit"
+										loading={isAddingItem}
 										leftSection={<IconPrinter size={16} />}
 									>
 										Print
@@ -783,7 +783,7 @@ export default function PaymentSection({
 										size="lg"
 										type="button"
 										onClick={onPosPrint}
-										loading={isAddingSales}
+										loading={isAddingItem}
 									>
 										POS
 									</Button>
@@ -796,7 +796,7 @@ export default function PaymentSection({
 			{/* =============== split payments drawer =============== */}
 			<SplitPaymentsDrawer
 				opened={splitPaymentDrawerOpened}
-				onClose={() => salesForm.setFieldValue("splitPaymentDrawerOpened", false)}
+				onClose={() => itemsForm.setFieldValue("splitPaymentDrawerOpened", false)}
 				totalAmount={grandTotal}
 				onSave={handleSaveSplitPayments}
 				onRemove={clearSplitPayment}
@@ -807,7 +807,7 @@ export default function PaymentSection({
 			<SalesCustomerDrawer
 				opened={customerDrawerOpened}
 				onClose={customerDrawerClose}
-				form={salesForm}
+				form={itemsForm}
 				customersDropdownData={customersDropdownData}
 			/>
 		</>

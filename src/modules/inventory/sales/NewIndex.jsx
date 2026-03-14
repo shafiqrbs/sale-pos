@@ -17,10 +17,10 @@ export default function NewIndex() {
 	const { t } = useTranslation();
 	const { user } = useLoggedInUser();
 	const { configData } = useConfigData();
-	const salesForm = useForm(salesOverviewRequest());
-	const { salesProducts, refetch } = useTempSalesProducts({ type: "sales" });
+	const itemsForm = useForm(salesOverviewRequest());
+	const { salesProducts: itemsProducts, refetch } = useTempSalesProducts({ type: "sales" });
 	const [resetKey, setResetKey] = useState(0);
-	const [isAddingSales, setIsAddingSales] = useState(false);
+	const [isAddingItem, setIsAddingItem] = useState(false);
 
 	// =============== tracks whether the submit was triggered via POS Print ===============
 	const withPosPrintRef = useRef(false);
@@ -28,7 +28,7 @@ export default function NewIndex() {
 	// =============== update product quantities and sales after successful sale (same as POS Transaction) ===============
 	const updateProductsAfterSale = async () => {
 		try {
-			for (const cartItem of salesProducts) {
+			for (const cartItem of itemsProducts) {
 				const productId = cartItem.product_id;
 				const currentProduct = await window.dbAPI.getDataFromTable("core_products", {
 					id: productId,
@@ -61,7 +61,7 @@ export default function NewIndex() {
 	};
 
 	const handleSubmit = async (formValues) => {
-		if (!salesProducts?.length) {
+		if (!itemsProducts?.length) {
 			showNotification("Add minimum one sales item first", "red");
 			return;
 		}
@@ -77,7 +77,7 @@ export default function NewIndex() {
 			return;
 		}
 
-		const subTotal = salesProducts.reduce(
+		const subTotal = itemsProducts.reduce(
 			(sum, item) => sum + (Number(item.quantity) || 0) * (Number(item.sales_price) || 0),
 			0
 		);
@@ -108,7 +108,7 @@ export default function NewIndex() {
 		}
 
 		const invoiceId = generateInvoiceId();
-        const salesItemsForDb = salesProducts.map((item) => ({
+        const salesItemsForDb = itemsProducts.map((item) => ({
             product_id: item.product_id,
             display_name: item.display_name,
             quantity: Number(item.quantity) || 0,
@@ -150,7 +150,7 @@ export default function NewIndex() {
 			payments: JSON.stringify(payments),
 		};
 
-		setIsAddingSales(true);
+		setIsAddingItem(true);
 		try {
 			await window.dbAPI.upsertIntoTable("sales", salesData);
 			await updateProductsAfterSale();
@@ -161,7 +161,7 @@ export default function NewIndex() {
 
 			await window.dbAPI.deleteDataFromTable("temp_sales_products", { type: "sales" });
 			refetch();
-			salesForm.reset();
+			itemsForm.reset();
 			setResetKey((previousKey) => previousKey + 1);
 
 			if (shouldPrint && window.deviceAPI?.thermalPrint) {
@@ -181,21 +181,21 @@ export default function NewIndex() {
 			console.error(error);
 			showNotification(error?.message || "Failed to save sale", "red");
 		} finally {
-			setIsAddingSales(false);
+			setIsAddingItem(false);
 			withPosPrintRef.current = false;
 		}
 	};
 
 	const handlePosPrint = () => {
 		withPosPrintRef.current = true;
-		// =============== trigger salesForm submission with POS print flag set ===============
-		salesForm.onSubmit(handleSubmit)();
+		// =============== trigger itemsForm submission with POS print flag set ===============
+		itemsForm.onSubmit(handleSubmit)();
 	};
 
 	const handleReset = async () => {
 		await window.dbAPI.deleteDataFromTable("temp_sales_products", { type: "sales" });
 		refetch();
-		salesForm.reset();
+		itemsForm.reset();
 		setResetKey((previousKey) => previousKey + 1);
 	};
 
@@ -232,11 +232,11 @@ export default function NewIndex() {
 			<Box p="xs" pb={0}>
 				<InvoiceForm refetch={refetch} />
 			</Box>
-			<Box component="form" id="salesForm" onSubmit={salesForm.onSubmit(handleSubmit)}>
+			<Box component="form" id="itemsForm" onSubmit={itemsForm.onSubmit(handleSubmit)}>
 				<SalesOverview
-					isAddingSales={isAddingSales}
-					salesForm={salesForm}
-					salesProducts={salesProducts}
+					isAddingItem={isAddingItem}
+					itemsForm={itemsForm}
+					itemsProducts={itemsProducts}
 					refetch={refetch}
 					onPosPrint={handlePosPrint}
 					onReset={handleReset}

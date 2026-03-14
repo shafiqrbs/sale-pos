@@ -15,13 +15,13 @@ export default function EditIndex() {
 	const { id: purchaseId } = useParams();
 	const navigate = useNavigate();
 	const { user } = useLoggedInUser();
-	const purchaseForm = useForm(vendorOverviewRequest());
+	const itemsForm = useForm(vendorOverviewRequest());
 
 	const { purchase, isLoading: isLoadingPurchase } = useGetPurchase(purchaseId);
 
-	const [editPurchaseItems, setEditPurchaseItems] = useState([]);
-	const [isAddingPurchase, setIsAddingPurchase] = useState(false);
-	const [isEditInitialized, setIsEditInitialized] = useState(false);
+	const [ editItems, setEditItems ] = useState([]);
+	const [ isAddingItem, setIsAddingItem ] = useState(false);
+	const [ isEditInitialized, setIsEditInitialized ] = useState(false);
 
 	const editItemIdCounter = useRef(0);
 	const originalSnapshotRef = useRef(null);
@@ -61,8 +61,8 @@ export default function EditIndex() {
 			transactionMode: purchase.mode_name ?? "",
 		};
 
-		setEditPurchaseItems(parsedItems);
-		purchaseForm.setValues(formValues);
+		setEditItems(parsedItems);
+		itemsForm.setValues(formValues);
 
 		originalSnapshotRef.current = {
 			parsedItems,
@@ -71,17 +71,17 @@ export default function EditIndex() {
 
 		setIsEditInitialized(true);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [purchase]);
+	}, [ purchase ]);
 
 	// =============== apply a partial update to a single item in local state ===============
 	const handleEditItemUpdate = (itemId, updatedData) => {
-		setEditPurchaseItems((previousItems) =>
+		setEditItems((previousItems) =>
 			previousItems.map((item) => (item.id === itemId ? { ...item, ...updatedData } : item))
 		);
 	};
 
 	const handleEditRemoveItem = (itemId) => {
-		setEditPurchaseItems((previousItems) => previousItems.filter((item) => item.id !== itemId));
+		setEditItems((previousItems) => previousItems.filter((item) => item.id !== itemId));
 	};
 
 	// =============== add new item to local state without touching temp_purchase_products table ===============
@@ -93,7 +93,7 @@ export default function EditIndex() {
 			price: newItem.purchase_price,
 			mrp: newItem.purchase_price,
 		};
-		setEditPurchaseItems((previousItems) => [...previousItems, itemWithId]);
+		setEditItems((previousItems) => [ ...previousItems, itemWithId ]);
 	};
 
 	// =============== restore original product quantities then deduct the newly saved quantities ===============
@@ -104,7 +104,7 @@ export default function EditIndex() {
 				const productResult = await window.dbAPI.getDataFromTable("core_products", {
 					id: originalItem.product_id,
 				});
-				const productData = Array.isArray(productResult) ? productResult[0] : productResult;
+				const productData = Array.isArray(productResult) ? productResult[ 0 ] : productResult;
 				if (!productData) continue;
 
 				const restoredQuantity = (productData.quantity || 0) - (Number(originalItem.quantity) || 0);
@@ -120,7 +120,7 @@ export default function EditIndex() {
 				const productResult = await window.dbAPI.getDataFromTable("core_products", {
 					id: newItem.product_id,
 				});
-				const productData = Array.isArray(productResult) ? productResult[0] : productResult;
+				const productData = Array.isArray(productResult) ? productResult[ 0 ] : productResult;
 				if (!productData) continue;
 
 				const purchasedQuantity = Number(newItem.quantity) || 0;
@@ -139,7 +139,7 @@ export default function EditIndex() {
 	};
 
 	const handleSubmit = async (formValues) => {
-		if (!editPurchaseItems.length) {
+		if (!editItems.length) {
 			showNotification("Add minimum one purchase item first", "red");
 			return;
 		}
@@ -154,7 +154,7 @@ export default function EditIndex() {
 			return;
 		}
 
-		const subTotal = editPurchaseItems.reduce(
+		const subTotal = editItems.reduce(
 			(sum, item) => sum + (Number(item.quantity) || 0) * (Number(item.purchase_price) || 0),
 			0
 		);
@@ -173,13 +173,13 @@ export default function EditIndex() {
 			const vendorResult = await window.dbAPI.getDataFromTable("core_vendors", {
 				id: Number(formValues.vendor_id),
 			});
-			const vendorData = Array.isArray(vendorResult) ? vendorResult[0] : vendorResult;
+			const vendorData = Array.isArray(vendorResult) ? vendorResult[ 0 ] : vendorResult;
 			if (vendorData) {
 				vendorName = vendorData.name ?? vendorName;
 			}
 		}
 
-		const purchaseItemsForDb = editPurchaseItems.map((item) => ({
+		const purchaseItemsForDb = editItems.map((item) => ({
 			product_id: item.product_id,
 			display_name: item.display_name,
 			quantity: Number(item.quantity) || 0,
@@ -217,22 +217,22 @@ export default function EditIndex() {
 
 		const originalItemsSnapshot = originalSnapshotRef.current?.parsedItems ?? [];
 
-		setIsAddingPurchase(true);
+		setIsAddingItem(true);
 		try {
 			await window.dbAPI.updateDataInTable("purchase", {
 				condition: { id: Number(purchaseId) },
 				data: purchaseData,
 			});
 
-			await updateProductsAfterEdit(originalItemsSnapshot, editPurchaseItems);
+			await updateProductsAfterEdit(originalItemsSnapshot, editItems);
 
 			showNotification("Purchase updated successfully", "teal");
 
 			// =============== after a successful save the current items become the new baseline ===============
-			const newBaseline = editPurchaseItems.map((item) => ({ ...item }));
+			const newBaseline = editItems.map((item) => ({ ...item }));
 			originalSnapshotRef.current = {
 				parsedItems: newBaseline,
-				formValues: { ...purchaseForm.values },
+				formValues: { ...itemsForm.values },
 			};
 
 			navigate(APP_NAVLINKS.PURCHASE);
@@ -240,7 +240,7 @@ export default function EditIndex() {
 			console.error(error);
 			showNotification(error?.message || "Failed to update purchase", "red");
 		} finally {
-			setIsAddingPurchase(false);
+			setIsAddingItem(false);
 		}
 	};
 
@@ -249,8 +249,8 @@ export default function EditIndex() {
 		const snapshot = originalSnapshotRef.current;
 		if (!snapshot) return;
 
-		setEditPurchaseItems(snapshot.parsedItems.map((item) => ({ ...item })));
-		purchaseForm.setValues(snapshot.formValues);
+		setEditItems(snapshot.parsedItems.map((item) => ({ ...item })));
+		itemsForm.setValues(snapshot.formValues);
 	};
 
 	if (isLoadingPurchase) {
@@ -273,16 +273,16 @@ export default function EditIndex() {
 		<Grid columns={24} gutter={0}>
 			<Grid.Col span={6}>
 				<Box p="xs" pr={0}>
-					<InvoiceForm refetch={() => {}} onAddItem={handleAddEditItem} />
+					<InvoiceForm refetch={() => { }} onAddItem={handleAddEditItem} />
 				</Box>
 			</Grid.Col>
 			<Grid.Col span={18}>
-				<Box component="form" id="purchaseForm" onSubmit={purchaseForm.onSubmit(handleSubmit)}>
+				<Box component="form" id="itemsForm" onSubmit={itemsForm.onSubmit(handleSubmit)}>
 					<PurchaseOverview
-						isAddingPurchase={isAddingPurchase}
-						purchaseForm={purchaseForm}
-						purchaseProducts={editPurchaseItems}
-						refetch={() => {}}
+						isAddingItem={isAddingItem}
+						itemsForm={itemsForm}
+						itemsProducts={editItems}
+						refetch={() => { }}
 						onQuantityChange={handleEditItemUpdate}
 						onPriceChange={handleEditItemUpdate}
 						onRemoveItem={handleEditRemoveItem}

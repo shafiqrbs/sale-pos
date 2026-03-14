@@ -41,7 +41,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 	const [ productResetKey, setProductResetKey ] = useState(0);
 	const [ selectedCategoryId, setSelectedCategoryId ] = useState(null);
 	const { configData } = useConfigData();
-	const invoiceItemForm = useForm(invoiceItemFormRequest());
+	const itemsForm = useForm(invoiceItemFormRequest());
 	const { getLocalProducts } = useLocalProducts({
 		fetchOnMount: false,
 	});
@@ -75,7 +75,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 	const containerHeight = mainAreaHeight - 160;
 
 	const handleAddItemToPurchaseForm = async () => {
-		const { productId, purchasePrice, quantity, expired_date } = invoiceItemForm.values;
+		const { productId, purchasePrice, quantity, expired_date } = itemsForm.values;
 
 		if (!productId || !quantity) {
 			showNotification("Product and quantity are required", "red");
@@ -110,7 +110,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 			average_price: Number(selectedProduct.average_price ?? 0),
 			sales_price: Number(selectedProduct.sales_price ?? 0),
 			sub_total: quantityNumber * priceNumber,
-			unit_name: selectedProduct.unit_name || invoiceItemForm.values.unit || "",
+			unit_name: selectedProduct.unit_name || itemsForm.values.unit || "",
 			category_id: categoryId,
 			category_name: categoryName,
 			type: "purchase",
@@ -131,11 +131,11 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 	};
 
 	const invoiceSubTotal =
-		(Number(invoiceItemForm.values.quantity) || 0) *
-		(Number(invoiceItemForm.values.purchasePrice) || 0);
+		(Number(itemsForm.values.quantity) || 0) *
+		(Number(itemsForm.values.purchasePrice) || 0);
 
 	const handleResetInvoiceItemForm = () => {
-		invoiceItemForm.reset();
+		itemsForm.reset();
 		setProductResetKey((prev) => prev + 1);
 		requestAnimationFrame(() => {
 			document.getElementById("productId")?.open?.();
@@ -143,9 +143,9 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 	};
 
 	const handleProductSelect = (value, option) => {
-		invoiceItemForm.setFieldValue("productId", value);
-		invoiceItemForm.setFieldValue("purchasePrice", option?.purchase_price);
-		invoiceItemForm.setFieldValue("unit", option?.unit);
+		itemsForm.setFieldValue("productId", value);
+		itemsForm.setFieldValue("purchasePrice", option?.purchase_price);
+		itemsForm.setFieldValue("unit", option?.unit);
 		setTimeout(() => document.getElementById("quantity")?.focus(), 0);
 	};
 
@@ -155,7 +155,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 		<>
 			<Box
 				component="form"
-				onSubmit={invoiceItemForm.onSubmit(handleAddItemToPurchaseForm)}
+				onSubmit={itemsForm.onSubmit(handleAddItemToPurchaseForm)}
 				bd="1px solid #dee2e6"
 				bg="white"
 				className="borderRadiusAll"
@@ -167,7 +167,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 				<ScrollArea h={containerHeight} bg={'#f0f4f83d'} type="never">
 					<Box p="sm">
 						<InputForm
-							form={invoiceItemForm}
+							form={itemsForm}
 							name="barcode"
 							id="barcode"
 							label=""
@@ -197,12 +197,12 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 							<Box w="100%">
 								<FormValidationWrapper
 									errorMessage="Product is required"
-									opened={!!invoiceItemForm.errors.productId}
+									opened={!!itemsForm.errors.productId}
 								>
 									<Box pos="relative">
 										<VirtualSearchSelect
 											key={productResetKey}
-											value={invoiceItemForm.values.productId}
+											value={itemsForm.values.productId}
 											options={productOptions}
 											placeholder="Choose Product"
 											searchable
@@ -228,30 +228,30 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 						<Grid gutter={4} mt="sm">
 							<Grid.Col span={12}>
 								<InputNumberForm
-									form={invoiceItemForm}
+									form={itemsForm}
 									name="purchasePrice"
 									id="purchasePrice"
 									label="Purchase Price"
 									nextField="quantity"
 									placeholder="0.00"
-									tooltip={invoiceItemForm.errors.purchasePrice}
+									tooltip={itemsForm.errors.purchasePrice}
 									leftSection={<IconCurrencyTaka size={16} opacity={0.6} />}
 								/>
 							</Grid.Col>
 							<Grid.Col span={12}>
 								<InputNumberForm
-									form={invoiceItemForm}
+									form={itemsForm}
 									name="quantity"
 									id="quantity"
 									label="Quantity"
 									placeholder="0"
 									nextField="expired_date"
 									required={false}
-									tooltip={invoiceItemForm.errors.quantity}
+									tooltip={itemsForm.errors.quantity}
 									leftSection={<IconSortAscendingNumbers size={16} opacity={0.6} />}
 									rightIcon={
 										<Text fz="xs" fw={500}>
-											{invoiceItemForm.values.unit || "Unit"}
+											{itemsForm.values.unit || "Unit"}
 										</Text>
 									}
 								/>
@@ -259,14 +259,14 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 							<Grid.Col span={12}>
 								<DateInputForm
 									label="Expired Date"
-									form={invoiceItemForm}
+									form={itemsForm}
 									name="expired_date"
 									id="expired_date"
 									placeholder="DD-MM-YYYY"
 									valueFormat="DD-MM-YYYY"
 									nextField="EntityFormSubmit"
 									clearable
-									tooltip={invoiceItemForm.errors.expired_date}
+									tooltip={itemsForm.errors.expired_date}
 								/>
 							</Grid.Col>
 						</Grid>

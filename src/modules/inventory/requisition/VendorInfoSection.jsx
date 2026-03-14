@@ -6,7 +6,7 @@ import AddVendorModal from "@components/modals/AddVendorModal";
 import { IconUserPlus } from "@tabler/icons-react";
 import { useGetVendorsQuery } from "@services/core/vendors";
 
-export default function VendorInfoSection({ purchaseForm }) {
+export default function VendorInfoSection({ itemsForm }) {
 	const { configData } = useConfigData();
 	const currencySymbol =
 		configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol;
@@ -20,7 +20,7 @@ export default function VendorInfoSection({ purchaseForm }) {
 			<Box>
 				<SelectForm
 					name="vendor_id"
-					form={purchaseForm}
+					form={itemsForm}
 					dropdownValue={vendors?.data?.map((vendor) => ({
 						value: String(vendor.id),
 						label: vendor.name,
@@ -77,7 +77,7 @@ export default function VendorInfoSection({ purchaseForm }) {
 			<AddVendorModal
 				opened={isAddVendorModalOpened}
 				onClose={closeAddVendorModal}
-				purchaseForm={purchaseForm}
+				itemsForm={itemsForm}
 			/>
 		</Box>
 	);

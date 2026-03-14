@@ -23,9 +23,9 @@ import { useHotkeys } from "@mantine/hooks";
 import DateInputForm from "@components/form-builders/DateInputForm";
 
 export default function PaymentSection({
-	purchaseForm,
+	itemsForm,
 	itemsTotal,
-	isAddingPurchase,
+	isAddingItem,
 	isEditMode = false,
 }) {
 	const { transactionMode } = useTransactionMode();
@@ -34,7 +34,7 @@ export default function PaymentSection({
 		configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol;
 
 	const { discountAmount, isDiscountPercentage, purchaseNarration, paymentAmount } =
-		purchaseForm.values;
+		itemsForm.values;
 
 	const vatAmount = 0;
 
@@ -86,25 +86,25 @@ export default function PaymentSection({
 	// =============== auto-set cash transaction mode on load ===============
 	useEffect(() => {
 		if (!transactionMode?.length || isEditMode) return;
-		if (purchaseForm.values.transactionModeId) return;
+		if (itemsForm.values.transactionModeId) return;
 
 		const cashMethod = transactionMode.find((mode) => mode.slug === "cash");
 		if (cashMethod) {
-			purchaseForm.setFieldValue("transactionModeId", String(cashMethod.id));
-			purchaseForm.setFieldValue("transactionMode", cashMethod.name);
+			itemsForm.setFieldValue("transactionModeId", String(cashMethod.id));
+			itemsForm.setFieldValue("transactionMode", cashMethod.name);
 		}
 	}, [ transactionMode ]);
 
 	// =============== auto-populate payment amount with grand total ===============
 	useEffect(() => {
 		if (isEditMode) return;
-		purchaseForm.setFieldValue("paymentAmount", grandTotal);
+		itemsForm.setFieldValue("paymentAmount", grandTotal);
 	}, [ grandTotal ]);
 
 	// =============== toggle between flat and percentage discount; reset amount on switch ===============
 	const toggleDiscountType = () => {
-		purchaseForm.setFieldValue("discountAmount", 0);
-		purchaseForm.setFieldValue("isDiscountPercentage", !isDiscountPercentage);
+		itemsForm.setFieldValue("discountAmount", 0);
+		itemsForm.setFieldValue("isDiscountPercentage", !isDiscountPercentage);
 	};
 
 	// =============== render option with image and label ===============
@@ -126,7 +126,7 @@ export default function PaymentSection({
 		</Group>
 	);
 
-	useHotkeys([ [ "alt+s", () => document.getElementById("PurchaseFormSubmit")?.click() ] ]);
+	useHotkeys([ [ "alt+s", () => document.getElementById("ItemsFormSubmit")?.click() ] ]);
 
 	return (
 		<>
@@ -136,7 +136,7 @@ export default function PaymentSection({
 						<Grid columns={16} gutter={8}>
 							<Grid.Col span={8}>
 								<Box bd="1px solid #dee2e6" bg="white" p="xs" h="100%">
-									<VendorInfoSection purchaseForm={purchaseForm} />
+									<VendorInfoSection itemsForm={itemsForm} />
 								</Box>
 							</Grid.Col>
 
@@ -150,16 +150,16 @@ export default function PaymentSection({
 												</Text>
 												<FormValidationWrapper
 													errorMessage="Transaction mode is required"
-													opened={!!purchaseForm.errors.transactionModeId}
+													opened={!!itemsForm.errors.transactionModeId}
 												>
 													<Select
 														data={groupedTransactionMode}
 														renderOption={renderTransactionModeOption}
 														searchable
-														{...purchaseForm.getInputProps("transactionModeId", { type: "search" })}
+														{...itemsForm.getInputProps("transactionModeId", { type: "search" })}
 														onChange={(value, option) => {
-															purchaseForm.setFieldValue("transactionMode", option.label);
-															purchaseForm.setFieldValue("transactionModeId", String(value));
+															itemsForm.setFieldValue("transactionMode", option.label);
+															itemsForm.setFieldValue("transactionModeId", String(value));
 														}}
 														nothingFoundMessage="No transaction mode found"
 														placeholder="Select transaction mode"
@@ -171,20 +171,20 @@ export default function PaymentSection({
 										<Grid.Col span={12}>
 											<DateInputForm
 												name="purchaseDate"
-												form={purchaseForm}
+												form={itemsForm}
 												id="expired_date"
 												placeholder="DD-MM-YYYY"
 												valueFormat="DD-MM-YYYY"
 												clearable
-												tooltip={purchaseForm.errors.purchaseDate}
-												{...purchaseForm.getInputProps("purchaseDate")}
+												tooltip={itemsForm.errors.purchaseDate}
+												{...itemsForm.getInputProps("purchaseDate")}
 											/>
 										</Grid.Col>
 										<Grid.Col span={12}>
 											<Textarea
 												value={purchaseNarration}
 												onChange={(event) =>
-													purchaseForm.setFieldValue("purchaseNarration", event.currentTarget.value)
+													itemsForm.setFieldValue("purchaseNarration", event.currentTarget.value)
 												}
 												placeholder="Narration"
 												size="xs"
@@ -298,7 +298,7 @@ export default function PaymentSection({
 													<NumberInput
 														value={discountAmount}
 														onChange={(value) =>
-															purchaseForm.setFieldValue("discountAmount", parseFloat(value) || 0)
+															itemsForm.setFieldValue("discountAmount", parseFloat(value) || 0)
 														}
 														hideControls
 														size="sm"
@@ -324,7 +324,7 @@ export default function PaymentSection({
 													<NumberInput
 														value={discountAmount}
 														onChange={(value) =>
-															purchaseForm.setFieldValue("discountAmount", parseFloat(value) || 0)
+															itemsForm.setFieldValue("discountAmount", parseFloat(value) || 0)
 														}
 														hideControls
 														size="sm"
@@ -372,7 +372,7 @@ export default function PaymentSection({
 										</Flex>
 										<FormValidationWrapper
 											errorMessage="Payment amount is required"
-											opened={!!purchaseForm.errors.paymentAmount}
+											opened={!!itemsForm.errors.paymentAmount}
 										>
 											<NumberInput
 												hideControls
@@ -385,7 +385,7 @@ export default function PaymentSection({
 														backgroundColor: "white",
 													},
 												}}
-												{...purchaseForm.getInputProps("paymentAmount", { type: "number" })}
+												{...itemsForm.getInputProps("paymentAmount", { type: "number" })}
 											/>
 										</FormValidationWrapper>
 									</Flex>
@@ -402,7 +402,7 @@ export default function PaymentSection({
 						color="white"
 						radius={0}
 						type="button"
-						id="PurchaseResetFormSubmit"
+						id="ItemsResetFormSubmit"
 					>
 						Reset
 					</Button>
@@ -412,7 +412,7 @@ export default function PaymentSection({
 						color="white"
 						radius={0}
 						type="button"
-						id="PurchaseHoldFormSubmit"
+						id="ItemsHoldFormSubmit"
 					>
 						Hold
 					</Button>
@@ -422,7 +422,7 @@ export default function PaymentSection({
 						color="white"
 						radius={0}
 						type="button"
-						id="PurchasePrintFormSubmit"
+						id="ItemsPrintFormSubmit"
 					>
 						Print
 					</Button>
@@ -431,10 +431,10 @@ export default function PaymentSection({
 						bg="var(--theme-pos-btn-color)"
 						color="white"
 						radius={0}
-						form="purchaseForm"
+						form="itemsForm"
 						type="submit"
-						loading={isAddingPurchase}
-						id="PurchaseFormSubmit"
+						loading={isAddingItem}
+						id="ItemsFormSubmit"
 					>
 						{isEditMode ? "Update" : "Save"}
 					</Button>

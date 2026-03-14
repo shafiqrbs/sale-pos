@@ -11,6 +11,8 @@ const vendorOverviewInitialValues = {
 	discountAmount: 0,
 	isDiscountPercentage: false,
 	paymentAmount: 0,
+	invoice_date: null,
+	expected_date: null,
 };
 
 export const vendorOverviewRequest = () => {
@@ -29,9 +31,15 @@ export const vendorOverviewRequest = () => {
 				}
 				return null;
 			},
-			paymentAmount: (value) => {
-				if (Number(value) <= 0) {
-					return "Payment amount is required";
+			invoice_date: (value) => {
+				if (!value) {
+					return "Invoice date is required";
+				}
+				return null;
+			},
+			expected_date: (value) => {
+				if (!value) {
+					return "Expected date is required";
 				}
 				return null;
 			},

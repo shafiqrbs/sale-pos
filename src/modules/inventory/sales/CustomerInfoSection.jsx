@@ -2,7 +2,7 @@ import { Box, Flex, Grid, Select, Text } from "@mantine/core";
 import useConfigData from "@hooks/useConfigData";
 import useGetCoreCustomers from "@hooks/useGetCoreCustomers";
 
-export default function CustomerInfoSection({ salesForm }) {
+export default function CustomerInfoSection({ itemsForm }) {
 	const { configData } = useConfigData();
 	const { coreCustomers } = useGetCoreCustomers();
 
@@ -21,8 +21,8 @@ export default function CustomerInfoSection({ salesForm }) {
 				data={customerOptions}
 				searchable
 				clearable
-				value={salesForm.values.customer_id || null}
-				onChange={(value) => salesForm.setFieldValue("customer_id", value ?? "")}
+				value={itemsForm.values.customer_id || null}
+				onChange={(value) => itemsForm.setFieldValue("customer_id", value ?? "")}
 				nothingFoundMessage="No customer found"
 			/>
 

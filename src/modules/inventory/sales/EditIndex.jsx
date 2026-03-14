@@ -19,13 +19,13 @@ export default function EditIndex() {
 	const navigate = useNavigate();
 	const { user } = useLoggedInUser();
 	const { configData } = useConfigData();
-	const salesForm = useForm(salesOverviewRequest());
+	const itemsForm = useForm(salesOverviewRequest());
 
 	const { sale, isLoading: isLoadingSale } = useGetSale(saleId);
 
-	const [editSaleItems, setEditSaleItems] = useState([]);
+	const [editItems, setEditItems] = useState([]);
 	const [resetKey, setResetKey] = useState(0);
-	const [isAddingSales, setIsAddingSales] = useState(false);
+	const [isAddingItem, setIsAddingItem] = useState(false);
 	const [isEditInitialized, setIsEditInitialized] = useState(false);
 
 	const editItemIdCounter = useRef(0);
@@ -77,8 +77,8 @@ export default function EditIndex() {
 			splitPaymentDrawerOpened: false,
 		};
 
-		setEditSaleItems(parsedItems);
-		salesForm.setValues(formValues);
+		setEditItems(parsedItems);
+		itemsForm.setValues(formValues);
 
 		originalSnapshotRef.current = {
 			parsedItems,
@@ -91,13 +91,13 @@ export default function EditIndex() {
 
 	// =============== apply a partial update to a single item in local state ===============
 	const handleEditItemUpdate = (itemId, updatedData) => {
-		setEditSaleItems((previousItems) =>
+		setEditItems((previousItems) =>
 			previousItems.map((item) => (item.id === itemId ? { ...item, ...updatedData } : item))
 		);
 	};
 
 	const handleEditRemoveItem = (itemId) => {
-		setEditSaleItems((previousItems) => previousItems.filter((item) => item.id !== itemId));
+		setEditItems((previousItems) => previousItems.filter((item) => item.id !== itemId));
 	};
 
 	// =============== add new item to local state without touching temp_sales_products table ===============
@@ -109,7 +109,7 @@ export default function EditIndex() {
 			price: newItem.sales_price,
 			mrp: newItem.sales_price,
 		};
-		setEditSaleItems((previousItems) => [...previousItems, itemWithId]);
+		setEditItems((previousItems) => [...previousItems, itemWithId]);
 	};
 
 	// =============== restore original product quantities then deduct the newly saved quantities ===============
@@ -158,7 +158,7 @@ export default function EditIndex() {
 	};
 
 	const handleSubmit = async (formValues) => {
-		if (!editSaleItems.length) {
+		if (!editItems.length) {
 			showNotification("Add minimum one sales item first", "red");
 			return;
 		}
@@ -174,7 +174,7 @@ export default function EditIndex() {
 			return;
 		}
 
-		const subTotal = editSaleItems.reduce(
+		const subTotal = editItems.reduce(
 			(sum, item) => sum + (Number(item.quantity) || 0) * (Number(item.sales_price) || 0),
 			0
 		);
@@ -204,7 +204,7 @@ export default function EditIndex() {
 			}
 		}
 
-		const salesItemsForDb = editSaleItems.map((item) => ({
+		const salesItemsForDb = editItems.map((item) => ({
 			product_id: item.product_id,
 			display_name: item.display_name,
 			quantity: Number(item.quantity) || 0,
@@ -246,14 +246,14 @@ export default function EditIndex() {
 
 		const originalItemsSnapshot = originalSnapshotRef.current?.parsedItems ?? [];
 
-		setIsAddingSales(true);
+		setIsAddingItem(true);
 		try {
 			await window.dbAPI.updateDataInTable("sales", {
 				condition: { id: Number(saleId) },
 				data: salesData,
 			});
 
-			await updateProductsAfterEdit(originalItemsSnapshot, editSaleItems);
+			await updateProductsAfterEdit(originalItemsSnapshot, editItems);
 
 			const shouldPrint = withPosPrintRef.current;
 
@@ -261,11 +261,11 @@ export default function EditIndex() {
 
 			// =============== after a successful save the current items become the new baseline for
 			// future resets and the next product-qty restoration cycle ===============
-			const newBaseline = editSaleItems.map((item) => ({ ...item }));
+			const newBaseline = editItems.map((item) => ({ ...item }));
 			originalSnapshotRef.current = {
 				parsedItems: newBaseline,
 				formValues: {
-					...salesForm.values,
+					...itemsForm.values,
 					splitPaymentDrawerOpened: false,
 				},
 			};
@@ -289,15 +289,15 @@ export default function EditIndex() {
 			console.error(error);
 			showNotification(error?.message || "Failed to update sale", "red");
 		} finally {
-			setIsAddingSales(false);
+			setIsAddingItem(false);
 			withPosPrintRef.current = false;
 		}
 	};
 
 	const handlePosPrint = () => {
 		withPosPrintRef.current = true;
-		// =============== trigger salesForm submission with POS print flag set ===============
-		salesForm.onSubmit(handleSubmit)();
+		// =============== trigger itemsForm submission with POS print flag set ===============
+		itemsForm.onSubmit(handleSubmit)();
 	};
 
 	// =============== re-seed the form and item list from the original sale snapshot ===============
@@ -305,8 +305,8 @@ export default function EditIndex() {
 		const snapshot = originalSnapshotRef.current;
 		if (!snapshot) return;
 
-		setEditSaleItems(snapshot.parsedItems.map((item) => ({ ...item })));
-		salesForm.setValues(snapshot.formValues);
+		setEditItems(snapshot.parsedItems.map((item) => ({ ...item })));
+		itemsForm.setValues(snapshot.formValues);
 		setResetKey((previousKey) => previousKey + 1);
 	};
 
@@ -331,11 +331,11 @@ export default function EditIndex() {
 			<Box p="xs" pb={0}>
 				<InvoiceForm refetch={() => {}} onAddItem={handleAddEditItem} />
 			</Box>
-			<Box component="form" id="salesForm" onSubmit={salesForm.onSubmit(handleSubmit)}>
+			<Box component="form" id="itemsForm" onSubmit={itemsForm.onSubmit(handleSubmit)}>
 				<SalesOverview
-					isAddingSales={isAddingSales}
-					salesForm={salesForm}
-					salesProducts={editSaleItems}
+					isAddingItem={isAddingItem}
+					itemsForm={itemsForm}
+					itemsProducts={editItems}
 					refetch={() => {}}
 					onPosPrint={handlePosPrint}
 					onReset={handleReset}

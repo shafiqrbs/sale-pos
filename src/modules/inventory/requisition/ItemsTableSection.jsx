@@ -1,5 +1,5 @@
 import React from "react";
-import {ActionIcon, Box, Flex, NumberInput, Text, Button, Badge} from "@mantine/core";
+import { ActionIcon, Box, Flex, NumberInput, Text, Button, Badge } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
 import { DataTable } from "mantine-datatable";
 import { IconList, IconTrashX } from "@tabler/icons-react";
@@ -16,7 +16,7 @@ import dayjs from "dayjs";
 
 dayjs.extend(customParseFormat);
 
-export default function ItemsTableSection({ purchaseProducts, refetch, itemsTotal, onQuantityChange, onPriceChange, onRemoveItem }) {
+export default function ItemsTableSection({ itemsProducts, refetch, itemsTotal, onQuantityChange, onPriceChange, onRemoveItem }) {
 	const navigate = useNavigate();
 	const { t } = useTranslation();
 	const { mainAreaHeight } = useMainAreaHeight();
@@ -28,7 +28,7 @@ export default function ItemsTableSection({ purchaseProducts, refetch, itemsTota
 
 	const handleQuantityChange = async (itemId, value) => {
 		const numericValue = parseFloat(value) || 0;
-		const currentItem = purchaseProducts.find((item) => item.id === itemId);
+		const currentItem = itemsProducts.find((item) => item.id === itemId);
 		const newSubTotal = numericValue * (currentItem?.purchase_price || 0);
 		const updatedData = { quantity: numericValue, sub_total: newSubTotal };
 		if (onQuantityChange) {
@@ -41,7 +41,7 @@ export default function ItemsTableSection({ purchaseProducts, refetch, itemsTota
 
 	const handlePriceChange = async (itemId, value) => {
 		const numericValue = parseFloat(value) || 0;
-		const currentItem = purchaseProducts.find((item) => item.id === itemId);
+		const currentItem = itemsProducts.find((item) => item.id === itemId);
 		const newSubTotal = (currentItem?.quantity || 0) * numericValue;
 		const updatedData = { purchase_price: numericValue, sub_total: newSubTotal };
 		if (onPriceChange) {
@@ -77,11 +77,11 @@ export default function ItemsTableSection({ purchaseProducts, refetch, itemsTota
 					{t("RequisitionItems")}
 				</Box>
 				<Button
-					onClick={() => navigate(APP_NAVLINKS.PURCHASE)}
+					onClick={() => navigate(APP_NAVLINKS.REQUISITION)}
 					bg="red"
 					color="white"
 					leftSection={<IconList size={18} />}
-					>
+				>
 					{t("Requisition")}
 				</Button>
 			</Flex>
@@ -100,7 +100,7 @@ export default function ItemsTableSection({ purchaseProducts, refetch, itemsTota
 					},
 				}}
 				withColumnBorders={true}
-				records={purchaseProducts}
+				records={itemsProducts}
 				columns={[
 					{
 						accessor: "serial",
@@ -199,7 +199,7 @@ export default function ItemsTableSection({ purchaseProducts, refetch, itemsTota
 				<Flex justify="space-between" align="center">
 					<Badge size="xl" bg={"red"}>
 						<Text fz="sm" fw={600}>
-							Σ&nbsp; {purchaseProducts.length} Item(s)
+							Σ&nbsp; {itemsProducts.length} Item(s)
 						</Text>
 					</Badge>
 					<Flex align="center" gap={4}>

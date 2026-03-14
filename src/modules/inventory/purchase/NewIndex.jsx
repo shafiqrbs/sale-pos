@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Grid, Box } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import dayjs from "dayjs";
 import InvoiceForm from "./form/InvoiceForm";
 import VendorOverview from "./Overview";
 import { vendorOverviewRequest } from "./helpers/request";
@@ -12,20 +11,20 @@ import { generateInvoiceId, formatDateTime } from "@utils/index";
 
 export default function NewIndex() {
 	const { user } = useLoggedInUser();
-	const purchaseForm = useForm(vendorOverviewRequest());
-	const { purchaseProducts, refetch } = useTempPurchaseProducts({ type: "purchase" });
-	const [isAddingPurchase, setIsAddingPurchase] = useState(false);
+	const itemsForm = useForm(vendorOverviewRequest());
+	const { purchaseProducts: itemsProducts, refetch } = useTempPurchaseProducts({ type: "purchase" });
+	const [ isAddingItem, setIsAddingItem ] = useState(false);
 
 	// =============== update product quantities after successful purchase ===============
 	const updateProductsAfterPurchase = async () => {
 		try {
-			for (const cartItem of purchaseProducts) {
+			for (const cartItem of itemsProducts) {
 				const productId = cartItem.product_id;
 				const currentProduct = await window.dbAPI.getDataFromTable("core_products", {
 					id: productId,
 				});
 				const currentProductData = Array.isArray(currentProduct)
-					? currentProduct[0]
+					? currentProduct[ 0 ]
 					: currentProduct;
 
 				if (!currentProductData) {
@@ -48,7 +47,7 @@ export default function NewIndex() {
 	};
 
 	const handleSubmit = async (formValues) => {
-		if (!purchaseProducts?.length) {
+		if (!itemsProducts?.length) {
 			showNotification("Add minimum one purchase item first", "red");
 			return;
 		}
@@ -66,7 +65,7 @@ export default function NewIndex() {
 			return;
 		}
 
-		const subTotal = purchaseProducts.reduce(
+		const subTotal = itemsProducts.reduce(
 			(sum, item) => sum + (Number(item.quantity) || 0) * (Number(item.purchase_price) || 0),
 			0
 		);
@@ -84,13 +83,13 @@ export default function NewIndex() {
 			const vendorResult = await window.dbAPI.getDataFromTable("core_vendors", {
 				id: Number(formValues.vendor_id),
 			});
-			const vendorData = Array.isArray(vendorResult) ? vendorResult[0] : vendorResult;
+			const vendorData = Array.isArray(vendorResult) ? vendorResult[ 0 ] : vendorResult;
 			if (vendorData) {
 				vendorName = vendorData.name ?? vendorName;
 			}
 		}
 
-		const purchaseItemsForDb = purchaseProducts.map((item) => ({
+		const purchaseItemsForDb = itemsProducts.map((item) => ({
 			product_id: item.product_id,
 			display_name: item.display_name,
 			quantity: Number(item.quantity) || 0,
@@ -126,7 +125,7 @@ export default function NewIndex() {
 			created: formatDateTime(new Date()),
 		};
 
-		setIsAddingPurchase(true);
+		setIsAddingItem(true);
 		try {
 			await window.dbAPI.upsertIntoTable("purchase", localPurchaseRecord);
 			await updateProductsAfterPurchase();
@@ -139,22 +138,22 @@ export default function NewIndex() {
 
 			// =============== partial reset: preserve vendor + transaction mode ===============
 			const preservedValues = {
-				vendor_id: purchaseForm.values.vendor_id,
-				vendorName: purchaseForm.values.vendorName,
-				vendorPhone: purchaseForm.values.vendorPhone,
-				vendorEmail: purchaseForm.values.vendorEmail,
-				transactionMode: purchaseForm.values.transactionMode,
-				transactionModeId: purchaseForm.values.transactionModeId,
+				vendor_id: itemsForm.values.vendor_id,
+				vendorName: itemsForm.values.vendorName,
+				vendorPhone: itemsForm.values.vendorPhone,
+				vendorEmail: itemsForm.values.vendorEmail,
+				transactionMode: itemsForm.values.transactionMode,
+				transactionModeId: itemsForm.values.transactionModeId,
 			};
-			purchaseForm.reset();
-			Object.entries(preservedValues).forEach(([key, value]) => {
-				purchaseForm.setFieldValue(key, value);
+			itemsForm.reset();
+			Object.entries(preservedValues).forEach(([ key, value ]) => {
+				itemsForm.setFieldValue(key, value);
 			});
 		} catch (error) {
 			console.error(error);
 			showNotification(error?.message || "Failed to save purchase", "red");
 		} finally {
-			setIsAddingPurchase(false);
+			setIsAddingItem(false);
 		}
 	};
 
@@ -166,11 +165,11 @@ export default function NewIndex() {
 				</Box>
 			</Grid.Col>
 			<Grid.Col span={18}>
-				<Box component="form" id="purchaseForm" onSubmit={purchaseForm.onSubmit(handleSubmit)}>
+				<Box component="form" id="itemsForm" onSubmit={itemsForm.onSubmit(handleSubmit)}>
 					<VendorOverview
-						isAddingPurchase={isAddingPurchase}
-						purchaseForm={purchaseForm}
-						purchaseProducts={purchaseProducts}
+						isAddingItem={isAddingItem}
+						itemsForm={itemsForm}
+						itemsProducts={itemsProducts}
 						refetch={refetch}
 					/>
 				</Box>

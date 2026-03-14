@@ -46,7 +46,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 	const [ productResetKey, setProductResetKey ] = useState(0);
 	const [ selectedCategoryId, setSelectedCategoryId ] = useState(null);
 	const { configData } = useConfigData();
-	const invoiceItemForm = useForm(invoiceItemFormRequest());
+	const itemsForm = useForm(invoiceItemFormRequest());
 	const { getLocalProducts } = useLocalProducts({
 		fetchOnMount: false,
 	});
@@ -81,7 +81,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 	const containerHeight = mainAreaHeight - 120;
 
 	const handleAddItemToPurchaseForm = async () => {
-		const { productId, purchasePrice, quantity, expired_date } = invoiceItemForm.values;
+		const { productId, purchasePrice, quantity, expired_date } = itemsForm.values;
 
 		if (!productId || !quantity) {
 			showNotification("Product and quantity are required", "red");
@@ -116,7 +116,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 			average_price: Number(selectedProduct.average_price ?? 0),
 			sales_price: Number(selectedProduct.sales_price ?? 0),
 			sub_total: quantityNumber * priceNumber,
-			unit_name: selectedProduct.unit_name || invoiceItemForm.values.unit || "",
+			unit_name: selectedProduct.unit_name || itemsForm.values.unit || "",
 			category_id: categoryId,
 			category_name: categoryName,
 			type: "purchase",
@@ -137,11 +137,11 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 	};
 
 	const invoiceSubTotal =
-		(Number(invoiceItemForm.values.quantity) || 0) *
-		(Number(invoiceItemForm.values.purchasePrice) || 0);
+		(Number(itemsForm.values.quantity) || 0) *
+		(Number(itemsForm.values.purchasePrice) || 0);
 
 	const handleResetInvoiceItemForm = () => {
-		invoiceItemForm.reset();
+		itemsForm.reset();
 		setProductResetKey((prev) => prev + 1);
 		requestAnimationFrame(() => {
 			document.getElementById("productId")?.open?.();
@@ -149,9 +149,9 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 	};
 
 	const handleProductSelect = (value, option) => {
-		invoiceItemForm.setFieldValue("productId", value);
-		invoiceItemForm.setFieldValue("purchasePrice", option?.purchase_price);
-		invoiceItemForm.setFieldValue("unit", option?.unit);
+		itemsForm.setFieldValue("productId", value);
+		itemsForm.setFieldValue("purchasePrice", option?.purchase_price);
+		itemsForm.setFieldValue("unit", option?.unit);
 		setTimeout(() => document.getElementById("quantity")?.focus(), 0);
 	};
 
@@ -161,7 +161,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 		<>
 			<Box
 				component="form"
-				onSubmit={invoiceItemForm.onSubmit(handleAddItemToPurchaseForm)}
+				onSubmit={itemsForm.onSubmit(handleAddItemToPurchaseForm)}
 				bd="1px solid #dee2e6"
 				bg="white"
 				className="borderRadiusAll"
@@ -176,7 +176,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 							<Box w="100%">
 								<Select
 									name="return_mode"
-									form={invoiceItemForm}
+									form={itemsForm}
 									data={['Requisition', 'General']}
 									nextField="invoice_date"
 									placeholder="Search Return Mode"
@@ -188,7 +188,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 							<Box w="100%">
 								<SelectForm
 									name="vendor_id"
-									form={invoiceItemForm}
+									form={itemsForm}
 									dropdownValue={vendors?.data?.map((vendor) => ({
 										value: String(vendor.id),
 										label: vendor.name,

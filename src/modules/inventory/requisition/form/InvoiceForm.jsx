@@ -1,49 +1,42 @@
 import {
-	ActionIcon,
 	Box,
 	Button,
 	Divider,
 	Flex,
-	Grid,
 	ScrollArea,
 	Select,
 	Text,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import {
-	IconBarcode,
-	IconCurrencyTaka, IconNumber,
 	IconPlus,
-	IconRefresh,
-	IconShoppingCart, IconSortAscendingNumbers, IconUserPlus,
+	IconShoppingCart,
+	IconSortAscendingNumbers,
 } from "@tabler/icons-react";
 
 import useMainAreaHeight from "@hooks/useMainAreaHeight";
 import InputNumberForm from "@components/form-builders/InputNumberForm";
-import InputForm from "@components/form-builders/InputForm";
 import AddProductDrawer from "@components/drawers/AddProductDrawer";
 import useLocalProducts from "@hooks/useLocalProducts";
 import useGetCategories from "@hooks/useGetCategories";
 import useConfigData from "@hooks/useConfigData";
 import { useDisclosure, useHotkeys } from "@mantine/hooks";
-import { formatCurrency } from "@utils/index";
 import { showNotification } from "@components/ShowNotificationComponent";
 import { invoiceItemFormRequest } from "../helpers/request";
 import FormValidationWrapper from "@components/form-builders/FormValidationWrapper";
 import VirtualSearchSelect from "@components/form-builders/VirtualSearchSelect";
-import DateInputForm from "@components/form-builders/DateInputForm";
 
 import React, { useEffect, useState } from "react";
 import { useGetInventoryCategoryQuery } from "@services/settings";
 import SelectForm from "@components/form-builders/SelectForm";
-import {useGetVendorsQuery} from "@services/core/vendors";
+import { useGetVendorsQuery } from "@services/core/vendors";
 
 export default function InvoiceForm({ refetch, onAddItem }) {
 	const [ products, setProducts ] = useState([]);
 	const [ productResetKey, setProductResetKey ] = useState(0);
 	const [ selectedCategoryId, setSelectedCategoryId ] = useState(null);
 	const { configData } = useConfigData();
-	const invoiceItemForm = useForm(invoiceItemFormRequest());
+	const itemsForm = useForm(invoiceItemFormRequest());
 	const { getLocalProducts } = useLocalProducts({
 		fetchOnMount: false,
 	});
@@ -57,13 +50,13 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 
 	// =============== fetch products in db entry order (id ASC), same as sales product select ===============
 	useEffect(() => {
-		getLocalProducts({ category_id: selectedCategoryId }, "id", {
+		getLocalProducts({ vendor_id: itemsForm.values.vendor_id, category_id: selectedCategoryId }, "id", {
 			orderBy: "product_name ASC",
 		}).then((fetchedProducts) => {
 			setProducts(fetchedProducts);
 		});
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ selectedCategoryId ]);
+	}, [ selectedCategoryId, itemsForm.values.vendor_id ]);
 
 	const currencySymbol =
 		configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol;
@@ -78,7 +71,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 	const containerHeight = mainAreaHeight - 120;
 
 	const handleAddItemToPurchaseForm = async () => {
-		const { productId, purchasePrice, quantity, expired_date } = invoiceItemForm.values;
+		const { productId, purchasePrice, quantity } = itemsForm.values;
 
 		if (!productId || !quantity) {
 			showNotification("Product and quantity are required", "red");
@@ -113,12 +106,11 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 			average_price: Number(selectedProduct.average_price ?? 0),
 			sales_price: Number(selectedProduct.sales_price ?? 0),
 			sub_total: quantityNumber * priceNumber,
-			unit_name: selectedProduct.unit_name || invoiceItemForm.values.unit || "",
+			unit_name: selectedProduct.unit_name || itemsForm.values.unit || "",
 			category_id: categoryId,
 			category_name: categoryName,
-			type: "purchase",
+			type: "requisition",
 			price: priceNumber,
-			expired_date,
 		};
 
 		// =============== persist new item into local temp_purchase_products table or pass to edit state ===============
@@ -133,12 +125,8 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 		showNotification("Item added successfully", "teal");
 	};
 
-	const invoiceSubTotal =
-		(Number(invoiceItemForm.values.quantity) || 0) *
-		(Number(invoiceItemForm.values.purchasePrice) || 0);
-
 	const handleResetInvoiceItemForm = () => {
-		invoiceItemForm.reset();
+		itemsForm.reset();
 		setProductResetKey((prev) => prev + 1);
 		requestAnimationFrame(() => {
 			document.getElementById("productId")?.open?.();
@@ -146,9 +134,9 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 	};
 
 	const handleProductSelect = (value, option) => {
-		invoiceItemForm.setFieldValue("productId", value);
-		invoiceItemForm.setFieldValue("purchasePrice", option?.purchase_price);
-		invoiceItemForm.setFieldValue("unit", option?.unit);
+		itemsForm.setFieldValue("productId", value);
+		itemsForm.setFieldValue("purchasePrice", option?.purchase_price);
+		itemsForm.setFieldValue("unit", option?.unit);
 		setTimeout(() => document.getElementById("quantity")?.focus(), 0);
 	};
 
@@ -158,7 +146,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 		<>
 			<Box
 				component="form"
-				onSubmit={invoiceItemForm.onSubmit(handleAddItemToPurchaseForm)}
+				onSubmit={itemsForm.onSubmit(handleAddItemToPurchaseForm)}
 				bd="1px solid #dee2e6"
 				bg="white"
 				className="borderRadiusAll"
@@ -173,7 +161,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 							<Box w="100%">
 								<SelectForm
 									name="vendor_id"
-									form={invoiceItemForm}
+									form={itemsForm}
 									dropdownValue={vendors?.data?.map((vendor) => ({
 										value: String(vendor.id),
 										label: vendor.name,
@@ -207,12 +195,12 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 							<Box w="100%">
 								<FormValidationWrapper
 									errorMessage="Product is required"
-									opened={!!invoiceItemForm.errors.productId}
+									opened={!!itemsForm.errors.productId}
 								>
 									<Box pos="relative">
 										<VirtualSearchSelect
 											key={productResetKey}
-											value={invoiceItemForm.values.productId}
+											value={itemsForm.values.productId}
 											options={productOptions}
 											placeholder="Choose Product"
 											searchable
@@ -227,19 +215,19 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 						</Flex>
 					</Box>
 				</ScrollArea>
-				<Flex p="sm" justify="space-between" align="center" bg={"#fffbeb85"}>
+				<Flex p="sm" gap="xs" justify="space-between" align="center" bg={"#fffbeb85"}>
 					<InputNumberForm
-						form={invoiceItemForm}
+						form={itemsForm}
 						name="quantity"
 						id="quantity"
 						placeholder="0"
 						nextField="expired_date"
 						required={false}
-						tooltip={invoiceItemForm.errors.quantity}
+										tooltip={itemsForm.errors.quantity}
 						leftSection={<IconSortAscendingNumbers size={16} opacity={0.6} />}
 						rightIcon={
 							<Text fz="xs" fw={500}>
-								{invoiceItemForm.values.unit || "Unit"}
+								{itemsForm.values.unit || "Unit"}
 							</Text>
 						}
 					/>
@@ -252,6 +240,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 						radius="sm"
 						type="submit"
 						id="EntityFormSubmit"
+						w={150}
 					>
 						Add
 					</Button>

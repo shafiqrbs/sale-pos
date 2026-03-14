@@ -29,7 +29,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 	const [products, setProducts] = useState([]);
 	const [productResetKey, setProductResetKey] = useState(0);
 	const { configData } = useConfigData();
-	const salesItemForm = useForm(salesItemFormRequest());
+	const itemsForm = useForm(salesItemFormRequest());
 	const { getLocalProducts } = useLocalProducts({ fetchOnMount: false });
 	const { categories } = useGetCategories();
 
@@ -58,12 +58,12 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 	}));
 
 	// =============== effective price = MRP * (1 - discount/100); used for sub_total and cart ===============
-	const baseMRP = Number(salesItemForm.values.salesPrice) || 0;
-	const discountPercent = Number(salesItemForm.values.discount) || 0;
+	const baseMRP = Number(itemsForm.values.salesPrice) || 0;
+	const discountPercent = Number(itemsForm.values.discount) || 0;
 	const effectivePrice = baseMRP * (1 - discountPercent / 100);
 
 	const handleAddItemToSalesForm = async () => {
-		const { productId, salesPrice, quantity } = salesItemForm.values;
+		const { productId, salesPrice, quantity } = itemsForm.values;
 
 		if (!productId || !quantity) {
 			showNotification("Product and quantity are required", "red");
@@ -79,7 +79,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 
 		const quantityNumber = Number(quantity) || 0;
 		const mrpNumber = Number(salesPrice) || Number(selectedProduct.sales_price) || 0;
-		const percentNumber = Number(salesItemForm.values.discount) || 0;
+		const percentNumber = Number(itemsForm.values.discount) || 0;
 		const effectivePriceNumber = mrpNumber * (1 - percentNumber / 100);
 
 		// =============== resolve category_name from category_id using local categories ===============
@@ -97,7 +97,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 			percent: percentNumber,
 			stock: Number(selectedProduct.quantity ?? 0),
 			quantity: quantityNumber,
-			unit_name: selectedProduct.unit_name || salesItemForm.values.unit || "",
+			unit_name: selectedProduct.unit_name || itemsForm.values.unit || "",
 			purchase_price: Number(selectedProduct.purchase_price ?? 0),
 			average_price: Number(selectedProduct.average_price ?? 0),
 			sub_total: quantityNumber * effectivePriceNumber,
@@ -120,10 +120,10 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 		showNotification("Item added successfully", "teal");
 	};
 
-	const invoiceSubTotal = (Number(salesItemForm.values.quantity) || 0) * effectivePrice;
+	const invoiceSubTotal = (Number(itemsForm.values.quantity) || 0) * effectivePrice;
 
 	const handleResetSalesItemForm = () => {
-		salesItemForm.reset();
+		itemsForm.reset();
 		setProductResetKey((previousKey) => previousKey + 1);
 		requestAnimationFrame(() => {
 			document.getElementById("productId").open();
@@ -131,10 +131,10 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 	};
 
 	const handleProductSelect = (value, option) => {
-		salesItemForm.setFieldValue("productId", value);
-		salesItemForm.setFieldValue("salesPrice", option?.sales_price);
-		salesItemForm.setFieldValue("discount", 0);
-		salesItemForm.setFieldValue("unit", option?.unit);
+		itemsForm.setFieldValue("productId", value);
+		itemsForm.setFieldValue("salesPrice", option?.sales_price);
+		itemsForm.setFieldValue("discount", 0);
+		itemsForm.setFieldValue("unit", option?.unit);
 		requestAnimationFrame(() => document.getElementById("quantity").focus());
 	};
 
@@ -144,7 +144,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 		<>
 			<Box
 				component="form"
-				onSubmit={salesItemForm.onSubmit(handleAddItemToSalesForm)}
+				onSubmit={itemsForm.onSubmit(handleAddItemToSalesForm)}
 				bd="1px solid #dee2e6"
 				className="borderRadiusAll"
 				px="sm"
@@ -154,7 +154,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 					{/* =============== barcode input =============== */}
 					<Box w={200} style={{ flexShrink: 0 }}>
 						<InputForm
-							form={salesItemForm}
+							form={itemsForm}
 							name="barcode"
 							id="barcode"
 							label=""
@@ -190,12 +190,12 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 						<Box style={{ flex: 1 }}>
 							<FormValidationWrapper
 								errorMessage="Product is required"
-								opened={!!salesItemForm.errors.productId}
+								opened={!!itemsForm.errors.productId}
 							>
 								<Box pos="relative">
 									<VirtualSearchSelect
 										key={productResetKey}
-										value={salesItemForm.values.productId}
+										value={itemsForm.values.productId}
 										options={productOptions}
 										placeholder="Enter stock product name"
 										searchable
@@ -223,17 +223,17 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 					<Box w={110} style={{ flexShrink: 0 }}>
 						<InputNumberForm
 							classNames={{ input: "sales-price-input" }}
-							form={salesItemForm}
+							form={itemsForm}
 							name="quantity"
 							id="quantity"
 							label=""
 							placeholder="QTY"
 							nextField="salesPrice"
 							required={false}
-							tooltip={salesItemForm.errors.quantity}
+									tooltip={itemsForm.errors.quantity}
 							rightIcon={
 								<Text fz="xs" fw={500}>
-									{salesItemForm.values.unit || "Unit"}
+									{itemsForm.values.unit || "Unit"}
 								</Text>
 							}
 						/>
@@ -241,7 +241,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 
 					<Box w={130} style={{ flexShrink: 0 }}>
 						<NumberInput
-							{...salesItemForm.getInputProps("discount", { type: "number" })}
+							{...itemsForm.getInputProps("discount", { type: "number" })}
 							id="discount"
 							placeholder={t("Percent")}
 							hideControls
@@ -255,10 +255,10 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 					<Box w={130} style={{ flexShrink: 0 }}>
 						<FormValidationWrapper
 							errorMessage="Sales price is required"
-							opened={!!salesItemForm.errors.salesPrice}
+							opened={!!itemsForm.errors.salesPrice}
 						>
 							<NumberInput
-								{...salesItemForm.getInputProps("salesPrice", { type: "number" })}
+								{...itemsForm.getInputProps("salesPrice", { type: "number" })}
 								id="salesPrice"
 								placeholder={t("SalesPrice")}
 								hideControls

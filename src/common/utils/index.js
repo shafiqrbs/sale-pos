@@ -131,7 +131,7 @@ export const saveSyncRecordToLocalStorage = (syncRecord) => {
 	if (typeof window === "undefined" || !window?.localStorage) return [];
 
 	const existingRecords = getSyncRecordsFromLocalStorage();
-	const nextRecords = [syncRecord, ...existingRecords].slice(0, 200);
+	const nextRecords = [ syncRecord, ...existingRecords ].slice(0, 200);
 
 	window.localStorage.setItem(LOCAL_STORAGE_SYNC_RECORDS_KEY, JSON.stringify(nextRecords));
 	return nextRecords;
@@ -139,12 +139,31 @@ export const saveSyncRecordToLocalStorage = (syncRecord) => {
 
 export const getLastSyncRecord = (syncRecords) => {
 	if (!Array.isArray(syncRecords) || syncRecords.length === 0) return null;
-	return syncRecords[0] ?? null;
+	return syncRecords[ 0 ] ?? null;
 };
 
 export const getLastSyncRecordByMode = (syncRecords, mode) => {
 	if (!Array.isArray(syncRecords) || !mode) return null;
 	return syncRecords.find((record) => record?.mode === mode) ?? null;
+};
+
+// =============== parses YYYY-MM-DD string (e.g. 2026-03-14) to Date object, uses noon local time to avoid timezone boundary issues (e.g. Bangladesh UTC+6) ===============
+export const parseDateISO = (dateString) => {
+	if (!dateString) return null;
+	const trimmed = String(dateString).trim();
+	const match = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+	if (!match) return null;
+	const [ , year, month, day ] = match.map(Number);
+	const parsed = new Date(year, month - 1, day, 12, 0, 0);
+	return isNaN(parsed.getTime()) ? null : parsed;
+};
+
+// =============== extracts date part only (YYYY-MM-DD) from ISO string, e.g. 2026-03-19T06:00:00.000Z → 2026-03-19 ===============
+export const extractDateISO = (dateString) => {
+	if (!dateString) return "";
+	const trimmed = String(dateString).trim();
+	const match = trimmed.match(/^(\d{4}-\d{2}-\d{2})/);
+	return match ? match[ 1 ] : "";
 };
 
 // =============== returns YYYY-MM-DD for api query params (e.g. start_date, end_date) ===============
@@ -162,11 +181,11 @@ export const parseDateString = (dateString) => {
 	if (!dateString) return null;
 	const parts = String(dateString).trim().split("-");
 	if (parts.length !== 3) return null;
-	const first = parts[0];
+	const first = parts[ 0 ];
 	const isISO = first.length === 4 && Number(first) > 999;
-	const [year, month, day] = isISO
-		? [Number(parts[0]), Number(parts[1]) - 1, Number(parts[2])]
-		: [Number(parts[2]), Number(parts[1]) - 1, Number(parts[0])];
+	const [ year, month, day ] = isISO
+		? [ Number(parts[ 0 ]), Number(parts[ 1 ]) - 1, Number(parts[ 2 ]) ]
+		: [ Number(parts[ 2 ]), Number(parts[ 1 ]) - 1, Number(parts[ 0 ]) ];
 	const parsed = new Date(year, month, day);
 	return isNaN(parsed.getTime()) ? null : parsed;
 };
@@ -186,7 +205,7 @@ export function getRandomColor(index) {
 		"var(--mantine-color-cyan-6)",
 		"var(--mantine-color-indigo-6)",
 	];
-	return colors[index % colors.length];
+	return colors[ index % colors.length ];
 }
 
 export const formatCurrency = (amount) => {

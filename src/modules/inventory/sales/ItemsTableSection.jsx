@@ -8,7 +8,7 @@ import useMainAreaHeight from "@hooks/useMainAreaHeight";
 import { formatCurrency } from "@utils/index";
 
 export default function ItemsTableSection({
-	salesProducts,
+	itemsProducts,
 	refetch,
 	itemsTotal,
 	onQuantityChange,
@@ -26,7 +26,7 @@ export default function ItemsTableSection({
 
 	const handleQuantityChange = async (itemId, value) => {
 		const numericValue = parseFloat(value) || 0;
-		const currentItem = salesProducts.find((item) => item.id === itemId);
+		const currentItem = itemsProducts.find((item) => item.id === itemId);
 		const newSubTotal = numericValue * (currentItem?.sales_price || 0);
 		const updatedData = { quantity: numericValue, sub_total: newSubTotal };
 
@@ -43,7 +43,7 @@ export default function ItemsTableSection({
 
 	const handlePriceChange = async (itemId, value) => {
 		const effectivePrice = parseFloat(value) || 0;
-		const currentItem = salesProducts.find((item) => item.id === itemId);
+		const currentItem = itemsProducts.find((item) => item.id === itemId);
 		const basePrice = Number(currentItem?.price) || Number(currentItem?.sales_price) || 0;
 		const newSubTotal = (currentItem?.quantity || 0) * effectivePrice;
 		// =============== derive percent from effective price; if base is 0, set price = effectivePrice ===============
@@ -70,7 +70,7 @@ export default function ItemsTableSection({
 
 	const handleDiscountChange = async (itemId, value) => {
 		const percentValue = parseFloat(value) || 0;
-		const currentItem = salesProducts.find((item) => item.id === itemId);
+		const currentItem = itemsProducts.find((item) => item.id === itemId);
 		const basePrice = Number(currentItem?.price) || Number(currentItem?.sales_price) || 0;
 		const effectivePrice = basePrice * (1 - percentValue / 100);
 		const newSubTotal = (currentItem?.quantity || 0) * effectivePrice;
@@ -116,7 +116,7 @@ export default function ItemsTableSection({
 					},
 				}}
 				withColumnBorders={true}
-				records={salesProducts}
+				records={itemsProducts}
 				columns={[
 					{
 						accessor: "serial",
@@ -277,7 +277,7 @@ export default function ItemsTableSection({
 				<Flex justify="space-between" align="center">
 					<Badge size="xl" bg={"red"}>
 						<Text fz="sm" fw={600}>
-							Σ&nbsp; {salesProducts.length} Item(s)
+							Σ&nbsp; {itemsProducts.length} Item(s)
 						</Text>
 					</Badge>
 					<Flex align="center" gap={4}>
