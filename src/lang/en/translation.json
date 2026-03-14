@@ -1200,5 +1200,11 @@
 	"NewSale": "New Sale",
 	"SalesList": "Sales List",
 	"SalesItems": "Sales Items",
-	"ExpiredDate": "Expired Date"
+	"ExpiredDate": "Expired Date",
+	"NewPurchaseReturn": "New Purchase Return",
+	"PurchaseReturn": "Purchase Return",
+	"PurchaseReturnItems": "Purchase Return Items",
+	"NewSalesReturn": "New Sales Return",
+	"SalesReturn": "Sales Return",
+	"SalesReturnItems": "Sales Return Items"
 }

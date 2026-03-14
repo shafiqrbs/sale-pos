@@ -19,6 +19,7 @@ import usePurchaseList from "@hooks/usePurchaseList";
 import { modals } from "@mantine/modals";
 import { showNotification } from "@components/ShowNotificationComponent";
 import { formatCurrency } from "@utils/index";
+import {useGetPurchaseReturnQuery} from "@services/purchase-return";
 
 const PER_PAGE = 25;
 
@@ -46,7 +47,7 @@ export default function Table() {
 		},
 	});
 
-	const { purchases: purchaseData, isLoading } = usePurchaseList({
+	const { data: entities, isLoading } = useGetPurchaseReturnQuery({
 		params: {
 			term: form.values.term,
 			start_date: form.values.start_date,
@@ -54,8 +55,9 @@ export default function Table() {
 			page,
 			offset: PER_PAGE,
 		},
-		offlineFetch: effectiveDataSource === "offline",
 	});
+
+	console.log(entities);
 
 	const handlePurchaseApprove = (id) => {
 		// Open confirmation modal
@@ -122,9 +124,9 @@ export default function Table() {
 	};
 
 	// =============== open purchase details view from menu (stops propagation so row click does not fire) ===============
-	const handleShowPurchaseFromMenu = (event, purchaseData) => {
+	const handleShowPurchaseFromMenu = (event, entities) => {
 		event.stopPropagation();
-		handleShowDetails(purchaseData);
+		handleShowDetails(entities);
 	};
 
 	// =============== delete purchase with confirmation (local SQLite) ===============
@@ -149,36 +151,15 @@ export default function Table() {
 		<Box>
 			<Flex mb="xs" gap="sm" justify="space-between" align="center">
 				<KeywordSearch showStartEndDate form={form} />
-
 				<Group gap="sm" wrap="nowrap" >
-					<SegmentedControl
-						value={effectiveDataSource}
-						onChange={(value) => {
-							setDataSource(value);
-							setPage(1);
-						}}
-						color={effectiveDataSource === "online" ? "green" : "orange"}
-						data={[
-							{
-								value: "online",
-								label: "🌐 " + t("Online"),
-								disabled: !isOnline,
-							},
-							{
-								value: "offline",
-								label: "📡 " + t("Offline"),
-							},
-						]}
-					/>
 					<Button
-						w={170}
 						size="md"
 						color="red"
 						variant="filled"
 						leftSection={<IconPlus size={20} />}
-						onClick={() => navigate(APP_NAVLINKS.PURCHASE_NEW)}
+						onClick={() => navigate(APP_NAVLINKS.PURCHASE_RETURN_NEW)}
 					>
-						{t("NewPurchase")}
+						{t("NewPurchaseReturn")}
 					</Button>
 				</Group>
 			</Flex>
@@ -196,7 +177,7 @@ export default function Table() {
 							onRowClick={(rowData) => {
 								handleShowDetails(rowData.record);
 							}}
-							records={(purchaseData?.data ?? []).filter((item) => !deletedPurchaseIds.has(item.id))}
+							records={(entities?.data ?? []).filter((item) => !deletedPurchaseIds.has(item.id))}
 							columns={[
 								{
 									accessor: "created",
@@ -207,6 +188,7 @@ export default function Table() {
 										</Text>
 									),
 								},
+
 								{
 									accessor: "invoice",
 									title: t("Invoice"),
@@ -222,33 +204,17 @@ export default function Table() {
 									render: (item) => <Text size="sm">{item?.vendor_name || "N/A"}</Text>,
 								},
 								{
-									accessor: "subtotal",
-									title: t("Sub Total"),
+									accessor: "quantity",
+									title: t("TotalQuantity"),
 									textAlign: "right",
-									render: (data) => <>{formatCurrency(data.sub_total || 0)}</>,
-								},
-								{
-									accessor: "discount",
-									title: t("Discount"),
-									textAlign: "right",
-									render: (data) => <>{formatCurrency(data.discount || 0)}</>,
+									render: (data) => <>{formatCurrency(data.quantity || 0)}</>,
 								},
 								{
 									accessor: "total",
 									title: t("Total"),
 									textAlign: "right",
-									render: (data) => <>{formatCurrency(data.total || 0)}</>,
+									render: (data) => <>{formatCurrency(data.sub_total || 0)}</>,
 								},
-								{
-									accessor: "due",
-									title: t("Payable"),
-									textAlign: "right",
-									render: (data) => {
-										return <>{formatCurrency(Number(data.total) - Number(data.payment))}</>;
-									},
-								},
-								// { accessor: "payment", title: t("Payment") },
-								{ accessor: "mode", title: t("Mode") },
 								{
 									accessor: "process",
 									title: t("Status"),
@@ -258,10 +224,8 @@ export default function Table() {
 											Created: "blue",
 											Approved: "red",
 										};
-
 										const badgeColor = colorMap[item.process] || "gray";
-
-										return item.process && <Badge color={badgeColor}>{item.process}</Badge>;
+										return item.process && <Badge radius="xs"  color={badgeColor}>{item.process}</Badge>;
 									},
 								},
 								{
@@ -326,15 +290,6 @@ export default function Table() {
 													>
 														{t("Edit")}
 													</Menu.Item>
-													{
-														<Menu.Item
-															color="indigo"
-															onClick={() => handleOpenCopyConfirmModal(data.id)}
-															leftSection={<IconCopy height={"18"} width={"18"} stroke={1.5} />}
-														>
-															{t("Copy")}
-														</Menu.Item>
-													}
 													<Menu.Item
 														onClick={(event) => {
 															event.stopPropagation();
@@ -352,7 +307,7 @@ export default function Table() {
 								},
 							]}
 							fetching={isLoading}
-							totalRecords={purchaseData?.total || 0}
+							totalRecords={entities?.total || 0}
 							recordsPerPage={PER_PAGE}
 							loaderSize="xs"
 							loaderColor="grape"
@@ -364,7 +319,7 @@ export default function Table() {
 							scrollAreaProps={{ type: "never" }}
 							rowStyle={(item) =>
 								item.invoice === selectedRow
-									? { background: "var(--theme-primary-color-0)", color: "#FA5463" }
+									? { background: "var(--theme-primary-color-0)"}
 									: undefined
 							}
 						/>
@@ -375,7 +330,7 @@ export default function Table() {
 			<GlobalModal
 				opened={opened}
 				onClose={close}
-				size="80%"
+				size="65%"
 				padding="md"
 				title={`${t("Purchase")}: ${viewData?.invoice || ""}`}
 			>

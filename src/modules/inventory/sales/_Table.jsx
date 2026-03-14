@@ -146,7 +146,7 @@ export default function Table() {
 									accessor: "created",
 									title: t("Created"),
 									render: (item) => (
-										<Text component="a" size="sm" variant="subtle" c="var(--theme-primary-color-6)">
+										<Text component="a" size="sm" variant="subtle">
 											{item?.created}
 										</Text>
 									),
@@ -155,7 +155,7 @@ export default function Table() {
 									accessor: "invoice",
 									title: t("Invoice"),
 									render: (item) => (
-										<Text component="a" size="sm" variant="subtle" c="var(--theme-primary-color-6)">
+										<Text component="a" size="sm" variant="subtle" c="red">
 											{item.invoice}
 										</Text>
 									),
@@ -210,26 +210,26 @@ export default function Table() {
 												trigger="hover"
 												openDelay={100}
 												closeDelay={400}
+												ta={'right'}
 											>
 												<Menu.Target>
 													<ActionIcon
 														size="sm"
-														variant="outline"
-														color="var(--theme-primary-color-6)"
-														radius="xl"
+														variant="transparent"
+														color="red"
 														aria-label="Settings"
 														onClick={(e) => e.preventDefault()}
 													>
 														<IconDotsVertical height="18" width="18" stroke={1.5} />
 													</ActionIcon>
 												</Menu.Target>
-												<Menu.Dropdown>
+												<Menu.Dropdown w={'200'}>
 													<Menu.Item
 														onClick={(e) => {
 															e.preventDefault();
 															handleShowDetails(data);
 														}}
-														w="140"
+														color="blue"
 													>
 														<Flex gap={4} align="center">
 															<IconEye size={18} />
@@ -241,7 +241,7 @@ export default function Table() {
 															e.preventDefault();
 															navigate(`${APP_NAVLINKS.SALES_EDIT}/${data.id}`);
 														}}
-														w="140"
+														color="yellow"
 													>
 														<Flex gap={4} align="center">
 															<IconEdit size={18} />
@@ -253,7 +253,6 @@ export default function Table() {
 															e.stopPropagation();
 															handleDeleteClick(data);
 														}}
-														w="140"
 														color="red"
 													>
 														<Flex gap={4} align="center">
@@ -280,7 +279,7 @@ export default function Table() {
 							scrollAreaProps={{ type: "never" }}
 							rowStyle={(item) =>
 								item.invoice === selectedRow
-									? { background: "var(--theme-primary-color-0)", color: "#FA5463" }
+									? { background: "var(--theme-primary-color-0)"}
 									: undefined
 							}
 						/>

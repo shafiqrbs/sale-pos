@@ -1,8 +1,8 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { Box, Flex, ActionIcon } from "@mantine/core";
+import {Box, Flex, ActionIcon, SegmentedControl, Button, Group, Tooltip} from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import { useForm } from "@mantine/form";
-import { IconReload } from "@tabler/icons-react";
+import {IconPlus, IconReload} from "@tabler/icons-react";
 import { DataTable } from "mantine-datatable";
 import tableCss from "@assets/css/Table.module.css";
 import useMainAreaHeight from "@hooks/useMainAreaHeight.js";
@@ -10,6 +10,7 @@ import useLocalProducts from "@hooks/useLocalProducts.js";
 import useConfigData from "@hooks/useConfigData.js";
 import { formatCurrency } from "@utils/index.js";
 import KeywordSearch from "@components/KeywordSearch";
+import {APP_NAVLINKS} from "@/routes/routes";
 
 const PER_PAGE = 25;
 
@@ -90,7 +91,7 @@ export default function Table() {
 	const height = mainAreaHeight - 60;
 
 	return (
-		<Box p="sm" className="border-all-radius border-top-none overflow-hidden">
+		<Box>
 			<Flex gap="sm" mb="2xs" justify="space-between" align="center">
 				<KeywordSearch
 					form={searchForm}
@@ -100,14 +101,36 @@ export default function Table() {
 					showDatePicker={false}
 					showAdvancedFilter={false}
 				/>
+				<Tooltip
+					label="Click here for update stock"
+					c="white"
+					bg={"green"}
+					withArrow
+					zIndex={999}
+					transitionProps={{ transition: "pop-bottom-left", duration: 500 }}
+				>
 				<ActionIcon
 					bg="var(--theme-secondary-color-6)"
 					onClick={fetchProductsPage}
 					disabled={loading}
+					size="lg"
 					aria-label="Refresh"
 				>
 					<IconReload size={16} stroke={1.5} />
 				</ActionIcon>
+				</Tooltip>
+				<Group gap="sm" wrap="nowrap" >
+					<Button
+						w={170}
+						size="md"
+						color="red"
+						variant="filled"
+						leftSection={<IconPlus size={20} />}
+						onClick={() => navigate(APP_NAVLINKS.SALES_NEW)}
+					>
+						{t("NewProduct")}
+					</Button>
+				</Group>
 			</Flex>
 			<Box className="border-all-radius border-top-none overflow-hidden">
 				<DataTable

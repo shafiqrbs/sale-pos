@@ -105,9 +105,14 @@
 	--theme-primary-card-color: #1e40af;
 }
 
+.borderRadiusAll{
+	border: 1px solid #dee2e6!important;
+	border-radius:4px;
+}
 
-
-
+.tableFooterBg{
+	background-color: #f9fafb !important;
+}
 
 .cursor-pointer {
 	cursor: pointer !important;

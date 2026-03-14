@@ -42,6 +42,7 @@ export default function SalesPrintThermal({ salesViewData, salesItems }) {
 
 	return (
 		<Button
+			size={'compact-xs'}
 			fullWidth={true}
 			variant="filled"
 			leftSection={<IconReceipt size={14} />}

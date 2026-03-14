@@ -16,7 +16,10 @@ function Footer() {
 	const links = [
 		{ link: APP_NAVLINKS.SALES, label: t("Sales") },
 		{ link: APP_NAVLINKS.PURCHASE, label: t("Purchase") },
-		{ link: "/inventory/product", label: t("Product") },
+		{ link: APP_NAVLINKS.REQUISITION, label: t("Requisition") },
+		{ link: APP_NAVLINKS.PURCHASE_RETURN, label: t("PurchaseReturn") },
+		{ link: APP_NAVLINKS.SALES_RETURN, label: t("SalesReturn") },
+		{ link: APP_NAVLINKS.STOCK, label: t("Stock") },
 		{ link: "/accounting/voucher-entry", label: t("Accounting") },
 	];
 

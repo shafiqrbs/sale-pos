@@ -1,11 +1,12 @@
 import { ActionIcon, Flex, Select, TextInput,Button } from "@mantine/core";
 import { IconFileTypeXls, IconRestore, IconSearch, IconX } from "@tabler/icons-react";
 import AdvancedFilter from "@components/AdvancedFilter";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { DateInput } from "@mantine/dates";
 import { formatDate, formatDateISO } from "@utils";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { parseDateString } from "@utils/index";
+import DateInputForm from "@components/form-builders/DateInputForm";
 
 export default function KeywordSearch({
 	form,

@@ -3,7 +3,7 @@ import Table from "./Table";
 
 export default function StockIndex() {
     return (
-        <Box>
+		<Box p="xs" bg="var(--mantine-color-gray-2)">
             <Table />
         </Box>
     )

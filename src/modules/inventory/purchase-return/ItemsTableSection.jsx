@@ -20,7 +20,7 @@ export default function ItemsTableSection({ purchaseProducts, refetch, itemsTota
 	const navigate = useNavigate();
 	const { t } = useTranslation();
 	const { mainAreaHeight } = useMainAreaHeight();
-	const tableHeight = mainAreaHeight - 348;
+	const tableHeight = mainAreaHeight - 220;
 	const { configData } = useConfigData();
 
 	const currencySymbol =
@@ -71,18 +71,18 @@ export default function ItemsTableSection({ purchaseProducts, refetch, itemsTota
 	};
 
 	return (
-		<Box bd="1px solid #dee2e6" bg="gray.1" p="3xs" className="borderRadiusAll">
+		<Box bg="gray.1" >
 			<Flex justify="space-between" align="center" mb="4xs">
-				<Box px="xs" fz="sm" fw={600} className="boxBackground textColor borderRadiusAll">
-					{t("PurchaseItems")}
+				<Box px="xs" fz="sm" fw={600} className="boxBackground textColor">
+					{t("PurchaseReturnItems")}
 				</Box>
 				<Button
-					onClick={() => navigate(APP_NAVLINKS.PURCHASE)}
+					onClick={() => navigate(APP_NAVLINKS.PURCHASE_RETURN)}
 					bg="red"
 					color="white"
 					leftSection={<IconList size={18} />}
-				>
-					{t("Purchase")}
+					>
+					{t("PurchaseReturn")}
 				</Button>
 			</Flex>
 
@@ -124,54 +124,7 @@ export default function ItemsTableSection({ purchaseProducts, refetch, itemsTota
 							</Text>
 						),
 					},
-					{
-						accessor: "expired_date",
-						title: t("ExpiredDate"),
-						textAlign: "center",
-						width: 130,
-						render: (record) => (
-							<DateInput
-								size="xs"
-								value={
-									record.expired_date && dayjs(record.expired_date, "YYYY-MM-DD", true).isValid()
-										? dayjs(record.expired_date, "YYYY-MM-DD", true).toDate()
-										: null
-								}
-								placeholder="DD-MM-YYYY"
-								valueFormat="DD-MM-YYYY"
-								clearable
-								onChange={(dateValue) => handleExpiredDateChange(record.id, dateValue)}
-							/>
-						),
-					},
-					{
-						accessor: "mrp",
-						title: "MRP",
-						textAlign: "center",
-						width: 100,
-						render: (record) => (
-							<Text size="sm" c="dimmed">
-								<Badge
-									variant="light"
-									color={record.mrp > record.purchase_price ? "red" : "blue"}
-									radius="sm">
-									{currencySymbol} {formatCurrency(record.mrp ?? 0)}
-								</Badge>
-							</Text>
-						),
-					},
 
-					{
-						accessor: "average_price",
-						title: "Avg. Price",
-						textAlign: "center",
-						width: 120,
-						render: (record) => (
-							<Text size="sm" c="dimmed">
-								{currencySymbol} {formatCurrency(record.average_price ?? 0)}
-							</Text>
-						),
-					},
 					{
 						accessor: "price",
 						title: "Price",
@@ -191,7 +144,7 @@ export default function ItemsTableSection({ purchaseProducts, refetch, itemsTota
 					},
 					{
 						accessor: "quantity",
-						title: "Qty",
+						title: "Quantity",
 						textAlign: "left",
 						width: 120,
 						render: (record) => (

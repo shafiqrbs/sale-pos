@@ -14,7 +14,6 @@ export default function Details({ loading, viewData }) {
   const [ printA4, setPrintA4 ] = useState(false);
   const { configData } = useConfigData({ offlineFetch: !isOnline });
 
-	console.log(viewData)
   const salesItems = isOnline
     ? viewData?.purchase_items
     : Array.isArray(viewData?.purchase_items)
@@ -59,14 +58,34 @@ export default function Details({ loading, viewData }) {
             loaderProps={{ color: "red" }}
           />
         )}
-        <Box>
-          <Box>
+        <Box
+          h="36"
+          px="xs"
+          fz="sm"
+          fw="600"
+          pt="6"
+          mb="4"
+          className="boxBackground textColor borderRadiusAll"
+        >
+          {t("Invoice")}:{" "}
+          {viewData?.invoice}
+        </Box>
+        <Box className="borderRadiusAll" fz="sm">
+          <ScrollArea h={102} type="never">
+            <Box
+              fz="sm"
+              fw="600"
+              px="xs"
+              pt="6"
+              pb="xs"
+              className="boxBackground textColor"
+            >
               <Grid gutter={{ base: 4 }}>
                 <Grid.Col span="6">
                   <Grid columns={15} gutter={{ base: 4 }}>
                     <Grid.Col span={6}>
                       <Text fz="sm" lh="xs">
-                        {t("Vendor/Supplier")}
+                        {t("Customer")}
                       </Text>
                     </Grid.Col>
                     <Grid.Col span={9}>
@@ -88,7 +107,7 @@ export default function Details({ loading, viewData }) {
                     </Grid.Col>
                   </Grid>
                 </Grid.Col>
-                <Grid.Col span="4">
+                <Grid.Col span="6">
                   <Grid columns={15} gutter={{ base: 4 }}>
                     <Grid.Col span={6}>
                       <Text fz="sm" lh="xs">
@@ -126,27 +145,11 @@ export default function Details({ loading, viewData }) {
                     </Grid.Col>
                   </Grid>
                 </Grid.Col>
-				<Grid.Col span="2">
-					<Button.Group mb="1">
-						<Button
-							size={'compact-xs'}
-							fullWidth
-							variant="filled"
-							leftSection={<IconPrinter size={14} />}
-							color="green.5"
-							onClick={() => {
-								setPrintA4(true);
-							}}
-						>
-							{t("Print")}
-						</Button>
-						<SalesPrintThermal salesViewData={viewData} salesItems={salesItems} />
-					</Button.Group>
-				</Grid.Col>
               </Grid>
             </Box>
-          <ScrollArea h={mainAreaHeight - 300} scrollbarSize={2} type="never">
-            <Table stickyHeader className='sales-details-table borderRadiusAll' >
+          </ScrollArea>
+          <ScrollArea h={mainAreaHeight - 246} scrollbarSize={2} type="never">
+            <Table stickyHeader className='sales-details-table'>
               <Table.Thead>
                 <Table.Tr>
                   <Table.Th fz="xs" w="20">
@@ -171,51 +174,64 @@ export default function Details({ loading, viewData }) {
               </Table.Thead>
               <Table.Tbody>{rows}</Table.Tbody>
               <Table.Tfoot>
-                <Table.Tr className={'tableFooterBg'}>
-                  <Table.Td colSpan="5" ta="right" fz="xs" w="100">
+                <Table.Tr>
+                  <Table.Th colSpan="5" ta="right" fz="xs" w="100">
                     {t("SubTotal")}
-                  </Table.Td>
-                  <Table.Td ta="right" fz="xs" w="100">
+                  </Table.Th>
+                  <Table.Th ta="right" fz="xs" w="100">
                     {viewData.sub_total}
-                  </Table.Td>
+                  </Table.Th>
                 </Table.Tr>
-                <Table.Tr className={'tableFooterBg'}>
-                  <Table.Td colSpan="5" ta="right" fz="xs" w="100">
+                <Table.Tr>
+                  <Table.Th colSpan="5" ta="right" fz="xs" w="100">
                     {t("Discount")}
-                  </Table.Td>
-                  <Table.Td ta="right" fz="xs" w="100">
+                  </Table.Th>
+                  <Table.Th ta="right" fz="xs" w="100">
                     {viewData.discount}
-                  </Table.Td>
+                  </Table.Th>
                 </Table.Tr>
-                <Table.Tr className={'tableFooterBg'}>
-                  <Table.Td colSpan="5" ta="right" fz="xs" w="100">
+                <Table.Tr>
+                  <Table.Th colSpan="5" ta="right" fz="xs" w="100">
                     {t("Total")}
-                  </Table.Td>
-                  <Table.Td ta="right" fz="xs" w="100">
+                  </Table.Th>
+                  <Table.Th ta="right" fz="xs" w="100">
                     {viewData.total}
-                  </Table.Td>
-                </Table.Tr >
-                <Table.Tr className={'tableFooterBg'}>
-                  <Table.Td colSpan="5" ta="right" fz="xs" w="100">
-                    {t("Payment")}
-                  </Table.Td>
-                  <Table.Td ta="right" fz="xs" w="100">
+                  </Table.Th>
+                </Table.Tr>
+                <Table.Tr>
+                  <Table.Th colSpan="5" ta="right" fz="xs" w="100">
+                    {t("Receive")}
+                  </Table.Th>
+                  <Table.Th ta="right" fz="xs" w="100">
                     {viewData.payment}
-                  </Table.Td>
-                </Table.Tr >
-                <Table.Tr className={'tableFooterBg'}>
-                  <Table.Td colSpan="5" ta="right" fz="xs" w="100">
+                  </Table.Th>
+                </Table.Tr>
+                <Table.Tr>
+                  <Table.Th colSpan="5" ta="right" fz="xs" w="100">
                     {dueOrReturnValue >= 0 ? t("Due") : t("Return")}
-                  </Table.Td>
-                  <Table.Td ta="right" fz="xs" w="100">
+                  </Table.Th>
+                  <Table.Th ta="right" fz="xs" w="100">
                     {Math.abs(dueOrReturnValue)}
-                  </Table.Td>
+                  </Table.Th>
                 </Table.Tr>
               </Table.Tfoot>
             </Table>
           </ScrollArea>
         </Box>
-
+        <Button.Group mb="1">
+          <Button
+            fullWidth
+            variant="filled"
+            leftSection={<IconPrinter size={14} />}
+            color="green.5"
+            onClick={() => {
+              setPrintA4(true);
+            }}
+          >
+            {t("Print")}
+          </Button>
+          <SalesPrintThermal salesViewData={viewData} salesItems={salesItems} />
+        </Button.Group>
       </Box>
       {printA4 && (
         <div style={{ display: "none" }}>

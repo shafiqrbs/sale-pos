@@ -14,6 +14,12 @@ import CustomersIndex from "@modules/core/customers";
 import ConfigIndex from "@modules/inventory/config";
 import SalesNewIndex from "@modules/inventory/sales/NewIndex";
 import SalesEditIndex from "@modules/inventory/sales/EditIndex";
+import RequisitionIndex from "@modules/inventory/requisition";
+import RequisitionNewIndex from "@modules/inventory/requisition/NewIndex";
+import RequisitionEditIndex from "@modules/inventory/requisition/EditIndex";
+import PurchaseReturnIndex from "@modules/inventory/purchase-return";
+import PurchaseReturnNewIndex from "@modules/inventory/purchase-return/NewIndex";
+import PurchaseReturnEditIndex from "@modules/inventory/purchase-return/EditIndex";
 
 export default function AppRoutes() {
 	return (
@@ -35,11 +41,21 @@ export default function AppRoutes() {
 						<Route path="new" element={<PurchaseNewIndex />} />
 						<Route path="edit/:id" element={<PurchaseEditIndex />} />
 					</Route>
+					<Route path="requisition">
+						<Route index element={<RequisitionIndex />} />
+						<Route path="new" element={<RequisitionNewIndex />} />
+						<Route path="edit/:id" element={<RequisitionEditIndex />} />
+					</Route>
+					<Route path="purchase-return">
+						<Route index element={<PurchaseReturnIndex />} />
+						<Route path="new" element={<PurchaseReturnNewIndex />} />
+						<Route path="edit/:id" element={<PurchaseReturnEditIndex />} />
+					</Route>
 					<Route path="config" element={<ConfigIndex />} />
 					{/* <Route path="sales/edit/:id" element={<SalesEdit />} /> */}
 					{/* <Route path="sales" element={<DashboardBarChart />} /> */}
 					{/* <Route path="sales" element={<TestInput />} /> */}
-					{/* 
+					{/*
                     <Route path="sales-invoice" element={<SalesInvoice />} /> */}
 					{/* <Route path="purchase/edit/:id" element={<PurchaseEdit />} /> */}
 					{/* <Route path="purchase-invoice" element={<PurchaseInvoice />} /> */}

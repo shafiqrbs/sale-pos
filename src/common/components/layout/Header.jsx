@@ -116,7 +116,7 @@ export default function Header({ isOnline, toggleNetwork }) {
 	];
 
 	const allowSync =
-		roles.includes("role_sales_purchase_manager") || roles.includes("role_sales_purchase_admin");
+		roles.includes("role_sales_purchase_manager") || roles.includes("role_sales_purchase_admin") || roles.includes("role_sales_purchase_admin");
 
 	useEffect(() => {
 		const checkPrinterData = async () => {
