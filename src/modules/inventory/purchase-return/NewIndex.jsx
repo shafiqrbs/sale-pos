@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Grid, Box } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import dayjs from "dayjs";
@@ -6,51 +6,59 @@ import InvoiceForm from "./form/InvoiceForm";
 import VendorOverview from "./Overview";
 import { vendorOverviewRequest } from "./helpers/request";
 import { showNotification } from "@components/ShowNotificationComponent";
-import useTempPurchaseProducts from "@hooks/useTempPurchaseProducts";
 import useLoggedInUser from "@hooks/useLoggedInUser";
-import { generateInvoiceId, formatDateTime } from "@utils/index";
-import {useTranslation} from "react-i18next";
+import { useAddPurchaseReturnMutation } from "@services/purchase-return";
 
 export default function NewIndex() {
 	const { user } = useLoggedInUser();
-	const { t } = useTranslation();
 	const itemsForm = useForm(vendorOverviewRequest());
-	const { purchaseProducts: itemsProducts, refetch } = useTempPurchaseProducts({ type: "purchase" });
+	const [purchaseItems, setPurchaseItems] = useState([]);
 	const [isAddingItem, setIsAddingItem] = useState(false);
+	const [returnType, setReturnType] = useState(null);
+	const itemIdCounter = useRef(0);
+	const [addPurchaseReturn] = useAddPurchaseReturnMutation();
 
-	// =============== update product quantities after successful purchase ===============
-	const updateProductsAfterPurchase = async () => {
-		try {
-			for (const cartItem of itemsProducts) {
-				const productId = cartItem.product_id;
-				const currentProduct = await window.dbAPI.getDataFromTable("core_products", {
-					id: productId,
-				});
-				const currentProductData = Array.isArray(currentProduct)
-					? currentProduct[0]
-					: currentProduct;
-
-				if (!currentProductData) {
-					console.error(`Product not found in database: ${productId}`);
-					continue;
-				}
-
-				const purchasedQuantity = Number(cartItem.quantity) || 0;
-				const newQuantity = (currentProductData.quantity || 0) + purchasedQuantity;
-
-				await window.dbAPI.updateDataInTable("core_products", {
-					condition: { id: productId },
-					data: { quantity: newQuantity },
-				});
+	// =============== add item to state; deduplicate by purchase_item_id (replace qty if same item added again) ===============
+	const handleAddItem = (newItem) => {
+		setPurchaseItems((previous) => {
+			const existingIndex = previous.findIndex(
+				(item) => item.purchase_item_id === newItem.purchase_item_id
+			);
+			if (existingIndex !== -1) {
+				return previous.map((item, index) =>
+					index === existingIndex
+						? { ...item, quantity: newItem.quantity, sub_total: newItem.sub_total }
+						: item
+				);
 			}
-			window.dispatchEvent(new CustomEvent("products-updated"));
-		} catch (error) {
-			console.error("Error updating products after purchase:", error);
-		}
+			itemIdCounter.current += 1;
+			return [...previous, { ...newItem, id: itemIdCounter.current }];
+		});
+	};
+
+	const handleQuantityChange = (itemId, updatedData) => {
+		setPurchaseItems((previous) =>
+			previous.map((item) => (item.id === itemId ? { ...item, ...updatedData } : item))
+		);
+	};
+
+	const handlePriceChange = (itemId, updatedData) => {
+		setPurchaseItems((previous) =>
+			previous.map((item) => (item.id === itemId ? { ...item, ...updatedData } : item))
+		);
+	};
+
+	const handleRemoveItem = (itemId) => {
+		setPurchaseItems((previous) => previous.filter((item) => item.id !== itemId));
+	};
+
+	// =============== sync vendor_id into itemsForm when selected from InvoiceForm ===============
+	const handleVendorChange = (vendorId) => {
+		itemsForm.setFieldValue("vendor_id", vendorId ?? "");
 	};
 
 	const handleSubmit = async (formValues) => {
-		if (!itemsProducts?.length) {
+		if (!purchaseItems.length) {
 			showNotification("Add minimum one purchase item first", "red");
 			return;
 		}
@@ -59,102 +67,46 @@ export default function NewIndex() {
 			showNotification("Vendor is required", "red");
 			return;
 		}
-		if (!formValues.transactionModeId) {
-			showNotification("Transaction mode is required", "red");
-			return;
-		}
-		if (!formValues.paymentAmount) {
-			showNotification("Payment amount is required", "red");
+
+		if (!returnType) {
+			showNotification("Return type is required", "red");
 			return;
 		}
 
-		const subTotal = itemsProducts.reduce(
-			(sum, item) => sum + (Number(item.quantity) || 0) * (Number(item.purchase_price) || 0),
-			0
-		);
+		const invoiceDate = formValues.invoice_date
+			? dayjs(formValues.invoice_date).format("YYYY-MM-DD")
+			: dayjs().format("YYYY-MM-DD");
 
-		const discountValue = formValues.isDiscountPercentage
-			? (subTotal * (Number(formValues.discountAmount) || 0)) / 100
-			: Number(formValues.discountAmount) || 0;
-
-		const vat = 0;
-		const total = Math.max(subTotal - discountValue + vat, 0);
-
-		// =============== get vendor info from local vendors table ===============
-		let vendorName = formValues.vendorName ?? "";
-		if (formValues.vendor_id) {
-			const vendorResult = await window.dbAPI.getDataFromTable("core_vendors", {
-				id: Number(formValues.vendor_id),
-			});
-			const vendorData = Array.isArray(vendorResult) ? vendorResult[0] : vendorResult;
-			if (vendorData) {
-				vendorName = vendorData.name ?? vendorName;
-			}
-		}
-
-		const purchaseItemsForDb = itemsProducts.map((item) => ({
-			product_id: item.product_id,
-			display_name: item.display_name,
-			quantity: Number(item.quantity) || 0,
-			mrp: Number(item.mrp ?? item.purchase_price) || 0,
-			purchase_price: Number(item.purchase_price) || 0,
-			sales_price: Number(item.sales_price) || Number(item.purchase_price) || 0,
-			sub_total: (Number(item.quantity) || 0) * (Number(item.purchase_price) || 0),
-			category_id: item.category_id ?? null,
-			category_name: item.category_name ?? "",
-			unit_name: item.unit_name ?? "",
-			average_price: Number(item.average_price) || 0,
-			expired_date: item.expired_date ?? null,
-		}));
-
-		const localPurchaseRecord = {
-			invoice: generateInvoiceId(),
-			sub_total: subTotal,
-			total: Math.round(total),
-			payment: Number(formValues.paymentAmount) || 0,
-			discount: Number(formValues.discountAmount) || 0,
-			discount_calculation: discountValue,
-			discount_type: formValues.isDiscountPercentage ? "Percentage" : "Flat",
-			approved_by_id: user?.id ?? null,
-			vendor_id: formValues.vendor_id ? Number(formValues.vendor_id) : null,
-			vendor_name: vendorName,
-			createdByUser: user?.username ?? "",
-			createdByName: user?.name ?? "",
-			createdById: user?.id ?? null,
-			process: "",
-			mode_name: formValues.transactionMode ?? "",
-			transaction_mode_id: formValues.transactionModeId ? Number(formValues.transactionModeId) : null,
-			purchase_items: JSON.stringify(purchaseItemsForDb),
-			created: formatDateTime(new Date()),
+		const payload = {
+			invoice_date: invoiceDate,
+			issue_by_id: String(user?.id ?? ""),
+			vendor_id: String(formValues.vendor_id),
+			items: purchaseItems.map((item) => ({
+				id: item.purchase_item_id,
+				display_name: item.display_name,
+				quantity: Number(item.quantity) || 0,
+				purchase_quantity: Number(item.purchase_quantity) || 0,
+				unit_name: item.unit_name ?? "",
+				purchase_price: Number(item.purchase_price) || 0,
+				sub_total:
+					(Number(item.quantity) || 0) * (Number(item.purchase_price) || 0),
+			})),
+			narration: formValues.purchaseNarration ?? "",
+			return_type: returnType,
 		};
 
 		setIsAddingItem(true);
 		try {
-			await window.dbAPI.upsertIntoTable("purchase", localPurchaseRecord);
-			await updateProductsAfterPurchase();
+			await addPurchaseReturn(payload).unwrap();
 
-			showNotification("Purchase added successfully", "teal");
-
-			// =============== clear persisted temp items after successful purchase submission ===============
-			await window.dbAPI.deleteDataFromTable("temp_purchase_products", { type: "purchase" });
-			refetch();
-
-			// =============== partial reset: preserve vendor + transaction mode ===============
-			const preservedValues = {
-				vendor_id: itemsForm.values.vendor_id,
-				vendorName: itemsForm.values.vendorName,
-				vendorPhone: itemsForm.values.vendorPhone,
-				vendorEmail: itemsForm.values.vendorEmail,
-				transactionMode: itemsForm.values.transactionMode,
-				transactionModeId: itemsForm.values.transactionModeId,
-			};
+			showNotification("Purchase return saved successfully", "teal");
+			setPurchaseItems([]);
+			itemIdCounter.current = 0;
+			setReturnType(null);
 			itemsForm.reset();
-			Object.entries(preservedValues).forEach(([key, value]) => {
-				itemsForm.setFieldValue(key, value);
-			});
 		} catch (error) {
 			console.error(error);
-			showNotification(error?.message || "Failed to save purchase", "red");
+			showNotification(error?.message || "Failed to save purchase return", "red");
 		} finally {
 			setIsAddingItem(false);
 		}
@@ -164,7 +116,11 @@ export default function NewIndex() {
 		<Grid columns={24} gutter={0}>
 			<Grid.Col span={8}>
 				<Box p="xs" pr={0}>
-					<InvoiceForm refetch={refetch} />
+					<InvoiceForm
+						onAddItem={handleAddItem}
+						onReturnTypeChange={setReturnType}
+						onVendorChange={handleVendorChange}
+					/>
 				</Box>
 			</Grid.Col>
 			<Grid.Col span={16}>
@@ -172,8 +128,10 @@ export default function NewIndex() {
 					<VendorOverview
 						isAddingItem={isAddingItem}
 						itemsForm={itemsForm}
-						itemsProducts={itemsProducts}
-						refetch={refetch}
+						itemsProducts={purchaseItems}
+						onQuantityChange={handleQuantityChange}
+						onPriceChange={handlePriceChange}
+						onRemoveItem={handleRemoveItem}
 					/>
 				</Box>
 			</Grid.Col>

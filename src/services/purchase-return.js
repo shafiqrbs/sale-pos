@@ -60,11 +60,21 @@ export const extendedPurchaseReturnApiSlice = apiSlice.injectEndpoints({
     approvePurchaseReturn: builder.mutation({
       query: (id) => {
         return {
-          url: `${APP_APIS.PURCHASE_RETURN}/approve/${id}`,
+          url: `${APP_APIS.PURCHASE_RETURN}/${id}/approve/purchase`,
           method: "GET",
         };
       },
       invalidatesTags: [ "PurchaseReturn" ],
+    }),
+
+    getVendorWisePurchaseItems: builder.query({
+      query: () => {
+        return {
+          url: `${APP_APIS.PURCHASE_RETURN}/vendor-wise-purchase-item`,
+          method: "GET",
+        };
+      },
+      providesTags: [ "PurchaseReturn" ],
     }),
 
   }),
@@ -78,4 +88,5 @@ export const {
   useGetPurchaseReturnByIdQuery,
   useApprovePurchaseReturnMutation,
   useCopyPurchaseReturnMutation,
+  useGetVendorWisePurchaseItemsQuery,
 } = extendedPurchaseReturnApiSlice;

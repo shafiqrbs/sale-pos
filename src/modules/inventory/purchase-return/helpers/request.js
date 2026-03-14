@@ -7,6 +7,7 @@ const vendorOverviewInitialValues = {
 	transactionMode: "cash",
 	transactionModeId: "",
 	purchaseDate: new Date(),
+	invoice_date: new Date(),
 	purchaseNarration: "",
 	discountAmount: 0,
 	isDiscountPercentage: false,

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Box, Grid, Text, ActionIcon, Group, Menu, Flex, Button, Badge, SegmentedControl } from "@mantine/core";
-import { IconCopy, IconDotsVertical, IconEdit, IconEye, IconPlus, IconTrashX } from "@tabler/icons-react";
+import { IconDotsVertical, IconEdit, IconEye, IconPlus, IconTrashX } from "@tabler/icons-react";
 import { useNavigate, useOutletContext } from "react-router";
 import { DataTable } from "mantine-datatable";
 import tableCss from "@assets/css/Table.module.css";
@@ -15,26 +15,25 @@ import {
 	useApprovePurchaseMutation,
 	useCopyPurchaseMutation,
 } from "@services/purchase";
-import usePurchaseList from "@hooks/usePurchaseList";
 import { modals } from "@mantine/modals";
 import { showNotification } from "@components/ShowNotificationComponent";
 import { formatCurrency } from "@utils/index";
-import {useGetPurchaseReturnQuery} from "@services/purchase-return";
+import { useApprovePurchaseReturnMutation, useGetPurchaseReturnQuery } from "@services/purchase-return";
 
 const PER_PAGE = 25;
 
 export default function Table() {
-	const [approvePurchase] = useApprovePurchaseMutation();
-	const [copyPurchase] = useCopyPurchaseMutation();
+	const [ approvePurchaseReturn ] = useApprovePurchaseReturnMutation();
+	const [ copyPurchase ] = useCopyPurchaseMutation();
 	const navigate = useNavigate();
 	const { t } = useTranslation();
-	const [opened, { open, close }] = useDisclosure(false);
-	const [page, setPage] = useState(1);
-	const [selectedRow, setSelectedRow] = useState(null);
-	const [loading, setLoading] = useState(false);
-	const [viewData, setViewData] = useState(null);
-	const [deletedPurchaseIds, setDeletedPurchaseIds] = useState(new Set());
-	const [dataSource, setDataSource] = useState("offline");
+	const [ opened, { open, close } ] = useDisclosure(false);
+	const [ page, setPage ] = useState(1);
+	const [ selectedRow, setSelectedRow ] = useState(null);
+	const [ loading, setLoading ] = useState(false);
+	const [ viewData, setViewData ] = useState(null);
+	const [ deletedPurchaseIds, setDeletedPurchaseIds ] = useState(new Set());
+	const [ dataSource, setDataSource ] = useState("offline");
 	const { mainAreaHeight, isOnline } = useOutletContext();
 	// =============== when offline, always use offline data (online segment disabled) ===============
 	const effectiveDataSource = isOnline ? dataSource : "offline";
@@ -77,7 +76,7 @@ export default function Table() {
 
 	const handleConfirmPurchaseApprove = async (id) => {
 		try {
-			const res = await approvePurchase(id);
+			const res = await approvePurchaseReturn(id);
 
 			if (res.data.status === 200) {
 				showNotification(t("ApprovedSuccessfully"), "teal");
@@ -143,7 +142,7 @@ export default function Table() {
 
 	const handleConfirmDelete = async (record) => {
 		await window.dbAPI.deleteDataFromTable("purchase", { id: record.id });
-		setDeletedPurchaseIds((previousIds) => new Set([...previousIds, record.id]));
+		setDeletedPurchaseIds((previousIds) => new Set([ ...previousIds, record.id ]));
 		showNotification(`Invoice ${record.invoice} deleted`, "teal");
 	};
 
@@ -224,8 +223,8 @@ export default function Table() {
 											Created: "blue",
 											Approved: "red",
 										};
-										const badgeColor = colorMap[item.process] || "gray";
-										return item.process && <Badge radius="xs"  color={badgeColor}>{item.process}</Badge>;
+										const badgeColor = colorMap[ item.process ] || "gray";
+										return item.process && <Badge radius="xs" color={badgeColor}>{item.process}</Badge>;
 									},
 								},
 								{
@@ -319,7 +318,7 @@ export default function Table() {
 							scrollAreaProps={{ type: "never" }}
 							rowStyle={(item) =>
 								item.invoice === selectedRow
-									? { background: "var(--theme-primary-color-0)"}
+									? { background: "var(--theme-primary-color-0)" }
 									: undefined
 							}
 						/>
