@@ -25,17 +25,19 @@ import axios from "axios";
 import orderProcessDropdownLocalDataStore from "@utils/local-storage/orderProcessDropdownLocalDataStore.js";
 import commonDataStoreIntoLocalStorage from "@utils/local-storage/commonDataStoreIntoLocalStorage.js";
 import { APP_NAVLINKS, MASTER_APIS } from "@/routes/routes";
+import useConfigData from "@hooks/useConfigData";
 
 export default function Login() {
-	const [user, setUser] = useState(null);
-	const [loading, setLoading] = useState(true);
+	const { configData } = useConfigData();
+	const [ user, setUser ] = useState(null);
+	const [ loading, setLoading ] = useState(true);
 	const { t } = useTranslation();
 	const navigate = useNavigate();
 	const icon = <IconInfoCircle />;
 
-	const [spinner, setSpinner] = useState(false);
-	const [errorMessage, setErrorMessage] = useState("");
-	const [activated, setActivated] = useState({ is_activated: false });
+	const [ spinner, setSpinner ] = useState(false);
+	const [ errorMessage, setErrorMessage ] = useState("");
+	const [ activated, setActivated ] = useState({ is_activated: false });
 
 	useEffect(() => {
 		const checkAuth = async () => {
@@ -52,7 +54,7 @@ export default function Login() {
 			}
 		};
 		checkAuth();
-	}, [navigate]);
+	}, [ navigate ]);
 
 	useEffect(() => {
 		async function checkActivation() {
@@ -63,7 +65,7 @@ export default function Login() {
 		checkActivation();
 	}, []);
 
-	useHotkeys([["alt+n", () => document.getElementById("Username")?.focus()]], []);
+	useHotkeys([ [ "alt+n", () => document.getElementById("Username")?.focus() ] ], []);
 
 	const form = useForm({
 		initialValues: { username: "", password: "" },
@@ -112,7 +114,12 @@ export default function Login() {
 				orderProcessDropdownLocalDataStore(response.data?.data?.id);
 
 				await commonDataStoreIntoLocalStorage(response.data?.data?.id);
-				navigate(APP_NAVLINKS.BAKERY, { replace: true });
+
+				if (configData?.is_pos) {
+					navigate(APP_NAVLINKS.BAKERY, { replace: true });
+				} else {
+					navigate(APP_NAVLINKS.SALES, { replace: true });
+				}
 			} else {
 				setErrorMessage(response.data.message);
 			}
@@ -184,7 +191,7 @@ export default function Login() {
 								disabled={spinner}
 								{...form.getInputProps("username")}
 								onKeyDown={getHotkeyHandler([
-									["Enter", () => document.getElementById("Password")?.focus()],
+									[ "Enter", () => document.getElementById("Password")?.focus() ],
 								])}
 							/>
 						</Tooltip>
@@ -212,7 +219,7 @@ export default function Login() {
 								{...form.getInputProps("password")}
 								id="Password"
 								onKeyDown={getHotkeyHandler([
-									["Enter", () => document.getElementById("LoginSubmit")?.click()],
+									[ "Enter", () => document.getElementById("LoginSubmit")?.click() ],
 								])}
 							/>
 						</Tooltip>

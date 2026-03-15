@@ -25,20 +25,22 @@ import { APP_NAVLINKS } from "@/routes/routes";
 import { formatCurrency } from "@utils/index";
 import { showNotification } from "@components/ShowNotificationComponent";
 import { modals } from "@mantine/modals";
+import useConfigData from "@hooks/useConfigData";
 
 const PER_PAGE = 25;
 
 export default function Table() {
+	const { configData } = useConfigData()
 	const { t } = useTranslation();
-	const [opened, { open, close }] = useDisclosure(false);
+	const [ opened, { open, close } ] = useDisclosure(false);
 	useDisclosure(false);
 	const navigate = useNavigate();
-	const [page, setPage] = useState(1);
-	const [selectedRow, setSelectedRow] = useState(null);
-	const [loading, setLoading] = useState(false);
-	const [salesViewData, setSalesViewData] = useState(null);
-	const [deletedSaleIds, setDeletedSaleIds] = useState(new Set());
-	const [dataSource, setDataSource] = useState("offline");
+	const [ page, setPage ] = useState(1);
+	const [ selectedRow, setSelectedRow ] = useState(null);
+	const [ loading, setLoading ] = useState(false);
+	const [ salesViewData, setSalesViewData ] = useState(null);
+	const [ deletedSaleIds, setDeletedSaleIds ] = useState(new Set());
+	const [ dataSource, setDataSource ] = useState("offline");
 	const { mainAreaHeight, isOnline } = useOutletContext();
 	// =============== when offline, always use offline data (online segment disabled) ===============
 	const effectiveDataSource = isOnline ? dataSource : "offline";
@@ -74,7 +76,7 @@ export default function Table() {
 
 	const handleConfirmDelete = async (record) => {
 		await window.dbAPI.deleteDataFromTable("sales", { id: record.id });
-		setDeletedSaleIds((previousIds) => new Set([...previousIds, record.id]));
+		setDeletedSaleIds((previousIds) => new Set([ ...previousIds, record.id ]));
 		showNotification(`Invoice ${record.invoice} deleted`, "teal");
 	};
 
@@ -120,7 +122,13 @@ export default function Table() {
 						color="red"
 						variant="filled"
 						leftSection={<IconPlus size={20} />}
-						onClick={() => navigate(APP_NAVLINKS.SALES_NEW)}
+						onClick={() => {
+							if (configData?.is_pos) {
+								navigate(APP_NAVLINKS.BAKERY)
+							} else {
+								navigate(APP_NAVLINKS.SALES_NEW)
+							}
+						}}
 					>
 						{t("NewSale")}
 					</Button>
@@ -279,7 +287,7 @@ export default function Table() {
 							scrollAreaProps={{ type: "never" }}
 							rowStyle={(item) =>
 								item.invoice === selectedRow
-									? { background: "var(--theme-primary-color-0)"}
+									? { background: "var(--theme-primary-color-0)" }
 									: undefined
 							}
 						/>
