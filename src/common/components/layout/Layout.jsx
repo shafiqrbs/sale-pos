@@ -108,13 +108,14 @@ export default function Layout() {
 						top="40%"
 						style={{ transform: "translateY(-50%)", zIndex: 1000 }}
 					>
-						<Tooltip label="Options" position="left">
+						<Tooltip label="Menu" bg="var(--theme-primary-card-color)" position="left">
 							<ActionIcon
 								id="right-options-drawer-button"
 								variant="filled"
 								size="lg"
 								// opacity={leftDrawerOpened ? 1 : 0.5}
 								radius="md"
+								bg="var(--theme-primary-card-color)"
 								style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
 								onClick={openLeftDrawer}
 								aria-label="Open options menu"
@@ -129,7 +130,7 @@ export default function Layout() {
 			<AppShell.Footer height={footerHeight}>
 				<Footer />
 			</AppShell.Footer>
-			<OptionsDrawer opened={leftDrawerOpened} onClose={closeLeftDrawer} />
+			<OptionsDrawer isOnline={isOnline} opened={leftDrawerOpened} onClose={closeLeftDrawer} />
 		</AppShell>
 	);
 }

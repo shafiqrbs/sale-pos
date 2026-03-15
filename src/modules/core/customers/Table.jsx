@@ -7,7 +7,7 @@ import {
 	IconDotsVertical,
 	IconPlus,
 	IconRefresh,
-	IconReload,
+	IconReload, IconInfoCircle, IconAdjustments, IconMap2, IconLetterMSmall, IconSettings,
 } from "@tabler/icons-react";
 import { DataTable } from "mantine-datatable";
 import { modals } from "@mantine/modals";
@@ -60,8 +60,7 @@ export default function Table() {
 
 	const { t } = useTranslation();
 	const { mainAreaHeight } = useMainAreaHeight();
-	const height = mainAreaHeight - 102;
-
+	const height = mainAreaHeight - 48;
 	const [viewDrawer, { open: openViewDrawer, close: closeViewDrawer }] = useDisclosure(false);
 	const [createModal, { open: openCreateModal, close: closeCreateModal }] = useDisclosure(false);
 	const [updateModal, { open: openUpdateModal, close: closeUpdateModal }] = useDisclosure(false);
@@ -116,6 +115,44 @@ export default function Table() {
 				>
 					{t("Add")}
 				</Button>
+				<Menu withArrow arrowPosition="center" trigger="hover" openDelay={100} closeDelay={400}>
+					<Menu.Target>
+						<ActionIcon variant="filled" color="red.5" radius="xl" aria-label="Settings">
+							<IconInfoCircle height="12" width="12" stroke={1.5} />
+						</ActionIcon>
+					</Menu.Target>
+					<Menu.Dropdown>
+						<Menu.Item
+							component="button"
+							onClick={() => navigate("/core/setting")}
+							leftSection={<IconAdjustments style={{ width: rem(14), height: rem(14) }} />}
+						>
+							{t("Setting")}
+						</Menu.Item>
+						<Menu.Item
+							component="button"
+							onClick={() => navigate("/core/warehouse")}
+							leftSection={<IconMap2 style={{ width: rem(14), height: rem(14) }} />}
+						>
+							{t("Warehouse")}
+						</Menu.Item>
+						<Menu.Item
+							component="button"
+							onClick={() => navigate("/core/marketing-executive")}
+							leftSection={<IconLetterMSmall style={{ width: rem(14), height: rem(14) }} />}
+						>
+							{t("MarketingExecutive")}
+						</Menu.Item>
+						<Menu.Item
+							href="/inventory/config"
+							component="button"
+							onClick={() => navigate("/inventory/config")}
+							leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}
+						>
+							{t("Configuration")}
+						</Menu.Item>
+					</Menu.Dropdown>
+				</Menu>
 			</Flex>
 			<Box className="border-all-radius border-top-none overflow-hidden">
 				<DataTable

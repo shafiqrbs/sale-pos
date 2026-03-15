@@ -7,9 +7,9 @@ export default function Index() {
 	const { t } = useTranslation();
 
 	return (
-		<Box p="xs" bg="var(--theme-grey-color-0)">
-			<CoreHeaderNavbar pageTitle={t("ManageCustomer")} />
-			<Box className="borderRadiusAll border-top-none">
+		<Box p="xs" bg="var(--mantine-color-gray-2)">
+			{/*<CoreHeaderNavbar pageTitle={t("ManageCustomer")} />*/}
+			<Box className=" border-top-none">
 				<Table />
 			</Box>
 		</Box>
