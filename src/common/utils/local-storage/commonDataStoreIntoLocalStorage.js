@@ -1,4 +1,4 @@
-import { BASE_URL } from "@/routes/routes";
+import { BASE_URL, APP_NAVLINKS } from "@/routes/routes";
 import axios from "axios";
 
 const tableMap = {
@@ -8,10 +8,12 @@ const tableMap = {
 	// "core/vendor/local-storage": "core_vendors",
 	// "core/user/local-storage": "core_users",
 	"inventory/select/category": "categories",
-	"inventory/pos/check/invoice-mode": "invoice_table",
+	// "inventory/pos/check/invoice-mode": "invoice_table",
 	"accounting/transaction-mode/local-storage": "accounting_transaction_mode",
 };
 
+// =============== returns the navigation path determined by config_data (is_pos flag).
+// returns null when config_data is not in the tableMap (commented out). ===============
 const commonDataStoreIntoLocalStorage = async (user_id) => {
 	const requests = Object.entries(tableMap).map(async ([ route, table ]) => {
 		try {
@@ -33,13 +35,14 @@ const commonDataStoreIntoLocalStorage = async (user_id) => {
 					: [ response.data.data ];
 
 				for (const data of dataList) {
-					// insert only if data is new or different
 					if (table === "config_data") {
 						const newData = {
 							id: data.id,
 							data: JSON.stringify(data),
 						};
+
 						window.dbAPI.upsertIntoTable(table, newData);
+
 					} else {
 						window.dbAPI.upsertIntoTable(table, data);
 					}
@@ -51,6 +54,10 @@ const commonDataStoreIntoLocalStorage = async (user_id) => {
 	});
 
 	await Promise.all(requests);
+	const configData = await window.dbAPI.getDataFromTable("config_data");
+	const parsedConfigData = JSON.parse(configData?.data);
+
+	return parsedConfigData?.inventory_config?.is_pos ? APP_NAVLINKS.BAKERY : APP_NAVLINKS.SALES_NEW;
 };
 
 export default commonDataStoreIntoLocalStorage;

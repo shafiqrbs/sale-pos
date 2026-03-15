@@ -113,13 +113,9 @@ export default function Login() {
 				window.dbAPI.upsertIntoTable("users", response.data.data);
 				orderProcessDropdownLocalDataStore(response.data?.data?.id);
 
-				await commonDataStoreIntoLocalStorage(response.data?.data?.id);
+				const navigationPath = await commonDataStoreIntoLocalStorage(response.data?.data?.id);
 
-				if (configData?.is_pos) {
-					navigate(APP_NAVLINKS.BAKERY, { replace: true });
-				} else {
-					navigate(APP_NAVLINKS.SALES_NEW, { replace: true });
-				}
+				navigate(navigationPath ?? APP_NAVLINKS.BAKERY, { replace: true });
 			} else {
 				setErrorMessage(response.data.message);
 			}

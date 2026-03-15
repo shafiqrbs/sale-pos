@@ -58,13 +58,13 @@ const COLOR_SCHEME_CONFIG = {
 };
 
 function getColorSchemeMeta(scheme) {
-	return COLOR_SCHEME_CONFIG[scheme] ?? COLOR_SCHEME_CONFIG.auto;
+	return COLOR_SCHEME_CONFIG[ scheme ] ?? COLOR_SCHEME_CONFIG.auto;
 }
 
 export default function Header({ isOnline, toggleNetwork }) {
-	const { user, roles ,isOnlinePermissionIncludes } = useLoggedInUser();
+	const { user, isOnlinePermissionIncludes } = useLoggedInUser();
 	const { configData } = useConfigData({ offlineFetch: !isOnline });
-	const [openedPrinter, { open: openPrinter, close: closePrinter }] = useDisclosure(false);
+	const [ openedPrinter, { open: openPrinter, close: closePrinter } ] = useDisclosure(false);
 	const [
 		changePasswordDrawerOpened,
 		{ open: openChangePasswordDrawer, close: closeChangePasswordDrawer },
@@ -73,12 +73,12 @@ export default function Header({ isOnline, toggleNetwork }) {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const { toggle, fullscreen } = useFullscreen();
-	const [syncPanelOpen, setSyncPanelOpen] = useState(false);
-	const [languageOpened, setLanguageOpened] = useState(false);
-	const [languageSelected, setLanguageSelected] = useState(
+	const [ syncPanelOpen, setSyncPanelOpen ] = useState(false);
+	const [ languageOpened, setLanguageOpened ] = useState(false);
+	const [ languageSelected, setLanguageSelected ] = useState(
 		LANGUAGES.find((item) => item.value === i18n.language)
 	);
-	const [printerSetup, setPrinterSetup] = useState({
+	const [ printerSetup, setPrinterSetup ] = useState({
 		printerName: "",
 		characterSet: "PC437_USA",
 		lineCharacter: "-",
@@ -116,6 +116,13 @@ export default function Header({ isOnline, toggleNetwork }) {
 		{ label: "Stock", icon: <IconStack size={18} />, pathname: APP_NAVLINKS.STOCK },
 	];
 
+	const filteredModalLinks = modalLinks.filter((item) => {
+		if (!configData?.is_pos) {
+			return item.label !== "POS";
+		}
+		return true;
+	});
+
 
 	useEffect(() => {
 		const checkPrinterData = async () => {
@@ -132,7 +139,7 @@ export default function Header({ isOnline, toggleNetwork }) {
 		if (openedPrinter) {
 			checkPrinterData();
 		}
-	}, [openedPrinter]);
+	}, [ openedPrinter ]);
 
 	async function logout() {
 		await window.dbAPI.destroyTableData();
@@ -185,7 +192,7 @@ export default function Header({ isOnline, toggleNetwork }) {
 							{configData?.domain?.company_name || configData?.company_name}
 						</Box>
 						<Flex ml="46px" gap="sm" align="center">
-							{modalLinks.map((link) => {
+							{filteredModalLinks.map((link) => {
 								const isActive = link.pathname === location?.pathname;
 
 								return (
@@ -332,25 +339,25 @@ export default function Header({ isOnline, toggleNetwork }) {
 							</Menu.Dropdown>
 						</Menu>
 						{isOnlinePermissionIncludes && (
-						<Tooltip
-							label={isOnline ? t("Online") : t("Offline")}
-							bg={isOnline ? "var(--theme-secondary-color-6)" : "red.5"}
-							withArrow
-						>
-							<ActionIcon
-								mt="4xs"
-								variant="filled"
-								radius="xl"
-								color={isOnline ? "var(--theme-secondary-color-6)" : "red.5"}
-								onClick={toggleNetwork}
+							<Tooltip
+								label={isOnline ? t("Online") : t("Offline")}
+								bg={isOnline ? "var(--theme-secondary-color-6)" : "red.5"}
+								withArrow
 							>
-								{isOnline ? (
-									<IconWifi color="white" size={24} />
-								) : (
-									<IconWifiOff color="white" size={24} />
-								)}
-							</ActionIcon>
-						</Tooltip>
+								<ActionIcon
+									mt="4xs"
+									variant="filled"
+									radius="xl"
+									color={isOnline ? "var(--theme-secondary-color-6)" : "red.5"}
+									onClick={toggleNetwork}
+								>
+									{isOnline ? (
+										<IconWifi color="white" size={24} />
+									) : (
+										<IconWifiOff color="white" size={24} />
+									)}
+								</ActionIcon>
+							</Tooltip>
 						)}
 
 					</Flex>
