@@ -131,7 +131,6 @@
 	"StoreLedger": "Store ledger",
 	"FuelStation": "Fuel station",
 	"TLOCommission": "TLO commission",
-	"SalesReturn": "Sales return",
 	"SRCommission": "SR commission",
 	"BasicInformation": "Basic Information",
 	"BasicInformationDetails": "Basic Information Details",
@@ -1206,5 +1205,6 @@
 	"PurchaseReturnItems": "Purchase Return Items",
 	"NewSalesReturn": "New Sales Return",
 	"SalesReturn": "Sales Return",
-	"SalesReturnItems": "Sales Return Items"
+	"SalesReturnItems": "Sales Return Items",
+	"TotalSalesAfterDiscount": "Total Sales After Discount"
 }
