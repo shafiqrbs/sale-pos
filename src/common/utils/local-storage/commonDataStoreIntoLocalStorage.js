@@ -57,7 +57,7 @@ const commonDataStoreIntoLocalStorage = async (user_id) => {
 	const configData = await window.dbAPI.getDataFromTable("config_data");
 	const parsedConfigData = JSON.parse(configData?.data);
 
-	return parsedConfigData?.inventory_config?.is_pos ? APP_NAVLINKS.BAKERY : APP_NAVLINKS.SALES_NEW;
+	return (parsedConfigData?.inventory_config?.is_pos || parsedConfigData?.is_pos) ? APP_NAVLINKS.BAKERY : APP_NAVLINKS.SALES_NEW;
 };
 
 export default commonDataStoreIntoLocalStorage;
