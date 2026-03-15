@@ -21,5 +21,10 @@ export default function useLoggedInUser() {
         roles = []
     }
 
-    return { user, roles };
+    const isOnlinePermissionIncludes =
+        roles.includes("role_sales_purchase_manager") || roles.includes("role_sales_purchase_admin") || roles.includes("role_sales_purchase_admin");
+
+
+
+    return { user, roles , isOnlinePermissionIncludes};
 }

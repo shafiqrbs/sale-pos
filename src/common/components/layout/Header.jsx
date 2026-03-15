@@ -35,7 +35,7 @@ import {
 	IconLock,
 	IconDeviceDesktop,
 	IconSun,
-	IconMoon,
+	IconMoon, IconCategory,
 } from "@tabler/icons-react";
 import { NavLink, useLocation, useNavigate } from "react-router";
 import LanguagePickerStyle from "@assets/css/LanguagePicker.module.css";
@@ -62,7 +62,7 @@ function getColorSchemeMeta(scheme) {
 }
 
 export default function Header({ isOnline, toggleNetwork }) {
-	const { user, roles } = useLoggedInUser();
+	const { user, roles ,isOnlinePermissionIncludes } = useLoggedInUser();
 	const { configData } = useConfigData({ offlineFetch: !isOnline });
 	const [openedPrinter, { open: openPrinter, close: closePrinter }] = useDisclosure(false);
 	const [
@@ -112,11 +112,10 @@ export default function Header({ isOnline, toggleNetwork }) {
 		{ label: "Dashboard", icon: <IconDashboard size={18} />, pathname: APP_NAVLINKS.DASHBOARD },
 		{ label: "POS", icon: <IconCalculator size={18} />, pathname: APP_NAVLINKS.BAKERY },
 		{ label: "Sales", icon: <IconCashBanknote size={18} />, pathname: APP_NAVLINKS.SALES },
+		{ label: "Hold", icon: <IconCategory size={18} />, pathname: APP_NAVLINKS.HOLD_SALES },
 		{ label: "Stock", icon: <IconStack size={18} />, pathname: APP_NAVLINKS.STOCK },
 	];
 
-	const allowSync =
-		roles.includes("role_sales_purchase_manager") || roles.includes("role_sales_purchase_admin") || roles.includes("role_sales_purchase_admin");
 
 	useEffect(() => {
 		const checkPrinterData = async () => {
@@ -230,7 +229,7 @@ export default function Header({ isOnline, toggleNetwork }) {
 							withArrow
 							arrowPosition="center"
 						>
-							{allowSync ? (
+							{isOnlinePermissionIncludes ? (
 								<Tooltip label="Sync Data" bg="red.5" withArrow>
 									<ActionIcon
 										disabled={!isOnline}
@@ -332,6 +331,7 @@ export default function Header({ isOnline, toggleNetwork }) {
 								</Menu.Item>
 							</Menu.Dropdown>
 						</Menu>
+						{isOnlinePermissionIncludes && (
 						<Tooltip
 							label={isOnline ? t("Online") : t("Offline")}
 							bg={isOnline ? "var(--theme-secondary-color-6)" : "red.5"}
@@ -351,6 +351,8 @@ export default function Header({ isOnline, toggleNetwork }) {
 								)}
 							</ActionIcon>
 						</Tooltip>
+						)}
+
 					</Flex>
 				</Flex>
 			</Box>

@@ -1205,6 +1205,11 @@
 	"PurchaseReturnItems": "Purchase Return Items",
 	"NewSalesReturn": "New Sales Return",
 	"SalesReturn": "Sales Return",
+	"ClosingStock": "Closing Stock",
+	"TotalStock": "Total Stock",
+	"PurchaseReceive": "Purchase Receive",
+	"OpeningBalance": "Opening Balance",
+	"ClosingBalance": "Closing Balance",
 	"SalesReturnItems": "Sales Return Items",
-	"TotalSalesAfterDiscount": "Total Sales After Discount"
+	"TotalSalesAfterDiscount": "Total Sales after Discount"
 }

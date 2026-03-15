@@ -39,6 +39,7 @@ export default function useDailyMatrixData({ offlineFetch = true } = {}) {
 		{ start_date: yyyymmdd, end_date: yyyymmdd },
 		{ skip: offlineFetch }
 	);
+	console.log(summaryResponse);
 
 	const {
 		data: salesListResponse,
@@ -231,9 +232,13 @@ export default function useDailyMatrixData({ offlineFetch = true } = {}) {
 		return {
 			totalSales: Number(sales?.totalSales) || 0,
 			totalDiscount: Number(sales?.totalDiscount) || 0,
-			totalPayment: Number(sales?.totalPayment) || 0,
+			receive: Number(sales?.receive) || 0,
 			totalDue: Number(sales?.totalDue) || 0,
 			totalInvoices: Number(sales?.totalInvoices) || 0,
+			totalClosingBalance: Number(sales?.totalClosingBalance) || 0,
+			totalOpeningBalance: Number(sales?.totalOpeningBalance) || 0,
+			wastage: Number(sales?.wastage) || 0,
+			return: Number(sales?.return) || 0,
 			transactionModes: normalizedTransactionModes,
 			topProducts: normalizedTopProducts,
 			salesList: salesListResponse?.data || [],

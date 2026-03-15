@@ -5,20 +5,23 @@ import StatCard from "./StatCard";
 import { formatCurrency } from "@utils/index";
 
 const STAT_ITEMS = [
-    { icon: IconCurrencyTaka, labelKey: "OpeningStock", valueKey: "OpeningStock", format: "currency", color: "blue" },
-    { icon: IconCurrencyTaka, labelKey: "Receive", valueKey: "Receive", format: "currency", color: "green" },
-    { icon: IconDiscount, labelKey: "TotalStock", valueKey: "TotalStock", format: "currency", color: "orange" },
-    { icon: IconReceipt, labelKey: "TotalSales", valueKey: "TotalSales", format: "number", color: "grape" },
-    { icon: IconReceipt, labelKey: "Discount", valueKey: "Discount", format: "number", color: "yellow" },
-    { icon: IconReceipt, labelKey: "TotalSalesAfterDiscount", valueKey: "TotalSalesAfterDiscount", format: "number", color: "indigo" },
-    { icon: IconReceipt, labelKey: "Return", valueKey: "Return", format: "number", color: "gray" },
-    { icon: IconReceipt, labelKey: "Wastage", valueKey: "Wastage", format: "number", color: "teal" },
-    { icon: IconReceipt, labelKey: "ClosingStock", valueKey: "ClosingStock", format: "number", color: "violet" },
-    { icon: IconReceipt, labelKey: "TotalInvoices", valueKey: "totalInvoices", format: "number", color: "red" },
+    { icon: IconCurrencyTaka, labelKey: "OpeningBalance", valueKey: "totalOpeningBalance", format: "currency", color: "blue" },
+    { icon: IconCurrencyTaka, labelKey: "PurchaseReceive", valueKey: "receive", format: "currency", color: "green" },
+    { icon: IconDiscount, labelKey: "TotalStock", valueKey: "totalStock", format: "currency", color: "orange" },
+    { icon: IconReceipt, labelKey: "TotalSales", valueKey: "totalSales", format: "currency", color: "grape" },
+    { icon: IconReceipt, labelKey: "Discount", valueKey: "totalDiscount", format: "currency", color: "yellow" },
+    { icon: IconReceipt, labelKey: "TotalSalesAfterDiscount", valueKey: "total", format: "currency", color: "indigo" },
+    { icon: IconReceipt, labelKey: "Return", valueKey: "return", format: "currency", color: "gray" },
+    { icon: IconReceipt, labelKey: "Wastage/Leftover", valueKey: "wastage", format: "currency", color: "teal" },
+    { icon: IconReceipt, labelKey: "ClosingBalance", valueKey: "totalClosingBalance", format: "currency", color: "violet" },
+    { icon: IconReceipt, labelKey: "TotalInvoices", valueKey: "totalInvoices", format: "currency", color: "red" },
 ];
+
 
 export default function SalesSummaryCard({ dailyData, cardHeight }) {
     const { t } = useTranslation();
+
+    console.log(dailyData)
 
     return (
         <Paper shadow="sm" p="lg" radius="md" withBorder h="100%">

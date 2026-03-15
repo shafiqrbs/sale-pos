@@ -11,9 +11,11 @@ import { APP_NAVLINKS } from "@/routes/routes";
 import OptionsDrawer from "@components/drawers/OptionsDrawer";
 import useMainAreaHeight from "@hooks/useMainAreaHeight";
 import { SHOW_PROGRESSIVE_WORKS } from "@constants/index";
+import useLoggedInUser from "@hooks/useLoggedInUser";
 
 export default function Layout() {
 	const { mainAreaHeight, headerHeight, footerHeight, padding } = useMainAreaHeight();
+	const { roles ,isOnlinePermissionIncludes } = useLoggedInUser();
 	const networkStatus = useNetwork();
 	const [ isOnline, setIsOnline ] = useLocalStorage({
 		key: "network-preference",
@@ -98,7 +100,8 @@ export default function Layout() {
 				<Header isOnline={isOnline} toggleNetwork={toggleNetwork} />
 			</AppShell.Header>
 			<AppShell.Main bg="gray.0" py="44px" h="calc(100vh - 90px)">
-				{isOnline && !leftDrawerOpened && SHOW_PROGRESSIVE_WORKS && (
+
+				{isOnline && isOnlinePermissionIncludes && !leftDrawerOpened && SHOW_PROGRESSIVE_WORKS && (
 					<Box
 						pos="fixed"
 						right={0}

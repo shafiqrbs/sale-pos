@@ -14,6 +14,7 @@ export default function DashboardIndex() {
 	const [dashboardOnline, setDashboardOnline] = useState(false);
 
 	const { dailyData, isLoading } = useDailyMatrixData({ offlineFetch: !dashboardOnline });
+	console.log(dailyData)
 
 	const toggleDashboardMode = () => {
 		if (!dashboardOnline && !isOnline) {

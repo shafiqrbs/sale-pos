@@ -5,6 +5,7 @@ import Layout from "@components/layout/Layout";
 import NotFound from "@components/NotFound";
 import BakeryIndex from "@modules/pos/bakery";
 import SalesIndex from "@modules/inventory/sales";
+import HoldSalesIndex from "@modules/inventory/sales/HoldIndex";
 import PurchaseIndex from "@modules/inventory/purchase";
 import PurchaseNewIndex from "@modules/inventory/purchase/NewIndex";
 import PurchaseEditIndex from "@modules/inventory/purchase/EditIndex";
@@ -34,6 +35,7 @@ export default function AppRoutes() {
 					<Route path="sales">
 						<Route index element={<SalesIndex />} />
 						<Route path="new" element={<SalesNewIndex />} />
+						<Route path="hold" element={<HoldSalesIndex />} />
 						<Route path="edit/:id" element={<SalesEditIndex />} />
 					</Route>
 					<Route path="purchase">

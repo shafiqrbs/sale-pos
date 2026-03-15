@@ -12,6 +12,7 @@ import {
 } from "@tabler/icons-react";
 import GlobalDrawer from "./GlobalDrawer";
 import { APP_NAVLINKS } from "@/routes/routes";
+import useLoggedInUser from "@hooks/useLoggedInUser";
 
 const DRAWER_MENU = [
 	{
@@ -41,7 +42,6 @@ const DRAWER_MENU = [
 export default function OptionsDrawer({ opened, onClose }) {
 	const navigate = useNavigate();
 	const location = useLocation();
-
 	const handleSubmenuClick = (pathname) => {
 		navigate(pathname);
 		onClose();
