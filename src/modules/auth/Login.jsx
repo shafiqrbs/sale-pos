@@ -118,7 +118,7 @@ export default function Login() {
 				if (configData?.is_pos) {
 					navigate(APP_NAVLINKS.BAKERY, { replace: true });
 				} else {
-					navigate(APP_NAVLINKS.SALES, { replace: true });
+					navigate(APP_NAVLINKS.SALES_NEW, { replace: true });
 				}
 			} else {
 				setErrorMessage(response.data.message);
