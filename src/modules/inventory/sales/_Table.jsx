@@ -356,7 +356,7 @@ export default function Table() {
 			<GlobalModal
 				opened={opened}
 				onClose={close}
-				size="xl"
+				size="80%"
 				padding="md"
 				title={`${t("Sales")}: ${salesViewData?.invoice || ""}`}
 			>
