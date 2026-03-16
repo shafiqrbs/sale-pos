@@ -80,6 +80,56 @@ export default function Table() {
 		showNotification(`Invoice ${record.invoice} deleted`, "teal");
 	};
 
+	const handleEditInPos = async (data) => {
+		try {
+			// Clear existing cart items
+			const existingItems = await window.dbAPI.getDataFromTable("invoice_table_item");
+			if (existingItems?.length) {
+				const ids = existingItems.map((item) => item.id);
+				await window.dbAPI.deleteManyFromTable("invoice_table_item", ids);
+			}
+
+			// Parse saved sale items and insert into invoice_table_item
+			const salesItems = JSON.parse(data.sales_items || "[]");
+			for (const item of salesItems) {
+				await window.dbAPI.upsertIntoTable("invoice_table_item", {
+					stock_item_id: item.stock_item_id,
+					display_name: item.display_name,
+					quantity: item.quantity,
+					quantity_limit: item.quantity_limit || 0,
+					purchase_price: item.purchase_price || 0,
+					sales_price: item.sales_price,
+					custom_price: item.custom_price || 0,
+					is_print: item.is_print || 0,
+					sub_total: item.sub_total,
+					batches: typeof item.batches === "string" ? item.batches : JSON.stringify(item.batches || []),
+				});
+			}
+
+			// Store sale metadata for the POS page to restore
+			localStorage.setItem(
+				"editing_sale",
+				JSON.stringify({
+					id: data.id,
+					customerId: data.customerId,
+					customerName: data.customerName,
+					customerMobile: data.customerMobile,
+					customer_address: data.customer_address,
+					salesById: data.salesById,
+					discount: data.discount,
+					discount_type: data.discount_type,
+					payments: data.payments,
+					status: data.status,
+				})
+			);
+
+			navigate(APP_NAVLINKS.BAKERY);
+		} catch (err) {
+			console.error("Error loading sale into POS:", err);
+			showNotification("Failed to load sale into POS", "red");
+		}
+	};
+
 	const handleShowDetails = (item) => {
 		console.info("item:", item);
 		setLoading(true);
@@ -206,6 +256,21 @@ export default function Table() {
 									},
 								},
 								{
+									accessor: "status",
+									title: t("Status"),
+									textAlign: "center",
+									render: (data) => (
+										<Text
+											size="xs"
+											fw={600}
+											c={data.status === "hold" ? "orange" : "green"}
+											tt="capitalize"
+										>
+											{data.status || "completed"}
+										</Text>
+									),
+								},
+								{
 									accessor: "action",
 									title: t("Action"),
 									textAlign: "right",
@@ -247,7 +312,11 @@ export default function Table() {
 													<Menu.Item
 														onClick={(e) => {
 															e.preventDefault();
-															navigate(`${APP_NAVLINKS.SALES_EDIT}/${data.id}`);
+															if (configData?.is_pos) {
+																handleEditInPos(data);
+															} else {
+																navigate(`${APP_NAVLINKS.SALES_EDIT}/${data.id}`);
+															}
 														}}
 														color="yellow"
 													>

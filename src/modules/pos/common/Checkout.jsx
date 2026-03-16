@@ -53,6 +53,38 @@ export default function Checkout() {
 		}
 	}, [user]);
 
+	// =============== restore form values when editing a sale ================
+	useEffect(() => {
+		const editingSale = localStorage.getItem("editing_sale");
+		if (editingSale) {
+			try {
+				const saleData = JSON.parse(editingSale);
+				if (saleData.salesById) {
+					form.setFieldValue("sales_by_id", saleData.salesById?.toString());
+				}
+				if (saleData.discount) {
+					form.setFieldValue("discount", saleData.discount);
+				}
+				if (saleData.discount_type) {
+					form.setFieldValue("discount_type", saleData.discount_type);
+				}
+				if (saleData.payments) {
+					const payments = typeof saleData.payments === "string"
+						? JSON.parse(saleData.payments)
+						: saleData.payments;
+					if (payments?.length) {
+						form.setFieldValue("payments", payments);
+					}
+				}
+				if (saleData.customerId) {
+					form.setFieldValue("customer_id", saleData.customerId?.toString());
+				}
+			} catch (err) {
+				console.error("Error restoring editing sale data:", err);
+			}
+		}
+	}, []);
+
 	return (
 		<Box pr="3xs">
 			<CheckoutTable />

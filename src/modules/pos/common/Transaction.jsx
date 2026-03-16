@@ -18,6 +18,7 @@ import {
 	IconPercentage,
 	IconPlusMinus,
 	IconPrinter,
+	IconRefresh,
 	IconTicket,
 	IconUserPlus,
 } from "@tabler/icons-react";
@@ -26,7 +27,7 @@ import { useTranslation } from "react-i18next";
 import TransactionInformation from "./TransactionInformation";
 import useCartOperation from "@hooks/useCartOperation";
 import { showNotification } from "@components/ShowNotificationComponent";
-import { useOutletContext } from "react-router";
+import { useOutletContext, useNavigate } from "react-router";
 import useConfigData from "@hooks/useConfigData";
 import useLocalProducts from "@hooks/useLocalProducts";
 import { formatDateTime, generateInvoiceId } from "@utils/index";
@@ -34,6 +35,7 @@ import CustomerDrawer from "@components/drawers/CustomerDrawer";
 import { useDisclosure } from "@mantine/hooks";
 import FormValidationWrapper from "@components/form-builders/FormValidationWrapper";
 import useLoggedInUser from "@hooks/useLoggedInUser";
+import { APP_NAVLINKS } from "@/routes/routes";
 
 export default function Transaction({ form, tableId = null }) {
 	const { user } = useLoggedInUser();
@@ -48,6 +50,8 @@ export default function Transaction({ form, tableId = null }) {
 	const [ customerDrawerOpened, { open: customerDrawerOpen, close: customerDrawerClose } ] =
 		useDisclosure(false);
 	const [ customerObject, setCustomerObject ] = useState(null);
+	const navigate = useNavigate();
+	const [ isEditing ] = useState(() => !!localStorage.getItem("editing_sale"));
 	const [ discountMode, setDiscountMode ] = useState("flat");
 	const [ percentageValue, setPercentageValue ] = useState(0);
 
@@ -123,6 +127,26 @@ export default function Transaction({ form, tableId = null }) {
 			fetchCustomers();
 		}
 	}, [ customerDrawerOpened ]);
+
+	// =============== restore customer when editing a sale ================
+	useEffect(() => {
+		const editingSale = localStorage.getItem("editing_sale");
+		if (editingSale) {
+			try {
+				const saleData = JSON.parse(editingSale);
+				if (saleData.customerName) {
+					setCustomerObject({
+						id: saleData.customerId,
+						name: saleData.customerName,
+						mobile: saleData.customerMobile,
+						address: saleData.customer_address,
+					});
+				}
+			} catch (err) {
+				console.error("Error restoring customer from editing sale:", err);
+			}
+		}
+	}, []);
 
 	// =============== handle customer selection from drawer ================
 	const handleCustomerSelect = (customer) => {
@@ -214,7 +238,7 @@ export default function Transaction({ form, tableId = null }) {
 		}
 	};
 
-	const handleSave = async ({ withPos = false }) => {
+	const handleSave = async ({ withPos = false, status = "completed" }) => {
 		const total = Math.round(getCartTotal()) - (form.values.discount ?? 0);
 
 		// Validation checks
@@ -258,7 +282,7 @@ export default function Transaction({ form, tableId = null }) {
 			// if (isOnline) {
 			//     await handleOnlineSave(fullAmount);
 			// } else {
-			const responseSalesData = await handleOfflineSave(fullAmount);
+			const responseSalesData = await handleOfflineSave(fullAmount, status);
 			// }
 
 			setCustomerObject(null);
@@ -320,7 +344,7 @@ export default function Transaction({ form, tableId = null }) {
 	//     }
 	// };
 
-	const handleOfflineSave = async (fullAmount) => {
+	const handleOfflineSave = async (fullAmount, status = "completed") => {
 		// =============== get customer info from database or customerObject ================
 		const customerInfo =
 			customerObject ||
@@ -357,10 +381,48 @@ export default function Transaction({ form, tableId = null }) {
 			sales_items: JSON.stringify(invoiceData),
 			multi_transaction: form.values.payments.length > 1 ? 1 : 0,
 			payments: JSON.stringify(form.values.payments),
+			status: status,
 		};
 
-		// Insert sale record
-		await window.dbAPI.upsertIntoTable("sales", salesData);
+		// =============== if editing an existing sale, update it; otherwise insert new ================
+		const editingSale = localStorage.getItem("editing_sale");
+		if (editingSale) {
+			try {
+				const oldSale = JSON.parse(editingSale);
+				if (oldSale.id) {
+					await window.dbAPI.updateDataInTable("sales", {
+						condition: { id: oldSale.id },
+						data: salesData,
+					});
+				}
+			} catch (err) {
+				console.error("Error updating existing sale:", err);
+			}
+			localStorage.removeItem("editing_sale");
+		} else {
+			await window.dbAPI.upsertIntoTable("sales", salesData);
+		}
+
+		// =============== redirect to sales list after editing ================
+		if (editingSale) {
+			// Clear invoice table and items first
+			await window.dbAPI.updateDataInTable("invoice_table", {
+				id: tableId,
+				data: {
+					sales_by_id: null,
+					transaction_mode_id: null,
+					customer_id: null,
+					is_active: 0,
+					sub_total: null,
+					payment: null,
+				},
+			});
+			const ids = invoiceData.map((item) => item.id);
+			await window.dbAPI.deleteManyFromTable("invoice_table_item", ids);
+			refetchInvoice();
+			navigate(APP_NAVLINKS.SALES);
+			return salesData;
+		}
 
 		// =============== update product quantities and sales after successful sale ================
 		await updateProductsAfterSale();
@@ -409,8 +471,8 @@ export default function Transaction({ form, tableId = null }) {
 	};
 
 	const handlePrintAll = async () => {
-		// =============== first save the sale ================
-		await handleSave({ withPos: false });
+		// =============== first save the sale with hold status ================
+		await handleSave({ withPos: false, status: "hold" });
 
 		// =============== then handle kitchen printing ================
 		// if (invoiceData?.invoice_items?.length > 0) {
@@ -693,12 +755,12 @@ export default function Transaction({ form, tableId = null }) {
 					<Button
 						size="lg"
 						c="white"
-						bg="#38b000"
+						bg={isEditing ? "#0077b6" : "#38b000"}
 						fullWidth={true}
-						leftSection={<IconDeviceFloppy />}
+						leftSection={isEditing ? <IconRefresh /> : <IconDeviceFloppy />}
 						onClick={() => handleSave({ withPos: false })}
 					>
-						{t("Save")}
+						{isEditing ? t("Update") : t("Save")}
 					</Button>
 				</Grid.Col>
 			</Grid>
