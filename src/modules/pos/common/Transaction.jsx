@@ -19,6 +19,7 @@ import {
 	IconPlusMinus,
 	IconPrinter,
 	IconRefresh,
+	IconRotate,
 	IconTicket,
 	IconUserPlus,
 } from "@tabler/icons-react";
@@ -27,6 +28,8 @@ import { useTranslation } from "react-i18next";
 import TransactionInformation from "./TransactionInformation";
 import useCartOperation from "@hooks/useCartOperation";
 import { showNotification } from "@components/ShowNotificationComponent";
+import { useSelector, useDispatch } from "react-redux";
+import { clearEditingSale } from "@features/checkout";
 import { useOutletContext, useNavigate } from "react-router";
 import useConfigData from "@hooks/useConfigData";
 import useLocalProducts from "@hooks/useLocalProducts";
@@ -34,6 +37,7 @@ import { formatDateTime, generateInvoiceId } from "@utils/index";
 import CustomerDrawer from "@components/drawers/CustomerDrawer";
 import { useDisclosure } from "@mantine/hooks";
 import FormValidationWrapper from "@components/form-builders/FormValidationWrapper";
+import { modals } from "@mantine/modals";
 import useLoggedInUser from "@hooks/useLoggedInUser";
 import { APP_NAVLINKS } from "@/routes/routes";
 
@@ -42,25 +46,27 @@ export default function Transaction({ form, tableId = null }) {
 	const { t } = useTranslation();
 	const { isOnline } = useOutletContext();
 	const { configData } = useConfigData({ offlineFetch: !isOnline });
-	const [ coreUsers, setCoreUsers ] = useState([]);
+	const [coreUsers, setCoreUsers] = useState([]);
 	const { invoiceData, getCartTotal, refetchInvoice } = useCartOperation();
 	const { getProduct } = useLocalProducts({ fetchOnMount: false });
-	const [ isLoading, setIsLoading ] = useState({ saveAll: false, save: false, print: false });
-	const [ customersDropdownData, setCustomersDropdownData ] = useState([]);
-	const [ customerDrawerOpened, { open: customerDrawerOpen, close: customerDrawerClose } ] =
+	const [isLoading, setIsLoading] = useState({ saveAll: false, save: false, print: false });
+	const [customersDropdownData, setCustomersDropdownData] = useState([]);
+	const [customerDrawerOpened, { open: customerDrawerOpen, close: customerDrawerClose }] =
 		useDisclosure(false);
-	const [ customerObject, setCustomerObject ] = useState(null);
+	const [customerObject, setCustomerObject] = useState(null);
 	const navigate = useNavigate();
-	const [ isEditing ] = useState(() => !!localStorage.getItem("editing_sale"));
-	const [ discountMode, setDiscountMode ] = useState("flat");
-	const [ percentageValue, setPercentageValue ] = useState(0);
+	const dispatch = useDispatch();
+	const editingSale = useSelector((state) => state.checkout.editingSale);
+	const isEditing = !!editingSale;
+	const [discountMode, setDiscountMode] = useState("flat");
+	const [percentageValue, setPercentageValue] = useState(0);
 
-	const [ transactionModeData, setTransactionModeData ] = useState([]);
+	const [transactionModeData, setTransactionModeData] = useState([]);
 
 	// ============= wreckage start =============
 	const enableTable = false;
 	const salesByUser = "";
-	const handleClick = () => { };
+	const handleClick = () => {};
 	// ============= wreckage stop ==============
 
 	// =============== check if split payment is active ================
@@ -106,7 +112,7 @@ export default function Transaction({ form, tableId = null }) {
 			form.setFieldValue("receive_amount", cartTotal);
 
 			if (form.values.payments.length === 1) {
-				const currentPayment = form.values.payments[ 0 ];
+				const currentPayment = form.values.payments[0];
 				form.setFieldValue("payments", [
 					{
 						...currentPayment,
@@ -115,7 +121,7 @@ export default function Transaction({ form, tableId = null }) {
 				]);
 			}
 		}
-	}, [ getCartTotal(), form.values.discount, isSplitPaymentActive ]);
+	}, [getCartTotal(), form.values.discount, isSplitPaymentActive]);
 
 	useEffect(() => {
 		fetchCustomers();
@@ -126,27 +132,19 @@ export default function Transaction({ form, tableId = null }) {
 		if (!customerDrawerOpened) {
 			fetchCustomers();
 		}
-	}, [ customerDrawerOpened ]);
+	}, [customerDrawerOpened]);
 
 	// =============== restore customer when editing a sale ================
 	useEffect(() => {
-		const editingSale = localStorage.getItem("editing_sale");
-		if (editingSale) {
-			try {
-				const saleData = JSON.parse(editingSale);
-				if (saleData.customerName) {
-					setCustomerObject({
-						id: saleData.customerId,
-						name: saleData.customerName,
-						mobile: saleData.customerMobile,
-						address: saleData.customer_address,
-					});
-				}
-			} catch (err) {
-				console.error("Error restoring customer from editing sale:", err);
-			}
+		if (editingSale?.customerName) {
+			setCustomerObject({
+				id: editingSale.customerId,
+				name: editingSale.customerName,
+				mobile: editingSale.customerMobile,
+				address: editingSale.customer_address,
+			});
 		}
-	}, []);
+	}, [editingSale]);
 
 	// =============== handle customer selection from drawer ================
 	const handleCustomerSelect = (customer) => {
@@ -207,10 +205,10 @@ export default function Transaction({ form, tableId = null }) {
 
 							if (batchIndex !== -1) {
 								// =============== update sales_quantity and remain_quantity ================
-								purchaseItems[ batchIndex ].sales_quantity =
-									(purchaseItems[ batchIndex ].sales_quantity || 0) + soldBatch.quantity;
-								purchaseItems[ batchIndex ].remain_quantity =
-									(purchaseItems[ batchIndex ].remain_quantity || 0) - soldBatch.quantity;
+								purchaseItems[batchIndex].sales_quantity =
+									(purchaseItems[batchIndex].sales_quantity || 0) + soldBatch.quantity;
+								purchaseItems[batchIndex].remain_quantity =
+									(purchaseItems[batchIndex].remain_quantity || 0) - soldBatch.quantity;
 							}
 						});
 
@@ -288,7 +286,7 @@ export default function Transaction({ form, tableId = null }) {
 			setCustomerObject(null);
 			form.reset();
 
-			const firstMode = transactionModeData[ 0 ];
+			const firstMode = transactionModeData[0];
 			if (firstMode) {
 				form.setFieldValue("payments", [
 					{
@@ -354,7 +352,7 @@ export default function Transaction({ form, tableId = null }) {
 
 		const modeName =
 			form.values.payments.length === 1
-				? form.values.payments[ 0 ].transaction_mode_name
+				? form.values.payments[0].transaction_mode_name
 				: "Multiple";
 
 		const salesData = {
@@ -367,8 +365,8 @@ export default function Transaction({ form, tableId = null }) {
 			discount_calculation: 0,
 			discount_type: discountMode,
 			customerId: form.values.customer_id,
-			customerName: customerInfo?.name || customerInfo?.label?.split(" -- ")[ 1 ],
-			customerMobile: customerInfo?.mobile || customerInfo?.label?.split(" -- ")[ 0 ],
+			customerName: customerInfo?.name || customerInfo?.label?.split(" -- ")[1],
+			customerMobile: customerInfo?.mobile || customerInfo?.label?.split(" -- ")[0],
 			customer_address: customerInfo?.address || "",
 			createdByUser: "Sandra",
 			createdById: form.values.sales_by_id,
@@ -385,26 +383,24 @@ export default function Transaction({ form, tableId = null }) {
 		};
 
 		// =============== if editing an existing sale, update it; otherwise insert new ================
-		const editingSale = localStorage.getItem("editing_sale");
 		if (editingSale) {
 			try {
-				const oldSale = JSON.parse(editingSale);
-				if (oldSale.id) {
+				if (editingSale.id) {
 					await window.dbAPI.updateDataInTable("sales", {
-						condition: { id: oldSale.id },
+						condition: { id: editingSale.id },
 						data: salesData,
 					});
 				}
 			} catch (err) {
 				console.error("Error updating existing sale:", err);
 			}
-			localStorage.removeItem("editing_sale");
+			dispatch(clearEditingSale());
 		} else {
 			await window.dbAPI.upsertIntoTable("sales", salesData);
 		}
 
 		// =============== redirect to sales list after editing ================
-		if (editingSale) {
+		if (isEditing) {
 			// Clear invoice table and items first
 			await window.dbAPI.updateDataInTable("invoice_table", {
 				id: tableId,
@@ -468,6 +464,49 @@ export default function Transaction({ form, tableId = null }) {
 		refetchInvoice();
 
 		return salesData;
+	};
+
+	const handleReset = () => {
+		modals.openConfirmModal({
+			title: <Text size="md">{t("FormConfirmationTitle")}</Text>,
+			children: <Text size="sm">{t("ResetConfirmationMessage")}</Text>,
+			confirmProps: { color: "red.6" },
+			labels: { confirm: t("Confirm"), cancel: t("Cancel") },
+			onConfirm: async () => {
+				// Clear cart items from DB
+				const existingItems = await window.dbAPI.getDataFromTable("invoice_table_item");
+				if (existingItems?.length) {
+					const ids = existingItems.map((item) => item.id);
+					await window.dbAPI.deleteManyFromTable("invoice_table_item", ids);
+				}
+
+				// Clear Redux editing state
+				dispatch(clearEditingSale());
+
+				// Refresh cart from DB (now empty)
+				refetchInvoice();
+
+				// Reset form
+				setCustomerObject(null);
+				form.reset();
+
+				// Restore default payment mode
+				const firstMode = transactionModeData[0];
+				if (firstMode) {
+					form.setFieldValue("payments", [
+						{
+							transaction_mode_id: firstMode.id,
+							transaction_mode_name: firstMode.name,
+							amount: 0,
+							remark: "",
+						},
+					]);
+				}
+
+				setPercentageValue(0);
+				setDiscountMode("flat");
+			},
+		});
 	};
 
 	const handlePrintAll = async () => {
@@ -723,8 +762,20 @@ export default function Transaction({ form, tableId = null }) {
 					</Grid.Col>
 				</Grid>
 			</Box>
-			<Grid columns={12} gutter={{ base: 2 }}>
-				<Grid.Col span={4}>
+			<Grid columns={17} gutter={{ base: 2 }}>
+				<Grid.Col span={2}>
+					<ActionIcon
+						size="xl"
+						h="100%"
+						w="100%"
+						variant="filled"
+						color="red.7"
+						onClick={handleReset}
+					>
+						<IconRotate size={20} />
+					</ActionIcon>
+				</Grid.Col>
+				<Grid.Col span={5}>
 					<FormValidationWrapper errorMessage={t("PrintAll")} opened={!!form.errors.print_all}>
 						<Button
 							bg="orange"
@@ -738,7 +789,7 @@ export default function Transaction({ form, tableId = null }) {
 						</Button>
 					</FormValidationWrapper>
 				</Grid.Col>
-				<Grid.Col span={4}>
+				<Grid.Col span={5}>
 					<Button
 						// disabled={isDisabled}
 						bg="#264653"
@@ -751,7 +802,7 @@ export default function Transaction({ form, tableId = null }) {
 						{t("Pos")}
 					</Button>
 				</Grid.Col>
-				<Grid.Col span={4}>
+				<Grid.Col span={5}>
 					<Button
 						size="lg"
 						c="white"

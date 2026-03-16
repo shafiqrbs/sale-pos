@@ -25,7 +25,8 @@ export default function useSalesList({ params, offlineFetch = false } = {}) {
 				setIsLocalLoading(true);
 				setLocalError(null);
 				try {
-					const salesData = await window.dbAPI.getDataFromTable("sales");
+					const condition = params?.status ? { status: params.status } : {};
+				const salesData = await window.dbAPI.getDataFromTable("sales", condition);
 					setLocalSales(salesData);
 				} catch (error) {
 					console.error("Error fetching local sales:", error);
@@ -37,7 +38,7 @@ export default function useSalesList({ params, offlineFetch = false } = {}) {
 
 			fetchLocalSales();
 		}
-	}, [shouldUseOffline]);
+	}, [shouldUseOffline, params?.status]);
 
 	if (shouldUseOffline) {
 		const offlineSalesResponse = localSales

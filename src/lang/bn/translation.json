@@ -11,6 +11,7 @@
 	"ManageCustomer": "গ্রাহক পরিচালনা",
 	"FormConfirmationTitle": "নিশ্চিত করুন",
 	"FormConfirmationMessage": "অনুগ্রহ করে নিচের বাটন টি তে ক্লিক করে পরিবর্তন টি সেভ নিশ্চিত করুন",
+	"ResetConfirmationMessage": "এটি কার্ট থেকে সমস্ত আইটেম মুছে ফেলবে এবং ফর্মটি রিসেট করবে। আপনি কি চালিয়ে যেতে চান?",
 	"EnterSearchAnyKeyword": "যেকোনো কিওয়ার্ড সার্চ করুন",
 	"Close": "ক্লোস করুন",
 	"FieldIsRequired": "এই ক্ষেত্রটির মান আবশ্যক",

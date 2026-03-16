@@ -2,6 +2,7 @@
 import { Box, Group, Text } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import React, { useEffect } from "react";
+import { useSelector } from "react-redux";
 import { useOutletContext } from "react-router";
 import CheckoutTable from "./CheckoutTable";
 import { useTranslation } from "react-i18next";
@@ -20,6 +21,7 @@ export default function Checkout() {
 	const { configData } = useConfigData({ offlineFetch: !isOnline });
 	const { invoiceData, getCartTotal } = useCartOperation();
 
+	const editingSale = useSelector((state) => state.checkout.editingSale);
 	const customerId = invoiceData?.customer_id;
 
 	const form = useForm({
@@ -55,35 +57,29 @@ export default function Checkout() {
 
 	// =============== restore form values when editing a sale ================
 	useEffect(() => {
-		const editingSale = localStorage.getItem("editing_sale");
 		if (editingSale) {
-			try {
-				const saleData = JSON.parse(editingSale);
-				if (saleData.salesById) {
-					form.setFieldValue("sales_by_id", saleData.salesById?.toString());
+			if (editingSale.salesById) {
+				form.setFieldValue("sales_by_id", editingSale.salesById?.toString());
+			}
+			if (editingSale.discount) {
+				form.setFieldValue("discount", editingSale.discount);
+			}
+			if (editingSale.discount_type) {
+				form.setFieldValue("discount_type", editingSale.discount_type);
+			}
+			if (editingSale.payments) {
+				const payments = typeof editingSale.payments === "string"
+					? JSON.parse(editingSale.payments)
+					: editingSale.payments;
+				if (payments?.length) {
+					form.setFieldValue("payments", payments);
 				}
-				if (saleData.discount) {
-					form.setFieldValue("discount", saleData.discount);
-				}
-				if (saleData.discount_type) {
-					form.setFieldValue("discount_type", saleData.discount_type);
-				}
-				if (saleData.payments) {
-					const payments = typeof saleData.payments === "string"
-						? JSON.parse(saleData.payments)
-						: saleData.payments;
-					if (payments?.length) {
-						form.setFieldValue("payments", payments);
-					}
-				}
-				if (saleData.customerId) {
-					form.setFieldValue("customer_id", saleData.customerId?.toString());
-				}
-			} catch (err) {
-				console.error("Error restoring editing sale data:", err);
+			}
+			if (editingSale.customerId) {
+				form.setFieldValue("customer_id", editingSale.customerId?.toString());
 			}
 		}
-	}, []);
+	}, [editingSale]);
 
 	return (
 		<Box pr="3xs">

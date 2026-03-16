@@ -11,6 +11,7 @@ import {
 } from "@mantine/core";
 import { IconDotsVertical, IconEdit, IconEye, IconPlus, IconTrash } from "@tabler/icons-react";
 import { useState } from "react";
+import { useDispatch } from "react-redux";
 import { useOutletContext, useNavigate } from "react-router";
 import { DataTable } from "mantine-datatable";
 import tableCss from "@assets/css/Table.module.css";
@@ -26,21 +27,23 @@ import { formatCurrency } from "@utils/index";
 import { showNotification } from "@components/ShowNotificationComponent";
 import { modals } from "@mantine/modals";
 import useConfigData from "@hooks/useConfigData";
+import { setEditingSale } from "@features/checkout";
 
 const PER_PAGE = 25;
 
 export default function Table() {
-	const { configData } = useConfigData()
+	const dispatch = useDispatch();
+	const { configData } = useConfigData();
 	const { t } = useTranslation();
-	const [ opened, { open, close } ] = useDisclosure(false);
+	const [opened, { open, close }] = useDisclosure(false);
 	useDisclosure(false);
 	const navigate = useNavigate();
-	const [ page, setPage ] = useState(1);
-	const [ selectedRow, setSelectedRow ] = useState(null);
-	const [ loading, setLoading ] = useState(false);
-	const [ salesViewData, setSalesViewData ] = useState(null);
-	const [ deletedSaleIds, setDeletedSaleIds ] = useState(new Set());
-	const [ dataSource, setDataSource ] = useState("offline");
+	const [page, setPage] = useState(1);
+	const [selectedRow, setSelectedRow] = useState(null);
+	const [loading, setLoading] = useState(false);
+	const [salesViewData, setSalesViewData] = useState(null);
+	const [deletedSaleIds, setDeletedSaleIds] = useState(new Set());
+	const [dataSource, setDataSource] = useState("offline");
 	const { mainAreaHeight, isOnline } = useOutletContext();
 	// =============== when offline, always use offline data (online segment disabled) ===============
 	const effectiveDataSource = isOnline ? dataSource : "offline";
@@ -59,6 +62,7 @@ export default function Table() {
 			end_date: form.values.end_date,
 			page,
 			offset: PER_PAGE,
+			status: "completed",
 		},
 		offlineFetch: effectiveDataSource === "offline",
 	});
@@ -76,7 +80,7 @@ export default function Table() {
 
 	const handleConfirmDelete = async (record) => {
 		await window.dbAPI.deleteDataFromTable("sales", { id: record.id });
-		setDeletedSaleIds((previousIds) => new Set([ ...previousIds, record.id ]));
+		setDeletedSaleIds((previousIds) => new Set([...previousIds, record.id]));
 		showNotification(`Invoice ${record.invoice} deleted`, "teal");
 	};
 
@@ -102,14 +106,14 @@ export default function Table() {
 					custom_price: item.custom_price || 0,
 					is_print: item.is_print || 0,
 					sub_total: item.sub_total,
-					batches: typeof item.batches === "string" ? item.batches : JSON.stringify(item.batches || []),
+					batches:
+						typeof item.batches === "string" ? item.batches : JSON.stringify(item.batches || []),
 				});
 			}
 
 			// Store sale metadata for the POS page to restore
-			localStorage.setItem(
-				"editing_sale",
-				JSON.stringify({
+			dispatch(
+				setEditingSale({
 					id: data.id,
 					customerId: data.customerId,
 					customerName: data.customerName,
@@ -146,7 +150,7 @@ export default function Table() {
 		<Box>
 			<Flex mb="xs" gap="sm" justify="space-between" align="center">
 				<KeywordSearch showStartEndDate form={form} />
-				<Group gap="sm" wrap="nowrap" >
+				<Group gap="sm" wrap="nowrap">
 					<SegmentedControl
 						value={effectiveDataSource}
 						onChange={(value) => {
@@ -174,9 +178,9 @@ export default function Table() {
 						leftSection={<IconPlus size={20} />}
 						onClick={() => {
 							if (configData?.is_pos) {
-								navigate(APP_NAVLINKS.BAKERY)
+								navigate(APP_NAVLINKS.BAKERY);
 							} else {
-								navigate(APP_NAVLINKS.SALES_NEW)
+								navigate(APP_NAVLINKS.SALES_NEW);
 							}
 						}}
 					>
@@ -256,21 +260,6 @@ export default function Table() {
 									},
 								},
 								{
-									accessor: "status",
-									title: t("Status"),
-									textAlign: "center",
-									render: (data) => (
-										<Text
-											size="xs"
-											fw={600}
-											c={data.status === "hold" ? "orange" : "green"}
-											tt="capitalize"
-										>
-											{data.status || "completed"}
-										</Text>
-									),
-								},
-								{
 									accessor: "action",
 									title: t("Action"),
 									textAlign: "right",
@@ -283,7 +272,7 @@ export default function Table() {
 												trigger="hover"
 												openDelay={100}
 												closeDelay={400}
-												ta={'right'}
+												ta={"right"}
 											>
 												<Menu.Target>
 													<ActionIcon
@@ -296,7 +285,7 @@ export default function Table() {
 														<IconDotsVertical height="18" width="18" stroke={1.5} />
 													</ActionIcon>
 												</Menu.Target>
-												<Menu.Dropdown w={'200'}>
+												<Menu.Dropdown w={"200"}>
 													<Menu.Item
 														onClick={(e) => {
 															e.preventDefault();
@@ -311,7 +300,7 @@ export default function Table() {
 													</Menu.Item>
 													<Menu.Item
 														onClick={(e) => {
-															e.preventDefault();
+															e.stopPropagation();
 															if (configData?.is_pos) {
 																handleEditInPos(data);
 															} else {

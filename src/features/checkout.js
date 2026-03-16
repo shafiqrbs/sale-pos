@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
     invoiceData: [],
+    editingSale: null,
 };
 
 const checkoutSlice = createSlice({
@@ -14,8 +15,14 @@ const checkoutSlice = createSlice({
         clearCart(state) {
             state.invoiceData = [];
         },
+        setEditingSale(state, action) {
+            state.editingSale = action.payload;
+        },
+        clearEditingSale(state) {
+            state.editingSale = null;
+        },
     },
 });
 
-export const { setCartData, clearCart } = checkoutSlice.actions;
+export const { setCartData, clearCart, setEditingSale, clearEditingSale } = checkoutSlice.actions;
 export default checkoutSlice.reducer;

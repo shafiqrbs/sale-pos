@@ -18,6 +18,7 @@ import {
 	IconChevronRight
 } from "@tabler/icons-react";
 import React, { useState } from "react";
+import { useDispatch } from "react-redux";
 import { useOutletContext, useNavigate } from "react-router";
 import { DataTable } from "mantine-datatable";
 import tableCss from "@assets/css/Table.module.css";
@@ -32,10 +33,12 @@ import { APP_NAVLINKS } from "@/routes/routes";
 import { formatCurrency } from "@utils/index";
 import { showNotification } from "@components/ShowNotificationComponent";
 import { modals } from "@mantine/modals";
+import { setEditingSale } from "@features/checkout";
 
 const PER_PAGE = 25;
 
 export default function HoldTable() {
+	const dispatch = useDispatch();
 	const { t } = useTranslation();
 	const [opened, { open, close }] = useDisclosure(false);
 	useDisclosure(false);
@@ -64,6 +67,7 @@ export default function HoldTable() {
 			end_date: form.values.end_date,
 			page,
 			offset: PER_PAGE,
+			status: "hold",
 		},
 		offlineFetch: effectiveDataSource === "offline",
 	});
@@ -83,6 +87,53 @@ export default function HoldTable() {
 		await window.dbAPI.deleteDataFromTable("sales", { id: record.id });
 		setDeletedSaleIds((previousIds) => new Set([...previousIds, record.id]));
 		showNotification(`Invoice ${record.invoice} deleted`, "teal");
+	};
+
+	const handleProcess = async (data) => {
+		try {
+			// Clear existing cart items
+			const existingItems = await window.dbAPI.getDataFromTable("invoice_table_item");
+			if (existingItems?.length) {
+				const ids = existingItems.map((item) => item.id);
+				await window.dbAPI.deleteManyFromTable("invoice_table_item", ids);
+			}
+
+			// Parse saved sale items and insert into invoice_table_item
+			const salesItems = JSON.parse(data.sales_items || "[]");
+			for (const item of salesItems) {
+				await window.dbAPI.upsertIntoTable("invoice_table_item", {
+					stock_item_id: item.stock_item_id,
+					display_name: item.display_name,
+					quantity: item.quantity,
+					quantity_limit: item.quantity_limit || 0,
+					purchase_price: item.purchase_price || 0,
+					sales_price: item.sales_price,
+					custom_price: item.custom_price || 0,
+					is_print: item.is_print || 0,
+					sub_total: item.sub_total,
+					batches: typeof item.batches === "string" ? item.batches : JSON.stringify(item.batches || []),
+				});
+			}
+
+			// Store sale metadata in Redux for the POS page to restore
+			dispatch(setEditingSale({
+				id: data.id,
+				customerId: data.customerId,
+				customerName: data.customerName,
+				customerMobile: data.customerMobile,
+				customer_address: data.customer_address,
+				salesById: data.salesById,
+				discount: data.discount,
+				discount_type: data.discount_type,
+				payments: data.payments,
+				status: data.status,
+			}));
+
+			navigate(APP_NAVLINKS.BAKERY);
+		} catch (err) {
+			console.error("Error loading hold sale into POS:", err);
+			showNotification("Failed to load sale into POS", "red");
+		}
 	};
 
 	const handleShowDetails = (item) => {
@@ -215,9 +266,12 @@ export default function HoldTable() {
 												color="red"
 												aria-label="Settings"
 												rightSection={<IconChevronRight size={20} />}
-												onClick={(e) => e.preventDefault()}
+												onClick={(e) => {
+													e.stopPropagation();
+													handleProcess(data);
+												}}
 											>
-												Process
+												{t("Process")}
 											</Button>
 										</Group>
 									),

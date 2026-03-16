@@ -25,6 +25,7 @@
 	"FormConfirmationTitle": "Proceed Confirmation",
 	"FormConfirmationMessageOld": "This action is so important that you are required to confirm it with a\nmodal. Please click\none of these buttons to proceed.",
 	"FormConfirmationMessage": "Please confirm your submission by clicking the submit button below.",
+	"ResetConfirmationMessage": "This will clear all items from the cart and reset the form. Are you sure you want to continue?",
 	"MasterData": "Master Data",
 	"Customer": "Customer",
 	"ManageCustomer": "Manage Customers",

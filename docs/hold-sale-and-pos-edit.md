@@ -1,7 +1,7 @@
-# Hold Sale & POS Edit Feature
+# Hold Sale, POS Edit & Hold Processing Feature
 
 ## Overview
-Added ability to "hold" sales (save with hold status) and edit sales directly in the POS bakery interface.
+Added ability to "hold" sales (save with hold status), edit sales directly in the POS bakery interface, and process held sales from a dedicated Hold page.
 
 ---
 
@@ -18,16 +18,19 @@ Added ability to "hold" sales (save with hold status) and edit sales directly in
 - The **Hold button** (`handlePrintAll`) passes `status: "hold"` to `handleSave`.
 - The `salesData` object includes `status` before inserting into the database.
 
-### Sales Table UI
-- **`_Table.jsx`** — Added a **Status** column after the Due column.
-- Displays "hold" in orange and "completed" in green, with `tt="capitalize"`.
+### Sales Table Separation
+- **`_Table.jsx`** — Filters by `status: "completed"`, only completed sales shown.
+- **`_HoldTable.jsx`** — Filters by `status: "hold"`, only held sales shown (route: `/inventory/sales/hold`).
+- **`useSalesList.js`** — Accepts `params.status` and passes it as a condition to `getDataFromTable("sales", { status })` for offline filtering.
 
 ### Files Changed
 | File | Change |
 |------|--------|
 | `electron/db.cjs` | Added `status` column |
 | `src/modules/pos/common/Transaction.jsx` | `status` param in save flow |
-| `src/modules/inventory/sales/_Table.jsx` | Status column in UI |
+| `src/common/hooks/useSalesList.js` | Added `status` filter support for offline queries |
+| `src/modules/inventory/sales/_Table.jsx` | Filters `status: "completed"` only |
+| `src/modules/inventory/sales/_HoldTable.jsx` | Filters `status: "hold"` only |
 
 ---
 
@@ -43,13 +46,14 @@ Sales Table (Edit click)
   → if configData.is_pos:
       1. Clear existing invoice_table_item records
       2. Parse sales_items JSON → insert each item into invoice_table_item
-      3. Store sale metadata in localStorage("editing_sale")
+      3. Dispatch setEditingSale() to Redux store (checkout slice)
       4. Navigate to /pos/bakery
   → else:
       Navigate to /inventory/sales/edit/:id (existing behavior)
 ```
 
-### Data Stored in localStorage (`editing_sale`)
+### Redux State (`checkout.editingSale`)
+Stored via `setEditingSale` action in the `checkout` slice (`src/features/checkout.js`):
 ```json
 {
   "id": 123,
@@ -64,24 +68,54 @@ Sales Table (Edit click)
   "status": "completed"
 }
 ```
+Cleared via `clearEditingSale` action after save/update.
 
 ### Pre-population on POS Page
-- **`Checkout.jsx`** — `useEffect` on mount reads `editing_sale` from localStorage and sets form values: `sales_by_id`, `discount`, `discount_type`, `payments`, `customer_id`.
-- **`Transaction.jsx`** — `useEffect` on mount restores `customerObject` (name, mobile, address) from localStorage.
+- **`Checkout.jsx`** — `useEffect` watches `editingSale` from Redux and sets form values: `sales_by_id`, `discount`, `discount_type`, `payments`, `customer_id`.
+- **`Transaction.jsx`** — `useEffect` watches `editingSale` from Redux and restores `customerObject` (name, mobile, address).
 
 ### Save/Update Behavior
 - **`Transaction.jsx` → `handleOfflineSave`**:
-  - If `editing_sale` exists in localStorage: **updates** the existing sale record (via `updateDataInTable`) instead of inserting a new one.
-  - Clears cart, removes `editing_sale` from localStorage, and **redirects to sales list** (`APP_NAVLINKS.SALES`).
+  - If `editingSale` exists in Redux: **updates** the existing sale record (via `updateDataInTable`) instead of inserting a new one.
+  - Dispatches `clearEditingSale()`, clears cart, and **redirects to sales list** (`APP_NAVLINKS.SALES`).
   - If not editing: inserts new sale as usual.
 
 ### UI Changes in Edit Mode
 - **Save button** changes to **"Update"** with blue background (`#0077b6`) and `IconRefresh` icon.
-- `isEditing` state is initialized from `localStorage.getItem("editing_sale")` on mount.
+- `isEditing` derived from `!!editingSale` Redux state.
 
 ### Files Changed
 | File | Change |
 |------|--------|
-| `src/modules/inventory/sales/_Table.jsx` | `handleEditInPos()`, conditional Edit click |
-| `src/modules/pos/common/Checkout.jsx` | Form pre-population from localStorage |
-| `src/modules/pos/common/Transaction.jsx` | Customer restore, update logic, redirect, button text/icon |
+| `src/features/checkout.js` | Added `editingSale` state, `setEditingSale` & `clearEditingSale` actions |
+| `src/modules/inventory/sales/_Table.jsx` | `handleEditInPos()`, dispatches `setEditingSale` |
+| `src/modules/pos/common/Checkout.jsx` | Form pre-population from Redux `editingSale`, cleanup on unmount |
+| `src/modules/pos/common/Transaction.jsx` | Customer restore, update logic, redirect, button text/icon — all via Redux |
+
+---
+
+## 3. Hold Sales Processing
+
+### Requirement
+Held sales appear on a dedicated Hold page (`/inventory/sales/hold`). Clicking **Process** loads the held sale into the POS bakery for completion — same flow as Edit in POS mode.
+
+### Flow
+
+```
+Hold Table (Process click)
+  1. Clear existing invoice_table_item records
+  2. Parse sales_items JSON → insert each item into invoice_table_item
+  3. Dispatch setEditingSale() to Redux store (checkout slice)
+  4. Navigate to /pos/bakery
+  → POS page pre-populates cart + transaction form
+  → On save: updates the existing sale record, redirects to sales list
+```
+
+### Files Changed
+| File | Change |
+|------|--------|
+| `src/modules/inventory/sales/_HoldTable.jsx` | Added `handleProcess()`, status filter `"hold"`, wired Process button |
+| `src/common/hooks/useSalesList.js` | Added `status` condition for offline DB queries |
+
+### Cleanup
+- **`Checkout.jsx`** dispatches `clearEditingSale()` on unmount, so navigating away from POS without saving clears the editing state automatically.
