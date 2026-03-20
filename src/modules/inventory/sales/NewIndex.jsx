@@ -9,18 +9,24 @@ import { showNotification } from "@components/ShowNotificationComponent";
 import useTempSalesProducts from "@hooks/useTempSalesProducts";
 import useLoggedInUser from "@hooks/useLoggedInUser";
 import useConfigData from "@hooks/useConfigData";
-import { generateInvoiceId, formatDateTime } from "@utils/index";
+import { useAddSalesMutation } from "@services/sales";
+import { generateInvoiceId, formatDateTime, formatDateISO } from "@utils/index";
 import { useTranslation } from "react-i18next";
-import { NavLink } from "react-router";
+import { useOutletContext } from "react-router";
 
 export default function NewIndex() {
 	const { t } = useTranslation();
 	const { user } = useLoggedInUser();
-	const { configData } = useConfigData();
+	const { isOnline } = useOutletContext();
+	const { configData, is_sales_online } = useConfigData();
+	const [ addSales ] = useAddSalesMutation();
+	const shouldSubmitSalesOnline = isOnline && is_sales_online;
 	const itemsForm = useForm(salesOverviewRequest());
 	const { salesProducts: itemsProducts, refetch } = useTempSalesProducts({ type: "sales" });
-	const [resetKey, setResetKey] = useState(0);
-	const [isAddingItem, setIsAddingItem] = useState(false);
+	const [ resetKey, setResetKey ] = useState(0);
+	const [ isAddingItem, setIsAddingItem ] = useState(false);
+
+	console.log(itemsForm.errors)
 
 	// =============== tracks whether the submit was triggered via POS Print ===============
 	const withPosPrintRef = useRef(false);
@@ -34,7 +40,7 @@ export default function NewIndex() {
 					id: productId,
 				});
 				const currentProductData = Array.isArray(currentProduct)
-					? currentProduct[0]
+					? currentProduct[ 0 ]
 					: currentProduct;
 
 				if (!currentProductData) {
@@ -89,7 +95,7 @@ export default function NewIndex() {
 		const grandTotal = Math.max(subTotal - discountValue + vat, 0);
 		const fullAmount = Number(formValues.paymentAmount) || 0;
 		const isSplitPaymentActive = payments.length > 1;
-		const modeName = isSplitPaymentActive ? "Multiple" : (payments[0]?.transaction_mode_name ?? "");
+		const modeName = isSplitPaymentActive ? "Multiple" : (payments[ 0 ]?.transaction_mode_name ?? "");
 
 		// =============== get customer info from database ===============
 		let customerName = "";
@@ -99,7 +105,7 @@ export default function NewIndex() {
 			const customers = await window.dbAPI.getDataFromTable("core_customers", {
 				id: formValues.customer_id,
 			});
-			const customerData = Array.isArray(customers) ? customers[0] : customers;
+			const customerData = Array.isArray(customers) ? customers[ 0 ] : customers;
 			if (customerData) {
 				customerName = customerData.name ?? "";
 				customerMobile = customerData.mobile ?? "";
@@ -108,16 +114,23 @@ export default function NewIndex() {
 		}
 
 		const invoiceId = generateInvoiceId();
-        const salesItemsForDb = itemsProducts.map((item) => ({
-            product_id: item.product_id,
-            display_name: item.display_name,
-            quantity: Number(item.quantity) || 0,
-            mrp: Number(item.mrp ?? item.price ?? item.sales_price) || 0,
-            sales_price: Number(item.sales_price) || 0,
-            sub_total: (Number(item.quantity) || 0) * (Number(item.sales_price) || 0),
-            category_id: item.category_id ?? null,
-            category_name: item.category_name ?? "",
-        }));
+		const salesItemsForDb = itemsProducts.map((item) => ({
+			product_id: item.product_id,
+			display_name: item.display_name,
+			quantity: Number(item.quantity) || 0,
+			mrp: Number(item.mrp ?? item.price ?? item.sales_price) || 0,
+			sales_price: Number(item.sales_price) || 0,
+			sub_total: (Number(item.quantity) || 0) * (Number(item.sales_price) || 0),
+			category_id: item.category_id ?? null,
+			category_name: item.category_name ?? "",
+		}));
+
+		const discountTypeLabel =
+			formValues.discount_type === "flat"
+				? "Flat"
+				: formValues.discount_type === "percentage"
+					? "Percentage"
+					: "Coupon";
 
 		const salesData = {
 			invoice: invoiceId,
@@ -127,12 +140,7 @@ export default function NewIndex() {
 			payment: fullAmount,
 			discount: discountValue,
 			discount_calculation: discountValue,
-			discount_type:
-				formValues.discount_type === "flat"
-					? "Flat"
-					: formValues.discount_type === "percentage"
-						? "Percentage"
-						: "Coupon",
+			discount_type: discountTypeLabel,
 			customerId: formValues.customer_id ?? null,
 			customerName,
 			customerMobile,
@@ -150,9 +158,56 @@ export default function NewIndex() {
 			payments: JSON.stringify(payments),
 		};
 
+		const primaryTransactionModeId = payments[ 0 ]?.transaction_mode_id;
+
+		const buildSalesApiPayload = () => ({
+			customer_id: String(formValues.customer_id ?? ""),
+			sub_total: subTotal,
+			transaction_mode_id: String(primaryTransactionModeId ?? ""),
+			discount_type: discountTypeLabel,
+			discount: discountValue,
+			discount_calculation: 0,
+			vat,
+			total: Math.round(grandTotal),
+			sales_by_id: String(user?.id ?? ""),
+			created_by_id: Number(user?.id) || 0,
+			process: "",
+			narration: formValues.salesNarration ?? "",
+			invoice_date: formatDateISO(formValues.salesDate ?? new Date()),
+			items: itemsProducts.map((item) => ({
+				product_id: item.product_id,
+				item_name: item.display_name ?? "",
+				sales_price: Number(item.sales_price) || 0,
+				price: Number(item.price ?? item.sales_price) || 0,
+				percent: item.percent ? String(item.percent) : "",
+				quantity: Number(item.quantity) || 0,
+				price_matrix_id: null,
+				measurement_unit_id: null,
+				measurement_unit_quantity: null,
+				measurement_unit_name: null,
+				measurement_string: null,
+				uom: item.unit_name ?? "",
+				unit_id: item.unit_id ?? null,
+				purchase_price: Number(item.purchase_price) || 0,
+				sub_total: Number(item.sub_total) || 0,
+				warehouse_id: item.warehouse_id ?? null,
+				purchase_item_id: null,
+				bonus_quantity: Number(item.bonus_quantity) || 0,
+			})),
+			payment: fullAmount,
+		});
+
 		setIsAddingItem(true);
 		try {
-			await window.dbAPI.upsertIntoTable("sales", salesData);
+			if (shouldSubmitSalesOnline) {
+				const salesResponse = await addSales(buildSalesApiPayload()).unwrap();
+				if (salesResponse.data?.error) {
+					showNotification(salesResponse.data.error || "Failed to save sale", "red");
+					return;
+				}
+			} else {
+				await window.dbAPI.upsertIntoTable("sales", salesData);
+			}
 			await updateProductsAfterSale();
 
 			const shouldPrint = withPosPrintRef.current;
@@ -179,7 +234,7 @@ export default function NewIndex() {
 			}
 		} catch (error) {
 			console.error(error);
-			showNotification(error?.message || "Failed to save sale", "red");
+			showNotification(error?.message || error?.data?.error || "Failed to save sale", "red");
 		} finally {
 			setIsAddingItem(false);
 			withPosPrintRef.current = false;

@@ -7,10 +7,17 @@ import { vendorOverviewRequest } from "./helpers/request";
 import { showNotification } from "@components/ShowNotificationComponent";
 import useTempPurchaseProducts from "@hooks/useTempPurchaseProducts";
 import useLoggedInUser from "@hooks/useLoggedInUser";
-import { generateInvoiceId, formatDateTime } from "@utils/index";
+import useConfigData from "@hooks/useConfigData";
+import { useAddPurchaseMutation } from "@services/purchase";
+import { generateInvoiceId, formatDateTime, formatDateISO } from "@utils/index";
+import { useOutletContext } from "react-router";
 
 export default function NewIndex() {
 	const { user } = useLoggedInUser();
+	const { isOnline } = useOutletContext();
+	const { is_purchase_online } = useConfigData();
+	const [ addPurchase ] = useAddPurchaseMutation();
+	const shouldSubmitPurchaseOnline = isOnline && is_purchase_online;
 	const itemsForm = useForm(vendorOverviewRequest());
 	const { purchaseProducts: itemsProducts, refetch } = useTempPurchaseProducts({ type: "purchase" });
 	const [ isAddingItem, setIsAddingItem ] = useState(false);
@@ -104,6 +111,8 @@ export default function NewIndex() {
 			expired_date: item.expired_date ?? null,
 		}));
 
+		const purchaseDiscountTypeLabel = formValues.isDiscountPercentage ? "Percentage" : "Flat";
+
 		const localPurchaseRecord = {
 			invoice: generateInvoiceId(),
 			sub_total: subTotal,
@@ -111,7 +120,7 @@ export default function NewIndex() {
 			payment: Number(formValues.paymentAmount) || 0,
 			discount: Number(formValues.discountAmount) || 0,
 			discount_calculation: discountValue,
-			discount_type: formValues.isDiscountPercentage ? "Percentage" : "Flat",
+			discount_type: purchaseDiscountTypeLabel,
 			approved_by_id: user?.id ?? null,
 			vendor_id: formValues.vendor_id ? Number(formValues.vendor_id) : null,
 			vendor_name: vendorName,
@@ -125,9 +134,42 @@ export default function NewIndex() {
 			created: formatDateTime(new Date()),
 		};
 
+		const buildPurchaseApiPayload = () => ({
+			vendor_id: String(formValues.vendor_id ?? ""),
+			vendor_name: formValues.vendorName ?? "",
+			vendor_mobile: formValues.vendorPhone ?? "",
+			vendor_email: formValues.vendorEmail ?? "",
+			sub_total: subTotal,
+			transaction_mode_id: Number(formValues.transactionModeId) || 0,
+			discount_type: purchaseDiscountTypeLabel,
+			discount: discountValue,
+			discount_calculation: 0,
+			vat,
+			total: Math.round(total),
+			payment: String(formValues.paymentAmount ?? ""),
+			process: "",
+			narration: formValues.purchaseNarration ?? "",
+			warehouse_id: "",
+			invoice_date: formatDateISO(formValues.purchaseDate ?? new Date()),
+			items: itemsProducts.map((item) => ({
+				product_id: item.product_id,
+				warehouse_id: item.warehouse_id ?? null,
+				quantity: Number(item.quantity) || 0,
+				purchase_price: Number(item.purchase_price) || 0,
+				sales_price: Number(item.sales_price) || Number(item.purchase_price) || 0,
+				bonus_quantity: Number(item.bonus_quantity) || 0,
+				sub_total: Number(item.sub_total) || 0,
+				name: item.display_name ?? "",
+			})),
+		});
+
 		setIsAddingItem(true);
 		try {
-			await window.dbAPI.upsertIntoTable("purchase", localPurchaseRecord);
+			if (shouldSubmitPurchaseOnline) {
+				await addPurchase(buildPurchaseApiPayload()).unwrap();
+			} else {
+				await window.dbAPI.upsertIntoTable("purchase", localPurchaseRecord);
+			}
 			await updateProductsAfterPurchase();
 
 			showNotification("Purchase added successfully", "teal");

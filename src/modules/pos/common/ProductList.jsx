@@ -24,7 +24,7 @@ export default function ProductList() {
 	const [ batchModalOpened, { open: openBatchModal, close: closeBatchModal } ] = useDisclosure(false);
 	const { increment } = useCartOperation();
 	const { mainAreaHeight, isOnline } = useOutletContext();
-	const { configData } = useConfigData({ offlineFetch: !isOnline });
+	const { currencySymbol } = useConfigData({ offlineFetch: !isOnline });
 	const { t } = useTranslation()
 	const {
 		products: allProducts,
@@ -213,8 +213,7 @@ export default function ProductList() {
 																	)}
 																</Text>
 																<Text fw={900} fz="18" size="md" c="green.9">
-																	{configData?.currency?.symbol ||
-																		configData?.inventory_config?.currency?.symbol}{" "}
+																	{currencySymbol}{" "}
 																	{formatCurrency(product?.sales_price)}
 																</Text>
 															</Flex>

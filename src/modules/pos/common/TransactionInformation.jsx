@@ -11,7 +11,7 @@ import SplitPaymentsDrawer from "@components/drawers/SplitPaymentsDrawer";
 export default function TransactionInformation({ form, transactionModeData }) {
 	const { invoiceData, getCartTotal } = useCartOperation();
 	const { isOnline } = useOutletContext();
-	const { configData } = useConfigData({ offlineFetch: !isOnline });
+	const { configData, currencySymbol } = useConfigData({ offlineFetch: !isOnline });
 	const { t } = useTranslation();
 	const totalAmount = Math.round(getCartTotal()) - (form.values.discount ?? 0);
 	const dueAmount = Math.abs(totalAmount - (form.values.receive_amount ?? 0));
@@ -81,7 +81,7 @@ export default function TransactionInformation({ form, transactionModeData }) {
 										{t("DIS.")}
 									</Text>
 									<Text fz={"sm"} fw={800} c={"black"}>
-										{configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol}{" "}
+										{currencySymbol}{" "}
 										{invoiceData?.discount || 0}
 									</Text>
 								</Group>
@@ -109,7 +109,7 @@ export default function TransactionInformation({ form, transactionModeData }) {
 									{t("SD")}
 								</Text>
 								<Text fz={"sm"} fw={800} c={"black"}>
-									{configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol} 0
+									{currencySymbol} 0
 								</Text>
 							</Group>
 						</Grid.Col>
@@ -118,7 +118,7 @@ export default function TransactionInformation({ form, transactionModeData }) {
 				<Grid.Col span={3}>
 					<Stack gap={0} align="center" justify="center" bg="gray.8" py={4} bdrs={4}>
 						<Text fw={800} c="#dad6d6" size="lg">
-							{configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol}{" "}
+							{currencySymbol}{" "}
 							{formatCurrency(totalAmount)}
 						</Text>
 						<Text fw={500} c="#dad6d6" size="md">
@@ -129,7 +129,7 @@ export default function TransactionInformation({ form, transactionModeData }) {
 				<Grid.Col span={3}>
 					<Stack gap={0} align="center" justify="center" bg="red" py={4} bdrs={4}>
 						<Text fw={800} c="white" size="lg">
-							{configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol}{" "}
+							{currencySymbol}{" "}
 							{formatCurrency(dueAmount)}
 						</Text>
 						<Text fw={500} c="white" size="md">

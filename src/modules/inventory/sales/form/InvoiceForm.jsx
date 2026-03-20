@@ -28,7 +28,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 	const { t } = useTranslation();
 	const [products, setProducts] = useState([]);
 	const [productResetKey, setProductResetKey] = useState(0);
-	const { configData } = useConfigData();
+	const { currencySymbol } = useConfigData();
 	const itemsForm = useForm(salesItemFormRequest());
 	const { getLocalProducts } = useLocalProducts({ fetchOnMount: false });
 	const { categories } = useGetCategories();
@@ -45,9 +45,6 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 		);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
-
-	const currencySymbol =
-		configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol;
 
 	const productOptions = products?.map((product) => ({
 		value: String(product.id),

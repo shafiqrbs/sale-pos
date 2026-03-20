@@ -28,7 +28,7 @@ export default function SplitPaymentsDrawer({
 }) {
 	const { t } = useTranslation();
 	const { isOnline, mainAreaHeight } = useOutletContext();
-	const { configData } = useConfigData({ offlineFetch: !isOnline });
+	const { currencySymbol } = useConfigData({ offlineFetch: !isOnline });
 	const [methods, setMethods] = useState([]);
 
 	const initialPayments = useMemo(() => {
@@ -47,9 +47,6 @@ export default function SplitPaymentsDrawer({
 	const [paymentInputs, setPaymentInputs] = useState(initialPayments);
 	const amountInputRefsMap = useRef({});
 	const remarkInputRefsMap = useRef({});
-
-	const currencySymbol =
-		configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol;
 
 	useEffect(() => {
 		async function fetchMethods() {
@@ -153,7 +150,7 @@ export default function SplitPaymentsDrawer({
 								{t("Total")}
 							</Text>
 							<Text size="lg" fw={700} c="var(--theme-primary-color-6)">
-								{configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol}{" "}
+								{currencySymbol}{" "}
 								{formatCurrency(totalAmount)}
 							</Text>
 						</Group>
@@ -162,7 +159,7 @@ export default function SplitPaymentsDrawer({
 								{t("Due")}
 							</Text>
 							<Text size="md" fw={600} c={dueAmount > 0 ? "red" : "green"}>
-								{configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol}{" "}
+								{currencySymbol}{" "}
 								{formatCurrency(dueAmount)}
 							</Text>
 						</Group>

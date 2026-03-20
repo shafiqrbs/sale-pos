@@ -29,9 +29,7 @@ export default function PaymentSection({
 	isEditMode = false,
 }) {
 	const { transactionMode } = useTransactionMode();
-	const { configData } = useConfigData();
-	const currencySymbol =
-		configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol;
+	const { currencySymbol } = useConfigData();
 
 	const { discountAmount, isDiscountPercentage, purchaseNarration, paymentAmount } =
 		itemsForm.values;

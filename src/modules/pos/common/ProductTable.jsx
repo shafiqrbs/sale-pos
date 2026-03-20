@@ -13,7 +13,7 @@ import { useDisclosure } from '@mantine/hooks';
 export default function ProductTable({ products }) {
     const { t } = useTranslation()
     const { mainAreaHeight, isOnline } = useOutletContext()
-    const { configData } = useConfigData({ offlineFetch: !isOnline })
+    const { currencySymbol } = useConfigData({ offlineFetch: !isOnline })
     const { increment } = useCartOperation();
     const [ selectedProduct, setSelectedProduct ] = useState(null);
     const [ batchModalOpened, { open: openBatchModal, close: closeBatchModal } ] = useDisclosure(false);
@@ -95,7 +95,7 @@ export default function ProductTable({ products }) {
                         textAlign: "center",
                         render: (data) => (
                             <>
-                                {configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol}{" "}
+                                {currencySymbol}{" "}
                                 {data.sales_price}
                             </>
                         ),

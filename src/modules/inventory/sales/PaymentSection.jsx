@@ -46,16 +46,13 @@ export default function PaymentSection({
 }) {
 	const { t } = useTranslation();
 	const { transactionMode } = useTransactionMode();
-	const { configData } = useConfigData();
+	const { configData, currencySymbol } = useConfigData();
 
-	const [customersDropdownData, setCustomersDropdownData] = useState([]);
-	const [discountMode, setDiscountMode] = useState("discount");
-	const [percentageValue, setPercentageValue] = useState(0);
-	const [customerDrawerOpened, { open: customerDrawerOpen, close: customerDrawerClose }] =
+	const [ customersDropdownData, setCustomersDropdownData ] = useState([]);
+	const [ discountMode, setDiscountMode ] = useState("discount");
+	const [ percentageValue, setPercentageValue ] = useState(0);
+	const [ customerDrawerOpened, { open: customerDrawerOpen, close: customerDrawerClose } ] =
 		useDisclosure(false);
-
-	const currencySymbol =
-		configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol;
 
 	const { discount_type, discount, coupon_code, salesNarration, paymentAmount } = itemsForm.values;
 
@@ -65,16 +62,16 @@ export default function PaymentSection({
 	const discountValue = useMemo(() => {
 		if (discount_type === "coupon") return 0;
 		return Number(discount) || 0;
-	}, [discount_type, discount]);
+	}, [ discount_type, discount ]);
 
 	const grandTotal = useMemo(
 		() => Math.max(itemsTotal - discountValue + vatAmount, 0),
-		[itemsTotal, discountValue]
+		[ itemsTotal, discountValue ]
 	);
 
 	const dueAmount = useMemo(
 		() => Math.max(grandTotal - (paymentAmount || 0), 0),
-		[grandTotal, paymentAmount]
+		[ grandTotal, paymentAmount ]
 	);
 
 	const payments = itemsForm.values.payments ?? [];
@@ -85,7 +82,7 @@ export default function PaymentSection({
 	useEffect(() => {
 		if (transactionMode?.length > 0 && payments.length === 0) {
 			const cashMethod = transactionMode.find((mode) => mode.slug === "cash");
-			const defaultMethod = cashMethod || transactionMode[0];
+			const defaultMethod = cashMethod || transactionMode[ 0 ];
 			itemsForm.setFieldValue("payments", [
 				{
 					transaction_mode_id: defaultMethod.id,
@@ -96,7 +93,7 @@ export default function PaymentSection({
 			]);
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [transactionMode]);
+	}, [ transactionMode ]);
 
 	// =============== auto-sync paymentAmount and single payment amount with grandTotal;
 	// skipped in edit mode because paymentAmount is pre-populated from the stored sale
@@ -112,7 +109,7 @@ export default function PaymentSection({
 			}
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [grandTotal, isSplitPaymentActive]);
+	}, [ grandTotal, isSplitPaymentActive ]);
 
 	// =============== fetch customers for drawer ===============
 	async function fetchCustomers() {
@@ -133,13 +130,13 @@ export default function PaymentSection({
 		if (!customerDrawerOpened) {
 			fetchCustomers();
 		}
-	}, [customerDrawerOpened]);
+	}, [ customerDrawerOpened ]);
 
 	// =============== reset local state when parent triggers reset ===============
 	useEffect(() => {
 		setDiscountMode("discount");
 		setPercentageValue(0);
-	}, [resetKey]);
+	}, [ resetKey ]);
 
 	const handleCustomerAdd = () => {
 		customerDrawerOpen();
@@ -182,7 +179,7 @@ export default function PaymentSection({
 
 	const clearSplitPayment = () => {
 		const cashMethod = transactionMode?.find((mode) => mode.slug === "cash");
-		const defaultMethod = cashMethod || transactionMode?.[0];
+		const defaultMethod = cashMethod || transactionMode?.[ 0 ];
 		itemsForm.setFieldValue("payments", [
 			{
 				transaction_mode_id: defaultMethod?.id,
@@ -194,7 +191,7 @@ export default function PaymentSection({
 		itemsForm.setFieldValue("paymentAmount", grandTotal);
 	};
 
-	useHotkeys([["alt+s", () => document.getElementById("ItemsFormSubmit")?.click()]]);
+	useHotkeys([ [ "alt+s", () => document.getElementById("ItemsFormSubmit")?.click() ] ]);
 
 	return (
 		<>
@@ -739,7 +736,7 @@ export default function PaymentSection({
 											type="submit"
 											id="ItemsFormSubmit"
 											leftSection={<IconCheck size={16} />}
-											loading={isAddingItem}
+											disabled={isAddingItem}
 										>
 											{isEditMode ? "Update" : "Save"}
 										</Button>
@@ -753,7 +750,7 @@ export default function PaymentSection({
 											type="submit"
 											id="ItemsHoldFormSubmit"
 											leftSection={<IconPlayerPause size={16} />}
-											loading={isAddingItem}
+											disabled={isAddingItem}
 										>
 											{t("Hold")}
 										</Button>
@@ -769,7 +766,7 @@ export default function PaymentSection({
 										form="itemsForm"
 										type="submit"
 										id="ItemsFormSubmit"
-										loading={isAddingItem}
+										disabled={isAddingItem}
 										leftSection={<IconPrinter size={16} />}
 									>
 										Print
@@ -783,7 +780,7 @@ export default function PaymentSection({
 										size="lg"
 										type="button"
 										onClick={onPosPrint}
-										loading={isAddingItem}
+										disabled={isAddingItem}
 									>
 										POS
 									</Button>

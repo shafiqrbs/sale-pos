@@ -7,9 +7,7 @@ import { IconUserPlus } from "@tabler/icons-react";
 import { useGetVendorsQuery } from "@services/core/vendors";
 
 export default function VendorInfoSection({ itemsForm }) {
-	const { configData } = useConfigData();
-	const currencySymbol =
-		configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol;
+	const { currencySymbol } = useConfigData();
 
 	const { data: vendors } = useGetVendorsQuery();
 	const [isAddVendorModalOpened, { open: openAddVendorModal, close: closeAddVendorModal }] =

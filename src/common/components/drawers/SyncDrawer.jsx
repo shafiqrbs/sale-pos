@@ -28,7 +28,7 @@ import { createPortal } from "react-dom";
 import { apiSlice } from "@services/api.mjs";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
-// import { useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import axios from "axios";
 import { APP_NAVLINKS, MASTER_APIS } from "@/routes/routes";
 import commonDataStoreIntoLocalStorage from "@utils/local-storage/commonDataStoreIntoLocalStorage";
@@ -54,7 +54,7 @@ const PLATFORM_SYNC_DATA_MAP = {
 export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen }) {
 	const { t } = useTranslation();
 	const dispatch = useDispatch();
-	// const navigate = useNavigate();
+	const navigate = useNavigate();
 	const [ syncPos ] = useSyncPosMutation();
 	const [ syncRecords, setSyncRecords ] = useState(() => getSyncRecordsFromLocalStorage());
 	const [ loadingStates, setLoadingStates ] = useState(() => {
@@ -352,7 +352,22 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 			// =============== get user id from users table and call common data store function ================
 			const userData = await window.dbAPI.getDataFromTable("users");
 			if (userData?.id) {
-				await commonDataStoreIntoLocalStorage(userData.id);
+				const navigationPathFromConfig =
+					await commonDataStoreIntoLocalStorage(userData.id);
+				const targetPath = navigationPathFromConfig ?? APP_NAVLINKS.BAKERY;
+				// =============== HashRouter: read path when sync finishes (avoids stale closure) ================
+				const hashSegment = window.location.hash.replace(/^#/, "").split("?")[0];
+				const currentPathname = hashSegment === "" ? "/" : hashSegment;
+				// =============== only adjust route when user is on pos bakery or new sales entry (login-style routing) ================
+				const isSalesNewOrBakeryRoute =
+					currentPathname === APP_NAVLINKS.SALES_NEW ||
+					currentPathname === APP_NAVLINKS.BAKERY ||
+					currentPathname.startsWith(`${APP_NAVLINKS.SALES_NEW}/`) ||
+					currentPathname.startsWith(`${APP_NAVLINKS.BAKERY}/`);
+
+				if (isSalesNewOrBakeryRoute && currentPathname !== targetPath) {
+					navigate(targetPath, { replace: true });
+				}
 			}
 
 			// =============== save sync record ================
@@ -365,8 +380,6 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 			showNotification("Platform data synced successfully", "teal", "lightgray", "", "", true);
 
 			dispatch(apiSlice.util.invalidateTags([ "Sales" ]));
-
-			// navigate(APP_NAVLINKS.BAKERY, { replace: true });
 
 			setTimeout(() => window.location.reload(), 100);
 		} catch (error) {

@@ -21,10 +21,7 @@ export default function ItemsTableSection({ itemsProducts, refetch, itemsTotal, 
 	const { t } = useTranslation();
 	const { mainAreaHeight } = useMainAreaHeight();
 	const tableHeight = mainAreaHeight - 348;
-	const { configData } = useConfigData();
-
-	const currencySymbol =
-		configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol;
+	const { currencySymbol } = useConfigData();
 
 	const handleQuantityChange = async (itemId, value) => {
 		const numericValue = parseFloat(value) || 0;

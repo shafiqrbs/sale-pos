@@ -8,8 +8,8 @@ const useConfigData = ({ offlineFetch = false } = {}) => {
 	const { data: onlineConfigData } = useGetConfigQuery(undefined, {
 		skip: !networkStatus.online || offlineFetch,
 	});
-	const [localConfigData, setLocalConfigData] = useState(null);
-	const [configData, setConfigData] = useState({});
+	const [ localConfigData, setLocalConfigData ] = useState(null);
+	const [ configData, setConfigData ] = useState({});
 
 	// =============== fetch local config data from database ================
 	useEffect(() => {
@@ -62,9 +62,15 @@ const useConfigData = ({ offlineFetch = false } = {}) => {
 		};
 
 		syncConfigData();
-	}, [onlineConfigData, localConfigData]);
+	}, [ onlineConfigData, localConfigData ]);
 
-	return { configData };
+	const is_purchase_online = configData?.inventory_config?.config_purchase?.purchase_online ?? configData?.config_purchase?.purchase_online ?? 0;
+	const is_sales_online = configData?.inventory_config?.config_sales?.sales_online ?? configData?.config_sales?.sales_online ?? 0;
+
+	const currencySymbol =
+		configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol || "";
+
+	return { configData, is_purchase_online, is_sales_online, currencySymbol };
 };
 
 export default useConfigData;

@@ -3,11 +3,8 @@ import useConfigData from "@hooks/useConfigData";
 import useGetCoreCustomers from "@hooks/useGetCoreCustomers";
 
 export default function CustomerInfoSection({ itemsForm }) {
-	const { configData } = useConfigData();
+	const { currencySymbol } = useConfigData();
 	const { coreCustomers } = useGetCoreCustomers();
-
-	const currencySymbol =
-		configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol;
 
 	const customerOptions = coreCustomers?.map((customer) => ({
 		value: String(customer.id),

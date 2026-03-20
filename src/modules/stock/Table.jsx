@@ -17,7 +17,7 @@ const PER_PAGE = 25;
 export default function Table() {
 	const { t } = useTranslation();
 	const { mainAreaHeight } = useMainAreaHeight();
-	const { configData } = useConfigData({ offlineFetch: true });
+	const { currencySymbol } = useConfigData({ offlineFetch: true });
 	const [page, setPage] = useState(1);
 	const searchRef = useRef({ term: "" });
 
@@ -28,9 +28,6 @@ export default function Table() {
 	const { products, totalCount, getLocalProducts, getProductCount, loading } = useLocalProducts({
 		fetchOnMount: false,
 	});
-
-	const currencySymbol =
-		configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol || "";
 
 	// =============== fetch products with pagination and search ================
 	const fetchProductsPage = useCallback(async () => {

@@ -18,7 +18,7 @@ export default function Checkout() {
 
 	const { user } = useLoggedInUser();
 	const { isOnline } = useOutletContext();
-	const { configData } = useConfigData({ offlineFetch: !isOnline });
+	const { currencySymbol } = useConfigData({ offlineFetch: !isOnline });
 	const { invoiceData, getCartTotal } = useCartOperation();
 
 	const editingSale = useSelector((state) => state.checkout.editingSale);
@@ -101,7 +101,7 @@ export default function Checkout() {
 				<Group gap="2xs" pr="sm" align="center">
 					<IconSum size="16" style={{ color: "inherit" }} />
 					<Text fw="bold" fz="sm" c="black">
-						{configData?.inventory_config?.currency?.symbol} {formatCurrency(getCartTotal())}
+						{currencySymbol} {formatCurrency(getCartTotal())}
 					</Text>
 				</Group>
 			</Group>

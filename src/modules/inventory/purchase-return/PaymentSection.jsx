@@ -14,7 +14,6 @@ import {
 	Textarea,
 } from "@mantine/core";
 import {IconCheck, IconCurrencyTaka, IconNumber123, IconPercentage, IconUserPlus} from "@tabler/icons-react";
-import useConfigData from "@hooks/useConfigData";
 import useTransactionMode from "@hooks/useTransactionMode";
 import { formatCurrency } from "@utils/index";
 import FormValidationWrapper from "@components/form-builders/FormValidationWrapper";
@@ -30,9 +29,6 @@ export default function PaymentSection({
 	isEditMode = false,
 }) {
 	const { transactionMode } = useTransactionMode();
-	const { configData } = useConfigData();
-	const currencySymbol =
-		configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol;
 	const { data: vendors } = useGetVendorsQuery();
 	const { discountAmount, isDiscountPercentage, purchaseNarration, paymentAmount } =
 		itemsForm.values;

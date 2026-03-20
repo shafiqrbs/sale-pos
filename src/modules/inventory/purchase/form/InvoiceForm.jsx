@@ -40,7 +40,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 	const [ products, setProducts ] = useState([]);
 	const [ productResetKey, setProductResetKey ] = useState(0);
 	const [ selectedCategoryId, setSelectedCategoryId ] = useState(null);
-	const { configData } = useConfigData();
+	const { currencySymbol } = useConfigData();
 	const itemsForm = useForm(invoiceItemFormRequest());
 	const { getLocalProducts } = useLocalProducts({
 		fetchOnMount: false,
@@ -61,9 +61,6 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 		});
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ selectedCategoryId ]);
-
-	const currencySymbol =
-		configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol;
 
 	const productOptions = products?.map((product) => ({
 		value: String(product.id),
