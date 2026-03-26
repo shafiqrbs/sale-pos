@@ -171,7 +171,6 @@ export default function Table() {
 						]}
 					/>
 					<Button
-						w={170}
 						size="md"
 						color="red"
 						variant="filled"
@@ -202,7 +201,7 @@ export default function Table() {
 									accessor: "created",
 									title: t("Created"),
 									render: (item) => (
-										<Text component="a" size="sm" variant="subtle" c="var(--theme-primary-color-6)">
+										<Text component="a" size="sm" variant="subtle">
 											{item?.created}
 										</Text>
 									),
@@ -364,7 +363,7 @@ export default function Table() {
 							scrollAreaProps={{ type: "never" }}
 							rowStyle={(item) =>
 								item.invoice === selectedRow
-									? { background: "var(--theme-primary-color-0)", color: "#FA5463" }
+									? { background: "var(--theme-primary-color-3)", color: "#ffffff" }
 									: undefined
 							}
 						/>

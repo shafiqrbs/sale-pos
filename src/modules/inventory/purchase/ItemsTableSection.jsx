@@ -70,7 +70,7 @@ export default function ItemsTableSection({ itemsProducts, refetch, itemsTotal, 
 	return (
 		<Box bd="1px solid #dee2e6" bg="gray.1" p="3xs" className="borderRadiusAll">
 			<Flex justify="space-between" align="center" mb="4xs">
-				<Box px="xs" fz="sm" fw={600} className="boxBackground textColor borderRadiusAll">
+				<Box px="xs" fz="sm" fw={600} className="boxBackground textColor">
 					{t("PurchaseItems")}
 				</Box>
 				<Button

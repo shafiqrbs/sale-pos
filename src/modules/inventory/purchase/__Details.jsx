@@ -15,11 +15,9 @@ export default function Details({ loading, viewData }) {
   const { configData } = useConfigData({ offlineFetch: !isOnline });
 
 	console.log(viewData)
-  const salesItems = isOnline
-    ? viewData?.purchase_items
-    : Array.isArray(viewData?.purchase_items)
-      ? viewData?.purchase_items
-      : JSON.parse(viewData?.purchase_items || "[]");
+	const salesItems =  Array.isArray(viewData?.purchase_items)
+		? viewData?.purchase_items
+		: JSON.parse(viewData?.purchase_items || "[]");
 
   const rows =
     Array.isArray(salesItems) &&

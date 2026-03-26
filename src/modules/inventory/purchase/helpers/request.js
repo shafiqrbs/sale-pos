@@ -42,7 +42,7 @@ export const vendorOverviewRequest = () => {
 const invoiceItemFormInitialValues = {
 	barcode: "",
 	productId: "",
-	purchasePrice: "",
+	purchase_price: "",
 	quantity: "",
 	unit: "",
 	expired_date: "",
@@ -58,7 +58,7 @@ export const invoiceItemFormRequest = () => {
 				}
 				return null;
 			},
-			purchasePrice: (value) => {
+			purchase_price: (value) => {
 				if (!value) {
 					return "Purchase price is required";
 				}

@@ -72,7 +72,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 	const containerHeight = mainAreaHeight - 160;
 
 	const handleAddItemToPurchaseForm = async () => {
-		const { productId, purchasePrice, quantity, expired_date } = itemsForm.values;
+		const { productId, purchase_price, quantity, expired_date } = itemsForm.values;
 
 		if (!productId || !quantity) {
 			showNotification("Product and quantity are required", "red");
@@ -88,7 +88,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 
 		const quantityNumber = Number(quantity) || 0;
 		const priceNumber =
-			Number(purchasePrice) ||
+			Number(purchase_price) ||
 			Number(selectedProduct.purchase_price) ||
 			Number(selectedProduct.sales_price) ||
 			0;
@@ -129,7 +129,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 
 	const invoiceSubTotal =
 		(Number(itemsForm.values.quantity) || 0) *
-		(Number(itemsForm.values.purchasePrice) || 0);
+		(Number(itemsForm.values.purchase_price) || 0);
 
 	const handleResetInvoiceItemForm = () => {
 		itemsForm.reset();
@@ -141,7 +141,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 
 	const handleProductSelect = (value, option) => {
 		itemsForm.setFieldValue("productId", value);
-		itemsForm.setFieldValue("purchasePrice", option?.purchase_price);
+		itemsForm.setFieldValue("purchase_price", option?.purchase_price);
 		itemsForm.setFieldValue("unit", option?.unit);
 		setTimeout(() => document.getElementById("quantity")?.focus(), 0);
 	};
@@ -223,18 +223,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 						</Flex>
 
 						<Grid gutter={4} mt="sm">
-							<Grid.Col span={12}>
-								<InputNumberForm
-									form={itemsForm}
-									name="purchasePrice"
-									id="purchasePrice"
-									label="Purchase Price"
-									nextField="quantity"
-									placeholder="0.00"
-									tooltip={itemsForm.errors.purchasePrice}
-									leftSection={<IconCurrencyTaka size={16} opacity={0.6} />}
-								/>
-							</Grid.Col>
+
 							<Grid.Col span={12}>
 								<InputNumberForm
 									form={itemsForm}
@@ -242,7 +231,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 									id="quantity"
 									label="Quantity"
 									placeholder="0"
-									nextField="expired_date"
+									nextField="purchase_price"
 									required={false}
 									tooltip={itemsForm.errors.quantity}
 									leftSection={<IconSortAscendingNumbers size={16} opacity={0.6} />}
@@ -251,6 +240,18 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 											{itemsForm.values.unit || "Unit"}
 										</Text>
 									}
+								/>
+							</Grid.Col>
+							<Grid.Col span={12}>
+								<InputNumberForm
+									form={itemsForm}
+									name="purchase_price"
+									id="purchase_price"
+									label="Purchase Price"
+									nextField="expired_date"
+									placeholder="0.00"
+									tooltip={itemsForm.errors.purchase_price}
+									leftSection={<IconCurrencyTaka size={16} opacity={0.6} />}
 								/>
 							</Grid.Col>
 							<Grid.Col span={12}>

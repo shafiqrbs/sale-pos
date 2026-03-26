@@ -217,7 +217,7 @@ export default function Table() {
 									accessor: "invoice",
 									title: t("Invoice"),
 									render: (item) => (
-										<Text component="a" size="sm" variant="subtle" c="red">
+										<Text component="a" size="sm" variant="subtle" c="var(--theme-primary-color-6)">
 											{item.invoice}
 										</Text>
 									),
@@ -345,7 +345,7 @@ export default function Table() {
 							scrollAreaProps={{ type: "never" }}
 							rowStyle={(item) =>
 								item.invoice === selectedRow
-									? { background: "var(--theme-primary-color-0)" }
+									? { background: "var(--theme-primary-color-3)", color: "#ffffff" }
 									: undefined
 							}
 						/>

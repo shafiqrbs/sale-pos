@@ -14,12 +14,9 @@ export default function Details({ loading, salesViewData }) {
   const [ printA4, setPrintA4 ] = useState(false);
   const { configData } = useConfigData({ offlineFetch: !isOnline });
 
-  const salesItems = isOnline
-    ? salesViewData?.sales_items
-    : Array.isArray(salesViewData?.sales_items)
+  const salesItems =  Array.isArray(salesViewData?.sales_items)
       ? salesViewData?.sales_items
       : JSON.parse(salesViewData?.sales_items || "[]");
-
 
   const rows =
     Array.isArray(salesItems) &&

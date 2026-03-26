@@ -37,13 +37,13 @@ import SalesCustomerDrawer from "@components/drawers/SalesCustomerDrawer";
 import { DateInput } from "@mantine/dates";
 
 export default function PaymentSection({
-	itemsForm,
-	itemsTotal,
-	isAddingItem,
-	onPosPrint,
-	resetKey = 0,
-	isEditMode = false,
-}) {
+										   itemsForm,
+										   itemsTotal,
+										   isAddingItem,
+										   onPosPrint,
+										   resetKey = 0,
+										   isEditMode = false,
+									   }) {
 	const { t } = useTranslation();
 	const { transactionMode } = useTransactionMode();
 	const { configData, currencySymbol } = useConfigData();
@@ -275,9 +275,9 @@ export default function PaymentSection({
 											</Text>
 											<Text fz="sm" fw={800} c="black">
 												{configData?.inventory_config?.config_vat &&
-													formatCurrency(
-														calculateVATAmount(itemsTotal, configData?.inventory_config?.config_vat)
-													)}
+												formatCurrency(
+													calculateVATAmount(itemsTotal, configData?.inventory_config?.config_vat)
+												)}
 											</Text>
 										</Group>
 										<Group justify="space-between">
