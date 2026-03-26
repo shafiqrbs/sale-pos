@@ -298,7 +298,7 @@ export default function Table() {
 															<Text size="sm">{t("Show")}</Text>
 														</Flex>
 													</Menu.Item>
-													<Menu.Item
+													{/*<Menu.Item
 														onClick={(e) => {
 															e.stopPropagation();
 															if (configData?.is_pos) {
@@ -313,8 +313,8 @@ export default function Table() {
 															<IconEdit size={18} />
 															<Text size="sm">{t("Edit")}</Text>
 														</Flex>
-													</Menu.Item>
-													<Menu.Item
+													</Menu.Item>*/}
+													{/*<Menu.Item
 														onClick={(e) => {
 															e.stopPropagation();
 															handleDeleteClick(data);
@@ -325,7 +325,7 @@ export default function Table() {
 															<IconTrash size={18} />
 															<Text size="sm">{t("Delete")}</Text>
 														</Flex>
-													</Menu.Item>
+													</Menu.Item>*/}
 												</Menu.Dropdown>
 											</Menu>
 										</Group>

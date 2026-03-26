@@ -103,6 +103,8 @@
 	--theme-menu-three-dot: var(--mantine-color-red-6);
 
 	--theme-primary-card-color: #1e40af;
+	--theme-secondary-card-color: #196603;
+
 }
 
 .borderRadiusAll{

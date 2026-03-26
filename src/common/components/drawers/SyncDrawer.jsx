@@ -178,9 +178,14 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 						})),
 					})),
 				};
-
 			case "purchases":
 			case "products":
+				return {
+					...basePayload,
+					content: syncData.map((sale) => ({
+
+					})),
+				};
 			case "customers":
 			case "vendors":
 				// =============== generic payload structure for other sync types ================

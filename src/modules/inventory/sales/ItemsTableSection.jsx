@@ -18,16 +18,9 @@ export default function ItemsTableSection({
 }) {
 	const { mainAreaHeight } = useMainAreaHeight();
 	// =============== account for invoice form top row (~55px) + payment section + spacing ===============
-<<<<<<< HEAD
+
 	const tableHeight = mainAreaHeight - 342;
 	const { currencySymbol } = useConfigData();
-=======
-	const tableHeight = mainAreaHeight - 320;
-	const { configData } = useConfigData();
-
-	const currencySymbol =
-		configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol;
->>>>>>> 8e9f4ce (Update css & others)
 
 	const handleQuantityChange = async (itemId, value) => {
 		const numericValue = parseFloat(value) || 0;
