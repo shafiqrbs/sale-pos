@@ -10,7 +10,7 @@ import {
 	Box,
 	Loader,
 	Flex,
-	Text,
+	Text, Stack,
 } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import LoginPage from "@assets/css/LoginPage.module.css";
@@ -18,7 +18,7 @@ import classes from "@assets/css/AuthenticationImage.module.css";
 import { getHotkeyHandler, useHotkeys } from "@mantine/hooks";
 import { IconInfoCircle, IconLogin } from "@tabler/icons-react";
 import { isNotEmpty, useForm } from "@mantine/form";
-import { Navigate, useNavigate } from "react-router";
+import {Navigate, useNavigate, useOutletContext} from "react-router";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
@@ -34,10 +34,17 @@ export default function Login() {
 	const { t } = useTranslation();
 	const navigate = useNavigate();
 	const icon = <IconInfoCircle />;
-
 	const [ spinner, setSpinner ] = useState(false);
 	const [ errorMessage, setErrorMessage ] = useState("");
 	const [ activated, setActivated ] = useState({ is_activated: false });
+
+	const [height, setHeight] = useState(window.innerHeight);
+
+	useEffect(() => {
+		const handleResize = () => setHeight(window.innerHeight);
+		window.addEventListener("resize", handleResize);
+		return () => window.removeEventListener("resize", handleResize);
+	}, []);
 
 	useEffect(() => {
 		const checkAuth = async () => {
@@ -151,6 +158,13 @@ export default function Login() {
 	return (
 		<Box className={classes.wrapper}>
 			<Box component="form" onSubmit={form.onSubmit(login)}>
+				<Stack
+					h={height}
+					bg="var(--mantine-color-body)"
+					align="stretch"
+					justify="center"
+					gap="md"
+				>
 				<Paper className={classes.form} radius={0} p={30}>
 					<Title order={2} className={`${classes.title} ${classes.formTitle}`} ta="center" mt="md">
 						{t("WelcomeBackToPOSH")}
@@ -248,6 +262,7 @@ export default function Login() {
 						</Text>
 					</Flex>
 				</Paper>
+				</Stack>
 			</Box>
 			<Box className={classes.wrapperImage} />
 		</Box>

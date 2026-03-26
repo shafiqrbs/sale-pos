@@ -78,6 +78,7 @@ export default function Header({ isOnline, toggleNetwork }) {
 	const [ languageSelected, setLanguageSelected ] = useState(
 		LANGUAGES.find((item) => item.value === i18n.language)
 	);
+
 	const [ printerSetup, setPrinterSetup ] = useState({
 		printerName: "",
 		characterSet: "PC437_USA",

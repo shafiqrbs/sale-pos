@@ -22,7 +22,7 @@ export default function useLoggedInUser() {
     }
 
     const isOnlinePermissionIncludes =
-        roles.includes("role_sales_purchase_manager") || roles.includes("role_sales_purchase_admin") || roles.includes("role_sales_purchase_admin");
+        roles.includes("role_sales_purchase_manager") || roles.includes("role_sales_purchase_admin") || roles.includes("role_sales_purchase_admin") || roles.includes("role_sales_purchase_admin");
 
 
 
