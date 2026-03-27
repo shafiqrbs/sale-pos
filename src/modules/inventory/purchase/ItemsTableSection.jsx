@@ -20,7 +20,7 @@ export default function ItemsTableSection({ itemsProducts, refetch, itemsTotal, 
 	const navigate = useNavigate();
 	const { t } = useTranslation();
 	const { mainAreaHeight } = useMainAreaHeight();
-	const tableHeight = mainAreaHeight - 348;
+	const tableHeight = mainAreaHeight - 308;
 	const { currencySymbol } = useConfigData();
 
 	const handleQuantityChange = async (itemId, value) => {

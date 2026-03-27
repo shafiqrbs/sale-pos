@@ -14,12 +14,9 @@ export default function Details({ loading, viewData }) {
   const [ printA4, setPrintA4 ] = useState(false);
   const { configData } = useConfigData({ offlineFetch: !isOnline });
 
-  const salesItems = isOnline
-    ? viewData?.purchase_items
-    : Array.isArray(viewData?.purchase_items)
-      ? viewData?.purchase_items
-      : JSON.parse(viewData?.purchase_items || "[]");
-
+  const salesItems =  Array.isArray(viewData?.requisition_items)
+      ? viewData?.requisition_items
+      : JSON.parse(viewData?.requisition_items || "[]");
   const rows =
     Array.isArray(salesItems) &&
     salesItems?.map((element, index) => (
@@ -34,7 +31,7 @@ export default function Details({ loading, viewData }) {
           {element?.quantity}
         </Table.Td>
         <Table.Td ta="right" fz="xs" width="80">
-          {element?.uom}
+          {element?.unit_name}
         </Table.Td>
         <Table.Td ta="right" fz="xs" width="80">
           {element?.sales_price}
@@ -58,96 +55,80 @@ export default function Details({ loading, viewData }) {
             loaderProps={{ color: "red" }}
           />
         )}
-        <Box
-          h="36"
-          px="xs"
-          fz="sm"
-          fw="600"
-          pt="6"
-          mb="4"
-          className="boxBackground textColor borderRadiusAll"
-        >
-          {t("Invoice")}:{" "}
-          {viewData?.invoice}
-        </Box>
-        <Box className="borderRadiusAll" fz="sm">
-          <ScrollArea h={102} type="never">
-            <Box
-              fz="sm"
-              fw="600"
-              px="xs"
-              pt="6"
-              pb="xs"
-              className="boxBackground textColor"
-            >
-              <Grid gutter={{ base: 4 }}>
-                <Grid.Col span="6">
-                  <Grid columns={15} gutter={{ base: 4 }}>
-                    <Grid.Col span={6}>
-                      <Text fz="sm" lh="xs">
-                        {t("Customer")}
-                      </Text>
-                    </Grid.Col>
-                    <Grid.Col span={9}>
-                      <Text fz="sm" lh="xs">
-                        {viewData.customerName || "N/A"}
-                      </Text>
-                    </Grid.Col>
-                  </Grid>
-                  <Grid columns={15} gutter={{ base: 4 }}>
-                    <Grid.Col span={6}>
-                      <Text fz="sm" lh="xs">
-                        {t("Mobile")}
-                      </Text>
-                    </Grid.Col>
-                    <Grid.Col span={9}>
-                      <Text fz="sm" lh="xs">
-                        {viewData.customerMobile || "N/A"}
-                      </Text>
-                    </Grid.Col>
-                  </Grid>
+        <Box h={'70'}>
+          <Grid gutter={{ base: 4 }}>
+            <Grid.Col span="6">
+              <Grid columns={15} gutter={{ base: 4 }}>
+                <Grid.Col span={6}>
+                  <Text fz="sm" lh="xs">
+                    {t("Customer")}
+                  </Text>
                 </Grid.Col>
-                <Grid.Col span="6">
-                  <Grid columns={15} gutter={{ base: 4 }}>
-                    <Grid.Col span={6}>
-                      <Text fz="sm" lh="xs">
-                        {t("Created")}
-                      </Text>
-                    </Grid.Col>
-                    <Grid.Col span={9}>
-                      <Text fz="sm" lh="xs">
-                        {viewData.created}
-                      </Text>
-                    </Grid.Col>
-                  </Grid>
-                  <Grid columns={15} gutter={{ base: 4 }}>
-                    <Grid.Col span={6}>
-                      <Text fz="sm" lh="xs">
-                        {t("SalesBy")}
-                      </Text>
-                    </Grid.Col>
-                    <Grid.Col span={9}>
-                      <Text fz="sm" lh="xs">
-                        {viewData.salesByUser || "N/A"}
-                      </Text>
-                    </Grid.Col>
-                  </Grid>
-                  <Grid columns={15} gutter={{ base: 4 }}>
-                    <Grid.Col span={6}>
-                      <Text fz="sm" lh="xs">
-                        {t("Mode")}
-                      </Text>
-                    </Grid.Col>
-                    <Grid.Col span={9}>
-                      <Text fz="sm" lh="xs">
-                        {viewData?.multi_transaction ? "Multi Transaction" : viewData?.mode_name}
-                      </Text>
-                    </Grid.Col>
-                  </Grid>
+                <Grid.Col span={9}>
+                  <Text fz="sm" lh="xs">
+                    {viewData.vendor_name || "N/A"}
+                  </Text>
                 </Grid.Col>
               </Grid>
-            </Box>
-          </ScrollArea>
+              <Grid columns={15} gutter={{ base: 4 }}>
+                <Grid.Col span={6}>
+                  <Text fz="sm" lh="xs">
+                    {t("Mobile")}
+                  </Text>
+                </Grid.Col>
+                <Grid.Col span={9}>
+                  <Text fz="sm" lh="xs">
+                    {viewData.vendor_mobile || "N/A"}
+                  </Text>
+                </Grid.Col>
+              </Grid>
+            </Grid.Col>
+            <Grid.Col span="4">
+              <Grid columns={15} gutter={{ base: 4 }}>
+                <Grid.Col span={6}>
+                  <Text fz="sm" lh="xs">
+                    {t("Created")}
+                  </Text>
+                </Grid.Col>
+                <Grid.Col span={9}>
+                  <Text fz="sm" lh="xs">
+                    {viewData.created}
+                  </Text>
+                </Grid.Col>
+              </Grid>
+              <Grid columns={15} gutter={{ base: 4 }}>
+                <Grid.Col span={6}>
+                  <Text fz="sm" lh="xs">
+                    {t("CreatedBy")}
+                  </Text>
+                </Grid.Col>
+                <Grid.Col span={9}>
+                  <Text fz="sm" lh="xs">
+                    {viewData.createdByName || "N/A"}
+                  </Text>
+                </Grid.Col>
+              </Grid>
+            </Grid.Col>
+            <Grid.Col span="2">
+              <Button.Group mb="1">
+                <Button
+                    size={'compact-xs'}
+                    fullWidth
+                    variant="filled"
+                    leftSection={<IconPrinter size={14} />}
+                    color="green.5"
+                    onClick={() => {
+                      setPrintA4(true);
+                    }}
+                >
+                  {t("Print")}
+                </Button>
+                <SalesPrintThermal salesViewData={viewData} salesItems={salesItems} />
+              </Button.Group>
+            </Grid.Col>
+          </Grid>
+        </Box>
+        <Box  fz="sm">
           <ScrollArea h={mainAreaHeight - 246} scrollbarSize={2} type="never">
             <Table stickyHeader className='sales-details-table'>
               <Table.Thead>
@@ -182,56 +163,10 @@ export default function Details({ loading, viewData }) {
                     {viewData.sub_total}
                   </Table.Th>
                 </Table.Tr>
-                <Table.Tr>
-                  <Table.Th colSpan="5" ta="right" fz="xs" w="100">
-                    {t("Discount")}
-                  </Table.Th>
-                  <Table.Th ta="right" fz="xs" w="100">
-                    {viewData.discount}
-                  </Table.Th>
-                </Table.Tr>
-                <Table.Tr>
-                  <Table.Th colSpan="5" ta="right" fz="xs" w="100">
-                    {t("Total")}
-                  </Table.Th>
-                  <Table.Th ta="right" fz="xs" w="100">
-                    {viewData.total}
-                  </Table.Th>
-                </Table.Tr>
-                <Table.Tr>
-                  <Table.Th colSpan="5" ta="right" fz="xs" w="100">
-                    {t("Receive")}
-                  </Table.Th>
-                  <Table.Th ta="right" fz="xs" w="100">
-                    {viewData.payment}
-                  </Table.Th>
-                </Table.Tr>
-                <Table.Tr>
-                  <Table.Th colSpan="5" ta="right" fz="xs" w="100">
-                    {dueOrReturnValue >= 0 ? t("Due") : t("Return")}
-                  </Table.Th>
-                  <Table.Th ta="right" fz="xs" w="100">
-                    {Math.abs(dueOrReturnValue)}
-                  </Table.Th>
-                </Table.Tr>
               </Table.Tfoot>
             </Table>
           </ScrollArea>
         </Box>
-        <Button.Group mb="1">
-          <Button
-            fullWidth
-            variant="filled"
-            leftSection={<IconPrinter size={14} />}
-            color="green.5"
-            onClick={() => {
-              setPrintA4(true);
-            }}
-          >
-            {t("Print")}
-          </Button>
-          <SalesPrintThermal salesViewData={viewData} salesItems={salesItems} />
-        </Button.Group>
       </Box>
       {printA4 && (
         <div style={{ display: "none" }}>

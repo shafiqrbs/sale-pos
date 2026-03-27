@@ -217,7 +217,7 @@ export default function Table() {
 									accessor: "invoice",
 									title: t("Invoice"),
 									render: (item) => (
-										<Text component="a" size="sm" variant="subtle" c="var(--theme-primary-color-6)">
+										<Text component="a" size="sm" variant="subtle" >
 											{item.invoice}
 										</Text>
 									),

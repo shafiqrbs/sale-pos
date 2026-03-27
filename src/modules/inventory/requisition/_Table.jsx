@@ -337,9 +337,9 @@ export default function Table() {
 			<GlobalModal
 				opened={opened}
 				onClose={close}
-				size="65%"
+				size="80%"
 				padding="md"
-				title={`${t("Purchase")}: ${viewData?.invoice || ""}`}
+				title={`${t("Requisition No")}: ${viewData?.invoice || ""}`}
 			>
 				<Details loading={loading} viewData={viewData} />
 			</GlobalModal>

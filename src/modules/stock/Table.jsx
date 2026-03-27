@@ -148,12 +148,6 @@ export default function Table() {
 							render: (record) => products.indexOf(record) + 1 + (page - 1) * PER_PAGE,
 						},
 						{
-							accessor: "stock_id",
-							title: t("StockN") + " ID",
-							width: 100,
-							render: (record) => record.stock_id ?? record.stock_item_id ?? record.id ?? "—",
-						},
-						{
 							accessor: "display_name",
 							title: t("Product"),
 							width: 220,

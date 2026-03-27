@@ -1209,7 +1209,7 @@
 	"ClosingStock": "Closing Stock",
 	"TotalStock": "Total Stock",
 	"PurchaseReceive": "Purchase Receive",
-	"OpeningBalance": "Opening Balance",
+	"CategorySummaryReport": "Category Summary Report",
 	"ClosingBalance": "Closing Balance",
 	"SalesReturnItems": "Sales Return Items",
 	"TotalSalesAfterDiscount": "Total Sales after Discount"

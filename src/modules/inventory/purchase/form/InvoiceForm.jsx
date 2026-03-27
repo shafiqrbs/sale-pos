@@ -69,7 +69,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 		unit: product.unit_name,
 	}));
 
-	const containerHeight = mainAreaHeight - 160;
+	const containerHeight = mainAreaHeight - 162;
 
 	const handleAddItemToPurchaseForm = async () => {
 		const { productId, purchase_price, quantity, expired_date } = itemsForm.values;
@@ -233,6 +233,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 									placeholder="0"
 									nextField="purchase_price"
 									required={false}
+									value={1}
 									tooltip={itemsForm.errors.quantity}
 									leftSection={<IconSortAscendingNumbers size={16} opacity={0.6} />}
 									rightIcon={

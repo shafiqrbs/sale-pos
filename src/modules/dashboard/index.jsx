@@ -8,11 +8,12 @@ import TransactionModesCard from "@components/dashboard/TransactionModesCard";
 import TopSellingProductsCard from "@components/dashboard/TopSellingProductsCard";
 import TodaysOverviewCard from "@components/dashboard/TodaysOverviewCard";
 import { useOutletContext } from "react-router";
+import useLoggedInUser from "@hooks/useLoggedInUser";
 
 export default function DashboardIndex() {
 	const { isOnline, mainAreaHeight } = useOutletContext();
 	const [dashboardOnline, setDashboardOnline] = useState(false);
-
+	const { user, isOnlinePermissionIncludes } = useLoggedInUser();
 	const { dailyData, isLoading } = useDailyMatrixData({ offlineFetch: !dashboardOnline });
 	console.log(dailyData)
 
@@ -77,16 +78,10 @@ export default function DashboardIndex() {
 			</Grid>
 			<Grid gutter="md" mb="md">
 				{/* =============== sales summary ================ */}
-
-
-
-
-
-
-
 			</Grid>
 
 			{/* =============== floating online/offline toggle ================ */}
+			{isOnlinePermissionIncludes ? (
 			<Transition mounted={true} transition="slide-up" duration={300}>
 				{(styles) => (
 					<Tooltip
@@ -115,6 +110,7 @@ export default function DashboardIndex() {
 					</Tooltip>
 				)}
 			</Transition>
+			) : null}
 		</Box>
 	);
 }

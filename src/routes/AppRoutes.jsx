@@ -7,6 +7,7 @@ import BakeryIndex from "@modules/pos/bakery";
 import SalesIndex from "@modules/inventory/sales";
 import HoldSalesIndex from "@modules/inventory/sales/HoldIndex";
 import PurchaseIndex from "@modules/inventory/purchase";
+import PurchaseItemIndex from "@modules/inventory/purchase-item";
 import PurchaseNewIndex from "@modules/inventory/purchase/NewIndex";
 import PurchaseEditIndex from "@modules/inventory/purchase/EditIndex";
 import StockIndex from "@modules/stock";
@@ -21,6 +22,7 @@ import RequisitionEditIndex from "@modules/inventory/requisition/EditIndex";
 import PurchaseReturnIndex from "@modules/inventory/purchase-return";
 import PurchaseReturnNewIndex from "@modules/inventory/purchase-return/NewIndex";
 import PurchaseReturnEditIndex from "@modules/inventory/purchase-return/EditIndex";
+import CategorySummary from "@modules/report/category-summary";
 
 export default function AppRoutes() {
 	return (
@@ -30,6 +32,9 @@ export default function AppRoutes() {
 			<Route path="/" element={<Layout />}>
 				<Route path="core">
 					<Route index path="customers" element={<CustomersIndex />} />
+				</Route>
+				<Route path="report">
+					<Route index path="category-summary" element={<CategorySummary />} />
 				</Route>
 				<Route path="inventory">
 					<Route path="sales">
@@ -54,6 +59,7 @@ export default function AppRoutes() {
 						<Route path="edit/:id" element={<PurchaseReturnEditIndex />} />
 					</Route>
 					<Route path="config" element={<ConfigIndex />} />
+					<Route path="purchase-item" element={<PurchaseItemIndex />} />
 					{/* <Route path="sales/edit/:id" element={<SalesEdit />} /> */}
 					{/* <Route path="sales" element={<DashboardBarChart />} /> */}
 					{/* <Route path="sales" element={<TestInput />} /> */}

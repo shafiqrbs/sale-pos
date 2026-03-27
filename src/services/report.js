@@ -11,9 +11,21 @@ export const extendedReportApiSlice = apiSlice.injectEndpoints({
           params,
         };
       },
-      providesTags: ["Sales"],
+      providesTags: ["Reports"],
     }),
+	getCategorySummary: builder.query({
+		  query: (params) => {
+			  return {
+				  url: APP_APIS.CATEGORY_SUMMARY,
+				  method: "GET"
+			  };
+		  },
+		  providesTags: ["Reports"],
+	  }),
   }),
 });
 
-export const { useGetDailySummaryQuery } = extendedReportApiSlice;
+export const {
+	useGetDailySummaryQuery,
+	useGetCategorySummaryQuery,
+} = extendedReportApiSlice;

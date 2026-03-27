@@ -9,6 +9,13 @@ import {
 	IconArrowBack,
 	IconPackage,
 	IconBox,
+	IconBasket,
+	IconBasketDown,
+	IconGardenCart,
+	IconTruckReturn,
+	IconReceiptTax,
+	IconTruckLoading,
+	IconTruckDelivery, IconStack3, IconStackPop,
 } from "@tabler/icons-react";
 import GlobalDrawer from "./GlobalDrawer";
 import { APP_NAVLINKS } from "@/routes/routes";
@@ -18,6 +25,47 @@ import useConfigData from "@hooks/useConfigData";
 
 
 const DRAWER_MENU = [
+
+	{
+		value: "sales",
+		label: "Sales",
+		icon: IconShoppingCart,
+		submenu: [
+			{ label: "Sales", pathname: APP_NAVLINKS.SALES, icon: IconGardenCart },
+			{ label: "New Sale", pathname: APP_NAVLINKS.SALES_NEW, icon: IconReceipt },
+			{ label: "Sales Return", pathname: APP_NAVLINKS.SALES_RETURN, icon: IconBasketDown },
+			{ label: "New Sales Return", pathname: APP_NAVLINKS.SALES_RETURN_NEW, icon: IconReceiptTax },
+		],
+	},
+	{
+		value: "purchases",
+		label: "Purchases",
+		icon: IconTruck,
+		submenu: [
+			{ label: "Purchase", pathname: APP_NAVLINKS.PURCHASE, icon: IconTruckLoading },
+			{ label: "New purchase", pathname: APP_NAVLINKS.PURCHASE_NEW, icon: IconPackage },
+			{ label: "Purchase Item", pathname: APP_NAVLINKS.PURCHASE_ITEMS, icon: IconPackage },
+			{ label: "Purchase Return", pathname: APP_NAVLINKS.PURCHASE_RETURN, icon: IconTruckReturn },
+			{ label: "New Purchase Return", pathname: APP_NAVLINKS.PURCHASE_RETURN_NEW, icon: IconReceiptTax },
+		],
+	},
+	{
+		value: "requisition",
+		label: "Requisition",
+		icon: IconTruckDelivery,
+		submenu: [
+			{ label: "Requisition", pathname: APP_NAVLINKS.REQUISITION, icon: IconTruckLoading },
+			{ label: "New Requisition", pathname: APP_NAVLINKS.REQUISITION_NEW, icon: IconReceiptTax },
+		],
+	},
+	{
+		value: "stock",
+		label: "Stocks",
+		icon: IconStack3,
+		submenu: [
+			{ label: "Stocks", pathname: APP_NAVLINKS.STOCK, icon: IconStackPop },
+		],
+	},
 	{
 		value: "core",
 		label: "Core",
@@ -28,16 +76,11 @@ const DRAWER_MENU = [
 		],
 	},
 	{
-		value: "sales-purchases",
-		label: "Sales & Purchases",
-		icon: IconShoppingCart,
+		value: "report",
+		label: "Report",
+		icon: IconSettings,
 		submenu: [
-			{ label: "Sales", pathname: APP_NAVLINKS.SALES, icon: IconReceipt },
-			{ label: "New Sale", pathname: APP_NAVLINKS.SALES_NEW, icon: IconReceipt },
-			{ label: "Purchase", pathname: APP_NAVLINKS.PURCHASE, icon: IconShoppingCart },
-			{ label: "Sales return", pathname: APP_NAVLINKS.SALES_RETURN, icon: IconArrowBack },
-			{ label: "New purchase", pathname: APP_NAVLINKS.PURCHASE_NEW, icon: IconPackage },
-			{ label: "Opening stock", pathname: APP_NAVLINKS.OPENING_STOCK, icon: IconBox },
+			{ label: "Category Summary", pathname: APP_NAVLINKS.CATEGORY_SUMMARY, icon: IconUsers },
 		],
 	},
 ];
@@ -82,7 +125,9 @@ export default function OptionsDrawer({ isOnline,opened, onClose }) {
 												onClick={() => handleSubmenuClick(subItem.pathname)}
 												style={{
 													borderBottom:"1px solid #f9fafb",
-													paddingBottom:'8px',
+													paddingTop:'6px',
+													paddingBottom:'6px',
+													paddingLeft:'12px',
 													backgroundColor: isActive
 														? "var(--mantine-color-default-hover)"
 														: "transparent",

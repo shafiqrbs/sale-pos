@@ -14,7 +14,6 @@ export default function Details({ loading, viewData }) {
   const [ printA4, setPrintA4 ] = useState(false);
   const { configData } = useConfigData({ offlineFetch: !isOnline });
 
-	console.log(viewData)
 	const salesItems =  Array.isArray(viewData?.purchase_items)
 		? viewData?.purchase_items
 		: JSON.parse(viewData?.purchase_items || "[]");
@@ -33,7 +32,7 @@ export default function Details({ loading, viewData }) {
           {element?.quantity}
         </Table.Td>
         <Table.Td ta="right" fz="xs" width="80">
-          {element?.uom}
+          {element?.unit_name}
         </Table.Td>
         <Table.Td ta="right" fz="xs" width="80">
           {element?.sales_price}
@@ -58,7 +57,7 @@ export default function Details({ loading, viewData }) {
           />
         )}
         <Box>
-          <Box>
+          <Box h={'80'}>
               <Grid gutter={{ base: 4 }}>
                 <Grid.Col span="6">
                   <Grid columns={15} gutter={{ base: 4 }}>
@@ -69,7 +68,7 @@ export default function Details({ loading, viewData }) {
                     </Grid.Col>
                     <Grid.Col span={9}>
                       <Text fz="sm" lh="xs">
-                        {viewData.customerName || "N/A"}
+                        {viewData.vendor_name || "N/A"}
                       </Text>
                     </Grid.Col>
                   </Grid>
@@ -81,7 +80,7 @@ export default function Details({ loading, viewData }) {
                     </Grid.Col>
                     <Grid.Col span={9}>
                       <Text fz="sm" lh="xs">
-                        {viewData.customerMobile || "N/A"}
+                        {viewData.vendor_mobile || "N/A"}
                       </Text>
                     </Grid.Col>
                   </Grid>
@@ -102,12 +101,12 @@ export default function Details({ loading, viewData }) {
                   <Grid columns={15} gutter={{ base: 4 }}>
                     <Grid.Col span={6}>
                       <Text fz="sm" lh="xs">
-                        {t("SalesBy")}
+                        {t("CreatedBy")}
                       </Text>
                     </Grid.Col>
                     <Grid.Col span={9}>
                       <Text fz="sm" lh="xs">
-                        {viewData.salesByUser || "N/A"}
+                        {viewData.createdByName || "N/A"}
                       </Text>
                     </Grid.Col>
                   </Grid>
@@ -119,7 +118,7 @@ export default function Details({ loading, viewData }) {
                     </Grid.Col>
                     <Grid.Col span={9}>
                       <Text fz="sm" lh="xs">
-                        {viewData?.multi_transaction ? "Multi Transaction" : viewData?.mode_name}
+                        {viewData?.mode_name}
                       </Text>
                     </Grid.Col>
                   </Grid>
@@ -144,7 +143,7 @@ export default function Details({ loading, viewData }) {
               </Grid>
             </Box>
           <ScrollArea h={mainAreaHeight - 300} scrollbarSize={2} type="never">
-            <Table stickyHeader className='sales-details-table borderRadiusAll' >
+            <Table stickyHeader className='sales-details-table' >
               <Table.Thead>
                 <Table.Tr>
                   <Table.Th fz="xs" w="20">

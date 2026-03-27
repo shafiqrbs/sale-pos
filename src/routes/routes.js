@@ -12,6 +12,7 @@ export const APP_NAVLINKS = {
 	SALES_NEW: "/inventory/sales/new",
 	SALES_EDIT: "/inventory/sales/edit",
 	PURCHASE: "/inventory/purchase",
+	PURCHASE_ITEMS: "/inventory/purchase-item",
 	PURCHASE_NEW: "/inventory/purchase/new",
 	PURCHASE_EDIT: "/inventory/purchase/edit",
 	REQUISITION: "/inventory/requisition",
@@ -30,6 +31,7 @@ export const APP_NAVLINKS = {
 	DASHBOARD: "/dashboard",
 	CUSTOMERS: "/core/customers",
 	SETTINGS: "/inventory/config",
+	CATEGORY_SUMMARY: "/report/category-summary",
 };
 
 export const APP_APIS = {
@@ -57,7 +59,9 @@ export const APP_APIS = {
 	INVENTORY_CATEGORIES: "/inventory/select/category",
 	INVENTORY_PARTICULAR: "/inventory/select/particular",
 	PURCHASE: "/inventory/purchase",
+	PURCHASE_ITEM: "/inventory/purchase-item",
 	CHANGE_PASSWORD: "/core/change-password",
 	PURCHASE_CONFIG: "/domain/config/inventory-purchase",
 	DAILY_SUMMARY: "/inventory/report/daily-summary",
+	CATEGORY_SUMMARY: "/inventory/report/category-summary",
 };

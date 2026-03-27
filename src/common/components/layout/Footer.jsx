@@ -5,9 +5,11 @@ import { NavLink } from "react-router";
 import { IconPlus, IconMinus } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
 import { APP_NAVLINKS } from "@/routes/routes";
+import useLoggedInUser from "@hooks/useLoggedInUser";
 
 function Footer() {
 	const { t } = useTranslation();
+	const { user, isOnlinePermissionIncludes } = useLoggedInUser();
 	const [ zoomLevel, setZoomLevel ] = useState(() => {
 		const initialZoom = window.zoomAPI.getZoomFactor();
 		return Math.round(initialZoom * 100);
@@ -69,7 +71,6 @@ function Footer() {
 
 	const leftLinks = [
 		{ link: "/", label: t("Home") },
-		{ link: "/sitemap", label: t("Sitemap") },
 	];
 
 	const leftItems = leftLinks.map((link) => (
@@ -88,6 +89,7 @@ function Footer() {
 						</Flex>
 					</Group>
 					<Group>
+						{isOnlinePermissionIncludes ? (
 						<Group ml={50} gap={5} className={classes.links} visibleFrom="sm">
 							<Flex
 								gap="md"
@@ -100,6 +102,7 @@ function Footer() {
 								{items}
 							</Flex>
 						</Group>
+						) : null}
 						<Group>
 							<ActionIcon variant="outline" onClick={zoomOut} size="sm">
 								<IconMinus style={{ width: "70%", height: "70%" }} />
