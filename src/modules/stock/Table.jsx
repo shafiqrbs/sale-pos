@@ -1,8 +1,8 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import {Box, Flex, ActionIcon, SegmentedControl, Button, Group, Tooltip} from "@mantine/core";
+import { Box, Flex, ActionIcon, SegmentedControl, Button, Group, Tooltip } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import { useForm } from "@mantine/form";
-import {IconPlus, IconReload} from "@tabler/icons-react";
+import { IconPlus, IconReload } from "@tabler/icons-react";
 import { DataTable } from "mantine-datatable";
 import tableCss from "@assets/css/Table.module.css";
 import useMainAreaHeight from "@hooks/useMainAreaHeight.js";
@@ -10,16 +10,24 @@ import useLocalProducts from "@hooks/useLocalProducts.js";
 import useConfigData from "@hooks/useConfigData.js";
 import { formatCurrency } from "@utils/index.js";
 import KeywordSearch from "@components/KeywordSearch";
-import {APP_NAVLINKS} from "@/routes/routes";
+import { APP_NAVLINKS } from "@/routes/routes";
+import { useNavigate, useOutletContext } from "react-router";
+import { useGetProductQuery } from "@services/product";
 
 const PER_PAGE = 25;
 
 export default function Table() {
+	const navigate = useNavigate();
 	const { t } = useTranslation();
+	const { isOnline } = useOutletContext();
 	const { mainAreaHeight } = useMainAreaHeight();
 	const { currencySymbol } = useConfigData({ offlineFetch: true });
-	const [page, setPage] = useState(1);
+	const [ page, setPage ] = useState(1);
+	const [ dataSource, setDataSource ] = useState("offline");
+	const [ onlineSearchTerm, setOnlineSearchTerm ] = useState("");
 	const searchRef = useRef({ term: "" });
+
+	const effectiveDataSource = isOnline ? dataSource : "offline";
 
 	const searchForm = useForm({
 		initialValues: { term: "" },
@@ -29,17 +37,34 @@ export default function Table() {
 		fetchOnMount: false,
 	});
 
-	// =============== fetch products with pagination and search ================
-	const fetchProductsPage = useCallback(async () => {
+	// =============== online stock products via RTK Query ================
+	const {
+		data: onlineProductsResponse,
+		isLoading: isOnlineLoading,
+		isFetching: isOnlineFetching,
+		refetch: refetchOnlineProducts,
+	} = useGetProductQuery(
+		{
+			term: onlineSearchTerm,
+			page,
+			offset: PER_PAGE,
+			type: "product",
+			product_nature: "allstocks",
+		},
+		{ skip: effectiveDataSource !== "online" }
+	);
+
+	// =============== fetch local products with pagination and search ================
+	const fetchLocalProductsPage = useCallback(async () => {
 		const offset = (page - 1) * PER_PAGE;
 		const term = searchRef.current.term?.trim() || "";
 
 		const searchConditions = term
 			? {
-					like: {
-						display_name: term,
-					},
-				}
+				like: {
+					display_name: term,
+				},
+			}
 			: undefined;
 
 		await getLocalProducts({}, "id", {
@@ -55,35 +80,62 @@ export default function Table() {
 				...(searchConditions && { search: searchConditions }),
 			}
 		);
-	}, [page, getLocalProducts, getProductCount]);
+	}, [ page, getLocalProducts, getProductCount ]);
 
-	// =============== fetch on mount and when page changes ================
+	// =============== fetch local products on mount and when page or data source changes ================
 	useEffect(() => {
-		fetchProductsPage();
-	}, [fetchProductsPage]);
+		if (effectiveDataSource === "offline") {
+			fetchLocalProductsPage();
+		}
+	}, [ fetchLocalProductsPage, effectiveDataSource ]);
 
-	// =============== listen for product updates from sales and refetch ================
+	// =============== listen for product updates from sales and refetch local products ================
 	useEffect(() => {
-		window.addEventListener("products-updated", fetchProductsPage);
+		window.addEventListener("products-updated", fetchLocalProductsPage);
 
 		return () => {
-			window.removeEventListener("products-updated", fetchProductsPage);
+			window.removeEventListener("products-updated", fetchLocalProductsPage);
 		};
-	}, [fetchProductsPage]);
+	}, [ fetchLocalProductsPage ]);
 
 	// =============== search handler ================
 	const handleSearch = (data) => {
-		searchRef.current.term = data?.term || "";
+		const term = data?.term || "";
+		searchRef.current.term = term;
+		setOnlineSearchTerm(term);
 		setPage(1);
-		fetchProductsPage();
+		fetchLocalProductsPage();
 	};
 
 	// =============== reset handler ================
 	const handleReset = () => {
 		searchRef.current.term = "";
+		setOnlineSearchTerm("");
 		setPage(1);
-		fetchProductsPage();
+		fetchLocalProductsPage();
 	};
+
+	// =============== refresh button handler ================
+	const handleRefresh = () => {
+		if (effectiveDataSource === "online") {
+			refetchOnlineProducts();
+		} else {
+			fetchLocalProductsPage();
+		}
+	};
+
+	// =============== derive active table data based on current data source ================
+	const tableRecords = effectiveDataSource === "online"
+		? (onlineProductsResponse?.data ?? [])
+		: products;
+
+	const tableTotalCount = effectiveDataSource === "online"
+		? (onlineProductsResponse?.total ?? 0)
+		: totalCount;
+
+	const isTableLoading = effectiveDataSource === "online"
+		? (isOnlineLoading || isOnlineFetching)
+		: loading;
 
 	const height = mainAreaHeight - 60;
 
@@ -98,25 +150,44 @@ export default function Table() {
 					showDatePicker={false}
 					showAdvancedFilter={false}
 				/>
-				<Tooltip
-					label="Click here for update stock"
-					c="white"
-					bg={"green"}
-					withArrow
-					zIndex={999}
-					transitionProps={{ transition: "pop-bottom-left", duration: 500 }}
-				>
-				<ActionIcon
-					bg="var(--theme-secondary-color-6)"
-					onClick={fetchProductsPage}
-					disabled={loading}
-					size="lg"
-					aria-label="Refresh"
-				>
-					<IconReload size={16} stroke={1.5} />
-				</ActionIcon>
-				</Tooltip>
-				<Group gap="sm" wrap="nowrap" >
+				<Group gap="sm" wrap="nowrap">
+					<SegmentedControl
+						value={effectiveDataSource}
+						onChange={(value) => {
+							setDataSource(value);
+							setPage(1);
+						}}
+						color={effectiveDataSource === "online" ? "green" : "orange"}
+						data={[
+							{
+								value: "online",
+								label: "🌐 " + t("Online"),
+								disabled: !isOnline,
+							},
+							{
+								value: "offline",
+								label: "📡 " + t("Offline"),
+							},
+						]}
+					/>
+					<Tooltip
+						label="Click here for update stock"
+						c="white"
+						bg={"green"}
+						withArrow
+						zIndex={999}
+						transitionProps={{ transition: "pop-bottom-left", duration: 500 }}
+					>
+						<ActionIcon
+							bg="var(--theme-secondary-color-6)"
+							onClick={handleRefresh}
+							disabled={isTableLoading}
+							size="lg"
+							aria-label="Refresh"
+						>
+							<IconReload size={16} stroke={1.5} />
+						</ActionIcon>
+					</Tooltip>
 					<Button
 						w={170}
 						size="md"
@@ -138,20 +209,20 @@ export default function Table() {
 						footer: tableCss.footer,
 						pagination: tableCss.pagination,
 					}}
-					records={products}
+					records={tableRecords}
 					columns={[
 						{
 							accessor: "index",
 							title: t("S/N"),
 							textAlignment: "right",
 							width: 70,
-							render: (record) => products.indexOf(record) + 1 + (page - 1) * PER_PAGE,
+							render: (record) => tableRecords.indexOf(record) + 1 + (page - 1) * PER_PAGE,
 						},
 						{
-							accessor: "display_name",
+							accessor: "product_name",
 							title: t("Product"),
 							width: 220,
-							render: (record) => record.display_name || "—",
+							render: (record) => record.product_name || record.display_name || "—",
 						},
 						{
 							accessor: "barcode",
@@ -160,10 +231,10 @@ export default function Table() {
 							render: (record) => record.barcode || "—",
 						},
 						{
-							accessor: "category_id",
-							title: t("CategoryId"),
+							accessor: "category",
+							title: t("Category"),
 							width: 140,
-							render: (record) => record.category_id || "—",
+							render: (record) => record.category_name || record.category_id || "—",
 						},
 						{
 							accessor: "unit_name",
@@ -202,8 +273,8 @@ export default function Table() {
 									: "—",
 						},
 					]}
-					fetching={loading}
-					totalRecords={totalCount}
+					fetching={isTableLoading}
+					totalRecords={tableTotalCount}
 					recordsPerPage={PER_PAGE}
 					page={page}
 					onPageChange={setPage}
