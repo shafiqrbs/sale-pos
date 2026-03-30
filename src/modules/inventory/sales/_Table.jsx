@@ -12,6 +12,7 @@ import { showNotification } from "@components/ShowNotificationComponent";
 // Sales-only: loads a completed sale back into the POS interface for editing.
 // Clears existing invoice items, inserts the sale's items, dispatches Redux
 // state, and navigates to the bakery POS page.
+// eslint-disable-next-line no-unused-vars
 async function handleEditInPos(data, dispatch, navigate) {
 	try {
 		const existingItems = await window.dbAPI.getDataFromTable("invoice_table_item");
