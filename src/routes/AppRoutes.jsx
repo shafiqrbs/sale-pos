@@ -23,6 +23,7 @@ import PurchaseReturnIndex from "@modules/inventory/purchase-return";
 import PurchaseReturnNewIndex from "@modules/inventory/purchase-return/NewIndex";
 import PurchaseReturnEditIndex from "@modules/inventory/purchase-return/EditIndex";
 import CategorySummary from "@modules/report/category-summary";
+import ProtectedRoute from "@components/ProtectedRoute";
 
 export default function AppRoutes() {
 	return (
@@ -58,7 +59,11 @@ export default function AppRoutes() {
 						<Route path="new" element={<PurchaseReturnNewIndex />} />
 						<Route path="edit/:id" element={<PurchaseReturnEditIndex />} />
 					</Route>
-					<Route path="config" element={<ConfigIndex />} />
+					<Route path="config" element={
+						<ProtectedRoute allowedRoles={["role_sales_purchase_admin"]}>
+							<ConfigIndex />
+						</ProtectedRoute>
+					} />
 					<Route path="purchase-item" element={<PurchaseItemIndex />} />
 					{/* <Route path="sales/edit/:id" element={<SalesEdit />} /> */}
 					{/* <Route path="sales" element={<DashboardBarChart />} /> */}
