@@ -494,36 +494,12 @@ const upsertIntoTable = (table, data) => {
 		const updateSetAssignments = keys.map((key) => `${key} = excluded.${key}`).join(", ");
 
 		const stmt = db.prepare(
-			`INSERT INTO ${table} (${keys.join(", ")}) 
+			`INSERT INTO ${table} (${keys.join(", ")})
 			VALUES (${placeholders})
 			ON CONFLICT(id) DO UPDATE SET ${updateSetAssignments}`
 		);
 
-		const existingRow = db.prepare(`SELECT id FROM ${table} WHERE id = ?`).get(validData.id);
-
-		if (!existingRow) {
-			stmt.run(...Object.values(validData));
-		} else {
-			const existingData = db.prepare(`SELECT * FROM ${table} WHERE id = ?`).get(validData.id);
-
-			const isChanged = keys.some((key) => {
-				const existingValue =
-					typeof existingData[ key ] === "string" && existingData[ key ].startsWith("{")
-						? JSON.parse(existingData[ key ])
-						: existingData[ key ];
-
-				const newValue =
-					typeof validData[ key ] === "string" && validData[ key ].startsWith("{")
-						? JSON.parse(validData[ key ])
-						: validData[ key ];
-
-				return JSON.stringify(existingValue) !== JSON.stringify(newValue);
-			});
-
-			if (isChanged) {
-				stmt.run(...Object.values(validData));
-			}
-		}
+		stmt.run(...Object.values(validData));
 	} catch (e) {
 		console.log("Error in upsertIntoTable for this data:", table, data);
 		console.error(e);
@@ -922,31 +898,30 @@ const clearAndInsertBulk = (table, dataArray, options = {}) => {
 		table = validateTableName(table);
 		const total = dataArray.length;
 
-		// =============== clear the table once before starting batch inserts ================
-		destroyTableData(table);
+		// Wrap delete + insert in single transaction for atomicity
+		const bulkOperation = db.transaction(() => {
+			db.prepare(`DELETE FROM ${table}`).run();
 
-		const insertBatch = db.transaction((batch) => {
-			for (const data of batch) {
-				upsertIntoTable(table, data);
+			let inserted = 0;
+			for (let offset = 0; offset < total; offset += batchSize) {
+				const batch = dataArray.slice(offset, offset + batchSize);
+				for (const data of batch) {
+					upsertIntoTable(table, data);
+				}
+				inserted += batch.length;
+
+				if (typeof onProgress === "function") {
+					onProgress({
+						table,
+						inserted,
+						total,
+						percent: Math.round((inserted / total) * 100),
+					});
+				}
 			}
 		});
 
-		let inserted = 0;
-
-		for (let offset = 0; offset < total; offset += batchSize) {
-			const batch = dataArray.slice(offset, offset + batchSize);
-			insertBatch(batch);
-			inserted += batch.length;
-
-			if (typeof onProgress === "function") {
-				onProgress({
-					table,
-					inserted,
-					total,
-					percent: Math.round((inserted / total) * 100),
-				});
-			}
-		}
+		bulkOperation();
 
 		console.log(`Successfully cleared and inserted ${total} records into ${table}`);
 	} catch (error) {
