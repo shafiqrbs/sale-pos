@@ -155,13 +155,19 @@ app.whenReady().then(() => {
 	// This CSP restricts scripts to only load from 'self' (our bundled app files),
 	// blocks inline scripts, and limits network connections to HTTPS origins.
 	// 'unsafe-inline' is only allowed for styles (required by Mantine UI library).
+	//
+	// In development, Vite injects inline scripts for hot-reload (HMR), so we
+	// must allow 'unsafe-inline' for scripts too — only in dev, never in production.
 	// ============================================================================
+	const isDev = !app.isPackaged;
 	session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
 		callback({
 			responseHeaders: {
 				...details.responseHeaders,
 				"Content-Security-Policy": [
-					"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https:; font-src 'self' data:;",
+					isDev
+						? "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https: http://localhost:*; font-src 'self' data:;"
+						: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https:; font-src 'self' data:;",
 				],
 			},
 		});
