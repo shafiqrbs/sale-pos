@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require("electron");
+const { app, BrowserWindow, ipcMain, session } = require("electron");
 const path = require("path");
 const dbModule = require("./electron/db.cjs");
 const deviceModule = require("./electron/pos.cjs");
@@ -100,11 +100,15 @@ ipcMain.handle("pos-print", async (event, data) => {
 	}
 });
 
+// These handlers previously swallowed errors (caught but never rethrown).
+// The renderer received `undefined` instead of an error, so failed prints
+// and queries silently did nothing — the user had no idea something went wrong.
 ipcMain.handle("pos-thermal", async (event, data) => {
 	try {
 		return deviceModule.thermalPrint(data);
 	} catch (error) {
 		console.error("Error occurred on pos thermal printing: ", error);
+		throw error;
 	}
 });
 
@@ -113,6 +117,7 @@ ipcMain.handle("kitchen-thermal", async (event, data) => {
 		return deviceModule.kitchenPrint(data);
 	} catch (error) {
 		console.error("Error occurred on kitchen thermal printing: ", error);
+		throw error;
 	}
 });
 
@@ -121,6 +126,7 @@ ipcMain.handle("get-joined-table-data", async (event, data) => {
 		return dbModule.getJoinedTableData(data);
 	} catch (error) {
 		console.error("Error occurred on getting joined table data: ", error);
+		throw error;
 	}
 });
 
@@ -141,6 +147,32 @@ let splash;
 if (require("electron-squirrel-startup")) app.quit();
 
 app.whenReady().then(() => {
+	// ========================= CONTENT SECURITY POLICY ==========================
+	// Without CSP, the renderer could load and execute scripts from any source.
+	// If an attacker found a way to inject HTML (e.g. via a compromised API response),
+	// they could load external malicious scripts.
+	//
+	// This CSP restricts scripts to only load from 'self' (our bundled app files),
+	// blocks inline scripts, and limits network connections to HTTPS origins.
+	// 'unsafe-inline' is only allowed for styles (required by Mantine UI library).
+	//
+	// In development, Vite injects inline scripts for hot-reload (HMR), so we
+	// must allow 'unsafe-inline' for scripts too — only in dev, never in production.
+	// ============================================================================
+	const isDev = !app.isPackaged;
+	session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+		callback({
+			responseHeaders: {
+				...details.responseHeaders,
+				"Content-Security-Policy": [
+					isDev
+						? "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https: http://localhost:*; font-src 'self' data:;"
+						: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https:; font-src 'self' data:;",
+				],
+			},
+		});
+	});
+
 	// Create Splash Screen
 	splash = new BrowserWindow({
 		width: 810,
@@ -164,9 +196,13 @@ app.whenReady().then(() => {
 			nodeIntegration: false,
 			contextIsolation: true,
 			preload: path.join(__dirname, "preload.cjs"),
-			// for debugging purpose only
-			devTools: true,
-			sandbox: false,
+			// Previously devTools was always true — users could inspect app state,
+			// tokens, and API keys in production. Now restricted to development only.
+			devTools: !app.isPackaged,
+			// Previously sandbox was false — the renderer process had broader system
+			// access than needed. Enabling sandbox restricts it to only communicate
+			// with the main process via the IPC bridge defined in preload.cjs.
+			sandbox: true,
 		},
 		autoHideMenuBar: true,
 	});
@@ -191,6 +227,17 @@ app.whenReady().then(() => {
 		const currentZoom = mainWindow.webContents.getZoomFactor();
 		mainWindow.webContents.send("zoom-changed", currentZoom);
 	});
+});
+
+// Close the database cleanly before the process exits.
+// Previously the DB was never closed on quit — risking WAL file corruption
+// and file locks if the app was force-killed while SQLite had pending writes.
+app.on("before-quit", () => {
+	try {
+		dbModule.close();
+	} catch (e) {
+		console.error("Error closing database:", e);
+	}
 });
 
 // Quit app when all windows are closed (except macOS)
