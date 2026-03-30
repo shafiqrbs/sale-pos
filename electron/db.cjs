@@ -11,6 +11,58 @@ const db = new Database(dbPath);
 
 const convertTableName = (key) => key.replace(/-/g, "_");
 
+// Whitelist of valid table names for SQL injection prevention
+const VALID_TABLES = new Set([
+	"license_activate",
+	"users",
+	"accounting_transaction_mode",
+	"config_data",
+	"core_products",
+	"core_customers",
+	"core_vendors",
+	"core_users",
+	"order_process",
+	"sales",
+	"purchase",
+	"invoice_table",
+	"categories",
+	"invoice_table_item",
+	"temp_sales_products",
+	"temp_purchase_products",
+	"printer",
+]);
+
+const validateTableName = (table) => {
+	if (typeof table !== "string") throw new Error(`Invalid table name: ${table}`);
+	const normalized = table.replace(/-/g, "_");
+	if (!VALID_TABLES.has(normalized)) {
+		throw new Error(`Invalid table name: ${table}`);
+	}
+	return normalized;
+};
+
+const SAFE_IDENTIFIER = /^[a-zA-Z][a-zA-Z0-9_]*$/;
+
+const validateIdentifier = (name, label = "identifier") => {
+	if (typeof name !== "string" || !SAFE_IDENTIFIER.test(name)) {
+		throw new Error(`Invalid ${label}: ${name}`);
+	}
+	return name;
+};
+
+const VALID_SQL_OPERATORS = new Set(["=", "!=", "<>", ">", "<", ">=", "<=", "LIKE", "NOT LIKE", "IN", "NOT IN"]);
+
+const validateSearchFields = (search) => {
+	if (!search || typeof search !== "object") return;
+	for (const group of ["equals", "like", "in"]) {
+		if (search[group] && typeof search[group] === "object") {
+			for (const field of Object.keys(search[group])) {
+				validateIdentifier(field, "search field");
+			}
+		}
+	}
+};
+
 // license activate table
 db.prepare(
 	`
@@ -423,7 +475,7 @@ const getTableColumns = (table) => {
 // data insertion into the table
 const upsertIntoTable = (table, data) => {
 	try {
-		table = convertTableName(table);
+		table = validateTableName(table);
 		const columns = getTableColumns(table);
 
 		const validData = Object.keys(data)
@@ -479,13 +531,14 @@ const upsertIntoTable = (table, data) => {
 };
 
 const getDataFromTable = (table, idOrConditions, property = "id", options = {}) => {
-	table = convertTableName(table);
+	table = validateTableName(table);
 	const useGet = [ "config_data", "users", "license_activate", "printer" ].includes(table); // return a single row for these tables
 
 	let stmt;
 	let result;
 
 	const { limit, offset, search, orderBy } = options || {};
+	validateSearchFields(search);
 
 	// =============== safe order by: "id ASC" or "created_at DESC" etc. (column name + optional ASC/DESC) ===============
 	const orderByClause = (() => {
@@ -557,6 +610,7 @@ const getDataFromTable = (table, idOrConditions, property = "id", options = {}) 
 	if (typeof idOrConditions === "object" && idOrConditions !== null) {
 		// multiple conditions
 		const keys = Object.keys(idOrConditions);
+		keys.forEach((key) => validateIdentifier(key, "column"));
 		const baseConditions = keys.map((key) => `${key} = ?`);
 		const baseValues = keys.map((key) => idOrConditions[ key ]);
 
@@ -579,6 +633,7 @@ const getDataFromTable = (table, idOrConditions, property = "id", options = {}) 
 			result = stmt.all(...finalValues);
 		}
 	} else if (idOrConditions) {
+		validateIdentifier(property, "property");
 		stmt = db.prepare(`SELECT * FROM ${table} WHERE ${property} = ?`);
 		result = stmt.get(idOrConditions);
 	} else {
@@ -606,7 +661,7 @@ const getDataFromTable = (table, idOrConditions, property = "id", options = {}) 
 };
 
 const updateDataInTable = (table, { id, data, condition = {}, property = "id" }) => {
-	table = convertTableName(table);
+	table = validateTableName(table);
 	const columns = getTableColumns(table);
 	const updatePayload = { ...data };
 
@@ -616,6 +671,7 @@ const updateDataInTable = (table, { id, data, condition = {}, property = "id" })
 
 	// build SET clause
 	const setKeys = Object.keys(updatePayload);
+	setKeys.forEach((key) => validateIdentifier(key, "column"));
 	const setClause = setKeys.map((key) => `${key} = ?`).join(", ");
 	const setValues = setKeys.map((key) => updatePayload[ key ]);
 
@@ -625,10 +681,12 @@ const updateDataInTable = (table, { id, data, condition = {}, property = "id" })
 
 	if (id !== undefined) {
 		// backward compatible: use id + property
+		validateIdentifier(property, "property");
 		whereClause = `WHERE ${property} = ?`;
 		whereValues = [ id ];
 	} else if (typeof condition === "object" && Object.keys(condition).length > 0) {
 		const conditionKeys = Object.keys(condition);
+		conditionKeys.forEach((key) => validateIdentifier(key, "column"));
 		whereClause = "WHERE " + conditionKeys.map((key) => `${key} = ?`).join(" AND ");
 		whereValues = conditionKeys.map((key) => condition[ key ]);
 	} else {
@@ -640,16 +698,18 @@ const updateDataInTable = (table, { id, data, condition = {}, property = "id" })
 };
 
 const deleteDataFromTable = (table, idOrConditions = 1, property = "id") => {
-	table = convertTableName(table);
+	table = validateTableName(table);
 	let stmt;
 	if (typeof idOrConditions === "object" && idOrConditions !== null) {
 		// multiple conditions
 		const keys = Object.keys(idOrConditions);
+		keys.forEach((key) => validateIdentifier(key, "column"));
 		const conditions = keys.map((key) => `${key} = ?`).join(" AND ");
 		const values = keys.map((key) => idOrConditions[ key ]);
 		stmt = db.prepare(`DELETE FROM ${table} WHERE ${conditions}`);
 		stmt.run(...values);
 	} else {
+		validateIdentifier(property, "property");
 		stmt = db.prepare(`DELETE FROM ${table} WHERE ${property} = ?`);
 		stmt.run(idOrConditions);
 	}
@@ -658,35 +718,39 @@ const deleteDataFromTable = (table, idOrConditions = 1, property = "id") => {
 const deleteManyFromTable = (table, ids = [], property = "id") => {
 	if (!Array.isArray(ids) || ids.length === 0) return;
 
-	table = convertTableName(table);
+	table = validateTableName(table);
 
 	// Create ?,?,? placeholders dynamically
 	const placeholders = ids.map(() => "?").join(",");
 
+	validateIdentifier(property, "property");
 	const stmt = db.prepare(`DELETE FROM ${table} WHERE ${property} IN (${placeholders})`);
 
 	return stmt.run(...ids);
 };
 
 const destroyTableData = (table = "users") => {
+	table = validateTableName(table);
 	const stmt = db.prepare(`DELETE FROM ${table}`);
 	stmt.run();
 };
 
 const getTableCount = (table, conditions = {}, options = {}) => {
 	try {
-		table = convertTableName(table);
+		table = validateTableName(table);
 
 		let query = `SELECT COUNT(*) as total FROM ${table}`;
 		let whereClauses = [];
 		let values = [];
 
 		if (conditions && typeof conditions === "object" && Object.keys(conditions).length > 0) {
+			Object.keys(conditions).forEach((key) => validateIdentifier(key, "column"));
 			whereClauses = Object.keys(conditions).map((key) => `${key} = ?`);
 			values.push(...Object.keys(conditions).map((key) => conditions[ key ]));
 		}
 
 		const { search } = options || {};
+		validateSearchFields(search);
 
 		if (search && typeof search === "object") {
 			if (search.equals && typeof search.equals === "object") {
@@ -779,8 +843,9 @@ const getJoinedTableData = ({
 	search = {}, // { field: 'name', value: 'bread' }
 }) => {
 	try {
-		table1 = convertTableName(table1);
-		table2 = convertTableName(table2);
+		table1 = validateTableName(table1);
+		table2 = validateTableName(table2);
+		validateIdentifier(foreignKey, "foreign key");
 
 		// Get all columns for both tables
 		const table1Columns = db
@@ -819,9 +884,13 @@ const getJoinedTableData = ({
 		// Add conditions if provided
 		if (Object.keys(conditions).length > 0) {
 			const conditionClauses = Object.entries(conditions).map(([ key, value ]) => {
+				validateIdentifier(key, "condition column");
 				if (typeof value === "object") {
 					// Handle operators like IN, LIKE, etc.
 					const [ operator, operand ] = Object.entries(value)[ 0 ];
+					if (!VALID_SQL_OPERATORS.has(operator.toUpperCase())) {
+						throw new Error(`Invalid SQL operator: ${operator}`);
+					}
 					return `p.${key} ${operator} ?`;
 				}
 				return `p.${key} = ?`;
@@ -850,7 +919,7 @@ const clearAndInsertBulk = (table, dataArray, options = {}) => {
 	const { batchSize = 500, onProgress = null } = options;
 
 	try {
-		table = convertTableName(table);
+		table = validateTableName(table);
 		const total = dataArray.length;
 
 		// =============== clear the table once before starting batch inserts ================
