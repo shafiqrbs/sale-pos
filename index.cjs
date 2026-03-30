@@ -223,6 +223,17 @@ app.whenReady().then(() => {
 	});
 });
 
+// Close the database cleanly before the process exits.
+// Previously the DB was never closed on quit — risking WAL file corruption
+// and file locks if the app was force-killed while SQLite had pending writes.
+app.on("before-quit", () => {
+	try {
+		dbModule.close();
+	} catch (e) {
+		console.error("Error closing database:", e);
+	}
+});
+
 // Quit app when all windows are closed (except macOS)
 app.on("window-all-closed", () => {
 	if (process.platform !== "darwin") {
