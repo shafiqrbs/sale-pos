@@ -141,7 +141,15 @@ let splash;
 if (require("electron-squirrel-startup")) app.quit();
 
 app.whenReady().then(() => {
-	// Content Security Policy - restrict resource loading in renderer
+	// ========================= CONTENT SECURITY POLICY ==========================
+	// Without CSP, the renderer could load and execute scripts from any source.
+	// If an attacker found a way to inject HTML (e.g. via a compromised API response),
+	// they could load external malicious scripts.
+	//
+	// This CSP restricts scripts to only load from 'self' (our bundled app files),
+	// blocks inline scripts, and limits network connections to HTTPS origins.
+	// 'unsafe-inline' is only allowed for styles (required by Mantine UI library).
+	// ============================================================================
 	session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
 		callback({
 			responseHeaders: {
@@ -176,7 +184,12 @@ app.whenReady().then(() => {
 			nodeIntegration: false,
 			contextIsolation: true,
 			preload: path.join(__dirname, "preload.cjs"),
+			// Previously devTools was always true — users could inspect app state,
+			// tokens, and API keys in production. Now restricted to development only.
 			devTools: !app.isPackaged,
+			// Previously sandbox was false — the renderer process had broader system
+			// access than needed. Enabling sandbox restricts it to only communicate
+			// with the main process via the IPC bridge defined in preload.cjs.
 			sandbox: true,
 		},
 		autoHideMenuBar: true,

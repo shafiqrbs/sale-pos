@@ -1,6 +1,18 @@
 import { Component } from "react";
 import { Button, Center, Stack, Text, Title } from "@mantine/core";
 
+/**
+ * ErrorBoundary — prevents the entire app from crashing when a component throws.
+ *
+ * Without this, a single rendering error in any component (e.g. a null reference
+ * in the POS checkout, a bad API response in dashboard) would show a blank white
+ * screen with no way to recover — the user would have to force-quit the app.
+ *
+ * This catches those errors and shows a recovery UI with "Go Back" and "Reload"
+ * options, so the user can continue working without losing their session.
+ *
+ * Wraps all routes in App.jsx so every page is protected.
+ */
 class ErrorBoundary extends Component {
 	constructor(props) {
 		super(props);

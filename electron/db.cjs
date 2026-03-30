@@ -11,7 +11,18 @@ const db = new Database(dbPath);
 
 const convertTableName = (key) => key.replace(/-/g, "_");
 
-// Whitelist of valid table names for SQL injection prevention
+// ========================= SQL INJECTION PREVENTION =========================
+// Previously, table names and column names from the renderer process were
+// interpolated directly into SQL strings (e.g. `SELECT * FROM ${table}`).
+// A malicious or compromised renderer could pass something like
+// "users; DROP TABLE sales; --" as a table name and execute arbitrary SQL.
+//
+// Fix: Every table name is validated against this whitelist before use in SQL.
+// Every column/property name is checked against a safe identifier regex.
+// Every SQL operator is checked against an allowed set.
+// If any value fails validation, an error is thrown before the query runs.
+// ==========================================================================
+
 const VALID_TABLES = new Set([
 	"license_activate",
 	"users",
@@ -32,6 +43,7 @@ const VALID_TABLES = new Set([
 	"printer",
 ]);
 
+// Rejects any table name not in VALID_TABLES — prevents SQL injection via table names
 const validateTableName = (table) => {
 	if (typeof table !== "string") throw new Error(`Invalid table name: ${table}`);
 	const normalized = table.replace(/-/g, "_");
@@ -41,6 +53,8 @@ const validateTableName = (table) => {
 	return normalized;
 };
 
+// Only allows simple column names like "id", "sales_price", "created_at"
+// Rejects anything with spaces, semicolons, quotes, or other SQL-special characters
 const SAFE_IDENTIFIER = /^[a-zA-Z][a-zA-Z0-9_]*$/;
 
 const validateIdentifier = (name, label = "identifier") => {
@@ -50,8 +64,11 @@ const validateIdentifier = (name, label = "identifier") => {
 	return name;
 };
 
+// Prevents injection via operators in getJoinedTableData conditions
+// e.g. passing "= 1; DROP TABLE sales; --" as an operator
 const VALID_SQL_OPERATORS = new Set(["=", "!=", "<>", ">", "<", ">=", "<=", "LIKE", "NOT LIKE", "IN", "NOT IN"]);
 
+// Validates all field names in search objects (equals, like, in) before they reach SQL
 const validateSearchFields = (search) => {
 	if (!search || typeof search !== "object") return;
 	for (const group of ["equals", "like", "in"]) {
@@ -472,7 +489,15 @@ const getTableColumns = (table) => {
 	const columns = db.prepare(`PRAGMA table_info(${table})`).all();
 	return columns.map((col) => col.name);
 };
-// data insertion into the table
+// ========================= ATOMIC UPSERT ================================
+// Previously this function did SELECT to check existence, then INSERT or
+// UPDATE separately. Between the SELECT and the write, another operation
+// could modify the same row — a classic race condition.
+//
+// Fix: Use a single INSERT ... ON CONFLICT(id) DO UPDATE statement.
+// SQLite handles the insert-or-update atomically in one step —
+// no gap where concurrent operations can interfere.
+// ========================================================================
 const upsertIntoTable = (table, data) => {
 	try {
 		table = validateTableName(table);
@@ -898,7 +923,10 @@ const clearAndInsertBulk = (table, dataArray, options = {}) => {
 		table = validateTableName(table);
 		const total = dataArray.length;
 
-		// Wrap delete + insert in single transaction for atomicity
+		// Previously DELETE ran outside the transaction. If the app crashed after
+		// deleting but before inserting, all data in the table was permanently lost.
+		// Now DELETE + all INSERTs run in a single transaction — if anything fails,
+		// the entire operation rolls back and no data is lost.
 		const bulkOperation = db.transaction(() => {
 			db.prepare(`DELETE FROM ${table}`).run();
 
