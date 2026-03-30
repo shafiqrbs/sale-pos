@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require("electron");
+const { app, BrowserWindow, ipcMain, session } = require("electron");
 const path = require("path");
 const dbModule = require("./electron/db.cjs");
 const deviceModule = require("./electron/pos.cjs");
@@ -141,6 +141,18 @@ let splash;
 if (require("electron-squirrel-startup")) app.quit();
 
 app.whenReady().then(() => {
+	// Content Security Policy - restrict resource loading in renderer
+	session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+		callback({
+			responseHeaders: {
+				...details.responseHeaders,
+				"Content-Security-Policy": [
+					"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https:; font-src 'self' data:;",
+				],
+			},
+		});
+	});
+
 	// Create Splash Screen
 	splash = new BrowserWindow({
 		width: 810,
@@ -164,9 +176,8 @@ app.whenReady().then(() => {
 			nodeIntegration: false,
 			contextIsolation: true,
 			preload: path.join(__dirname, "preload.cjs"),
-			// for debugging purpose only
-			devTools: true,
-			sandbox: false,
+			devTools: !app.isPackaged,
+			sandbox: true,
 		},
 		autoHideMenuBar: true,
 	});
