@@ -100,11 +100,15 @@ ipcMain.handle("pos-print", async (event, data) => {
 	}
 });
 
+// These handlers previously swallowed errors (caught but never rethrown).
+// The renderer received `undefined` instead of an error, so failed prints
+// and queries silently did nothing — the user had no idea something went wrong.
 ipcMain.handle("pos-thermal", async (event, data) => {
 	try {
 		return deviceModule.thermalPrint(data);
 	} catch (error) {
 		console.error("Error occurred on pos thermal printing: ", error);
+		throw error;
 	}
 });
 
@@ -113,6 +117,7 @@ ipcMain.handle("kitchen-thermal", async (event, data) => {
 		return deviceModule.kitchenPrint(data);
 	} catch (error) {
 		console.error("Error occurred on kitchen thermal printing: ", error);
+		throw error;
 	}
 });
 
@@ -121,6 +126,7 @@ ipcMain.handle("get-joined-table-data", async (event, data) => {
 		return dbModule.getJoinedTableData(data);
 	} catch (error) {
 		console.error("Error occurred on getting joined table data: ", error);
+		throw error;
 	}
 });
 
