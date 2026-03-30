@@ -474,6 +474,47 @@ db.prepare(
 	)`
 ).run();
 
+// ========================= DATABASE INDEXES ================================
+// Without indexes, queries that filter by foreign keys or search columns
+// (e.g. find products by barcode, customers by mobile, items by invoice_id)
+// do a full table scan — O(n) for every lookup. As data grows to thousands
+// of records, these queries become noticeably slow.
+//
+// These CREATE INDEX IF NOT EXISTS statements add indexes on the most
+// frequently queried columns. They run once on startup and are no-ops
+// if the indexes already exist.
+// ==========================================================================
+
+// core_products: searched by barcode (POS scan), category, vendor
+db.prepare("CREATE INDEX IF NOT EXISTS idx_products_barcode ON core_products(barcode)").run();
+db.prepare("CREATE INDEX IF NOT EXISTS idx_products_category ON core_products(category_id)").run();
+db.prepare("CREATE INDEX IF NOT EXISTS idx_products_vendor ON core_products(vendor_id)").run();
+
+// core_customers: searched by mobile (lookup at checkout), email
+db.prepare("CREATE INDEX IF NOT EXISTS idx_customers_mobile ON core_customers(mobile)").run();
+db.prepare("CREATE INDEX IF NOT EXISTS idx_customers_code ON core_customers(code)").run();
+
+// core_vendors: searched by vendor_code, mobile
+db.prepare("CREATE INDEX IF NOT EXISTS idx_vendors_code ON core_vendors(vendor_code)").run();
+db.prepare("CREATE INDEX IF NOT EXISTS idx_vendors_mobile ON core_vendors(mobile)").run();
+
+// sales: filtered by date (daily reports), customer, status
+db.prepare("CREATE INDEX IF NOT EXISTS idx_sales_created ON sales(created)").run();
+db.prepare("CREATE INDEX IF NOT EXISTS idx_sales_customer ON sales(customerId)").run();
+db.prepare("CREATE INDEX IF NOT EXISTS idx_sales_status ON sales(status)").run();
+
+// purchase: filtered by date, vendor
+db.prepare("CREATE INDEX IF NOT EXISTS idx_purchase_created ON purchase(created)").run();
+db.prepare("CREATE INDEX IF NOT EXISTS idx_purchase_vendor ON purchase(vendor_id)").run();
+
+// invoice_table_item: looked up by invoice_id (loading invoice line items)
+db.prepare("CREATE INDEX IF NOT EXISTS idx_invoice_item_invoice ON invoice_table_item(invoice_id)").run();
+db.prepare("CREATE INDEX IF NOT EXISTS idx_invoice_item_stock ON invoice_table_item(stock_item_id)").run();
+
+// temp tables: filtered by type and product_id
+db.prepare("CREATE INDEX IF NOT EXISTS idx_temp_sales_type ON temp_sales_products(type)").run();
+db.prepare("CREATE INDEX IF NOT EXISTS idx_temp_purchase_type ON temp_purchase_products(type)").run();
+
 const formatValue = (value) => {
 	if (value === undefined || value === null) return null;
 	try {
