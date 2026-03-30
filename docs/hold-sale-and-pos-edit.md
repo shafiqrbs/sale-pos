@@ -119,3 +119,62 @@ Hold Table (Process click)
 
 ### Cleanup
 - **`Checkout.jsx`** dispatches `clearEditingSale()` on unmount, so navigating away from POS without saving clears the editing state automatically.
+
+---
+
+## 4. Requisition Edit (API-Based)
+
+### Requirement
+Edit existing requisitions via API. Clicking **Edit** on the requisition table navigates to the edit form, fetches data from the API, populates the form and temp table, and submits via PATCH.
+
+### API Endpoints
+- **GET** `/api/inventory/requisition/:id` — fetch requisition data (via `useGetRequisitionByIdQuery`)
+- **PATCH** `/api/inventory/requisition/:id` — update requisition (via `useUpdateRequisitionMutation`)
+
+### Flow
+
+```
+_Table.jsx (Edit click)
+  → navigate("/inventory/requisition/edit/:id")
+
+EditIndex.jsx (mount)
+  → useGetRequisitionByIdQuery(id) — fetch from API
+  → Clear temp_purchase_products WHERE type="requisition"
+  → Insert each requisition_item into temp_purchase_products
+  → Populate form: vendor_id, invoice_date, expected_date, remark
+  → useTempPurchaseProducts({ type: "requisition" }) renders items
+
+EditIndex.jsx (submit)
+  → Map temp items to PATCH payload
+  → PATCH /api/inventory/requisition/:id
+  → Clear temp items → navigate to requisition list
+
+EditIndex.jsx (unmount / navigate away)
+  → Clear temp_purchase_products WHERE type="requisition"
+
+NewIndex.jsx (mount)
+  → Clear temp_purchase_products WHERE type="requisition" (safety net)
+```
+
+### Stale Temp Items Solution
+Three-layer cleanup prevents stale items from appearing in the wrong context:
+1. **EditIndex unmount** — cleanup `useEffect` clears temp items when user navigates away
+2. **NewIndex mount** — clears temp items on mount as a safety net
+3. **EditIndex mount** — clears temp items before inserting fresh ones from API
+
+### RTK Service Fix
+- `updateRequisition` changed from `PUT` to `PATCH` with dynamic URL `${APP_APIS.REQUISITION}/${id}`
+
+### Bug Fix
+- `_Table.jsx` Edit menu was navigating to `PURCHASE_EDIT` instead of `REQUISITION_EDIT`
+
+### UI Changes
+- Save button shows **"Update"** when `isEditMode={true}` (already handled by `PaymentSection.jsx`)
+
+### Files Changed
+| File | Change |
+|------|--------|
+| `src/services/requisition.js` | `PUT` → `PATCH`, dynamic URL with `id` |
+| `src/modules/inventory/requisition/_Table.jsx` | Fixed edit nav to `REQUISITION_EDIT` |
+| `src/modules/inventory/requisition/EditIndex.jsx` | Full rewrite: API fetch, temp table, PATCH submit, cleanup on unmount |
+| `src/modules/inventory/requisition/NewIndex.jsx` | Added temp table cleanup on mount |

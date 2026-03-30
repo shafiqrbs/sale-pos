@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Box, Center, Grid, Loader, Text } from "@mantine/core";
+import { Box, Center, Grid, Text } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useParams, useNavigate } from "react-router";
 
@@ -8,263 +8,153 @@ import PurchaseOverview from "./Overview";
 import { vendorOverviewRequest } from "./helpers/request";
 import { showNotification } from "@components/ShowNotificationComponent";
 import useLoggedInUser from "@hooks/useLoggedInUser";
-import useGetPurchase from "@hooks/useGetPurchase";
+import useTempPurchaseProducts from "@hooks/useTempPurchaseProducts";
+import { useGetRequisitionByIdQuery, useUpdateRequisitionMutation } from "@services/requisition";
+import { formatDateISO } from "@utils/index";
 import { APP_NAVLINKS } from "@/routes/routes";
+import RequisitionEditSkeleton from "@components/skeletons/RequisitionEditSkeleton";
 
 export default function EditIndex() {
-	const { id: purchaseId } = useParams();
+	const { id: requisitionId } = useParams();
 	const navigate = useNavigate();
 	const { user } = useLoggedInUser();
 	const itemsForm = useForm(vendorOverviewRequest());
 
-	const { purchase, isLoading: isLoadingPurchase } = useGetPurchase(purchaseId);
+	const { data: requisitionResponse, isLoading: isLoadingRequisition } = useGetRequisitionByIdQuery(requisitionId);
+	const [updateRequisition] = useUpdateRequisitionMutation();
 
-	const [editItems, setEditItems] = useState([]);
+	const { purchaseProducts: itemsProducts, refetch } = useTempPurchaseProducts({ type: "requisition" });
 	const [isAddingItem, setIsAddingItem] = useState(false);
 	const [isEditInitialized, setIsEditInitialized] = useState(false);
+	const warehouseIdRef = useRef(null);
 
-	const editItemIdCounter = useRef(0);
-	const originalSnapshotRef = useRef(null);
+	const requisition = requisitionResponse?.data;
 
-	// =============== parse purchase_items from the fetched purchase and populate form once ===============
+	// =============== clear temp items and populate from API response ===============
 	useEffect(() => {
-		if (!purchase || isEditInitialized) return;
+		if (!requisition || isEditInitialized) return;
 
-		editItemIdCounter.current = 0;
+		const populateTempTable = async () => {
+			// =============== clear any existing temp requisition items first ===============
+			await window.dbAPI.deleteDataFromTable("temp_purchase_products", { type: "requisition" });
 
-		const parsedItems = JSON.parse(purchase.purchase_items || "[]").map((item) => {
-			editItemIdCounter.current += 1;
-			return {
-				...item,
-				id: editItemIdCounter.current,
-				price: item.mrp ?? item.purchase_price,
-				percent: 0,
-				stock: 0,
-				average_price: item.average_price ?? 0,
-				unit_name: item.unit_name ?? "",
+			const items = requisition.requisition_items || [];
+			for (const item of items) {
+				await window.dbAPI.upsertIntoTable("temp_purchase_products", {
+					product_id: item.product_id,
+					display_name: item.display_name,
+					quantity: Number(item.quantity) || 0,
+					purchase_price: Number(item.purchase_price) || 0,
+					sales_price: Number(item.sales_price) || Number(item.purchase_price) || 0,
+					sub_total: Number(item.sub_total) || 0,
+					unit_name: item.unit_name ?? "",
+					warehouse_id: item.warehouse_id ?? null,
+					type: "requisition",
+				});
+			}
+
+			refetch();
+
+			// =============== parse dates from dd-mm-yyyy to Date objects ===============
+			const parseDate = (dateStr) => {
+				if (!dateStr) return null;
+				const parts = dateStr.split("-");
+				if (parts.length === 3) {
+					return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+				}
+				return new Date(dateStr);
 			};
-		});
 
-		const discountTypeMapped = purchase.discount_type === "Percentage";
+			itemsForm.setValues({
+				vendor_id: requisition.vendor_id ? String(requisition.vendor_id) : "",
+				vendorName: requisition.vendor_name ?? "",
+				vendorPhone: requisition.vendor_mobile ?? "+880",
+				vendorEmail: "",
+				purchaseNarration: requisition.remark ?? "",
+				invoice_date: parseDate(requisition.invoice_date),
+				expected_date: parseDate(requisition.expected_date),
+				transactionModeId: "placeholder",
+				discountAmount: 0,
+				isDiscountPercentage: false,
+				paymentAmount: 0,
+			});
 
-		const formValues = {
-			vendor_id: purchase.vendor_id ? String(purchase.vendor_id) : "",
-			vendorName: purchase.vendor_name ?? "",
-			vendorPhone: "+880",
-			vendorEmail: "",
-			purchaseDate: purchase.created ? new Date(purchase.created) : new Date(),
-			purchaseNarration: "",
-			discountAmount: purchase.discount ?? 0,
-			isDiscountPercentage: discountTypeMapped,
-			paymentAmount: purchase.payment ?? 0,
-			transactionModeId: purchase.transaction_mode_id ? String(purchase.transaction_mode_id) : "",
-			transactionMode: purchase.mode_name ?? "",
+			warehouseIdRef.current = requisition.warehouse_id ?? null;
+			setIsEditInitialized(true);
 		};
 
-		setEditItems(parsedItems);
-		itemsForm.setValues(formValues);
-
-		originalSnapshotRef.current = {
-			parsedItems,
-			formValues,
-		};
-
-		setIsEditInitialized(true);
+		populateTempTable();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [purchase]);
+	}, [requisition]);
 
-	// =============== apply a partial update to a single item in local state ===============
-	const handleEditItemUpdate = (itemId, updatedData) => {
-		setEditItems((previousItems) =>
-			previousItems.map((item) => (item.id === itemId ? { ...item, ...updatedData } : item))
-		);
-	};
-
-	const handleEditRemoveItem = (itemId) => {
-		setEditItems((previousItems) => previousItems.filter((item) => item.id !== itemId));
-	};
-
-	// =============== add new item to local state without touching temp_purchase_products table ===============
-	const handleAddEditItem = (newItem) => {
-		editItemIdCounter.current += 1;
-		const itemWithId = {
-			...newItem,
-			id: editItemIdCounter.current,
-			price: newItem.purchase_price,
-			mrp: newItem.purchase_price,
+	// =============== cleanup temp items when leaving edit page ===============
+	useEffect(() => {
+		return () => {
+			window.dbAPI.deleteDataFromTable("temp_purchase_products", { type: "requisition" });
 		};
-		setEditItems((previousItems) => [...previousItems, itemWithId]);
-	};
-
-	// =============== restore original product quantities then deduct the newly saved quantities ===============
-	const updateProductsAfterEdit = async (originalItems, newItems) => {
-		try {
-			// =============== restore: undo original purchase quantities ===============
-			for (const originalItem of originalItems) {
-				const productResult = await window.dbAPI.getDataFromTable("core_products", {
-					id: originalItem.product_id,
-				});
-				const productData = Array.isArray(productResult) ? productResult[0] : productResult;
-				if (!productData) continue;
-
-				const restoredQuantity = (productData.quantity || 0) - (Number(originalItem.quantity) || 0);
-
-				await window.dbAPI.updateDataInTable("core_products", {
-					condition: { id: originalItem.product_id },
-					data: { quantity: restoredQuantity },
-				});
-			}
-
-			// =============== deduct: apply new purchase quantities ===============
-			for (const newItem of newItems) {
-				const productResult = await window.dbAPI.getDataFromTable("core_products", {
-					id: newItem.product_id,
-				});
-				const productData = Array.isArray(productResult) ? productResult[0] : productResult;
-				if (!productData) continue;
-
-				const purchasedQuantity = Number(newItem.quantity) || 0;
-				const newQuantity = (productData.quantity || 0) + purchasedQuantity;
-
-				await window.dbAPI.updateDataInTable("core_products", {
-					condition: { id: newItem.product_id },
-					data: { quantity: newQuantity },
-				});
-			}
-
-			window.dispatchEvent(new CustomEvent("products-updated"));
-		} catch (error) {
-			console.error("Error updating product quantities after edit:", error);
-		}
-	};
+	}, []);
 
 	const handleSubmit = async (formValues) => {
-		if (!editItems.length) {
-			showNotification("Add minimum one purchase item first", "red");
+		if (!itemsProducts?.length) {
+			showNotification("Add minimum one requisition item first", "red");
 			return;
 		}
 
-		if (!formValues.transactionModeId && !formValues.transactionMode) {
-			showNotification("Transaction mode is required", "red");
+		if (!formValues.vendor_id) {
+			showNotification("Vendor is required", "red");
 			return;
 		}
 
-		if (!formValues.paymentAmount || Number(formValues.paymentAmount) <= 0) {
-			showNotification("Payment amount is required", "red");
-			return;
-		}
-
-		const subTotal = editItems.reduce(
-			(sum, item) => sum + (Number(item.quantity) || 0) * (Number(item.purchase_price) || 0),
-			0
-		);
-
-		const discountValue = formValues.isDiscountPercentage
-			? (subTotal * (Number(formValues.discountAmount) || 0)) / 100
-			: Number(formValues.discountAmount) || 0;
-
-		const vat = 0;
-		const grandTotal = Math.max(subTotal - discountValue + vat, 0);
-		const fullAmount = Number(formValues.paymentAmount) || 0;
-
-		// =============== get vendor info from local vendors table ===============
-		let vendorName = formValues.vendorName ?? "";
-		if (formValues.vendor_id) {
-			const vendorResult = await window.dbAPI.getDataFromTable("core_vendors", {
-				id: Number(formValues.vendor_id),
-			});
-			const vendorData = Array.isArray(vendorResult) ? vendorResult[0] : vendorResult;
-			if (vendorData) {
-				vendorName = vendorData.name ?? vendorName;
-			}
-		}
-
-		const purchaseItemsForDb = editItems.map((item) => ({
+		const requisitionItemsForPayload = itemsProducts.map((item) => ({
 			product_id: item.product_id,
 			display_name: item.display_name,
+			unit_name: item.unit_name ?? "",
 			quantity: Number(item.quantity) || 0,
-			mrp: Number(item.mrp ?? item.price ?? item.purchase_price) || 0,
 			purchase_price: Number(item.purchase_price) || 0,
 			sales_price: Number(item.sales_price) || Number(item.purchase_price) || 0,
 			sub_total: (Number(item.quantity) || 0) * (Number(item.purchase_price) || 0),
-			category_id: item.category_id ?? null,
-			category_name: item.category_name ?? "",
-			unit_name: item.unit_name ?? "",
-			average_price: Number(item.average_price) || 0,
-			expired_date: item.expired_date ?? null,
 		}));
 
-		// =============== keep the original invoice number unchanged; only recalculate financials ===============
-		const purchaseData = {
-			invoice: purchase.invoice,
-			sub_total: subTotal,
-			total: Math.round(grandTotal),
-			payment: fullAmount,
-			discount: Number(formValues.discountAmount) || 0,
-			discount_calculation: discountValue,
-			discount_type: formValues.isDiscountPercentage ? "Percentage" : "Flat",
-			approved_by_id: user?.id ?? null,
-			vendor_id: formValues.vendor_id ? Number(formValues.vendor_id) : null,
-			vendor_name: vendorName,
-			createdByUser: user?.username ?? "",
-			createdByName: user?.name ?? "",
-			createdById: user?.id ?? null,
-			process: purchase.process ?? "",
-			mode_name: formValues.transactionMode ?? purchase.mode_name ?? "",
-			transaction_mode_id: formValues.transactionModeId ? Number(formValues.transactionModeId) : null,
-			purchase_items: JSON.stringify(purchaseItemsForDb),
+		const payload = {
+			id: Number(requisitionId),
+			invoice_date: formValues.invoice_date ? formatDateISO(formValues.invoice_date) : null,
+			expected_date: formValues.expected_date ? formatDateISO(formValues.expected_date) : null,
+			remark: formValues.purchaseNarration || null,
+			created_by_id: user?.id ?? null,
+			items: requisitionItemsForPayload,
+			process: requisition?.process ?? "Created",
+			vendor_id: formValues.vendor_id ? String(formValues.vendor_id) : null,
+			warehouse_id: warehouseIdRef.current,
 		};
-
-		const originalItemsSnapshot = originalSnapshotRef.current?.parsedItems ?? [];
 
 		setIsAddingItem(true);
 		try {
-			await window.dbAPI.updateDataInTable("purchase", {
-				condition: { id: Number(purchaseId) },
-				data: purchaseData,
-			});
+			const res = await updateRequisition(payload).unwrap();
 
-			await updateProductsAfterEdit(originalItemsSnapshot, editItems);
+			if (res.data || res.status === 200) {
+				showNotification("Requisition updated successfully", "teal");
 
-			showNotification("Purchase updated successfully", "teal");
-
-			// =============== after a successful save the current items become the new baseline ===============
-			const newBaseline = editItems.map((item) => ({ ...item }));
-			originalSnapshotRef.current = {
-				parsedItems: newBaseline,
-				formValues: { ...itemsForm.values },
-			};
-
-			navigate(APP_NAVLINKS.PURCHASE);
+				await window.dbAPI.deleteDataFromTable("temp_purchase_products", { type: "requisition" });
+				navigate(APP_NAVLINKS.REQUISITION);
+			} else {
+				showNotification("Failed to update requisition", "red");
+			}
 		} catch (error) {
 			console.error(error);
-			showNotification(error?.message || "Failed to update purchase", "red");
+			showNotification(error?.message || "Failed to update requisition", "red");
 		} finally {
 			setIsAddingItem(false);
 		}
 	};
 
-	// =============== re-seed the form and item list from the original purchase snapshot ===============
-	const handleReset = () => {
-		const snapshot = originalSnapshotRef.current;
-		if (!snapshot) return;
-
-		setEditItems(snapshot.parsedItems.map((item) => ({ ...item })));
-		itemsForm.setValues(snapshot.formValues);
-	};
-
-	if (isLoadingPurchase) {
-		return (
-			<Center h={300}>
-				<Loader size="md" />
-			</Center>
-		);
+	if (isLoadingRequisition) {
+		return <RequisitionEditSkeleton />;
 	}
 
-	if (!purchase && !isLoadingPurchase) {
+	if (!requisition && !isLoadingRequisition) {
 		return (
 			<Center h={300}>
-				<Text c="dimmed">Purchase not found.</Text>
+				<Text c="dimmed">Requisition not found.</Text>
 			</Center>
 		);
 	}
@@ -273,7 +163,7 @@ export default function EditIndex() {
 		<Grid columns={24} gutter={0}>
 			<Grid.Col span={6}>
 				<Box p="xs" pr={0}>
-					<InvoiceForm refetch={() => {}} onAddItem={handleAddEditItem} />
+					<InvoiceForm refetch={refetch} />
 				</Box>
 			</Grid.Col>
 			<Grid.Col span={18}>
@@ -281,11 +171,8 @@ export default function EditIndex() {
 					<PurchaseOverview
 						isAddingItem={isAddingItem}
 						itemsForm={itemsForm}
-						itemsProducts={editItems}
-						refetch={() => {}}
-						onQuantityChange={handleEditItemUpdate}
-						onPriceChange={handleEditItemUpdate}
-						onRemoveItem={handleEditRemoveItem}
+						itemsProducts={itemsProducts}
+						refetch={refetch}
 						isEditMode={true}
 					/>
 				</Box>

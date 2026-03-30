@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Grid, Box } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import InvoiceForm from "./form/InvoiceForm";
@@ -17,6 +17,16 @@ export default function NewIndex() {
 	console.log(itemsForm.errors)
 	const { purchaseProducts: itemsProducts, refetch } = useTempPurchaseProducts({ type: "requisition" });
 	const [ isAddingItem, setIsAddingItem ] = useState(false);
+
+	// =============== clear stale temp items on mount (safety net for abandoned edits) ===============
+	useEffect(() => {
+		const clearStaleTempItems = async () => {
+			await window.dbAPI.deleteDataFromTable("temp_purchase_products", { type: "requisition" });
+			refetch();
+		};
+		clearStaleTempItems();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
 	const handleSubmit = async (formValues) => {
 		if (!itemsProducts?.length) {

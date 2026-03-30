@@ -1,6 +1,13 @@
 import { useState } from "react";
-import { Box, Grid, Text, ActionIcon, Group, Menu, Flex, Button, Badge, SegmentedControl } from "@mantine/core";
-import { IconCopy, IconDotsVertical, IconEdit, IconEye, IconPlus, IconTrashX } from "@tabler/icons-react";
+import { Box, Grid, Text, ActionIcon, Group, Menu, Flex, Button, Badge } from "@mantine/core";
+import {
+	IconCopy,
+	IconDotsVertical,
+	IconEdit,
+	IconEye,
+	IconPlus,
+	IconTrashX,
+} from "@tabler/icons-react";
 import { useNavigate, useOutletContext } from "react-router";
 import { DataTable } from "mantine-datatable";
 import tableCss from "@assets/css/Table.module.css";
@@ -11,31 +18,27 @@ import GlobalModal from "@components/modals/GlobalModal";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import { APP_NAVLINKS } from "@/routes/routes";
-import {
-	useCopyPurchaseMutation,
-} from "@services/purchase";
+import { useCopyPurchaseMutation } from "@services/purchase";
 import { modals } from "@mantine/modals";
 import { showNotification } from "@components/ShowNotificationComponent";
 import { formatCurrency } from "@utils/index";
 import { useApproveRequisitionMutation, useGetRequisitionQuery } from "@services/requisition";
 
 const PER_PAGE = 25;
+const RESTRICTED_STATUSES = ["generated", "approved"];
 
 export default function Table() {
-	const [ approveRequisition ] = useApproveRequisitionMutation();
-	const [ copyPurchase ] = useCopyPurchaseMutation();
+	const [approveRequisition] = useApproveRequisitionMutation();
+	const [copyPurchase] = useCopyPurchaseMutation();
 	const navigate = useNavigate();
 	const { t } = useTranslation();
-	const [ opened, { open, close } ] = useDisclosure(false);
-	const [ page, setPage ] = useState(1);
-	const [ selectedRow, setSelectedRow ] = useState(null);
-	const [ loading, setLoading ] = useState(false);
-	const [ viewData, setViewData ] = useState(null);
-	const [ deletedPurchaseIds, setDeletedPurchaseIds ] = useState(new Set());
-	const [ dataSource, setDataSource ] = useState("offline");
-	const { mainAreaHeight, isOnline } = useOutletContext();
-	// =============== when offline, always use offline data (online segment disabled) ===============
-	const effectiveDataSource = isOnline ? dataSource : "offline";
+	const [opened, { open, close }] = useDisclosure(false);
+	const [page, setPage] = useState(1);
+	const [selectedRow, setSelectedRow] = useState(null);
+	const [loading, setLoading] = useState(false);
+	const [viewData, setViewData] = useState(null);
+	const [deletedPurchaseIds, setDeletedPurchaseIds] = useState(new Set());
+	const { mainAreaHeight } = useOutletContext();
 
 	const form = useForm({
 		initialValues: {
@@ -139,7 +142,7 @@ export default function Table() {
 
 	const handleConfirmDelete = async (record) => {
 		await window.dbAPI.deleteDataFromTable("purchase", { id: record.id });
-		setDeletedPurchaseIds((previousIds) => new Set([ ...previousIds, record.id ]));
+		setDeletedPurchaseIds((previousIds) => new Set([...previousIds, record.id]));
 		showNotification(`Invoice ${record.invoice} deleted`, "teal");
 	};
 
@@ -147,7 +150,7 @@ export default function Table() {
 		<Box>
 			<Flex mb="xs" gap="sm" justify="space-between" align="center">
 				<KeywordSearch showStartEndDate form={form} />
-				<Group gap="sm" wrap="nowrap" >
+				<Group gap="sm" wrap="nowrap">
 					<Button
 						size="md"
 						color="red"
@@ -222,7 +225,7 @@ export default function Table() {
 											Created: "blue",
 											Approved: "red",
 										};
-										const badgeColor = colorMap[ item.process ] || "gray";
+										const badgeColor = colorMap[item.process] || "gray";
 										return item.process && <Badge color={badgeColor}>{item.process}</Badge>;
 									},
 								},
@@ -230,8 +233,9 @@ export default function Table() {
 									accessor: "action",
 									title: t("Action"),
 									textAlign: "right",
-									render: (data) => (
-
+									render: (data) => {
+										const isRestricted = RESTRICTED_STATUSES.includes(data?.process?.toLowerCase());
+										return (
 										<Group gap={4} justify="right" wrap="nowrap">
 											{!data.approved_by_id && (
 												<Button
@@ -278,39 +282,44 @@ export default function Table() {
 													>
 														{t("Show")}
 													</Menu.Item>
-													<Menu.Item
-														onClick={(event) => {
-															event.stopPropagation();
-															navigate(`${APP_NAVLINKS.PURCHASE_EDIT}/${data.id}`);
-														}}
-														leftSection={<IconEdit height={"18"} width={"18"} stroke={1.5} />}
-														color="yellow"
-													>
-														{t("Edit")}
-													</Menu.Item>
+													{!isRestricted && (
+														<Menu.Item
+															onClick={(event) => {
+																event.stopPropagation();
+																navigate(`${APP_NAVLINKS.REQUISITION_EDIT}/${data.id}`);
+															}}
+															leftSection={<IconEdit height="18" width="18" stroke={1.5} />}
+															color="yellow"
+														>
+															{t("Edit")}
+														</Menu.Item>
+													)}
 													{
 														<Menu.Item
 															color="indigo"
 															onClick={() => handleOpenCopyConfirmModal(data.id)}
-															leftSection={<IconCopy height={"18"} width={"18"} stroke={1.5} />}
+															leftSection={<IconCopy height="18" width="18" stroke={1.5} />}
 														>
 															{t("Copy")}
 														</Menu.Item>
 													}
-													<Menu.Item
-														onClick={(event) => {
-															event.stopPropagation();
-															handleDeleteClick(data);
-														}}
-														color="red"
-														leftSection={<IconTrashX height={"18"} width={"18"} stroke={1.5} />}
-													>
-														{t("Delete")}
-													</Menu.Item>
+													{!isRestricted && (
+														<Menu.Item
+															onClick={(event) => {
+																event.stopPropagation();
+																handleDeleteClick(data);
+															}}
+															color="red"
+															leftSection={<IconTrashX height="18" width="18" stroke={1.5} />}
+														>
+															{t("Delete")}
+														</Menu.Item>
+													)}
 												</Menu.Dropdown>
 											</Menu>
 										</Group>
-									),
+									);
+									},
 								},
 							]}
 							fetching={isLoading}

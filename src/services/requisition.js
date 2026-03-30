@@ -26,10 +26,10 @@ export const extendedRequisitionApiSlice = apiSlice.injectEndpoints({
     }),
 
     updateRequisition: builder.mutation({
-      query: (body) => {
+      query: ({ id, ...body }) => {
         return {
-          url: APP_APIS.REQUISITION,
-          method: "PUT",
+          url: `${APP_APIS.REQUISITION}/${id}`,
+          method: "PATCH",
           body,
         };
       },
