@@ -123,21 +123,10 @@ export default function ItemsTableSection({ itemsProducts, refetch, itemsTotal, 
 					},
 
 					{
-						accessor: "price",
+						accessor: "purchase_price",
 						title: "Price",
 						textAlign: "left",
 						width: 140,
-						render: (record) => (
-							<NumberInput
-								size="xs"
-								value={record.purchase_price ?? 0}
-								min={0}
-								step={1}
-								hideControls
-								thousandSeparator=","
-								onChange={(value) => handlePriceChange(record.id, value)}
-							/>
-						),
 					},
 					{
 						accessor: "quantity",
