@@ -8,9 +8,10 @@ import {
 	rem,
 	Flex,
 	LoadingOverlay,
+	Tabs,
 } from "@mantine/core";
 import { modals } from "@mantine/modals";
-import { IconRefresh } from "@tabler/icons-react";
+import { IconRefresh, IconCloudUpload, IconCloudDownload } from "@tabler/icons-react";
 import { SYNC_DATA } from "@/constants";
 import { showNotification } from "@components/ShowNotificationComponent";
 import { useSyncPosMutation } from "@services/pos";
@@ -27,7 +28,6 @@ import { useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { apiSlice } from "@services/api.mjs";
 import { useDispatch } from "react-redux";
-import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import axios from "axios";
 import { APP_NAVLINKS, MASTER_APIS } from "@/routes/routes";
@@ -42,6 +42,14 @@ const TABLE_MAPPING = {
 	vendors: "vendors",
 };
 
+const EXPORT_MODES = [ "sales", "purchases", "customers", "vendors" ];
+
+const IMPORT_ITEMS = [
+	{ mode: "platform", label: "Platform Sync", description: "Sync all platform data from server" },
+	{ mode: "customers", label: "Customers", description: "Import customer data from server" },
+	{ mode: "vendors", label: "Vendors", description: "Import vendor data from server" },
+];
+
 const PLATFORM_SYNC_DATA_MAP = {
 	core_customers: "customers",
 	core_users: "users",
@@ -52,7 +60,6 @@ const PLATFORM_SYNC_DATA_MAP = {
 };
 
 export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen }) {
-	const { t } = useTranslation();
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const [ syncPos ] = useSyncPosMutation();
@@ -66,6 +73,7 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 	const [ platformSyncing, setPlatformSyncing ] = useState(false);
 	const [ isInserting, setIsInserting ] = useState(false);
 	const [ insertProgress, setInsertProgress ] = useState(null);
+	const [ activeTab, setActiveTab ] = useState("export");
 	const lastSyncRecord = useMemo(() => getLastSyncRecord(syncRecords), [ syncRecords ]);
 
 	const buildSalesSyncPayload = (sale) => {
@@ -361,7 +369,7 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 					await commonDataStoreIntoLocalStorage(userData.id);
 				const targetPath = navigationPathFromConfig ?? APP_NAVLINKS.BAKERY;
 				// =============== HashRouter: read path when sync finishes (avoids stale closure) ================
-				const hashSegment = window.location.hash.replace(/^#/, "").split("?")[0];
+				const hashSegment = window.location.hash.replace(/^#/, "").split("?")[ 0 ];
 				const currentPathname = hashSegment === "" ? "/" : hashSegment;
 				// =============== only adjust route when user is on pos bakery or new sales entry (login-style routing) ================
 				const isSalesNewOrBakeryRoute =
@@ -435,70 +443,123 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 					title: { fontWeight: 600, fontSize: rem(20), color: "#626262" },
 				}}
 			>
-				<Divider mb="md" />
+				<Divider mb="lg" />
 
-				<Stack gap="md">
-					<Paper p="md" radius="md" withBorder shadow="sm">
-						<Group justify="space-between" wrap="nowrap">
-							<Stack gap={4}>
-								<Text fw={600} tt="capitalize">
-									{t("PlatformSync")}
-								</Text>
-								<Text size="sm" c="dimmed">
-									{getLastModeRecord("platform")}
-								</Text>
-							</Stack>
-							<ActionIcon
-								loading={platformSyncing}
-								loaderProps={{
-									children: (
-										<Flex justify="center" align="center" h="100%">
-											<IconRefresh className="spin" height={20} width={20} />
-										</Flex>
-									),
-								}}
-								onClick={confirmAndSyncPlatform}
-								variant="filled"
-								radius="xl"
-								color="teal"
-								size="32px"
-							>
-								<IconRefresh size={22} />
-							</ActionIcon>
-						</Group>
-					</Paper>
-					{SYNC_DATA.map((item, index) => (
-						<Paper key={index} p="md" radius="md" withBorder shadow="sm">
-							<Group justify="space-between" wrap="nowrap">
-								<Stack gap={4}>
-									<Text fw={600} tt="capitalize">
-										{item.mode}
-									</Text>
-									<Text size="sm" c="dimmed">
-										{getLastModeRecord(item?.mode)}
-									</Text>
-								</Stack>
-								<ActionIcon
-									loading={loadingStates[ item.mode ] || false}
-									loaderProps={{
-										children: (
-											<Flex justify="center" align="center" h="100%">
-												<IconRefresh className="spin" height={20} width={20} />
-											</Flex>
-										),
-									}}
-									onClick={() => confirmAndSync(item.mode)}
-									variant="filled"
-									radius="xl"
-									color="teal"
-									size="32px"
-								>
-									<IconRefresh size={22} />
-								</ActionIcon>
-							</Group>
-						</Paper>
-					))}
-				</Stack>
+				<Tabs
+					value={activeTab}
+					onChange={setActiveTab}
+					variant="pills"
+					styles={{
+						list: {
+							backgroundColor: "#f1f3f5",
+							borderRadius: "10px",
+							padding: "4px",
+							gap: "4px",
+							"&::before": { display: "none" },
+						},
+						tab: {
+							flex: 1,
+							justifyContent: "center",
+							borderRadius: "8px",
+							fontWeight: 600,
+							fontSize: "14px",
+							border: "none",
+							transition: "all 0.15s ease",
+							"&[data-active]": {
+								backgroundColor: "#ffffff",
+								color: "white",
+								boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
+							},
+							"&:hover:not([data-active])": {
+								backgroundColor: "#e9ecef",
+								color: "#495057",
+							},
+						},
+					}}
+				>
+					<Tabs.List grow mb="xl">
+						<Tabs.Tab value="export" leftSection={<IconCloudUpload size={16} />}>
+							Export
+						</Tabs.Tab>
+						<Tabs.Tab value="import" leftSection={<IconCloudDownload size={16} />}>
+							Import
+						</Tabs.Tab>
+					</Tabs.List>
+
+					{/* =============== export tab: push local data to the cloud server ================ */}
+					<Tabs.Panel value="export">
+						<Stack gap="md">
+							{SYNC_DATA.filter((item) => EXPORT_MODES.includes(item.mode)).map((item, index) => (
+								<Paper key={index} p="md" radius="md" withBorder shadow="sm">
+									<Group justify="space-between" wrap="nowrap">
+										<Stack gap={4}>
+											<Text fw={600} tt="capitalize">
+												{item.mode}
+											</Text>
+											<Text size="sm" c="dimmed">
+												{getLastModeRecord(item.mode)}
+											</Text>
+										</Stack>
+										<ActionIcon
+											loading={loadingStates[ item.mode ] || false}
+											loaderProps={{
+												children: (
+													<Flex justify="center" align="center" h="100%">
+														<IconRefresh className="spin" height={20} width={20} />
+													</Flex>
+												),
+											}}
+											onClick={() => confirmAndSync(item.mode)}
+											variant="filled"
+											radius="xl"
+											color="teal"
+											size="32px"
+										>
+											<IconRefresh size={22} />
+										</ActionIcon>
+									</Group>
+								</Paper>
+							))}
+						</Stack>
+					</Tabs.Panel>
+
+					{/* =============== import tab: pull data from the cloud server to local ================ */}
+					<Tabs.Panel value="import">
+						<Stack gap="md">
+							{IMPORT_ITEMS.map((importItem) => (
+								<Paper key={importItem.mode} p="md" radius="md" withBorder shadow="sm">
+									<Group justify="space-between" wrap="nowrap">
+										<Stack gap={4}>
+											<Text fw={600}>
+												{importItem.label}
+											</Text>
+											<Text size="sm" c="dimmed">
+												{getLastModeRecord(importItem.mode)}
+											</Text>
+										</Stack>
+										<ActionIcon
+											loading={platformSyncing}
+											loaderProps={{
+												children: (
+													<Flex justify="center" align="center" h="100%">
+														<IconRefresh className="spin" height={20} width={20} />
+													</Flex>
+												),
+											}}
+											onClick={confirmAndSyncPlatform}
+											variant="filled"
+											radius="xl"
+											color="blue"
+											size="32px"
+										>
+											<IconRefresh size={22} />
+										</ActionIcon>
+									</Group>
+								</Paper>
+							))}
+						</Stack>
+					</Tabs.Panel>
+				</Tabs>
 
 				<Text size="xs" c="dimmed" mt="xl" ta="center">
 					{lastSyncRecord?.mode && lastSyncRecord?.syncedAt

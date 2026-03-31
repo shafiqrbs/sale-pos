@@ -31,7 +31,7 @@ import { useGetInventoryCategoryQuery } from "@services/settings";
 import SelectForm from "@components/form-builders/SelectForm";
 import { useGetVendorsQuery } from "@services/core/vendors";
 
-export default function InvoiceForm({ refetch, onAddItem }) {
+export default function InvoiceForm({ refetch, onAddItem, onVendorChange }) {
 	const [ products, setProducts ] = useState([]);
 	const [ productResetKey, setProductResetKey ] = useState(0);
 	const [ selectedCategoryId, setSelectedCategoryId ] = useState(null);
@@ -130,11 +130,16 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 		});
 	};
 
+	const focusProductSelect = () => {
+		requestAnimationFrame(() => {
+			document.getElementById("productId")?.open?.();
+		});
+	};
+
 	const handleProductSelect = (value, option) => {
 		itemsForm.setFieldValue("productId", value);
 		itemsForm.setFieldValue("purchasePrice", option?.purchase_price);
 		itemsForm.setFieldValue("unit", option?.unit);
-		setTimeout(() => document.getElementById("quantity")?.focus(), 0);
 	};
 
 	useHotkeys([ [ "alt+a", () => document.getElementById("EntityFormSubmit")?.click() ] ]);
@@ -165,6 +170,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 									}))}
 									placeholder="Search vendor/supplier"
 									tooltip="Vendor is required"
+									changeValue={onVendorChange}
 								/>
 							</Box>
 						</Flex>
@@ -180,9 +186,16 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 										})) ?? []),
 									]}
 									value={selectedCategoryId ?? ""}
-									onChange={(value) =>
-										setSelectedCategoryId(value === "" || value == null ? null : value)
-									}
+									onChange={(value) => {
+										setSelectedCategoryId(value === "" || value == null ? null : value);
+										focusProductSelect();
+									}}
+									onKeyDown={(event) => {
+										if (event.key === "Enter") {
+											event.preventDefault();
+											focusProductSelect();
+										}
+									}}
 									clearable
 									searchable
 								/>
@@ -218,9 +231,9 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 						name="quantity"
 						id="quantity"
 						placeholder="0"
-						nextField="expired_date"
+						nextField="EntityFormSubmit"
 						required={false}
-										tooltip={itemsForm.errors.quantity}
+						tooltip={itemsForm.errors.quantity}
 						leftSection={<IconSortAscendingNumbers size={16} opacity={0.6} />}
 						rightIcon={
 							<Text fz="xs" fw={500}>

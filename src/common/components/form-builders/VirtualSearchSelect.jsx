@@ -27,6 +27,7 @@ export default function VirtualSearchSelect({
 	nothingFoundMessage = "No results found",
 	onChange,
 	id,
+	nextField,
 }) {
 	const containerRef = useRef(null);
 	const virtualSelectInstanceRef = useRef(null);
@@ -40,8 +41,10 @@ export default function VirtualSearchSelect({
 
 	const onChangeRef = useRef(onChange);
 	const optionMapRef = useRef(optionMap);
+	const nextFieldRef = useRef(nextField);
 	onChangeRef.current = onChange;
 	optionMapRef.current = optionMap;
+	nextFieldRef.current = nextField;
 
 	// =============== init on mount, destroy on unmount; single init with initial options/value ===============
 	useEffect(() => {
@@ -75,17 +78,37 @@ export default function VirtualSearchSelect({
 
 		virtualSelectInstanceRef.current = containerElement.virtualSelect;
 
+		// =============== tracks whether a value was selected in the current open/close cycle;
+		// afterClose should only move focus when the user actually picked a value, not when
+		// they dismissed the dropdown by clicking elsewhere ===============
+		let didSelectValue = false;
+
 		const handleChange = (event) => {
 			const selectedValue =
 				event.target != null && event.target.value != null ? String(event.target.value) : "";
 			const option = optionMapRef.current.get(selectedValue);
 			onChangeRef.current?.(selectedValue, option);
+			didSelectValue = true;
+		};
+
+		// =============== use afterClose instead of setTimeout(0) so focus moves only after the
+		// dropdown is fully closed — this fixes mouse-click selection not focusing nextField
+		// because with mouse, the dropdown is still animating when setTimeout(0) would fire ===============
+		const handleAfterClose = () => {
+			if (!didSelectValue) return;
+			didSelectValue = false;
+			const targetField = nextFieldRef.current;
+			if (!targetField) return;
+			const nextElement = document.getElementById(targetField);
+			if (nextElement) nextElement.focus();
 		};
 
 		containerElement.addEventListener("change", handleChange);
+		containerElement.addEventListener("afterClose", handleAfterClose);
 
 		return () => {
 			containerElement.removeEventListener("change", handleChange);
+			containerElement.removeEventListener("afterClose", handleAfterClose);
 			if (typeof containerElement.destroy === "function") {
 				containerElement.destroy();
 			}

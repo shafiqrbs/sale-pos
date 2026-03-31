@@ -98,7 +98,10 @@ export default function NewIndex() {
 		<Grid columns={24} gutter={0}>
 			<Grid.Col span={6}>
 				<Box p="xs" pr={0}>
-					<InvoiceForm refetch={refetch} />
+					<InvoiceForm
+						refetch={refetch}
+						onVendorChange={(vendorId) => itemsForm.setFieldValue("vendor_id", vendorId)}
+					/>
 				</Box>
 			</Grid.Col>
 			<Grid.Col span={18}>
