@@ -29,4 +29,4 @@ export const extendedProductApiSlice = apiSlice.injectEndpoints({
     }),
 });
 
-export const { useGetProductQuery, useAddProductMutation } = extendedProductApiSlice;
+export const { useGetProductQuery, useLazyGetProductQuery, useAddProductMutation } = extendedProductApiSlice;

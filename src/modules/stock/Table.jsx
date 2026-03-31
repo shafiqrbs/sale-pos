@@ -33,7 +33,15 @@ export default function Table() {
 		initialValues: { term: "" },
 	});
 
-	const { products, totalCount, getLocalProducts, getProductCount, loading } = useLocalProducts({
+	const {
+		products,
+		totalCount,
+		getLocalProducts,
+		getProductCount,
+		syncOnlineProductsToLocal,
+		loading,
+		isSyncing,
+	} = useLocalProducts({
 		fetchOnMount: false,
 	});
 
@@ -116,12 +124,15 @@ export default function Table() {
 	};
 
 	// =============== refresh button handler ================
-	const handleRefresh = () => {
-		if (effectiveDataSource === "online") {
-			refetchOnlineProducts();
-		} else {
-			fetchLocalProductsPage();
-		}
+	const handleRefresh = async () => {
+
+		await syncOnlineProductsToLocal({
+			type: "product",
+			product_nature: "allstocks",
+			term: "",
+		});
+		refetchOnlineProducts();
+		fetchLocalProductsPage();
 	};
 
 	// =============== derive active table data based on current data source ================
@@ -134,7 +145,7 @@ export default function Table() {
 		: totalCount;
 
 	const isTableLoading = effectiveDataSource === "online"
-		? (isOnlineLoading || isOnlineFetching)
+		? (isOnlineLoading || isOnlineFetching || isSyncing)
 		: loading;
 
 	const height = mainAreaHeight - 60;
@@ -173,7 +184,7 @@ export default function Table() {
 					<Tooltip
 						label="Click here for update stock"
 						c="white"
-						bg={"green"}
+						bg="green"
 						withArrow
 						zIndex={999}
 						transitionProps={{ transition: "pop-bottom-left", duration: 500 }}
@@ -181,7 +192,7 @@ export default function Table() {
 						<ActionIcon
 							bg="var(--theme-secondary-color-6)"
 							onClick={handleRefresh}
-							disabled={isTableLoading}
+							disabled={isTableLoading || !isOnline}
 							size="lg"
 							aria-label="Refresh"
 						>

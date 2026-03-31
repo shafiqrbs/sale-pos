@@ -1,9 +1,34 @@
 import { useState, useCallback, useEffect } from "react";
+import { useLazyGetProductQuery } from "@services/product";
+
+/**
+ * =============== map a single api product response to the core_products local schema ================
+ * the api uses different field names than the sqlite table, so we translate them here
+ * before bulk-inserting so that not-null constraints are satisfied.
+ */
+const mapApiProductToLocalSchema = (apiProduct) => ({
+	id: apiProduct.id,
+	stock_id: apiProduct.id,
+	product_name: apiProduct.product_name ?? "",
+	name: apiProduct.product_name ?? "",
+	display_name: apiProduct.product_name ?? "",
+	product_nature: apiProduct.product_type ?? "",
+	slug: apiProduct.slug ?? "",
+	unit_name: apiProduct.unit_name ?? "",
+	unit_id: 0,
+	category_id: null,
+	quantity: apiProduct.quantity ?? 0,
+	purchase_price: apiProduct.purchase_price ?? 0,
+	sales_price: apiProduct.sales_price ?? 0,
+	average_price: apiProduct.average_price ?? 0,
+	barcode: apiProduct.barcode ?? null,
+	feature_image: apiProduct.images ?? null,
+});
 
 const normalizeCondition = (condition) => {
-	return Object.entries(condition).reduce((acc, [key, value]) => {
+	return Object.entries(condition).reduce((acc, [ key, value ]) => {
 		if (value !== null && value !== undefined) {
-			acc[key] = value;
+			acc[ key ] = value;
 		}
 		return acc;
 	}, {});
@@ -26,11 +51,14 @@ export default function useLocalProducts(options = {}) {
 		queryOptions: initialQueryOptions = {},
 	} = options;
 
-	const [products, setProducts] = useState([]);
-	const [totalCount, setTotalCount] = useState(0);
-	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState(null);
-	const [lastFetchParams, setLastFetchParams] = useState(null);
+	const [ triggerGetProduct ] = useLazyGetProductQuery();
+
+	const [ products, setProducts ] = useState([]);
+	const [ totalCount, setTotalCount ] = useState(0);
+	const [ loading, setLoading ] = useState(false);
+	const [ isSyncing, setIsSyncing ] = useState(false);
+	const [ error, setError ] = useState(null);
+	const [ lastFetchParams, setLastFetchParams ] = useState(null);
 	/**
 	 * =============== fetch products from local database with filters and pagination ================
 	 * @param {Object} condition - filter condition (e.g., { stock_id: 123 })
@@ -109,7 +137,7 @@ export default function useLocalProducts(options = {}) {
 			setLoading(false);
 
 			if (fetchedProducts && fetchedProducts.length > 0) {
-				return fetchedProducts[0];
+				return fetchedProducts[ 0 ];
 			}
 
 			return null;
@@ -146,7 +174,74 @@ export default function useLocalProducts(options = {}) {
 
 		const { condition, propertyId, queryOptions } = lastFetchParams;
 		return getLocalProducts(condition, propertyId, queryOptions);
-	}, [lastFetchParams, getLocalProducts]);
+	}, [ lastFetchParams, getLocalProducts ]);
+
+	/**
+	 * =============== fetch all online products and repopulate core_products table in local db ================
+	 * fetches every paginated page from the server, clears the local table, then bulk-inserts fresh data.
+	 * safe to call from any component — put your RTK Query params in fetchParams.
+	 * @param {Object} fetchParams - query params forwarded to the product api (term, type, product_nature, …)
+	 * @returns {Promise<{success: boolean, count: number}>}
+	 */
+	const syncOnlineProductsToLocal = useCallback(async (fetchParams = {}) => {
+		setIsSyncing(true);
+		setError(null);
+
+		try {
+			// =============== fetch up to 500 records per request to minimize round-trips ================
+			const SYNC_PAGE_SIZE = 500;
+
+			const firstPageResponse = await triggerGetProduct(
+				{ ...fetchParams, page: 1, offset: SYNC_PAGE_SIZE },
+				false
+			).unwrap();
+
+			const totalProductCount = firstPageResponse.total ?? 0;
+			let allProducts = Array.isArray(firstPageResponse.data) ? [ ...firstPageResponse.data ] : [];
+
+			const totalPageCount = Math.ceil(totalProductCount / SYNC_PAGE_SIZE);
+
+			// =============== fetch remaining pages sequentially ================
+			for (let currentPage = 2; currentPage <= totalPageCount; currentPage++) {
+				const pageResponse = await triggerGetProduct(
+					{ ...fetchParams, page: currentPage, offset: SYNC_PAGE_SIZE },
+					false
+				).unwrap();
+
+				if (Array.isArray(pageResponse?.data)) {
+					allProducts = [ ...allProducts, ...pageResponse.data ];
+				}
+			}
+
+			// =============== safety guard: never wipe the table if the api returned nothing ================
+			if (allProducts.length === 0) {
+				return { success: false, count: 0 };
+			}
+
+			// =============== translate api fields to match the local sqlite schema ================
+			const mappedProducts = allProducts.map(mapApiProductToLocalSchema);
+
+			// =============== wipe old local records and bulk-insert fresh ones ================
+			await window.dbAPI.clearAndInsertBulk("core_products", mappedProducts, { batchSize: 500 });
+
+			// =============== re-fetch the current local page so offline view is immediately up to date ================
+			if (lastFetchParams) {
+				const { condition, propertyId, queryOptions } = lastFetchParams;
+				await getLocalProducts(condition, propertyId, queryOptions);
+			}
+
+			// =============== update total count so pagination reflects the new data ================
+			await getProductCount({});
+
+			return { success: true, count: allProducts.length };
+		} catch (syncError) {
+			console.error("Error syncing online products to local db:", syncError);
+			setError(syncError);
+			return { success: false, count: 0 };
+		} finally {
+			setIsSyncing(false);
+		}
+	}, [ triggerGetProduct, lastFetchParams, getLocalProducts, getProductCount ]);
 
 	// =============== auto-fetch on mount if enabled ================
 	useEffect(() => {
@@ -164,7 +259,9 @@ export default function useLocalProducts(options = {}) {
 		getProductCount,
 		getProduct,
 		refetch,
+		syncOnlineProductsToLocal,
 		loading,
+		isSyncing,
 		error,
 	};
 }

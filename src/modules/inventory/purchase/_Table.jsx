@@ -16,6 +16,7 @@ import {
 	useCopyPurchaseMutation,
 } from "@services/purchase";
 import usePurchaseList from "@hooks/usePurchaseList";
+import useLocalProducts from "@hooks/useLocalProducts";
 import { modals } from "@mantine/modals";
 import { showNotification } from "@components/ShowNotificationComponent";
 import { formatCurrency } from "@utils/index";
@@ -25,6 +26,7 @@ const PER_PAGE = 25;
 export default function Table() {
 	const [approvePurchase] = useApprovePurchaseMutation();
 	const [copyPurchase] = useCopyPurchaseMutation();
+	const { syncOnlineProductsToLocal } = useLocalProducts({ fetchOnMount: false });
 	const navigate = useNavigate();
 	const { t } = useTranslation();
 	const [opened, { open, close }] = useDisclosure(false);
@@ -79,6 +81,14 @@ export default function Table() {
 
 			if (res.data.status === 200) {
 				showNotification(t("ApprovedSuccessfully"), "teal");
+
+				// =============== silently refresh local product stock after approval ================
+				if (isOnline) {
+					syncOnlineProductsToLocal({
+						type: "product",
+						product_nature: "allstocks",
+					});
+				}
 			}
 		} catch (error) {
 			console.error("Error approving purchase:", error);
