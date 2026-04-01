@@ -16,7 +16,7 @@ import { formatCurrency } from "@utils/index";
 import useLocalProducts from "@hooks/useLocalProducts";
 import { useTranslation } from "react-i18next";
 
-const ITEMS_PER_PAGE = 16;
+const ITEMS_PER_PAGE = 24;
 
 export default function ProductList() {
 	const [ activePage, setActivePage ] = useState(1);

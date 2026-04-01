@@ -34,17 +34,17 @@ export default function Table() {
 	const { isOnline } = useOutletContext();
 	const { mainAreaHeight } = useMainAreaHeight();
 	const { currencySymbol } = useConfigData({ offlineFetch: true });
-	const [page, setPage] = useState(1);
-	const [dataSource, setDataSource] = useState("offline");
-	const [onlineSearchTerm, setOnlineSearchTerm] = useState("");
+	const [ page, setPage ] = useState(1);
+	const [ dataSource, setDataSource ] = useState("offline");
+	const [ onlineSearchTerm, setOnlineSearchTerm ] = useState("");
 	const searchRef = useRef({ term: "" });
 
 	const effectiveDataSource = isOnline ? dataSource : "offline";
 
 	// =============== damage process ================
-	const [damageOpened, { open: openDamage, close: closeDamage }] = useDisclosure(false);
-	const [selectedProduct, setSelectedProduct] = useState(null);
-	const [triggerGetItemsForDamage, { data: damageResponse, isFetching: isDamageLoading }] =
+	const [ damageOpened, { open: openDamage, close: closeDamage } ] = useDisclosure(false);
+	const [ selectedProduct, setSelectedProduct ] = useState(null);
+	const [ triggerGetItemsForDamage, { data: damageResponse, isFetching: isDamageLoading } ] =
 		useLazyGetItemsForDamageQuery();
 
 	const handleDamage = async (record) => {
@@ -93,10 +93,10 @@ export default function Table() {
 
 		const searchConditions = term
 			? {
-					like: {
-						display_name: term,
-					},
-				}
+				like: {
+					display_name: term,
+				},
+			}
 			: undefined;
 
 		await getLocalProducts({}, "id", {
@@ -112,14 +112,14 @@ export default function Table() {
 				...(searchConditions && { search: searchConditions }),
 			}
 		);
-	}, [page, getLocalProducts, getProductCount]);
+	}, [ page, getLocalProducts, getProductCount ]);
 
 	// =============== fetch local products on mount and when page or data source changes ================
 	useEffect(() => {
 		if (effectiveDataSource === "offline") {
 			fetchLocalProductsPage();
 		}
-	}, [fetchLocalProductsPage, effectiveDataSource]);
+	}, [ fetchLocalProductsPage, effectiveDataSource ]);
 
 	// =============== listen for product updates from sales and refetch local products ================
 	useEffect(() => {
@@ -128,7 +128,7 @@ export default function Table() {
 		return () => {
 			window.removeEventListener("products-updated", fetchLocalProductsPage);
 		};
-	}, [fetchLocalProductsPage]);
+	}, [ fetchLocalProductsPage ]);
 
 	// =============== search handler ================
 	const handleSearch = (data) => {
@@ -262,7 +262,7 @@ export default function Table() {
 							render: (record) => record.barcode || "—",
 						},
 						{
-							accessor: "category",
+							accessor: "category_name",
 							title: t("Category"),
 							width: 140,
 							render: (record) => record.category_name || record.category_id || "—",
@@ -305,56 +305,56 @@ export default function Table() {
 						},
 						...(effectiveDataSource === "online"
 							? [
-									{
-										accessor: "action",
-										title: t("Action"),
-										textAlign: "right",
-										width: 80,
-										render: (record) => {
-											const quantity = Number(record.quantity);
-											if (!quantity || quantity <= 0) return null;
+								{
+									accessor: "action",
+									title: t("Action"),
+									textAlign: "right",
+									width: 80,
+									render: (record) => {
+										const quantity = Number(record.quantity);
+										if (!quantity || quantity <= 0) return null;
 
-											return (
-												<Group gap={4} justify="right" wrap="nowrap">
-													<Menu
-														position="bottom-end"
-														offset={3}
-														withArrow
-														trigger="hover"
-														openDelay={100}
-														closeDelay={400}
-													>
-														<Menu.Target>
-															<ActionIcon
-																size="sm"
-																variant="transparent"
-																color="red"
-																radius="xl"
-																aria-label="Actions"
-															>
-																<IconDotsVertical height={"18"} width={"18"} stroke={1.5} />
-															</ActionIcon>
-														</Menu.Target>
-														<Menu.Dropdown w="160">
-															<Menu.Item
-																onClick={(event) => {
-																	event.stopPropagation();
-																	handleDamage(record);
-																}}
-																leftSection={
-																	<IconTruckReturn height={"18"} width={"18"} stroke={1.5} />
-																}
-																color="red"
-															>
-																{t("Damage")}
-															</Menu.Item>
-														</Menu.Dropdown>
-													</Menu>
-												</Group>
-											);
-										},
+										return (
+											<Group gap={4} justify="right" wrap="nowrap">
+												<Menu
+													position="bottom-end"
+													offset={3}
+													withArrow
+													trigger="hover"
+													openDelay={100}
+													closeDelay={400}
+												>
+													<Menu.Target>
+														<ActionIcon
+															size="sm"
+															variant="transparent"
+															color="red"
+															radius="xl"
+															aria-label="Actions"
+														>
+															<IconDotsVertical height={"18"} width={"18"} stroke={1.5} />
+														</ActionIcon>
+													</Menu.Target>
+													<Menu.Dropdown w="160">
+														<Menu.Item
+															onClick={(event) => {
+																event.stopPropagation();
+																handleDamage(record);
+															}}
+															leftSection={
+																<IconTruckReturn height={"18"} width={"18"} stroke={1.5} />
+															}
+															color="red"
+														>
+															{t("Damage")}
+														</Menu.Item>
+													</Menu.Dropdown>
+												</Menu>
+											</Group>
+										);
 									},
-								]
+								},
+							]
 							: []),
 					]}
 					fetching={isTableLoading}

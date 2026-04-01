@@ -101,7 +101,12 @@ export default function ProductTable({ products }) {
                         ),
                     },
                     {
-                        accessor: "qty",
+                        accessor: "quantity",
+                        textAlign: "center",
+                        title: t("Quantity"),
+                    },
+                    {
+                        accessor: "",
                         title: "",
                         textAlign: "center",
                         render: (data) => (

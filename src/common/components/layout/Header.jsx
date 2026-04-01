@@ -121,6 +121,11 @@ export default function Header({ isOnline, toggleNetwork }) {
 		if (!configData?.is_pos) {
 			return item.label !== "POS";
 		}
+
+		if (!isOnlinePermissionIncludes) {
+			return ![ "Hold", "Stock" ].includes(item.label);
+		}
+
 		return true;
 	});
 

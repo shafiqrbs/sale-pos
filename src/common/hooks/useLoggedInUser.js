@@ -24,7 +24,5 @@ export default function useLoggedInUser() {
     const isOnlinePermissionIncludes =
         roles.includes("role_sales_purchase_manager") || roles.includes("role_sales_purchase_admin") || roles.includes("role_sales_purchase_admin") || roles.includes("role_sales_purchase_admin");
 
-
-
-    return { user, roles , isOnlinePermissionIncludes};
+    return { user, roles, isOnlinePermissionIncludes };
 }
