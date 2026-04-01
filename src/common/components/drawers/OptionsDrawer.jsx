@@ -15,7 +15,7 @@ import {
 	IconTruckReturn,
 	IconReceiptTax,
 	IconTruckLoading,
-	IconTruckDelivery, IconStack3, IconStackPop,
+	IconTruckDelivery, IconStack3, IconStackPop, IconAlertTriangle, IconReportAnalytics,
 } from "@tabler/icons-react";
 import GlobalDrawer from "./GlobalDrawer";
 import { APP_NAVLINKS } from "@/routes/routes";
@@ -78,11 +78,13 @@ const DRAWER_MENU = [
 	{
 		value: "report",
 		label: "Report",
-		icon: IconSettings,
+		icon: IconReportAnalytics,
 		submenu: [
 			{ label: "Category Summary", pathname: APP_NAVLINKS.CATEGORY_SUMMARY, icon: IconUsers },
+			{ label: "Damage Item", pathname: APP_NAVLINKS.DAMAGE_ITEM, icon: IconAlertTriangle },
 		],
 	},
+
 ];
 
 export default function OptionsDrawer({ isOnline,opened, onClose }) {

@@ -21,6 +21,15 @@ export const extendedReportApiSlice = apiSlice.injectEndpoints({
 			  };
 		  },
 		  providesTags: ["Reports"],
+	}),
+	getDamageItem: builder.query({
+		  query: (params) => {
+			  return {
+				  url: APP_APIS.DAMAGE_ITEM,
+				  method: "GET"
+			  };
+		  },
+		  providesTags: ["Reports"],
 	  }),
   }),
 });
@@ -28,4 +37,5 @@ export const extendedReportApiSlice = apiSlice.injectEndpoints({
 export const {
 	useGetDailySummaryQuery,
 	useGetCategorySummaryQuery,
+	useGetDamageItemQuery,
 } = extendedReportApiSlice;

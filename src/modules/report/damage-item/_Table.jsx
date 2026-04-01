@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import KeywordSearch from "@components/KeywordSearch";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
-import {useGetCategorySummaryQuery} from "@services/report";
+import {useGetDamageItemQuery} from "@services/report";
 import {formatCurrency} from "@utils/index";
 import {IconPlus} from "@tabler/icons-react";
 import {APP_NAVLINKS} from "@/routes/routes";
@@ -34,10 +34,12 @@ export default function Table() {
 		},
 	});
 
-	const { data: entities, isLoading } = useGetCategorySummaryQuery({
+	const { data: entities, isLoading } = useGetDamageItemQuery({
 		page,
 		offset: PER_PAGE,
 	});
+
+	console.log(entities?.data?.entities);
 
 	return (
 		<Box>
@@ -70,6 +72,18 @@ export default function Table() {
 									render: (item) => <Text size="xs">{item?.name || "N/A"}</Text>,
 								},
 
+								{
+									accessor: "quantity",
+									title: t("Quantity"),
+									textAlign: "right",
+									render: (item) => <>{item?.quantity}</>,
+								},
+								{
+									accessor: "price",
+									title: t("Price"),
+									textAlign: "right",
+									render: (item) => <>{formatCurrency(item?.price || 0)}</>,
+								},
 								{
 									accessor: "total",
 									title: t("Amount"),

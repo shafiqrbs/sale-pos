@@ -32,6 +32,7 @@ export const APP_NAVLINKS = {
 	CUSTOMERS: "/core/customers",
 	SETTINGS: "/inventory/config",
 	CATEGORY_SUMMARY: "/report/category-summary",
+	DAMAGE_ITEM: "/report/damage-item",
 };
 
 export const APP_APIS = {
@@ -64,4 +65,5 @@ export const APP_APIS = {
 	PURCHASE_CONFIG: "/domain/config/inventory-purchase",
 	DAILY_SUMMARY: "/inventory/report/daily-summary",
 	CATEGORY_SUMMARY: "/inventory/report/category-summary",
+	DAMAGE_ITEM: "/inventory/report/damage-item",
 };

@@ -23,6 +23,7 @@ import PurchaseReturnIndex from "@modules/inventory/purchase-return";
 import PurchaseReturnNewIndex from "@modules/inventory/purchase-return/NewIndex";
 import PurchaseReturnEditIndex from "@modules/inventory/purchase-return/EditIndex";
 import CategorySummary from "@modules/report/category-summary";
+import DamageItem from "@modules/report/damage-item";
 
 export default function AppRoutes() {
 	return (
@@ -35,6 +36,7 @@ export default function AppRoutes() {
 				</Route>
 				<Route path="report">
 					<Route index path="category-summary" element={<CategorySummary />} />
+					<Route index path="damage-item" element={<DamageItem />} />
 				</Route>
 				<Route path="inventory">
 					<Route path="sales">
