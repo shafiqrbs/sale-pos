@@ -76,6 +76,26 @@ export const extendedPurchaseApiSlice = apiSlice.injectEndpoints({
       },
       invalidatesTags: [ "Purchase" ],
     }),
+
+    getItemsForDamage: builder.query({
+      query: (id) => {
+        return {
+          url: `${APP_APIS.PURCHASE}/items-for-damage/${id}`,
+          method: "GET",
+        };
+      },
+    }),
+
+    processDamage: builder.mutation({
+      query: ({ id, body }) => {
+        return {
+          url: `${APP_APIS.PURCHASE}/manual/damage-process/${id}`,
+          method: "POST",
+          body,
+        };
+      },
+      invalidatesTags: [ "Purchase" ],
+    }),
   }),
 });
 
@@ -87,4 +107,6 @@ export const {
   useGetPurchaseByIdQuery,
   useApprovePurchaseMutation,
   useCopyPurchaseMutation,
+  useLazyGetItemsForDamageQuery,
+  useProcessDamageMutation,
 } = extendedPurchaseApiSlice;
