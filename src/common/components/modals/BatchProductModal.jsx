@@ -11,7 +11,7 @@ import {
 } from "@mantine/core";
 import { IconPlus, IconMinus } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
-import { RESTRICT_PRODUCT_QUANTITY_LIMIT } from "@constants/index";
+import useConfigData from "@hooks/useConfigData";
 
 // purchase_item_for_sales structure:
 // [
@@ -32,6 +32,7 @@ export default function BatchProductModal({
 	productName,
 	onBatchSelect,
 }) {
+	const { allowSalesZeroStock } = useConfigData();
 	const [selectedBatches, setSelectedBatches] = useState({});
 
 	// =============== initialize with current batches from cart ================
@@ -135,7 +136,7 @@ export default function BatchProductModal({
 											w={60}
 											value={selectedBatches[item.purchase_item_id] || 0}
 											min={0}
-											max={RESTRICT_PRODUCT_QUANTITY_LIMIT ? item.remain_quantity : undefined}
+											max={!allowSalesZeroStock ? item.remain_quantity : undefined}
 											allowNegative={false}
 											clampBehavior="strict"
 											step={1}

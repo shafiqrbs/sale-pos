@@ -70,7 +70,10 @@ const useConfigData = ({ offlineFetch = false } = {}) => {
 	const currencySymbol =
 		configData?.currency?.symbol || configData?.inventory_config?.currency?.symbol || "";
 
-	return { configData, is_purchase_online, is_sales_online, currencySymbol };
+	const allowSalesZeroStock = configData?.inventory_config?.config_sales?.zero_stock === 1 || configData?.config_sales?.zero_stock === 1;
+	const allowPurchaseZeroStock = configData?.inventory_config?.config_purchase?.zero_stock === 1 || configData?.config_purchase?.zero_stock === 1;
+
+	return { configData, is_purchase_online, is_sales_online, currencySymbol, allowSalesZeroStock, allowPurchaseZeroStock };
 };
 
 export default useConfigData;

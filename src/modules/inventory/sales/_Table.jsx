@@ -151,25 +151,26 @@ export default function Table() {
 			<Flex mb="xs" gap="sm" justify="space-between" align="center">
 				<KeywordSearch showStartEndDate form={form} />
 				<Group gap="sm" wrap="nowrap">
-					<SegmentedControl
-						value={effectiveDataSource}
-						onChange={(value) => {
-							setDataSource(value);
-							setPage(1);
-						}}
-						color={effectiveDataSource === "online" ? "green" : "orange"}
-						data={[
-							{
-								value: "online",
-								label: "🌐 " + t("Online"),
-								disabled: !isOnline,
-							},
-							{
-								value: "offline",
-								label: "📡 " + t("Offline"),
-							},
-						]}
-					/>
+					{isOnline && (
+						<SegmentedControl
+							value={effectiveDataSource}
+							onChange={(value) => {
+								setDataSource(value);
+								setPage(1);
+							}}
+							color={effectiveDataSource === "online" ? "green" : "orange"}
+							data={[
+								{
+									value: "online",
+									label: "🌐 " + t("Online"),
+								},
+								{
+									value: "offline",
+									label: "📡 " + t("Offline"),
+								},
+							]}
+						/>
+					)}
 					<Button
 						w={170}
 						size="md"

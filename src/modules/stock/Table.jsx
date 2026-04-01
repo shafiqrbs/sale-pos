@@ -182,25 +182,26 @@ export default function Table() {
 					showAdvancedFilter={false}
 				/>
 				<Group gap="sm" wrap="nowrap">
-					<SegmentedControl
-						value={effectiveDataSource}
-						onChange={(value) => {
-							setDataSource(value);
-							setPage(1);
-						}}
-						color={effectiveDataSource === "online" ? "green" : "orange"}
-						data={[
-							{
-								value: "online",
-								label: "🌐 " + t("Online"),
-								disabled: !isOnline,
-							},
-							{
-								value: "offline",
-								label: "📡 " + t("Offline"),
-							},
-						]}
-					/>
+					{isOnline && (
+						<SegmentedControl
+							value={effectiveDataSource}
+							onChange={(value) => {
+								setDataSource(value);
+								setPage(1);
+							}}
+							color={effectiveDataSource === "online" ? "green" : "orange"}
+							data={[
+								{
+									value: "online",
+									label: "🌐 " + t("Online"),
+								},
+								{
+									value: "offline",
+									label: "📡 " + t("Offline"),
+								},
+							]}
+						/>
+					)}
 					<Tooltip
 						label="Click here for update stock"
 						c="white"

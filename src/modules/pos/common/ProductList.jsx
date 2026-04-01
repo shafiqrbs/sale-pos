@@ -11,7 +11,6 @@ import { useDisclosure } from "@mantine/hooks";
 import ProductPagination from "./ProductPagination";
 import noProductImg from "@assets/images/not-found.webp";
 import noProductImgFound from "@assets/images/no-image.png";
-import { RESTRICT_PRODUCT_QUANTITY_LIMIT } from "@constants/index";
 import { formatCurrency } from "@utils/index";
 import useLocalProducts from "@hooks/useLocalProducts";
 import { useTranslation } from "react-i18next";
@@ -24,7 +23,7 @@ export default function ProductList() {
 	const [ batchModalOpened, { open: openBatchModal, close: closeBatchModal } ] = useDisclosure(false);
 	const { increment } = useCartOperation();
 	const { mainAreaHeight, isOnline } = useOutletContext();
-	const { currencySymbol } = useConfigData({ offlineFetch: !isOnline });
+	const { currencySymbol, allowSalesZeroStock } = useConfigData({ offlineFetch: !isOnline });
 	const { t } = useTranslation()
 	const {
 		products: allProducts,
@@ -95,7 +94,7 @@ export default function ProductList() {
 
 	// =============== check if product should be disabled ================
 	const isProductDisabled = (product) => {
-		if (!RESTRICT_PRODUCT_QUANTITY_LIMIT) return false;
+		if (allowSalesZeroStock) return false;
 
 		const purchaseItems = JSON.parse(product?.purchase_item_for_sales || "[]");
 
