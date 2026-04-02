@@ -38,13 +38,10 @@ export default function Table() {
 		page,
 		offset: PER_PAGE,
 	});
-
-	console.log(entities?.data?.entities);
-
 	return (
 		<Box>
 			<Flex pl="xs" pb={'xs'} gap="sm" justify="space-between" align="center">
-				<Text>{t("CategorySummaryReport")}</Text>
+				<Text>{t("DamageStockReport")}</Text>
 			</Flex>
 			<Grid columns={24} gutter={{ base: 8 }}>
 				<Grid.Col span={24}>
