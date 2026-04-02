@@ -12,6 +12,8 @@ import './index.css'
 
 import App from './app/App.jsx'
 import { createTheme, MantineProvider } from '@mantine/core';
+import { ErrorBoundary } from 'react-error-boundary';
+import ErrorFallback from './common/components/ErrorFallback.jsx';
 import { ModalsProvider } from '@mantine/modals';
 import { Notifications } from '@mantine/notifications';
 import { Provider } from 'react-redux';
@@ -41,12 +43,14 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Provider store={store}>
       <MantineProvider theme={theme} withNormalizeCSS withGlobalStyles>
-        <HashRouter>
-          <ModalsProvider>
-            <App />
-            <Notifications />
-          </ModalsProvider>
-        </HashRouter>
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
+          <HashRouter>
+            <ModalsProvider>
+              <App />
+              <Notifications />
+            </ModalsProvider>
+          </HashRouter>
+        </ErrorBoundary>
       </MantineProvider>
     </Provider>
   </StrictMode>,

@@ -2,11 +2,18 @@ import { useEffect, useState } from "react";
 
 export default function useLoggedInUser() {
     const [ user, setUser ] = useState(null);
+    const [ isLoading, setIsLoading ] = useState(true);
 
     useEffect(() => {
         const fetchUser = async () => {
-            const user = await window.dbAPI.getDataFromTable("users");
-            setUser(user);
+            try {
+                const user = await window.dbAPI.getDataFromTable("users");
+                setUser(user);
+            } catch (error) {
+                console.error("Error fetching user:", error);
+            } finally {
+                setIsLoading(false);
+            }
         };
         fetchUser();
     }, []);
@@ -24,5 +31,5 @@ export default function useLoggedInUser() {
     const isOnlinePermissionIncludes =
         roles.includes("role_sales_purchase_manager") || roles.includes("role_sales_purchase_admin") || roles.includes("role_sales_purchase_admin") || roles.includes("role_sales_purchase_admin");
 
-    return { user, roles, isOnlinePermissionIncludes };
+    return { user, roles, isOnlinePermissionIncludes, isLoading };
 }

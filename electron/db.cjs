@@ -9,7 +9,62 @@ console.log(`Local database path: ${dbPath}`);
 
 const db = new Database(dbPath);
 
-const convertTableName = (key) => key.replace(/-/g, "_");
+const VALID_TABLES = new Set([
+	"license_activate",
+	"users",
+	"accounting_transaction_mode",
+	"config_data",
+	"core_products",
+	"core_customers",
+	"core_vendors",
+	"core_users",
+	"order_process",
+	"sales",
+	"purchase",
+	"invoice_table",
+	"categories",
+	"invoice_table_item",
+	"temp_sales_products",
+	"temp_purchase_products",
+	"printer",
+]);
+
+// Rejects any table name not in VALID_TABLES — prevents SQL injection via table names
+const validateTableName = (table) => {
+	if (typeof table !== "string") throw new Error(`Invalid table name: ${table}`);
+	const normalized = table.replace(/-/g, "_");
+	if (!VALID_TABLES.has(normalized)) {
+		throw new Error(`Invalid table name: ${table}`);
+	}
+	return normalized;
+};
+
+// Only allows simple column names like "id", "sales_price", "created_at"
+// Rejects anything with spaces, semicolons, quotes, or other SQL-special characters
+const SAFE_IDENTIFIER = /^[a-zA-Z][a-zA-Z0-9_]*$/;
+
+const validateIdentifier = (name, label = "identifier") => {
+	if (typeof name !== "string" || !SAFE_IDENTIFIER.test(name)) {
+		throw new Error(`Invalid ${label}: ${name}`);
+	}
+	return name;
+};
+
+// Prevents injection via operators in getJoinedTableData conditions
+// e.g. passing "= 1; DROP TABLE sales; --" as an operator
+const VALID_SQL_OPERATORS = new Set([ "=", "!=", "<>", ">", "<", ">=", "<=", "LIKE", "NOT LIKE", "IN", "NOT IN" ]);
+
+// Validates all field names in search objects (equals, like, in) before they reach SQL
+const validateSearchFields = (search) => {
+	if (!search || typeof search !== "object") return;
+	for (const group of [ "equals", "like", "in" ]) {
+		if (search[ group ] && typeof search[ group ] === "object") {
+			for (const field of Object.keys(search[ group ])) {
+				validateIdentifier(field, "search field");
+			}
+		}
+	}
+};
 
 // license activate table
 db.prepare(
@@ -93,7 +148,6 @@ db.prepare(
 		purchase_item_for_sales TEXT DEFAULT '[]',
 		slug TEXT NOT NULL,
 		category_id INTEGER,
-		category_name TEXT,
 		unit_id INTEGER NOT NULL,
 		quantity REAL NOT NULL,
 		total_sales REAL DEFAULT 0,
@@ -406,6 +460,36 @@ db.prepare(
 	)`
 ).run();
 
+// core_products: searched by barcode (POS scan), category, vendor
+db.prepare("CREATE INDEX IF NOT EXISTS idx_products_barcode ON core_products(barcode)").run();
+db.prepare("CREATE INDEX IF NOT EXISTS idx_products_category ON core_products(category_id)").run();
+db.prepare("CREATE INDEX IF NOT EXISTS idx_products_vendor ON core_products(vendor_id)").run();
+
+// core_customers: searched by mobile (lookup at checkout), email
+db.prepare("CREATE INDEX IF NOT EXISTS idx_customers_mobile ON core_customers(mobile)").run();
+db.prepare("CREATE INDEX IF NOT EXISTS idx_customers_code ON core_customers(code)").run();
+
+// core_vendors: searched by vendor_code, mobile
+db.prepare("CREATE INDEX IF NOT EXISTS idx_vendors_code ON core_vendors(vendor_code)").run();
+db.prepare("CREATE INDEX IF NOT EXISTS idx_vendors_mobile ON core_vendors(mobile)").run();
+
+// sales: filtered by date (daily reports), customer, status
+db.prepare("CREATE INDEX IF NOT EXISTS idx_sales_created ON sales(created)").run();
+db.prepare("CREATE INDEX IF NOT EXISTS idx_sales_customer ON sales(customerId)").run();
+db.prepare("CREATE INDEX IF NOT EXISTS idx_sales_status ON sales(status)").run();
+
+// purchase: filtered by date, vendor
+db.prepare("CREATE INDEX IF NOT EXISTS idx_purchase_created ON purchase(created)").run();
+db.prepare("CREATE INDEX IF NOT EXISTS idx_purchase_vendor ON purchase(vendor_id)").run();
+
+// invoice_table_item: looked up by invoice_id (loading invoice line items)
+db.prepare("CREATE INDEX IF NOT EXISTS idx_invoice_item_invoice ON invoice_table_item(invoice_id)").run();
+db.prepare("CREATE INDEX IF NOT EXISTS idx_invoice_item_stock ON invoice_table_item(stock_item_id)").run();
+
+// temp tables: filtered by type and product_id
+db.prepare("CREATE INDEX IF NOT EXISTS idx_temp_sales_type ON temp_sales_products(type)").run();
+db.prepare("CREATE INDEX IF NOT EXISTS idx_temp_purchase_type ON temp_purchase_products(type)").run();
+
 const formatValue = (value) => {
 	if (value === undefined || value === null) return null;
 	try {
@@ -421,10 +505,10 @@ const getTableColumns = (table) => {
 	const columns = db.prepare(`PRAGMA table_info(${table})`).all();
 	return columns.map((col) => col.name);
 };
-// data insertion into the table
+
 const upsertIntoTable = (table, data) => {
 	try {
-		table = convertTableName(table);
+		table = validateTableName(table);
 		const columns = getTableColumns(table);
 
 		const validData = Object.keys(data)
@@ -443,36 +527,12 @@ const upsertIntoTable = (table, data) => {
 		const updateSetAssignments = keys.map((key) => `${key} = excluded.${key}`).join(", ");
 
 		const stmt = db.prepare(
-			`INSERT INTO ${table} (${keys.join(", ")}) 
+			`INSERT INTO ${table} (${keys.join(", ")})
 			VALUES (${placeholders})
 			ON CONFLICT(id) DO UPDATE SET ${updateSetAssignments}`
 		);
 
-		const existingRow = db.prepare(`SELECT id FROM ${table} WHERE id = ?`).get(validData.id);
-
-		if (!existingRow) {
-			stmt.run(...Object.values(validData));
-		} else {
-			const existingData = db.prepare(`SELECT * FROM ${table} WHERE id = ?`).get(validData.id);
-
-			const isChanged = keys.some((key) => {
-				const existingValue =
-					typeof existingData[ key ] === "string" && existingData[ key ].startsWith("{")
-						? JSON.parse(existingData[ key ])
-						: existingData[ key ];
-
-				const newValue =
-					typeof validData[ key ] === "string" && validData[ key ].startsWith("{")
-						? JSON.parse(validData[ key ])
-						: validData[ key ];
-
-				return JSON.stringify(existingValue) !== JSON.stringify(newValue);
-			});
-
-			if (isChanged) {
-				stmt.run(...Object.values(validData));
-			}
-		}
+		stmt.run(...Object.values(validData));
 	} catch (e) {
 		console.log("Error in upsertIntoTable for this data:", table, data);
 		console.error(e);
@@ -480,13 +540,14 @@ const upsertIntoTable = (table, data) => {
 };
 
 const getDataFromTable = (table, idOrConditions, property = "id", options = {}) => {
-	table = convertTableName(table);
+	table = validateTableName(table);
 	const useGet = [ "config_data", "users", "license_activate", "printer" ].includes(table); // return a single row for these tables
 
 	let stmt;
 	let result;
 
 	const { limit, offset, search, orderBy } = options || {};
+	validateSearchFields(search);
 
 	// =============== safe order by: "id ASC" or "created_at DESC" etc. (column name + optional ASC/DESC) ===============
 	const orderByClause = (() => {
@@ -558,6 +619,7 @@ const getDataFromTable = (table, idOrConditions, property = "id", options = {}) 
 	if (typeof idOrConditions === "object" && idOrConditions !== null) {
 		// multiple conditions
 		const keys = Object.keys(idOrConditions);
+		keys.forEach((key) => validateIdentifier(key, "column"));
 		const baseConditions = keys.map((key) => `${key} = ?`);
 		const baseValues = keys.map((key) => idOrConditions[ key ]);
 
@@ -580,6 +642,7 @@ const getDataFromTable = (table, idOrConditions, property = "id", options = {}) 
 			result = stmt.all(...finalValues);
 		}
 	} else if (idOrConditions) {
+		validateIdentifier(property, "property");
 		stmt = db.prepare(`SELECT * FROM ${table} WHERE ${property} = ?`);
 		result = stmt.get(idOrConditions);
 	} else {
@@ -607,7 +670,7 @@ const getDataFromTable = (table, idOrConditions, property = "id", options = {}) 
 };
 
 const updateDataInTable = (table, { id, data, condition = {}, property = "id" }) => {
-	table = convertTableName(table);
+	table = validateTableName(table);
 	const columns = getTableColumns(table);
 	const updatePayload = { ...data };
 
@@ -617,6 +680,7 @@ const updateDataInTable = (table, { id, data, condition = {}, property = "id" })
 
 	// build SET clause
 	const setKeys = Object.keys(updatePayload);
+	setKeys.forEach((key) => validateIdentifier(key, "column"));
 	const setClause = setKeys.map((key) => `${key} = ?`).join(", ");
 	const setValues = setKeys.map((key) => updatePayload[ key ]);
 
@@ -626,10 +690,12 @@ const updateDataInTable = (table, { id, data, condition = {}, property = "id" })
 
 	if (id !== undefined) {
 		// backward compatible: use id + property
+		validateIdentifier(property, "property");
 		whereClause = `WHERE ${property} = ?`;
 		whereValues = [ id ];
 	} else if (typeof condition === "object" && Object.keys(condition).length > 0) {
 		const conditionKeys = Object.keys(condition);
+		conditionKeys.forEach((key) => validateIdentifier(key, "column"));
 		whereClause = "WHERE " + conditionKeys.map((key) => `${key} = ?`).join(" AND ");
 		whereValues = conditionKeys.map((key) => condition[ key ]);
 	} else {
@@ -641,16 +707,18 @@ const updateDataInTable = (table, { id, data, condition = {}, property = "id" })
 };
 
 const deleteDataFromTable = (table, idOrConditions = 1, property = "id") => {
-	table = convertTableName(table);
+	table = validateTableName(table);
 	let stmt;
 	if (typeof idOrConditions === "object" && idOrConditions !== null) {
 		// multiple conditions
 		const keys = Object.keys(idOrConditions);
+		keys.forEach((key) => validateIdentifier(key, "column"));
 		const conditions = keys.map((key) => `${key} = ?`).join(" AND ");
 		const values = keys.map((key) => idOrConditions[ key ]);
 		stmt = db.prepare(`DELETE FROM ${table} WHERE ${conditions}`);
 		stmt.run(...values);
 	} else {
+		validateIdentifier(property, "property");
 		stmt = db.prepare(`DELETE FROM ${table} WHERE ${property} = ?`);
 		stmt.run(idOrConditions);
 	}
@@ -659,35 +727,39 @@ const deleteDataFromTable = (table, idOrConditions = 1, property = "id") => {
 const deleteManyFromTable = (table, ids = [], property = "id") => {
 	if (!Array.isArray(ids) || ids.length === 0) return;
 
-	table = convertTableName(table);
+	table = validateTableName(table);
 
 	// Create ?,?,? placeholders dynamically
 	const placeholders = ids.map(() => "?").join(",");
 
+	validateIdentifier(property, "property");
 	const stmt = db.prepare(`DELETE FROM ${table} WHERE ${property} IN (${placeholders})`);
 
 	return stmt.run(...ids);
 };
 
 const destroyTableData = (table = "users") => {
+	table = validateTableName(table);
 	const stmt = db.prepare(`DELETE FROM ${table}`);
 	stmt.run();
 };
 
 const getTableCount = (table, conditions = {}, options = {}) => {
 	try {
-		table = convertTableName(table);
+		table = validateTableName(table);
 
 		let query = `SELECT COUNT(*) as total FROM ${table}`;
 		let whereClauses = [];
 		let values = [];
 
 		if (conditions && typeof conditions === "object" && Object.keys(conditions).length > 0) {
+			Object.keys(conditions).forEach((key) => validateIdentifier(key, "column"));
 			whereClauses = Object.keys(conditions).map((key) => `${key} = ?`);
 			values.push(...Object.keys(conditions).map((key) => conditions[ key ]));
 		}
 
 		const { search } = options || {};
+		validateSearchFields(search);
 
 		if (search && typeof search === "object") {
 			if (search.equals && typeof search.equals === "object") {
@@ -780,8 +852,9 @@ const getJoinedTableData = ({
 	search = {}, // { field: 'name', value: 'bread' }
 }) => {
 	try {
-		table1 = convertTableName(table1);
-		table2 = convertTableName(table2);
+		table1 = validateTableName(table1);
+		table2 = validateTableName(table2);
+		validateIdentifier(foreignKey, "foreign key");
 
 		// Get all columns for both tables
 		const table1Columns = db
@@ -820,9 +893,13 @@ const getJoinedTableData = ({
 		// Add conditions if provided
 		if (Object.keys(conditions).length > 0) {
 			const conditionClauses = Object.entries(conditions).map(([ key, value ]) => {
+				validateIdentifier(key, "condition column");
 				if (typeof value === "object") {
 					// Handle operators like IN, LIKE, etc.
 					const [ operator, operand ] = Object.entries(value)[ 0 ];
+					if (!VALID_SQL_OPERATORS.has(operator.toUpperCase())) {
+						throw new Error(`Invalid SQL operator: ${operator}`);
+					}
 					return `p.${key} ${operator} ?`;
 				}
 				return `p.${key} = ?`;
@@ -851,34 +928,32 @@ const clearAndInsertBulk = (table, dataArray, options = {}) => {
 	const { batchSize = 500, onProgress = null } = options;
 
 	try {
-		table = convertTableName(table);
+		table = validateTableName(table);
 		const total = dataArray.length;
 
-		// =============== clear the table once before starting batch inserts ================
-		destroyTableData(table);
+		const bulkOperation = db.transaction(() => {
+			db.prepare(`DELETE FROM ${table}`).run();
 
-		const insertBatch = db.transaction((batch) => {
-			for (const data of batch) {
-				upsertIntoTable(table, data);
+			let inserted = 0;
+			for (let offset = 0; offset < total; offset += batchSize) {
+				const batch = dataArray.slice(offset, offset + batchSize);
+				for (const data of batch) {
+					upsertIntoTable(table, data);
+				}
+				inserted += batch.length;
+
+				if (typeof onProgress === "function") {
+					onProgress({
+						table,
+						inserted,
+						total,
+						percent: Math.round((inserted / total) * 100),
+					});
+				}
 			}
 		});
 
-		let inserted = 0;
-
-		for (let offset = 0; offset < total; offset += batchSize) {
-			const batch = dataArray.slice(offset, offset + batchSize);
-			insertBatch(batch);
-			inserted += batch.length;
-
-			if (typeof onProgress === "function") {
-				onProgress({
-					table,
-					inserted,
-					total,
-					percent: Math.round((inserted / total) * 100),
-				});
-			}
-		}
+		bulkOperation();
 
 		console.log(`Successfully cleared and inserted ${total} records into ${table}`);
 	} catch (error) {

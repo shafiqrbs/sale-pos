@@ -64,6 +64,8 @@ const useConfigData = ({ offlineFetch = false } = {}) => {
 		syncConfigData();
 	}, [ onlineConfigData, localConfigData ]);
 
+	const is_pos = configData?.inventory_config?.is_pos ?? configData?.is_pos ?? 0;
+
 	const is_purchase_online = configData?.inventory_config?.config_purchase?.purchase_online ?? configData?.config_purchase?.purchase_online ?? 0;
 	const is_sales_online = configData?.inventory_config?.config_sales?.sales_online ?? configData?.config_sales?.sales_online ?? 0;
 
@@ -73,7 +75,7 @@ const useConfigData = ({ offlineFetch = false } = {}) => {
 	const allowSalesZeroStock = configData?.inventory_config?.config_sales?.zero_stock === 1 || configData?.config_sales?.zero_stock === 1;
 	const allowPurchaseZeroStock = configData?.inventory_config?.config_purchase?.zero_stock === 1 || configData?.config_purchase?.zero_stock === 1;
 
-	return { configData, is_purchase_online, is_sales_online, currencySymbol, allowSalesZeroStock, allowPurchaseZeroStock };
+	return { configData, is_pos, is_purchase_online, is_sales_online, currencySymbol, allowSalesZeroStock, allowPurchaseZeroStock };
 };
 
 export default useConfigData;

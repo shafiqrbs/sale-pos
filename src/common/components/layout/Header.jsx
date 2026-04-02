@@ -63,7 +63,7 @@ function getColorSchemeMeta(scheme) {
 
 export default function Header({ isOnline, toggleNetwork }) {
 	const { user, isOnlinePermissionIncludes } = useLoggedInUser();
-	const { configData } = useConfigData({ offlineFetch: !isOnline });
+	const { configData, is_pos } = useConfigData({ offlineFetch: !isOnline });
 	const [ openedPrinter, { open: openPrinter, close: closePrinter } ] = useDisclosure(false);
 	const [
 		changePasswordDrawerOpened,
@@ -118,7 +118,7 @@ export default function Header({ isOnline, toggleNetwork }) {
 	];
 
 	const filteredModalLinks = modalLinks.filter((item) => {
-		if (!configData?.is_pos) {
+		if (!is_pos) {
 			return item.label !== "POS";
 		}
 
@@ -192,7 +192,7 @@ export default function Header({ isOnline, toggleNetwork }) {
 							c="white"
 							fw="800"
 							className="cursor-pointer"
-							onClick={() => navigate(APP_NAVLINKS.BAKERY)}
+							onClick={() => navigate(is_pos ? APP_NAVLINKS.BAKERY : APP_NAVLINKS.SALES_NEW)}
 							pl="lg"
 						>
 							{configData?.domain?.company_name || configData?.company_name}
