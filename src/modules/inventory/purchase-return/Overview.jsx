@@ -21,7 +21,7 @@ export default function Overview({
 	}, [itemsProducts]);
 
 	return (
-		<Box bg="var(--theme-tertiary-color-0)" p="xs">
+		<Box>
 			<ItemsTableSection
 				itemsProducts={itemsProducts || []}
 				refetch={refetch}

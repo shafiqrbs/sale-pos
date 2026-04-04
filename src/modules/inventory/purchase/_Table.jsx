@@ -182,7 +182,7 @@ export default function Table() {
 						/>
 					)}
 					<Button
-						size="md"
+						size="xs"
 						color="red"
 						variant="filled"
 						leftSection={<IconPlus size={20} />}

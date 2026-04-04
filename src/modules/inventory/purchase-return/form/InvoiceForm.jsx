@@ -17,18 +17,19 @@ import { showNotification } from "@components/ShowNotificationComponent";
 import { useGetVendorWisePurchaseItemsQuery } from "@services/purchase-return";
 import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
+import useConfigData from "@hooks/useConfigData";
 
 export default function InvoiceForm({ onAddItem, onReturnTypeChange, onVendorChange }) {
 	const { data: vendorWisePurchaseItems } = useGetVendorWisePurchaseItemsQuery();
 	const { t } = useTranslation();
 	const { mainAreaHeight } = useMainAreaHeight();
-
+	const { currencySymbol } = useConfigData();
 	const [ selectedReturnMode, setSelectedReturnMode ] = useState(null);
 	const [ selectedVendorId, setSelectedVendorId ] = useState(null);
 	const [ selectedPurchaseId, setSelectedPurchaseId ] = useState(null);
 	const [ itemReturnQuantities, setItemReturnQuantities ] = useState({});
 
-	const containerHeight = mainAreaHeight - 120;
+	const containerHeight = mainAreaHeight - 116;
 
 	// =============== build vendor options from vendorWisePurchaseItems data ===============
 	const vendorOptions =
@@ -196,7 +197,7 @@ export default function InvoiceForm({ onAddItem, onReturnTypeChange, onVendorCha
 								Product
 							</Text>
 							<Text fz="xs" fw={600} c="white">
-								Quantity / Price / UOM
+								Price / Quantity
 							</Text>
 						</Flex>
 
@@ -228,38 +229,11 @@ export default function InvoiceForm({ onAddItem, onReturnTypeChange, onVendorCha
 										>
 											{index + 1}. {item.item_name}
 										</Text>
+										<Text fz="xs"  ta="center">{currencySymbol} {item.purchase_price}</Text>
+										<Text fz="xs"  ta="center">{item.purchase_quantity} {item.unit_name}</Text>
 										<NumberInput
 											size="xs"
-											w={50}
-											value={item.purchase_quantity}
-											readOnly
-											hideControls
-											styles={{
-												input: {
-													backgroundColor: "#fefce8",
-													textAlign: "center",
-												},
-											}}
-										/>
-										<NumberInput
-											size="xs"
-											w={50}
-											value={item.purchase_price}
-											readOnly
-											hideControls
-											styles={{
-												input: {
-													backgroundColor: "#fefce8",
-													textAlign: "center",
-												},
-											}}
-										/>
-										<Text fz="xs" w={30} ta="center">
-											{item.unit_name}
-										</Text>
-										<NumberInput
-											size="xs"
-											w={55}
+											w={80}
 											min={0}
 											value={itemReturnQuantities[ item.id ] ?? ""}
 											onChange={(value) =>

@@ -1214,6 +1214,7 @@
 	"SalesReturnItems": "Sales Return Items",
 	"RequisitionItems": "Requisition Items",
 	"NewProduct": "New Product",
+	"SendToVendor": "Send to Vendor",
 	"DamageStockReport": "Damage Stock Report",
 	"SearchByProductNameOrBarcode": "Search by product name or barcode",
 	"TotalSalesAfterDiscount": "Total Sales after Discount"

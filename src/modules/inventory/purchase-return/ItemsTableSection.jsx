@@ -1,8 +1,8 @@
 import React from "react";
-import { ActionIcon, Box, Flex, NumberInput, Text, Button, Badge } from "@mantine/core";
+import {ActionIcon, Box, Flex, NumberInput, Text, Button, Badge, Group} from "@mantine/core";
 import { DateInput } from "@mantine/dates";
 import { DataTable } from "mantine-datatable";
-import { IconList, IconTrashX } from "@tabler/icons-react";
+import {IconList, IconPlus, IconTrashX} from "@tabler/icons-react";
 import tableCss from "@assets/css/Table.module.css";
 import useConfigData from "@hooks/useConfigData";
 import useMainAreaHeight from "@hooks/useMainAreaHeight";
@@ -13,6 +13,7 @@ import { APP_NAVLINKS } from "@/routes/routes";
 import { useTranslation } from "react-i18next";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import dayjs from "dayjs";
+import KeywordSearch from "@components/KeywordSearch";
 
 dayjs.extend(customParseFormat);
 
@@ -20,9 +21,8 @@ export default function ItemsTableSection({ itemsProducts, refetch, itemsTotal, 
 	const navigate = useNavigate();
 	const { t } = useTranslation();
 	const { mainAreaHeight } = useMainAreaHeight();
-	const tableHeight = mainAreaHeight - 220;
+	const tableHeight = mainAreaHeight - 206;
 	const { currencySymbol } = useConfigData();
-
 	const handleQuantityChange = async (itemId, value) => {
 		const numericValue = parseFloat(value) || 0;
 		const currentItem = itemsProducts.find((item) => item.id === itemId);
@@ -46,21 +46,25 @@ export default function ItemsTableSection({ itemsProducts, refetch, itemsTotal, 
 	};
 
 	return (
-		<Box bg="gray.1" >
-			<Flex justify="space-between" align="center" mb="4xs">
-				<Box px="xs" fz="sm" fw={600} className="boxBackground textColor">
+		<Box>
+
+			<Flex mb="xs" gap="sm" justify="space-between" align="center">
+				<Box px="xs" fz="sm" fw={600} className="textColor">
 					{t("PurchaseReturnItems")}
 				</Box>
-				<Button
-					onClick={() => navigate(APP_NAVLINKS.PURCHASE_RETURN)}
-					bg="red"
-					color="white"
-					leftSection={<IconList size={18} />}
-				>
-					{t("PurchaseReturn")}
-				</Button>
+				<Group gap="sm" wrap="nowrap" >
+					<Button
+						size="xs"
+						color="red"
+						variant="filled"
+						leftSection={<IconPlus size={20} />}
+						onClick={() => navigate(APP_NAVLINKS.PURCHASE_RETURN)}
+					>
+						{t("PurchaseReturn")}
+					</Button>
+				</Group>
 			</Flex>
-
+			<Box pl={'xs'}>
 			<DataTable
 				classNames={{
 					root: tableCss.root,
@@ -102,9 +106,9 @@ export default function ItemsTableSection({ itemsProducts, refetch, itemsTotal, 
 					},
 					{
 						accessor: "purchase_quantity",
-						title: "Purchase Quantity",
+						title: "Stock",
 						textAlign: "center",
-						width: 130,
+						width: 120,
 						render: (record) => (
 							<Text size="sm" c="dimmed">
 								{record.purchase_quantity ?? "—"}
@@ -164,6 +168,7 @@ export default function ItemsTableSection({ itemsProducts, refetch, itemsTotal, 
 				noRecordsText="No items added"
 			/>
 
+			</Box>
 			<Box mt="les" px="xs" py="4xs" bg="var(--theme-tertiary-color-2)" className="borderRadiusAll">
 				<Flex justify="space-between" align="center">
 					<Badge size="xl" bg={"red"}>

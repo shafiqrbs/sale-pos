@@ -38,6 +38,7 @@ export default function Table() {
 		page,
 		offset: PER_PAGE,
 	});
+	console.log(entities?.data)
 	return (
 		<Box>
 			<Flex pl="xs" pb={'xs'} gap="sm" justify="space-between" align="center">
@@ -64,16 +65,34 @@ export default function Table() {
 									render: (_, index) => index + 1,
 								},
 								{
-									accessor: "name",
+									accessor: "item_name",
 									title: t("Name"),
-									render: (item) => <Text size="xs">{item?.name || "N/A"}</Text>,
+									render: (item) => <Text size="xs">{item?.item_name || "N/A"}</Text>,
+								},
+
+								{
+									accessor: "category_name",
+									title: t("Category"),
+									render: (item) => <Text size="xs">{item?.category_name || "N/A"}</Text>,
+								},
+
+								{
+									accessor: "warehouse_name",
+									title: t("Store"),
+									render: (item) => <Text size="xs">{item?.warehouse_name || "N/A"}</Text>,
 								},
 
 								{
 									accessor: "quantity",
 									title: t("Quantity"),
-									textAlign: "right",
+									textAlign: "center",
 									render: (item) => <>{item?.quantity}</>,
+								},
+								{
+									accessor: "unit_name",
+									title: t("Unit"),
+									textAlign: "right",
+									render: (item) => <>{item?.unit_name}</>,
 								},
 								{
 									accessor: "price",
@@ -85,12 +104,12 @@ export default function Table() {
 									accessor: "total",
 									title: t("Amount"),
 									textAlign: "right",
-									render: (item) => <>{formatCurrency(item?.total || 0)}</>,
+									render: (item) => <>{formatCurrency((item?.quantity * item?.price) || 0)}</>,
 								},
 
 							]}
 							fetching={isLoading}
-							totalRecords={entities?.total || 0}
+							totalRecords={entities?.count || 0}
 							recordsPerPage={PER_PAGE}
 							loaderSize="xs"
 							loaderColor="grape"

@@ -113,9 +113,10 @@ export default function NewIndex() {
 	};
 
 	return (
-		<Grid columns={24} gutter={0}>
+		<Box p="xs" bg="var(--mantine-color-gray-1)">
+		<Grid columns={24} gutter={0} >
 			<Grid.Col span={8}>
-				<Box p="xs" pr={0}>
+				<Box>
 					<InvoiceForm
 						onAddItem={handleAddItem}
 						onReturnTypeChange={setReturnType}
@@ -136,5 +137,6 @@ export default function NewIndex() {
 				</Box>
 			</Grid.Col>
 		</Grid>
+		</Box>
 	);
 }

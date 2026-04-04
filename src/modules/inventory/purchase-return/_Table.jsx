@@ -11,20 +11,16 @@ import GlobalModal from "@components/modals/GlobalModal";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import { APP_NAVLINKS } from "@/routes/routes";
-import {
-	useApprovePurchaseMutation,
-	useCopyPurchaseMutation,
-} from "@services/purchase";
 import { modals } from "@mantine/modals";
 import { showNotification } from "@components/ShowNotificationComponent";
 import { formatCurrency } from "@utils/index";
-import { useApprovePurchaseReturnMutation, useGetPurchaseReturnQuery } from "@services/purchase-return";
+import { useApprovePurchaseReturnMutation,usePurchaseReturnSendToVendorMutation, useGetPurchaseReturnQuery } from "@services/purchase-return";
 
 const PER_PAGE = 25;
 
 export default function Table() {
 	const [ approvePurchaseReturn ] = useApprovePurchaseReturnMutation();
-	const [ copyPurchase ] = useCopyPurchaseMutation();
+	const [ useSendToVendorMutation ] = usePurchaseReturnSendToVendorMutation();
 	const navigate = useNavigate();
 	const { t } = useTranslation();
 	const [ opened, { open, close } ] = useDisclosure(false);
@@ -55,9 +51,6 @@ export default function Table() {
 			offset: PER_PAGE,
 		},
 	});
-
-	console.log(entities);
-
 	const handlePurchaseApprove = (id) => {
 		// Open confirmation modal
 		modals.openConfirmModal({
@@ -78,6 +71,34 @@ export default function Table() {
 		try {
 			const res = await approvePurchaseReturn(id);
 
+			if (res.data.status === 200) {
+				showNotification(t("ApprovedSuccessfully"), "teal");
+			}
+		} catch (error) {
+			console.error("Error approving purchase:", error);
+			showNotification(error?.data?.message || t("ApproveFailed"), "red");
+		}
+	};
+
+	const handleSendVendorApproveConfirm = (id) => {
+		// Open confirmation modal
+		modals.openConfirmModal({
+			title: <Text size="md">{t("FormConfirmationTitle")}</Text>,
+			children: <Text size="sm">{t("FormConfirmationMessage")}</Text>,
+			labels: { confirm: t("Submit"), cancel: t("Cancel") },
+			confirmProps: { color: "red" },
+			onCancel: () => {
+				console.log("Cancel");
+			},
+			onConfirm: () => {
+				handleSendVendorApprove(id);
+			},
+		});
+	};
+
+	const handleSendVendorApprove = async (id) => {
+		try {
+			const res = await useSendToVendorMutation(id);
 			if (res.data.status === 200) {
 				showNotification(t("ApprovedSuccessfully"), "teal");
 			}
@@ -152,7 +173,7 @@ export default function Table() {
 				<KeywordSearch showStartEndDate form={form} />
 				<Group gap="sm" wrap="nowrap" >
 					<Button
-						size="md"
+						size="xs"
 						color="red"
 						variant="filled"
 						leftSection={<IconPlus size={20} />}
@@ -181,21 +202,19 @@ export default function Table() {
 								{
 									accessor: "created",
 									title: t("Created"),
-									render: (item) => (
-										<Text component="a" size="sm" variant="subtle" c="var(--theme-primary-color-6)">
-											{item?.created}
-										</Text>
-									),
+									render: (item) => <Text size="sm">{item?.created || "N/A"}</Text>,
 								},
 
 								{
 									accessor: "invoice",
 									title: t("Invoice"),
-									render: (item) => (
-										<Text component="a" size="sm" variant="subtle" c="var(--theme-primary-color-6)">
-											{item.invoice}
-										</Text>
-									),
+									render: (item) => <Text size="sm">{item?.invoice || "N/A"}</Text>,
+
+								},
+								{
+									accessor: "return_type",
+									title: t("ReturnMode"),
+									render: (item) => <Text size="sm">{item?.return_type || "N/A"}</Text>,
 								},
 								{
 									accessor: "vendor_name",
@@ -217,14 +236,13 @@ export default function Table() {
 								{
 									accessor: "process",
 									title: t("Status"),
-									width: "130px",
 									render: (item) => {
 										const colorMap = {
 											Created: "blue",
 											Approved: "red",
 										};
 										const badgeColor = colorMap[ item.process ] || "gray";
-										return item.process && <Badge radius="xs" color={badgeColor}>{item.process}</Badge>;
+										return item.process && <Badge variant="dot"  radius="xs" color={badgeColor}>{item.process}</Badge>;
 									},
 								},
 								{
@@ -234,16 +252,30 @@ export default function Table() {
 									render: (data) => (
 
 										<Group gap={4} justify="right" wrap="nowrap">
-											{!data.approved_by_id && (
+											{!data.approved_by_id && data.process === "Created" && data.return_type === 'Requisition' &&
 												<Button
 													component="a"
-													size="compact-xs"
+													size="compact-sm"
 													radius="xs"
+													color="orange"
 													variant="filled"
 													fw={"100"}
-													fz={"12"}
-													color="var(--theme-secondary-color-8)"
-													mr={"4"}
+													onClick={(e) => {
+														e.stopPropagation();
+														handleSendVendorApproveConfirm(data.id);
+													}}
+												>
+													{t('SendToVendor')}
+												</Button>
+											}{
+											!data.approved_by_id && data.process === "Created" && data.return_type === 'General' &&
+												<Button
+													component="a"
+													size="compact-sm"
+													radius="xs"
+													color="indigo"
+													variant="filled"
+													fw={"100"}
 													onClick={(e) => {
 														e.stopPropagation();
 														handlePurchaseApprove(data.id);
@@ -251,7 +283,7 @@ export default function Table() {
 												>
 													{t("Approve")}
 												</Button>
-											)}
+											}
 											<Menu
 												position="bottom-end"
 												offset={3}
@@ -268,39 +300,34 @@ export default function Table() {
 														radius="xl"
 														aria-label="Settings"
 													>
-														<IconDotsVertical height={"18"} width={"18"} stroke={1.5} />
+														<IconDotsVertical height={"18"} width={"18"} stroke={1.5}/>
 													</ActionIcon>
 												</Menu.Target>
 												<Menu.Dropdown w="200">
 													<Menu.Item
 														onClick={(event) => handleShowPurchaseFromMenu(event, data)}
-														leftSection={<IconEye height={"18"} width={"18"} stroke={1.5} />}
+														leftSection={<IconEye height={"18"} width={"18"} stroke={1.5}/>}
 														color="blue"
 													>
 														{t("Show")}
 													</Menu.Item>
-													<Menu.Item
-														onClick={(event) => {
-															event.stopPropagation();
-															navigate(`${APP_NAVLINKS.PURCHASE_EDIT}/${data.id}`);
-														}}
-														leftSection={<IconEdit height={"18"} width={"18"} stroke={1.5} />}
-														color="yellow"
-													>
-														{t("Edit")}
-													</Menu.Item>
-													<Menu.Item
+													{!data.approved_by_id && data.process === "Created" && data.return_type === 'Requisition' && (
+
+														<Menu.Item
 														onClick={(event) => {
 															event.stopPropagation();
 															handleDeleteClick(data);
 														}}
 														color="red"
-														leftSection={<IconTrashX height={"18"} width={"18"} stroke={1.5} />}
+														leftSection={<IconTrashX height={"18"} width={"18"}
+																				 stroke={1.5}/>}
 													>
 														{t("Delete")}
 													</Menu.Item>
+													)}
 												</Menu.Dropdown>
 											</Menu>
+
 										</Group>
 									),
 								},
@@ -325,11 +352,10 @@ export default function Table() {
 					</Box>
 				</Grid.Col>
 			</Grid>
-
 			<GlobalModal
 				opened={opened}
 				onClose={close}
-				size="65%"
+				size="85%"
 				padding="md"
 				title={`${t("Purchase")}: ${viewData?.invoice || ""}`}
 			>

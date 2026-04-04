@@ -14,12 +14,13 @@ export default function Details({ loading, viewData }) {
   const [ printA4, setPrintA4 ] = useState(false);
   const { configData } = useConfigData({ offlineFetch: !isOnline });
 
-  const salesItems = isOnline
-    ? viewData?.purchase_items
-    : Array.isArray(viewData?.purchase_items)
-      ? viewData?.purchase_items
-      : JSON.parse(viewData?.purchase_items || "[]");
 
+	const salesItems =  Array.isArray(viewData?.purchase_return_items)
+		? viewData?.purchase_return_items
+		: JSON.parse(viewData?.purchase_return_items || "[]");
+
+
+	console.log(salesItems);
   const rows =
     Array.isArray(salesItems) &&
     salesItems?.map((element, index) => (
