@@ -42,7 +42,7 @@ export const vendorOverviewRequest = () => {
 const invoiceItemFormInitialValues = {
 	barcode: "",
 	productId: "",
-	measurement_quantity: "",
+	measurement_quantity: 1,
 	measurement: "",
 	quantity: "",
 	total_mrp: "",

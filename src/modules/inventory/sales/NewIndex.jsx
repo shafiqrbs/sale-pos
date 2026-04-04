@@ -26,8 +26,6 @@ export default function NewIndex() {
 	const [ resetKey, setResetKey ] = useState(0);
 	const [ isAddingItem, setIsAddingItem ] = useState(false);
 
-	console.log(itemsForm.errors)
-
 	// =============== tracks whether the submit was triggered via POS Print ===============
 	const withPosPrintRef = useRef(false);
 

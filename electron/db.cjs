@@ -146,7 +146,7 @@ db.prepare(
 		product_nature TEXT NOT NULL,
 		display_name TEXT NOT NULL,
 		purchase_item_for_sales TEXT DEFAULT '[]',
-		measurments TEXT DEFAULT '[]',
+		measurements TEXT DEFAULT '[]',
 		slug TEXT NOT NULL,
 		category_id INTEGER,
 		category TEXT,
@@ -417,6 +417,8 @@ db.prepare(
 		expired_date TEXT,
 		warehouse_name TEXT,
 		bonus_quantity REAL,
+		measurement TEXT,
+		measurement_quantity REAL,
 		type TEXT CHECK(type IN ('sales', 'sales_return')) DEFAULT 'sales',
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -443,6 +445,8 @@ db.prepare(
 		warehouse_id INTEGER,
 		warehouse_name TEXT,
 		bonus_quantity REAL,
+		measurement TEXT,
+		measurement_quantity REAL,
 		type TEXT CHECK(type IN ('purchase', 'purchase_return', 'requisition')) DEFAULT 'purchase',
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP

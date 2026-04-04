@@ -11,10 +11,9 @@ import { formatDateISO } from "@utils/index";
 import { useAddRequisitionMutation } from "@services/requisition";
 
 export default function NewIndex() {
-	const [ addRequisition, { isLoading: isAddingRequisition } ] = useAddRequisitionMutation();
+	const [ addRequisition ] = useAddRequisitionMutation();
 	const { user } = useLoggedInUser();
 	const itemsForm = useForm(vendorOverviewRequest());
-	console.log(itemsForm.errors)
 	const { purchaseProducts: itemsProducts, refetch } = useTempPurchaseProducts({ type: "requisition" });
 	const [ isAddingItem, setIsAddingItem ] = useState(false);
 

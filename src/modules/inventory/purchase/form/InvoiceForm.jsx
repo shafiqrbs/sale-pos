@@ -25,7 +25,6 @@ import InputNumberForm from "@components/form-builders/InputNumberForm";
 import InputForm from "@components/form-builders/InputForm";
 import AddProductDrawer from "@components/drawers/AddProductDrawer";
 import useLocalProducts from "@hooks/useLocalProducts";
-import useGetCategories from "@hooks/useGetCategories";
 import useConfigData from "@hooks/useConfigData";
 import { useDisclosure, useHotkeys } from "@mantine/hooks";
 import { formatCurrency, parseJsonArray } from "@utils/index";
@@ -48,7 +47,6 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 	const { getLocalProducts } = useLocalProducts({
 		fetchOnMount: false,
 	});
-	const { categories } = useGetCategories();
 
 	const { data: productCategoryData } = useGetInventoryCategoryQuery({ type: "parent" });
 	const { mainAreaHeight } = useMainAreaHeight();
@@ -90,7 +88,35 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 
 	const productMeasurements = parseJsonArray(selectedProduct?.measurements);
 
+	const measurementOptions = productMeasurements?.map((measurement) => ({ label: measurement.unit_name, value: measurement.unit_name, quantity: measurement.quantity, is_purchase: measurement.is_purchase }));
+
 	const showMeasurementFields = ALLOW_MEASUREMENT_PURCHASE && isProductSelected && productMeasurements.length > 0;
+
+	// =============== when measurement or measurement_quantity changes, derive quantity = measurement_quantity × selected measurement's base quantity ===============
+	useEffect(() => {
+		if (!showMeasurementFields) return;
+
+		const selectedMeasurementOption = measurementOptions?.find(
+			(option) => option.value === itemsForm.values.measurement
+		);
+
+		if (!selectedMeasurementOption) return;
+
+		const measurementQuantityNumber = Number(itemsForm.values.measurement_quantity) || 0;
+		const baseQuantity = Number(selectedMeasurementOption.quantity) || 0;
+
+		const derivedQuantity = measurementQuantityNumber * baseQuantity;
+
+		itemsForm.setFieldValue("quantity", derivedQuantity > 0 ? String(derivedQuantity) : "");
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ itemsForm.values.measurement, itemsForm.values.measurement_quantity ]);
+
+
+	useEffect(() => {
+		if (!showMeasurementFields) return;
+		itemsForm.setFieldValue("measurement", measurementOptions.find((option) => option.is_purchase === 1)?.value?.toString());
+
+	}, [ showMeasurementFields ])
 
 	// =============== ref flag: tells the mrp+discount effect to skip when quantity already computed both fields in one setValues call, collapsing 3 renders into 2 ===============
 	const quantityComputedBothFields = useRef(false);
@@ -164,6 +190,8 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 			type: "purchase",
 			price: unitPurchasePrice,
 			expired_date,
+			measurement: itemsForm.values.measurement,
+			measurement_quantity: itemsForm.values.measurement_quantity,
 		};
 
 		// =============== persist new item into local temp_purchase_products table or pass to edit state ===============
@@ -291,9 +319,11 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 
 									<Grid.Col span={4}>
 										<Select
+											name="measurement"
 											label="Measurement"
 											placeholder="Select unit"
-											data={[]}
+											disabled={!isProductSelected || itemsForm.values?.measurement_quantity === ""}
+											data={measurementOptions}
 											{...itemsForm.getInputProps("measurement")}
 										/>
 									</Grid.Col>

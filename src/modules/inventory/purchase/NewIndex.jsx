@@ -133,6 +133,7 @@ export default function NewIndex() {
 			transaction_mode_id: formValues.transactionModeId ? Number(formValues.transactionModeId) : null,
 			purchase_items: JSON.stringify(purchaseItemsForDb),
 			created: formatDateTime(new Date()),
+			purchase_mode: "manual",
 		};
 
 		const buildPurchaseApiPayload = () => ({
@@ -162,6 +163,7 @@ export default function NewIndex() {
 				sub_total: Number(item.sub_total) || 0,
 				name: item.display_name ?? "",
 			})),
+			purchase_mode: "manual",
 		});
 
 		setIsAddingItem(true);
