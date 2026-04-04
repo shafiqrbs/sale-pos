@@ -8,11 +8,13 @@ import {
 	ScrollArea,
 	Select,
 	Text,
+	Tooltip,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import {
 	IconBarcode,
 	IconCurrencyTaka, IconNumber,
+	IconPercentage,
 	IconPlus,
 	IconRefresh,
 	IconShoppingCart, IconSortAscendingNumbers,
@@ -26,15 +28,16 @@ import useLocalProducts from "@hooks/useLocalProducts";
 import useGetCategories from "@hooks/useGetCategories";
 import useConfigData from "@hooks/useConfigData";
 import { useDisclosure, useHotkeys } from "@mantine/hooks";
-import { formatCurrency } from "@utils/index";
+import { formatCurrency, parseJsonArray } from "@utils/index";
 import { showNotification } from "@components/ShowNotificationComponent";
 import { invoiceItemFormRequest } from "../helpers/request";
 import FormValidationWrapper from "@components/form-builders/FormValidationWrapper";
 import VirtualSearchSelect from "@components/form-builders/VirtualSearchSelect";
-import DateInputForm from "@components/form-builders/DateInputForm";
+import { MonthPickerInput } from "@mantine/dates";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useGetInventoryCategoryQuery } from "@services/settings";
+import { ALLOW_MEASUREMENT_PURCHASE } from "@constants/index";
 
 export default function InvoiceForm({ refetch, onAddItem }) {
 	const [ products, setProducts ] = useState([]);
@@ -62,17 +65,67 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ selectedCategoryId ]);
 
-	const productOptions = products?.map((product) => ({
-		value: String(product.id),
-		label: `${product.display_name} [${product.quantity}] ${product.unit_name} - ${currencySymbol}${product.purchase_price}`,
-		purchase_price: product.purchase_price,
-		unit: product.unit_name,
-	}));
+	// =============== stable reference so VirtualSearchSelect's setOptions effect only fires when products actually change, not on every keystroke ===============
+	const productOptions = useMemo(
+		() => products?.map((product) => ({
+			value: String(product.id),
+			label: `${product.display_name} [${product.quantity}] ${product.unit_name} - ${currencySymbol}${product.purchase_price}`,
+			purchase_price: product.purchase_price,
+			unit: product.unit_name,
+		})),
+		[ products, currencySymbol ]
+	);
 
 	const containerHeight = mainAreaHeight - 162;
 
+	const isProductSelected = !!itemsForm.values.productId;
+
+	const selectedProduct = useMemo(
+		() => isProductSelected
+			? products?.find((product) => String(product.id) === String(itemsForm.values.productId)) ?? null
+			: null,
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- isProductSelected is derived from itemsForm.values.productId which is already in deps
+		[ products, itemsForm.values.productId ]
+	);
+
+	const productMeasurements = parseJsonArray(selectedProduct?.measurements);
+
+	const showMeasurementFields = ALLOW_MEASUREMENT_PURCHASE && isProductSelected && productMeasurements.length > 0;
+
+	// =============== ref flag: tells the mrp+discount effect to skip when quantity already computed both fields in one setValues call, collapsing 3 renders into 2 ===============
+	const quantityComputedBothFields = useRef(false);
+
+	// =============== quantity or product changed → compute total_mrp and purchase_price together in one setValues so only one extra render is triggered ===============
+	useEffect(() => {
+		const quantity = Number(itemsForm.values.quantity) || 0;
+		const salesPrice = Number(selectedProduct?.sales_price) || 0;
+		const purchasePrice = Number(selectedProduct?.purchase_price) || 0;
+		const totalMrp = quantity > 0 ? salesPrice * quantity : 0;
+
+		quantityComputedBothFields.current = true;
+		itemsForm.setValues({
+			total_mrp: totalMrp > 0 ? totalMrp.toFixed(2) : "",
+			purchase_price: (purchasePrice * quantity).toFixed(2) ?? "",
+		});
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ itemsForm.values.quantity, selectedProduct?.id ]);
+
+	// =============== discount changed manually → update purchase_price; skipped when the quantity effect already handled it ===============
+	useEffect(() => {
+		if (quantityComputedBothFields.current) {
+			quantityComputedBothFields.current = false;
+			return;
+		}
+		const discountPercent = Number(itemsForm.values.item_percent) || 0;
+		const quantity = Number(itemsForm.values.quantity) || 0;
+		const purchasePrice = Number(selectedProduct?.purchase_price) * quantity || 0;
+
+		itemsForm.setFieldValue("purchase_price", (purchasePrice - ((purchasePrice * discountPercent) / 100)).toFixed(2) ?? "");
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ itemsForm.values.item_percent, itemsForm.values.quantity ]);
+
 	const handleAddItemToPurchaseForm = async () => {
-		const { productId, purchase_price, quantity, expired_date } = itemsForm.values;
+		const { productId, purchase_price, total_mrp, quantity, expired_date } = itemsForm.values;
 
 		if (!productId || !quantity) {
 			showNotification("Product and quantity are required", "red");
@@ -87,31 +140,29 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 		}
 
 		const quantityNumber = Number(quantity) || 0;
-		const priceNumber =
-			Number(purchase_price) ||
-			Number(selectedProduct.purchase_price) ||
-			Number(selectedProduct.sales_price) ||
-			0;
+
+		// =============== form stores batch totals — divide by quantity to get per-unit values for the table row ===============
+		const unitMrp = quantityNumber > 0 ? (Number(total_mrp) || 0) / quantityNumber : 0;
+		const unitPurchasePrice = quantityNumber > 0 ? (Number(purchase_price) || 0) / quantityNumber : 0;
 
 		// =============== resolve category_name from category_id using local categories ===============
 		const categoryId = selectedProduct.category_id ?? null;
-		const categoryName =
-			categories?.find((cat) => cat.id === categoryId)?.name ?? "";
+		const categoryName = selectedProduct.category_name ?? "";
 
 		const newItem = {
 			product_id: selectedProduct.id,
 			display_name: selectedProduct.display_name,
 			quantity: quantityNumber,
-			purchase_price: priceNumber,
-			mrp: Number(selectedProduct.purchase_price ?? 0),
+			purchase_price: unitPurchasePrice,
+			mrp: unitMrp,
 			average_price: Number(selectedProduct.average_price ?? 0),
 			sales_price: Number(selectedProduct.sales_price ?? 0),
-			sub_total: quantityNumber * priceNumber,
+			sub_total: quantityNumber * unitPurchasePrice,
 			unit_name: selectedProduct.unit_name || itemsForm.values.unit || "",
 			category_id: categoryId,
 			category_name: categoryName,
 			type: "purchase",
-			price: priceNumber,
+			price: unitPurchasePrice,
 			expired_date,
 		};
 
@@ -224,16 +275,40 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 
 						<Grid gutter={4} mt="sm">
 
-							<Grid.Col span={12}>
+							{showMeasurementFields && (
+								<>
+									<Grid.Col span={4}>
+										<InputNumberForm
+											form={itemsForm}
+											name="measurement_quantity"
+											id="measurement_quantity"
+											label="Meas. Qty"
+											placeholder="0"
+											tooltip={itemsForm.errors.measurement_quantity}
+											leftSection={<IconNumber size={16} opacity={0.6} />}
+										/>
+									</Grid.Col>
+
+									<Grid.Col span={4}>
+										<Select
+											label="Measurement"
+											placeholder="Select unit"
+											data={[]}
+											{...itemsForm.getInputProps("measurement")}
+										/>
+									</Grid.Col>
+								</>
+							)}
+							<Grid.Col span={showMeasurementFields ? 4 : 12}>
 								<InputNumberForm
 									form={itemsForm}
 									name="quantity"
 									id="quantity"
 									label="Quantity"
 									placeholder="0"
-									nextField="purchase_price"
-									required={false}
+									nextField="total_mrp"
 									value={1}
+									disabled={!isProductSelected}
 									tooltip={itemsForm.errors.quantity}
 									leftSection={<IconSortAscendingNumbers size={16} opacity={0.6} />}
 									rightIcon={
@@ -243,29 +318,86 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 									}
 								/>
 							</Grid.Col>
+
+							<Grid.Col span={12}>
+								<InputNumberForm
+									form={itemsForm}
+									name="total_mrp"
+									id="total_mrp"
+									label="Total MRP"
+									placeholder="0.00"
+									nextField="item_percent"
+									disabled={!isProductSelected}
+									tooltip={itemsForm.errors.total_mrp}
+									leftSection={<IconCurrencyTaka size={16} opacity={0.6} />}
+								/>
+							</Grid.Col>
+							<Grid.Col span={12}>
+								<InputNumberForm
+									form={itemsForm}
+									name="item_percent"
+									id="item_percent"
+									label="Discount Percent"
+									placeholder="0"
+									max={100}
+									nextField="purchase_price"
+									disabled={!isProductSelected}
+									tooltip={itemsForm.errors.item_percent}
+									leftSection={<IconPercentage size={16} opacity={0.6} />}
+								/>
+							</Grid.Col>
 							<Grid.Col span={12}>
 								<InputNumberForm
 									form={itemsForm}
 									name="purchase_price"
 									id="purchase_price"
-									label="Purchase Price"
+									label="Total Purchase"
 									nextField="expired_date"
 									placeholder="0.00"
+									step={0.01}
+									disabled={!isProductSelected}
 									tooltip={itemsForm.errors.purchase_price}
 									leftSection={<IconCurrencyTaka size={16} opacity={0.6} />}
 								/>
 							</Grid.Col>
 							<Grid.Col span={12}>
-								<DateInputForm
-									label="Expired Date"
+								<Tooltip
+									label={itemsForm.errors.expired_date}
+									opened={!!itemsForm.errors.expired_date}
+									px={16}
+									py={2}
+									position="top-end"
+									bg="var(--theme-error-color)"
+									c="white"
+									withArrow
+									offset={2}
+									zIndex={999}
+									transitionProps={{ transition: "pop-bottom-left", duration: 500 }}
+								>
+									<MonthPickerInput
+										label="Expired Date"
+										id="expired_date"
+										valueFormat="MM-YYYY"
+										placeholder="MM-YYYY"
+										clearable
+										disabled={!isProductSelected}
+										value={itemsForm.values.expired_date || null}
+										onChange={(dateValue) => itemsForm.setFieldValue("expired_date", dateValue)}
+										error={itemsForm.errors.expired_date}
+									/>
+								</Tooltip>
+							</Grid.Col>
+							<Grid.Col span={12}>
+								<InputNumberForm
 									form={itemsForm}
-									name="expired_date"
-									id="expired_date"
-									placeholder="DD-MM-YYYY"
-									valueFormat="DD-MM-YYYY"
+									name="minimum_quantity"
+									id="minimum_quantity"
+									label="Minimum Quantity"
+									placeholder="0"
 									nextField="EntityFormSubmit"
-									clearable
-									tooltip={itemsForm.errors.expired_date}
+									disabled={!isProductSelected}
+									tooltip={itemsForm.errors.minimum_quantity}
+									leftSection={<IconSortAscendingNumbers size={16} opacity={0.6} />}
 								/>
 							</Grid.Col>
 						</Grid>
@@ -281,20 +413,20 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 					className="borderRadiusAll"
 					bg="var(--theme-primary-card-color)"
 				>
-					<Text fz="sm" fw={500} c={'white'}>
+					<Text fz="sm" fw={500} c='white'>
 						Sub Total
 					</Text>
-					<Flex align="center" gap="4" pr={'md'}>
-						<Text fz="sm" c={'white'} fw={500}>
+					<Flex align="center" gap="4" pr='md'>
+						<Text fz="sm" c='white' fw={500}>
 							{currencySymbol}
 						</Text>
-						<Text fz="sm" fw={600} c={'white'}>
+						<Text fz="sm" fw={600} c='white'>
 							{formatCurrency(invoiceSubTotal)}
 						</Text>
 					</Flex>
 				</Flex>
 
-				<Flex p="sm" justify="space-between" align="center" bg={"#fffbeb85"}>
+				<Flex p="sm" justify="space-between" align="center" bg="#fffbeb85">
 					<ActionIcon
 						onClick={handleResetInvoiceItemForm}
 						variant="outline"

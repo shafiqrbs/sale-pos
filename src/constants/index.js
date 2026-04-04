@@ -2,6 +2,7 @@ import flagBD from "@assets/images/flags/bd.svg";
 import flagGB from "@assets/images/flags/gb.svg";
 
 export const SHOW_PROGRESSIVE_WORKS = true;
+export const ALLOW_MEASUREMENT_PURCHASE = true;
 
 export const CHARACTER_SET = [
 	"PC437_USA",

@@ -1,6 +1,6 @@
 import React from "react";
-import {ActionIcon, Box, Flex, NumberInput, Text, Button, Badge} from "@mantine/core";
-import { DateInput } from "@mantine/dates";
+import { ActionIcon, Box, Flex, NumberInput, Text, Button, Badge } from "@mantine/core";
+import { MonthPickerInput } from "@mantine/dates";
 import { DataTable } from "mantine-datatable";
 import { IconList, IconTrashX } from "@tabler/icons-react";
 import tableCss from "@assets/css/Table.module.css";
@@ -127,15 +127,11 @@ export default function ItemsTableSection({ itemsProducts, refetch, itemsTotal, 
 						textAlign: "center",
 						width: 130,
 						render: (record) => (
-							<DateInput
+							<MonthPickerInput
 								size="xs"
-								value={
-									record.expired_date && dayjs(record.expired_date, "YYYY-MM-DD", true).isValid()
-										? dayjs(record.expired_date, "YYYY-MM-DD", true).toDate()
-										: null
-								}
-								placeholder="DD-MM-YYYY"
-								valueFormat="DD-MM-YYYY"
+								value={record.expired_date ? new Date(record.expired_date) : null}
+								placeholder="MM-YYYY"
+								valueFormat="MM-YYYY"
 								clearable
 								onChange={(dateValue) => handleExpiredDateChange(record.id, dateValue)}
 							/>
@@ -171,7 +167,7 @@ export default function ItemsTableSection({ itemsProducts, refetch, itemsTotal, 
 					},
 					{
 						accessor: "price",
-						title: "Price",
+						title: "Pur. price",
 						textAlign: "left",
 						width: 140,
 						render: (record) => (

@@ -1,7 +1,7 @@
 export const BASE_URL = import.meta.env.VITE_API_GATEWAY_URL;
 
 export const MASTER_APIS = {
-	SPLASH: `${BASE_URL}/core/splash-info`,
+	SPLASH: `${BASE_URL}/pos/splash`,
 	LOGIN: `${BASE_URL}/user-login`,
 };
 
@@ -56,7 +56,7 @@ export const APP_APIS = {
 	CUSTOMERS: "/core/customer",
 	SETTINGS: "/core/select/setting",
 	INVENTORY_SETTINGS: "/inventory/select/setting",
-	INVENTORY_PRODUCT: "/inventory/product",
+	INVENTORY_PRODUCT: "/pos/product",
 	INVENTORY_CATEGORIES: "/inventory/select/category",
 	INVENTORY_PARTICULAR: "/inventory/select/particular",
 	PURCHASE: "/inventory/purchase",

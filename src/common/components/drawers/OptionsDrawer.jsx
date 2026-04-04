@@ -1,4 +1,4 @@
-import { Accordion, Stack, UnstyledButton, Text, Group, Divider } from "@mantine/core";
+import { Accordion, Stack, UnstyledButton, Text, Group, Divider, SegmentedControl } from "@mantine/core";
 import { useNavigate, useLocation } from "react-router";
 import {
 	IconSettings,
@@ -87,7 +87,7 @@ const DRAWER_MENU = [
 
 ];
 
-export default function OptionsDrawer({ isOnline,opened, onClose }) {
+export default function OptionsDrawer({ isOnline, opened, onClose, drawerPosition, setDrawerPosition }) {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const { configData } = useConfigData({ offlineFetch: !isOnline });
@@ -101,11 +101,24 @@ export default function OptionsDrawer({ isOnline,opened, onClose }) {
 			opened={opened}
 			onClose={onClose}
 			title={configData?.domain?.company_name || configData?.company_name}
-			position="right"
+			position={drawerPosition}
 			size="380px"
 		>
-			<Divider mb="md"  />
-			<Accordion variant="filled" defaultValue="core" classNames={classes}  maw={400} transitionDuration={1000}>
+			<Divider mb="xs" />
+			<Group justify="space-between" align="center" mb="xs">
+				<Text size="sm" c="dimmed">Drawer position</Text>
+				<SegmentedControl
+					size="sm"
+					value={drawerPosition}
+					onChange={setDrawerPosition}
+					data={[
+						{ label: "Left", value: "left" },
+						{ label: "Right", value: "right" },
+					]}
+				/>
+			</Group>
+			<Divider mb="md" />
+			<Accordion variant="filled" defaultValue="core" classNames={classes} maw={400} transitionDuration={1000}>
 				{DRAWER_MENU.map((menuItem) => {
 					const MainIcon = menuItem.icon;
 					return (
@@ -126,10 +139,10 @@ export default function OptionsDrawer({ isOnline,opened, onClose }) {
 												key={subItem.pathname}
 												onClick={() => handleSubmenuClick(subItem.pathname)}
 												style={{
-													borderBottom:"1px solid #f9fafb",
-													paddingTop:'6px',
-													paddingBottom:'6px',
-													paddingLeft:'12px',
+													borderBottom: "1px solid #f9fafb",
+													paddingTop: '6px',
+													paddingBottom: '6px',
+													paddingLeft: '12px',
 													backgroundColor: isActive
 														? "var(--mantine-color-default-hover)"
 														: "transparent",

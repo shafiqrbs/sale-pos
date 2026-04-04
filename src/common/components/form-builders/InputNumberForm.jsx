@@ -18,6 +18,9 @@ function InputNumberForm(props) {
 		disabled,
 		closeIcon,
 		color = "var(--theme-error-color)",
+		min = 1,
+		max = 1000000,
+		step = 1,
 	} = props;
 
 	const { t } = useTranslation();
@@ -27,7 +30,7 @@ function InputNumberForm(props) {
 			{form && (
 				<Tooltip
 					label={tooltip}
-					opened={name in form.errors && !!form.errors[name]}
+					opened={name in form.errors && !!form.errors[ name ]}
 					px={16}
 					py={2}
 					position="top-end"
@@ -47,6 +50,9 @@ function InputNumberForm(props) {
 						mt={mt}
 						disabled={disabled}
 						autoComplete="off"
+						min={min}
+						max={max}
+						step={step}
 						{...form.getInputProps(name)}
 						onKeyDown={getHotkeyHandler([
 							[
@@ -60,7 +66,7 @@ function InputNumberForm(props) {
 						])}
 						leftSection={props.leftSection}
 						rightSection={
-							form.values[name] && closeIcon ? (
+							form.values[ name ] && closeIcon ? (
 								<Tooltip label={t("Close")} withArrow bg={"red.1"} c={"red.3"}>
 									<IconX
 										color="red.5"

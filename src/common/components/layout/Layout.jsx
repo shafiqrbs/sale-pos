@@ -28,6 +28,10 @@ export default function Layout() {
 	const [ user, setUser ] = useState({});
 	const [ defaultRoute, setDefaultRoute ] = useState(APP_NAVLINKS.SALES_NEW);
 	const [ leftDrawerOpened, { open: openLeftDrawer, close: closeLeftDrawer } ] = useDisclosure(false);
+	const [ drawerPosition, setDrawerPosition ] = useLocalStorage({
+		key: "drawer-position",
+		defaultValue: "right",
+	});
 
 	useEffect(() => {
 		const initializeData = async () => {
@@ -108,36 +112,49 @@ export default function Layout() {
 			</AppShell.Header>
 			<AppShell.Main bg="gray.0" py="44px" h="calc(100vh - 90px)">
 
-				{isOnline && isOnlinePermissionIncludes && !leftDrawerOpened && SHOW_PROGRESSIVE_WORKS && (
-					<Box
-						pos="fixed"
-						right={0}
-						top="40%"
-						style={{ transform: "translateY(-50%)", zIndex: 1000 }}
+			{isOnline && isOnlinePermissionIncludes && !leftDrawerOpened && SHOW_PROGRESSIVE_WORKS && (
+				<Box
+					pos="fixed"
+					{...(drawerPosition === "right" ? { right: 0 } : { left: 0 })}
+					top="40%"
+					style={{ transform: "translateY(-50%)", zIndex: 1000 }}
+				>
+					<Tooltip
+						label="Menu"
+						bg="var(--theme-primary-card-color)"
+						position={drawerPosition === "right" ? "left" : "right"}
 					>
-						<Tooltip label="Menu" bg="var(--theme-primary-card-color)" position="left">
-							<ActionIcon
-								id="right-options-drawer-button"
-								variant="filled"
-								size="lg"
-								// opacity={leftDrawerOpened ? 1 : 0.5}
-								radius="md"
-								bg="var(--theme-primary-card-color)"
-								style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
-								onClick={openLeftDrawer}
-								aria-label="Open options menu"
-							>
-								<IconMenu2 size={20} />
-							</ActionIcon>
-						</Tooltip>
-					</Box>
-				)}
+						<ActionIcon
+							id="right-options-drawer-button"
+							variant="filled"
+							size="lg"
+							radius="md"
+							bg="var(--theme-primary-card-color)"
+							style={
+								drawerPosition === "right"
+									? { borderTopRightRadius: 0, borderBottomRightRadius: 0 }
+									: { borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }
+							}
+							onClick={openLeftDrawer}
+							aria-label="Open options menu"
+						>
+							<IconMenu2 size={20} />
+						</ActionIcon>
+					</Tooltip>
+				</Box>
+			)}
 				<Outlet context={{ isOnline, toggleNetwork, mainAreaHeight, user }} />
 			</AppShell.Main>
 			<AppShell.Footer height={footerHeight}>
 				<Footer />
 			</AppShell.Footer>
-			<OptionsDrawer isOnline={isOnline} opened={leftDrawerOpened} onClose={closeLeftDrawer} />
+			<OptionsDrawer
+				isOnline={isOnline}
+				opened={leftDrawerOpened}
+				onClose={closeLeftDrawer}
+				drawerPosition={drawerPosition}
+				setDrawerPosition={setDrawerPosition}
+			/>
 		</AppShell>
 	);
 }
