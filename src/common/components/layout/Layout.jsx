@@ -15,7 +15,7 @@ import useLoggedInUser from "@hooks/useLoggedInUser";
 
 export default function Layout() {
 	const { mainAreaHeight, headerHeight, footerHeight, padding } = useMainAreaHeight();
-	const { roles ,isOnlinePermissionIncludes } = useLoggedInUser();
+	const { isOnlinePermissionIncludes } = useLoggedInUser();
 	const networkStatus = useNetwork();
 	const [ isOnline, setIsOnline ] = useLocalStorage({
 		key: "network-preference",
@@ -26,18 +26,25 @@ export default function Layout() {
 	const [ isLoading, setIsLoading ] = useState(true);
 	const [ activated, setActivated ] = useState({ is_activated: false });
 	const [ user, setUser ] = useState({});
+	const [ defaultRoute, setDefaultRoute ] = useState(APP_NAVLINKS.SALES_NEW);
 	const [ leftDrawerOpened, { open: openLeftDrawer, close: closeLeftDrawer } ] = useDisclosure(false);
 
 	useEffect(() => {
 		const initializeData = async () => {
 			try {
-				const [ activationData, user ] = await Promise.all([
+				const [ activationData, userData, storedConfigData ] = await Promise.all([
 					window.dbAPI.getDataFromTable("license_activate"),
 					window.dbAPI.getDataFromTable("users"),
+					window.dbAPI.getDataFromTable("config-data"),
 				]);
 
 				setActivated(activationData);
-				setUser(user);
+				setUser(userData);
+
+				// =============== read is_pos from the locally stored config to decide the default landing route ================
+				const parsedConfig = storedConfigData?.data ? JSON.parse(storedConfigData.data) : {};
+				const isPosEnabled = parsedConfig?.inventory_config?.is_pos ?? parsedConfig?.is_pos ?? 0;
+				setDefaultRoute(isPosEnabled ? APP_NAVLINKS.BAKERY : APP_NAVLINKS.SALES_NEW);
 			} catch (error) {
 				console.error("Error initializing data:", error);
 			} finally {
@@ -91,7 +98,7 @@ export default function Layout() {
 	}
 
 	if (paramPath === "/") {
-		return <Navigate replace to={APP_NAVLINKS.BAKERY} />;
+		return <Navigate replace to={defaultRoute} />;
 	}
 
 	return (

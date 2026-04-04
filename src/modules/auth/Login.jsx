@@ -18,17 +18,15 @@ import classes from "@assets/css/AuthenticationImage.module.css";
 import { getHotkeyHandler, useHotkeys } from "@mantine/hooks";
 import { IconInfoCircle, IconLogin } from "@tabler/icons-react";
 import { isNotEmpty, useForm } from "@mantine/form";
-import {Navigate, useNavigate, useOutletContext} from "react-router";
+import {Navigate, useNavigate} from "react-router";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
 import orderProcessDropdownLocalDataStore from "@utils/local-storage/orderProcessDropdownLocalDataStore.js";
 import commonDataStoreIntoLocalStorage from "@utils/local-storage/commonDataStoreIntoLocalStorage.js";
 import { APP_NAVLINKS, MASTER_APIS } from "@/routes/routes";
-import useConfigData from "@hooks/useConfigData";
 
 export default function Login() {
-	const { configData } = useConfigData();
 	const [ user, setUser ] = useState(null);
 	const [ loading, setLoading ] = useState(true);
 	const { t } = useTranslation();
@@ -49,10 +47,16 @@ export default function Login() {
 	useEffect(() => {
 		const checkAuth = async () => {
 			try {
-				const res = await window.dbAPI.getDataFromTable("users");
+				const [ res, storedConfigData ] = await Promise.all([
+					window.dbAPI.getDataFromTable("users"),
+					window.dbAPI.getDataFromTable("config-data"),
+				]);
 				setUser(res);
 				if (res?.id) {
-					navigate(APP_NAVLINKS.BAKERY, { replace: true });
+					// =============== use the locally stored is_pos flag to land on the correct page instead of hardcoding bakery ================
+					const parsedConfig = storedConfigData?.data ? JSON.parse(storedConfigData.data) : {};
+					const isPosEnabled = parsedConfig?.inventory_config?.is_pos ?? parsedConfig?.is_pos ?? 0;
+					navigate(isPosEnabled ? APP_NAVLINKS.BAKERY : APP_NAVLINKS.SALES_NEW, { replace: true });
 				}
 			} catch (error) {
 				console.error("Auth check error:", error);

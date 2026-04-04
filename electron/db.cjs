@@ -185,12 +185,12 @@ db.prepare(
 		marketing_email TEXT,
 		location_id INTEGER,
 		location_name TEXT,
-		created_date TEXT NOT NULL,
-		created_at TEXT NOT NULL,
+		created_date TEXT,
+		created_at TEXT,
 		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		debit REAL NOT NULL,
 		credit REAL NOT NULL,
-		balance REAL NOT NULL,
+		balance REAL DEFAULT 0,
 		is_new INTEGER DEFAULT 0
 	);
   	`
@@ -212,8 +212,8 @@ db.prepare(
 		unique_id VARCHAR(255) NOT NULL,
 		sub_domain_id INTEGER,
 		customer_id INTEGER,
-		created_date DATE NOT NULL,
-		created_at TIMESTAMP NOT NULL,
+		created_date DATE,
+		created_at TIMESTAMP,
 		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);
   	`

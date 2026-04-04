@@ -65,7 +65,7 @@ const useConfigData = ({ offlineFetch = false } = {}) => {
 	}, [ onlineConfigData, localConfigData ]);
 
 	const is_pos = configData?.inventory_config?.is_pos ?? configData?.is_pos ?? 0;
-
+	console.log(is_pos)
 	const is_purchase_online = configData?.inventory_config?.config_purchase?.purchase_online ?? configData?.config_purchase?.purchase_online ?? 0;
 	const is_sales_online = configData?.inventory_config?.config_sales?.sales_online ?? configData?.config_sales?.sales_online ?? 0;
 
