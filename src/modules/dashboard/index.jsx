@@ -12,10 +12,9 @@ import useLoggedInUser from "@hooks/useLoggedInUser";
 
 export default function DashboardIndex() {
 	const { isOnline, mainAreaHeight } = useOutletContext();
-	const [dashboardOnline, setDashboardOnline] = useState(false);
-	const { user, isOnlinePermissionIncludes } = useLoggedInUser();
+	const [ dashboardOnline, setDashboardOnline ] = useState(false);
+	const { isOnlinePermissionIncludes } = useLoggedInUser();
 	const { dailyData, isLoading } = useDailyMatrixData({ offlineFetch: !dashboardOnline });
-	console.log(dailyData)
 
 	const toggleDashboardMode = () => {
 		if (!dashboardOnline && !isOnline) {
@@ -54,23 +53,23 @@ export default function DashboardIndex() {
 			<Grid gutter="md" mb="md">
 				<Grid.Col span={{ base: 12, md: 6 }} >
 					<Grid gutter="md" mb="md">
-						<Grid.Col span={{ base: 12}}>
-							<SalesSummaryCard dailyData={dailyData} cardHeight={height-64} />
+						<Grid.Col span={{ base: 12 }}>
+							<SalesSummaryCard dailyData={dailyData} cardHeight={height - 64} />
 						</Grid.Col>
 					</Grid>
 				</Grid.Col>
 				<Grid.Col span={{ base: 12, md: 6 }}>
 					<Grid gutter="md" mb="md">
 						{/* =============== transaction modes ================ */}
-						<Grid.Col span={{ base: 12}}>
+						<Grid.Col span={{ base: 12 }}>
 							<TransactionModesCard dailyData={dailyData} cardHeight={cardHeight} />
 						</Grid.Col>
 						{/* =============== top selling products ================ */}
-						<Grid.Col span={{ base: 12}}>
+						<Grid.Col span={{ base: 12 }}>
 							<TopSellingProductsCard dailyData={dailyData} cardHeight={cardHeight} />
 						</Grid.Col>
 						{/* =============== today's overview ================ */}
-						<Grid.Col span={{ base: 12}}>
+						<Grid.Col span={{ base: 12 }}>
 							<TodaysOverviewCard dailyData={dailyData} cardHeight={cardHeight} />
 						</Grid.Col>
 					</Grid>
@@ -82,34 +81,34 @@ export default function DashboardIndex() {
 
 			{/* =============== floating online/offline toggle ================ */}
 			{isOnlinePermissionIncludes ? (
-			<Transition mounted={true} transition="slide-up" duration={300}>
-				{(styles) => (
-					<Tooltip
-						label={dashboardOnline ? "Switch to Offline" : "Switch to Online"}
-						position="left"
-						withArrow
-					>
-						<ActionIcon
-							style={{
-								...styles,
-								position: "fixed",
-								bottom: 60,
-								right: 24,
-								zIndex: 1000,
-								boxShadow: "0 4px 14px rgba(0, 0, 0, 0.15)",
-							}}
-							variant="filled"
-							size={48}
-							radius="xl"
-							color={dashboardOnline ? "teal" : "gray"}
-							onClick={toggleDashboardMode}
-							aria-label={dashboardOnline ? "Switch to offline mode" : "Switch to online mode"}
+				<Transition mounted={true} transition="slide-up" duration={300}>
+					{(styles) => (
+						<Tooltip
+							label={dashboardOnline ? "Switch to Offline" : "Switch to Online"}
+							position="left"
+							withArrow
 						>
-							{dashboardOnline ? <IconCloud size={22} /> : <IconCloudOff size={22} />}
-						</ActionIcon>
-					</Tooltip>
-				)}
-			</Transition>
+							<ActionIcon
+								style={{
+									...styles,
+									position: "fixed",
+									bottom: 60,
+									right: 24,
+									zIndex: 1000,
+									boxShadow: "0 4px 14px rgba(0, 0, 0, 0.15)",
+								}}
+								variant="filled"
+								size={48}
+								radius="xl"
+								color={dashboardOnline ? "teal" : "gray"}
+								onClick={toggleDashboardMode}
+								aria-label={dashboardOnline ? "Switch to offline mode" : "Switch to online mode"}
+							>
+								{dashboardOnline ? <IconCloud size={22} /> : <IconCloudOff size={22} />}
+							</ActionIcon>
+						</Tooltip>
+					)}
+				</Transition>
 			) : null}
 		</Box>
 	);

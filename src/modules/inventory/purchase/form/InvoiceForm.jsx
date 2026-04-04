@@ -147,7 +147,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 
 		// =============== resolve category_name from category_id using local categories ===============
 		const categoryId = selectedProduct.category_id ?? null;
-		const categoryName = selectedProduct.category_name ?? "";
+		const categoryName = selectedProduct.category ?? "";
 
 		const newItem = {
 			product_id: selectedProduct.id,

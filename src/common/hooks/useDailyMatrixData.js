@@ -23,9 +23,9 @@ const INITIAL_DATA = {
 
 export default function useDailyMatrixData({ offlineFetch = true } = {}) {
 	// =============== offline state ================
-	const [offlineData, setOfflineData] = useState(INITIAL_DATA);
-	const [offlineLoading, setOfflineLoading] = useState(false);
-	const [offlineError, setOfflineError] = useState(null);
+	const [ offlineData, setOfflineData ] = useState(INITIAL_DATA);
+	const [ offlineLoading, setOfflineLoading ] = useState(false);
+	const [ offlineError, setOfflineError ] = useState(null);
 
 	// =============== online RTK Query hooks (skip when offline) ================
 	const { yyyymmdd } = getTodayFormatted();
@@ -39,7 +39,6 @@ export default function useDailyMatrixData({ offlineFetch = true } = {}) {
 		{ start_date: yyyymmdd, end_date: yyyymmdd },
 		{ skip: offlineFetch }
 	);
-	console.log(summaryResponse);
 
 	const {
 		data: salesListResponse,
@@ -53,7 +52,7 @@ export default function useDailyMatrixData({ offlineFetch = true } = {}) {
 		if (offlineFetch) {
 			fetchOfflineData();
 		}
-	}, [offlineFetch]);
+	}, [ offlineFetch ]);
 
 	const fetchOfflineData = async () => {
 		setOfflineLoading(true);
@@ -96,35 +95,35 @@ export default function useDailyMatrixData({ offlineFetch = true } = {}) {
 				totalPayment += salePayment;
 				totalDue += saleDue;
 
-			// =============== aggregate transaction modes from payments array ================
-			if (sale.payments) {
-				try {
-					const payments = typeof sale.payments === "string"
-						? JSON.parse(sale.payments)
-						: sale.payments;
+				// =============== aggregate transaction modes from payments array ================
+				if (sale.payments) {
+					try {
+						const payments = typeof sale.payments === "string"
+							? JSON.parse(sale.payments)
+							: sale.payments;
 
-					if (Array.isArray(payments) && payments.length > 0) {
-						payments.forEach((payment) => {
-							const modeId = payment.transaction_mode_id;
-							const amount = Number(payment.amount) || 0;
-							const mode = transactionModes?.find((mode) => mode.id === modeId);
-							const modeName = mode?.name || payment.transaction_mode_name || "Unknown";
+						if (Array.isArray(payments) && payments.length > 0) {
+							payments.forEach((payment) => {
+								const modeId = payment.transaction_mode_id;
+								const amount = Number(payment.amount) || 0;
+								const mode = transactionModes?.find((mode) => mode.id === modeId);
+								const modeName = mode?.name || payment.transaction_mode_name || "Unknown";
 
-							if (!transactionModeMap[modeName]) {
-								transactionModeMap[modeName] = {
-									name: modeName,
-									amount: 0,
-									count: 0,
-								};
-							}
-							transactionModeMap[modeName].amount += amount;
-							transactionModeMap[modeName].count += 1;
-						});
+								if (!transactionModeMap[ modeName ]) {
+									transactionModeMap[ modeName ] = {
+										name: modeName,
+										amount: 0,
+										count: 0,
+									};
+								}
+								transactionModeMap[ modeName ].amount += amount;
+								transactionModeMap[ modeName ].count += 1;
+							});
+						}
+					} catch (error) {
+						console.error("Error parsing payments:", error, sale);
 					}
-				} catch (error) {
-					console.error("Error parsing payments:", error, sale);
 				}
-			}
 
 				// =============== aggregate products ================
 				if (sale.sales_items) {
@@ -140,16 +139,16 @@ export default function useDailyMatrixData({ offlineFetch = true } = {}) {
 							const salesPrice = Number(item.sales_price) || 0;
 							const subTotal = Number(item.sub_total) || 0;
 
-							if (!productMap[productName]) {
-								productMap[productName] = {
+							if (!productMap[ productName ]) {
+								productMap[ productName ] = {
 									name: productName,
 									totalQuantity: 0,
 									totalAmount: 0,
 									salesPrice: salesPrice,
 								};
 							}
-							productMap[productName].totalQuantity += quantity;
-							productMap[productName].totalAmount += subTotal;
+							productMap[ productName ].totalQuantity += quantity;
+							productMap[ productName ].totalAmount += subTotal;
 						});
 					} catch (error) {
 						console.error("Error parsing sales_items:", error);
@@ -194,18 +193,18 @@ export default function useDailyMatrixData({ offlineFetch = true } = {}) {
 		const rawModes = apiData.transactionModes || apiData.transaction_modes || apiData.methods || [];
 		const normalizedTransactionModes = Array.isArray(rawModes)
 			? rawModes.map((mode) => ({
-					name:
-						mode.name ||
-						mode.method ||
-						mode.transaction_mode_name ||
-						mode.modeName ||
-						mode.mode_name ||
-						"Unknown",
-					amount: Number(
-						mode.amount ?? mode.total ?? mode.total_amount ?? 0
-					),
-					count: Number(mode.count ?? mode.total_count ?? mode.sales_count ?? 0),
-			  }))
+				name:
+					mode.name ||
+					mode.method ||
+					mode.transaction_mode_name ||
+					mode.modeName ||
+					mode.mode_name ||
+					"Unknown",
+				amount: Number(
+					mode.amount ?? mode.total ?? mode.total_amount ?? 0
+				),
+				count: Number(mode.count ?? mode.total_count ?? mode.sales_count ?? 0),
+			}))
 			: [];
 
 		// =============== handle multiple possible key names the api may use for top products ================
@@ -217,16 +216,16 @@ export default function useDailyMatrixData({ offlineFetch = true } = {}) {
 			[];
 		const normalizedTopProducts = Array.isArray(rawTopProducts)
 			? rawTopProducts.map((item) => ({
-					name:
-						item.name ||
-						item.product_name ||
-						item.item_name ||
-						item.display_name ||
-						"Unknown",
-					totalQuantity: Number(item.totalQuantity ?? item.total_quantity ?? 0),
-					totalAmount: Number(item.totalAmount ?? item.total_amount ?? 0),
-					salesPrice: Number(item.salesPrice ?? item.sales_price ?? 0),
-			  }))
+				name:
+					item.name ||
+					item.product_name ||
+					item.item_name ||
+					item.display_name ||
+					"Unknown",
+				totalQuantity: Number(item.totalQuantity ?? item.total_quantity ?? 0),
+				totalAmount: Number(item.totalAmount ?? item.total_amount ?? 0),
+				salesPrice: Number(item.salesPrice ?? item.sales_price ?? 0),
+			}))
 			: [];
 
 		return {
@@ -243,7 +242,7 @@ export default function useDailyMatrixData({ offlineFetch = true } = {}) {
 			topProducts: normalizedTopProducts,
 			salesList: salesListResponse?.data || [],
 		};
-	}, [offlineFetch, summaryResponse, salesListResponse]);
+	}, [ offlineFetch, summaryResponse, salesListResponse ]);
 
 	// =============== return based on mode ================
 	if (offlineFetch) {

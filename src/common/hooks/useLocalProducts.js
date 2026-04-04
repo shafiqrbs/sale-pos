@@ -16,13 +16,15 @@ const mapApiProductToLocalSchema = (apiProduct) => ({
 	slug: apiProduct.slug ?? "",
 	unit_name: apiProduct.unit_name ?? "",
 	unit_id: 0,
-	category_name: apiProduct.category_name ?? "",
+	category: apiProduct.category_name || apiProduct.category || "",
 	quantity: apiProduct.quantity ?? 0,
 	purchase_price: apiProduct.purchase_price ?? 0,
 	sales_price: apiProduct.sales_price ?? 0,
 	average_price: apiProduct.average_price ?? 0,
 	barcode: apiProduct.barcode ?? null,
 	feature_image: apiProduct.images ?? null,
+	measurements: JSON.stringify(apiProduct.measurements || []),
+	purchase_item_for_sales: JSON.stringify(apiProduct.purchase_item_for_sales || []),
 });
 
 const normalizeCondition = (condition) => {

@@ -12,7 +12,7 @@ import {
 import { useDisclosure } from "@mantine/hooks";
 import { useTranslation } from "react-i18next";
 import { useForm } from "@mantine/form";
-import { IconPlus, IconReload, IconDotsVertical, IconTruckReturn } from "@tabler/icons-react";
+import { IconPlus, IconReload, IconDotsVertical, IconTruckReturn, IconGlobe, IconGlobeOff } from "@tabler/icons-react";
 import { DataTable } from "mantine-datatable";
 import tableCss from "@assets/css/Table.module.css";
 import useMainAreaHeight from "@hooks/useMainAreaHeight.js";
@@ -22,6 +22,7 @@ import { formatCurrency } from "@utils/index.js";
 import KeywordSearch from "@components/KeywordSearch";
 import { APP_NAVLINKS } from "@/routes/routes";
 import { useNavigate, useOutletContext } from "react-router";
+import useLoggedInUser from "@hooks/useLoggedInUser.js";
 import { useGetProductQuery } from "@services/product";
 import { useLazyGetItemsForDamageQuery } from "@services/purchase";
 import DamageProcessModal from "@components/modals/DamageProcessModal";
@@ -32,6 +33,7 @@ export default function Table() {
 	const navigate = useNavigate();
 	const { t } = useTranslation();
 	const { isOnline } = useOutletContext();
+	const { isOnlinePermissionIncludes } = useLoggedInUser();
 	const { mainAreaHeight } = useMainAreaHeight();
 	const { currencySymbol } = useConfigData({ offlineFetch: true });
 	const [ page, setPage ] = useState(1);
@@ -39,7 +41,7 @@ export default function Table() {
 	const [ onlineSearchTerm, setOnlineSearchTerm ] = useState("");
 	const searchRef = useRef({ term: "" });
 
-	const effectiveDataSource = isOnline ? dataSource : "offline";
+	const effectiveDataSource = isOnline && isOnlinePermissionIncludes ? dataSource : "offline";
 
 	// =============== damage process ================
 	const [ damageOpened, { open: openDamage, close: closeDamage } ] = useDisclosure(false);
@@ -182,26 +184,36 @@ export default function Table() {
 					showAdvancedFilter={false}
 				/>
 				<Group gap="sm" wrap="nowrap">
-					{isOnline && (
-						<SegmentedControl
-							value={effectiveDataSource}
-							onChange={(value) => {
-								setDataSource(value);
-								setPage(1);
-							}}
-							color={effectiveDataSource === "online" ? "green" : "orange"}
-							data={[
-								{
-									value: "online",
-									label: "🌐 " + t("Online"),
-								},
-								{
-									value: "offline",
-									label: "📡 " + t("Offline"),
-								},
-							]}
-						/>
-					)}
+				{isOnline && isOnlinePermissionIncludes && (
+					<SegmentedControl
+						value={effectiveDataSource}
+						onChange={(value) => {
+							setDataSource(value);
+							setPage(1);
+						}}
+						color={effectiveDataSource === "online" ? "green" : "red"}
+						data={[
+							{
+								value: "online",
+								label: (
+									<Group gap={4} wrap="nowrap">
+										<IconGlobe size={13} color={effectiveDataSource === "online" ? "white" : "var(--mantine-color-green-6)"} />
+										{t("Online")}
+									</Group>
+								),
+							},
+							{
+								value: "offline",
+								label: (
+									<Group gap={4} wrap="nowrap">
+										<IconGlobeOff size={13} color={effectiveDataSource === "offline" ? "white" : "var(--mantine-color-red-6)"} />
+										{t("Offline")}
+									</Group>
+								),
+							},
+						]}
+					/>
+				)}
 					<Tooltip
 						label="Click here for update stock"
 						c="white"
@@ -263,10 +275,10 @@ export default function Table() {
 							render: (record) => record.barcode || "—",
 						},
 						{
-							accessor: "category_name",
+							accessor: "category",
 							title: t("Category"),
 							width: 140,
-							render: (record) => record.category_name || record.category_id || "—",
+							render: (record) => record.category || record.category_name || "—",
 						},
 						{
 							accessor: "unit_name",

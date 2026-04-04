@@ -149,7 +149,7 @@ db.prepare(
 		measurments TEXT DEFAULT '[]',
 		slug TEXT NOT NULL,
 		category_id INTEGER,
-		category_name TEXT,
+		category TEXT,
 		unit_id INTEGER NOT NULL,
 		quantity REAL NOT NULL,
 		total_sales REAL DEFAULT 0,

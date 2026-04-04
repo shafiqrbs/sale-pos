@@ -15,7 +15,9 @@ import {
 	IconEye,
 	IconPlus,
 	IconTrash,
-	IconChevronRight
+	IconChevronRight,
+	IconGlobe,
+	IconGlobeOff,
 } from "@tabler/icons-react";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
@@ -34,6 +36,7 @@ import { formatCurrency } from "@utils/index";
 import { showNotification } from "@components/ShowNotificationComponent";
 import { modals } from "@mantine/modals";
 import { setEditingSale } from "@features/checkout";
+import useLoggedInUser from "@hooks/useLoggedInUser";
 
 const PER_PAGE = 25;
 
@@ -50,8 +53,9 @@ export default function HoldTable() {
 	const [deletedSaleIds, setDeletedSaleIds] = useState(new Set());
 	const [dataSource, setDataSource] = useState("offline");
 	const { mainAreaHeight, isOnline } = useOutletContext();
-	// =============== when offline, always use offline data (online segment disabled) ===============
-	const effectiveDataSource = isOnline ? dataSource : "offline";
+	const { isOnlinePermissionIncludes } = useLoggedInUser();
+	// =============== when offline or user lacks permission, always use offline data ===============
+	const effectiveDataSource = isOnline && isOnlinePermissionIncludes ? dataSource : "offline";
 	const form = useForm({
 		initialValues: {
 			term: "",
@@ -153,26 +157,36 @@ export default function HoldTable() {
 			<Flex mb="xs" gap="sm" justify="space-between" align="center">
 				<KeywordSearch showStartEndDate form={form} />
 				<Group gap="sm" wrap="nowrap" >
-					{isOnline && (
-						<SegmentedControl
-							value={effectiveDataSource}
-							onChange={(value) => {
-								setDataSource(value);
-								setPage(1);
-							}}
-							color={effectiveDataSource === "online" ? "green" : "orange"}
-							data={[
-								{
-									value: "online",
-									label: "🌐 " + t("Online"),
-								},
-								{
-									value: "offline",
-									label: "📡 " + t("Offline"),
-								},
-							]}
-						/>
-					)}
+				{isOnline && isOnlinePermissionIncludes && (
+					<SegmentedControl
+						value={effectiveDataSource}
+						onChange={(value) => {
+							setDataSource(value);
+							setPage(1);
+						}}
+						color={effectiveDataSource === "online" ? "green" : "red"}
+						data={[
+							{
+								value: "online",
+								label: (
+									<Group gap={4} wrap="nowrap">
+										<IconGlobe size={13} color={effectiveDataSource === "online" ? "white" : "var(--mantine-color-green-6)"} />
+										{t("Online")}
+									</Group>
+								),
+							},
+							{
+								value: "offline",
+								label: (
+									<Group gap={4} wrap="nowrap">
+										<IconGlobeOff size={13} color={effectiveDataSource === "offline" ? "white" : "var(--mantine-color-red-6)"} />
+										{t("Offline")}
+									</Group>
+								),
+							},
+						]}
+					/>
+				)}
 					<Button
 						w={170}
 						size="md"

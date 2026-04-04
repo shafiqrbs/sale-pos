@@ -14,7 +14,7 @@ import {
 	LoadingOverlay,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { IconKey, IconCheck, IconInfoCircle, IconCircleKey } from "@tabler/icons-react";
+import { IconCheck, IconInfoCircle, IconCircleKey } from "@tabler/icons-react";
 import axios from "axios";
 import { useNavigate } from "react-router";
 import { useEffect, useState } from "react";
@@ -27,9 +27,9 @@ const dataMap = {
 	core_customers: "customers",
 	core_users: "users",
 	core_vendors: "vendors",
-	accounting_transaction_mode: "transaction_modes",
+	accounting_transaction_mode: "transaction_methods",
 	config_data: "domain_config",
-	core_products: "stock_item",
+	core_products: "stocks",
 };
 
 // =============== threshold: arrays longer than this use clearAndInsertBulk ================
@@ -37,10 +37,10 @@ const BULK_INSERT_THRESHOLD = 1000;
 
 export default function Activate() {
 	const { t } = useTranslation();
-	const [spinner, setSpinner] = useState(false);
-	const [errorMessage, setErrorMessage] = useState("");
-	const [insertProgress, setInsertProgress] = useState(null);
-	const [isInserting, setIsInserting] = useState(false);
+	const [ spinner, setSpinner ] = useState(false);
+	const [ errorMessage, setErrorMessage ] = useState("");
+	const [ insertProgress, setInsertProgress ] = useState(null);
+	const [ isInserting, setIsInserting ] = useState(false);
 	const navigate = useNavigate();
 
 	const form = useForm({
@@ -63,19 +63,19 @@ export default function Activate() {
 		setIsInserting(true);
 
 		try {
-			for (const [table, property] of Object.entries(dataMap)) {
+			for (const [ table, property ] of Object.entries(dataMap)) {
 				// =============== config_data comes as a single object, not an array ================
 				if (table === "config_data") {
 					const configData = {
-						data: JSON.stringify(responseData[property]),
+						data: JSON.stringify(responseData[ property ]),
 					};
 					await window.dbAPI.upsertIntoTable(table, configData);
 					continue;
 				}
 
-				const dataList = Array.isArray(responseData[property])
-					? responseData[property]
-					: [responseData[property]];
+				const dataList = Array.isArray(responseData[ property ])
+					? responseData[ property ]
+					: [ responseData[ property ] ];
 
 				if (dataList.length > BULK_INSERT_THRESHOLD) {
 					// =============== large dataset: use batched bulk insert with progress reporting ================
@@ -84,7 +84,7 @@ export default function Activate() {
 					// =============== small dataset: upsert row by row, report progress manually ================
 					const total = dataList.length;
 					for (let index = 0; index < total; index++) {
-						await window.dbAPI.upsertIntoTable(table, dataList[index]);
+						await window.dbAPI.upsertIntoTable(table, dataList[ index ]);
 						setInsertProgress({
 							table,
 							inserted: index + 1,
@@ -152,7 +152,7 @@ export default function Activate() {
 			}
 		};
 		checkActivation();
-	}, [navigate]);
+	}, [ navigate ]);
 
 	return (
 		<Box
@@ -251,7 +251,7 @@ export default function Activate() {
 												{...form.getInputProps("activeKey")}
 												styles={(theme) => ({
 													input: {
-														borderColor: form.errors.activeKey ? theme.colors.red[5] : undefined,
+														borderColor: form.errors.activeKey ? theme.colors.red[ 5 ] : undefined,
 													},
 												})}
 											/>

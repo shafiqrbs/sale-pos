@@ -1,4 +1,4 @@
-import {Divider, Grid, Paper, ScrollArea, Text} from "@mantine/core";
+import { Divider, Grid, Paper, ScrollArea, Text } from "@mantine/core";
 import { IconCurrencyTaka, IconDiscount, IconReceipt } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 import StatCard from "./StatCard";
@@ -20,8 +20,6 @@ const STAT_ITEMS = [
 
 export default function SalesSummaryCard({ dailyData, cardHeight }) {
     const { t } = useTranslation();
-
-    console.log(dailyData)
 
     return (
         <Paper shadow="sm" p="lg" radius="md" withBorder h="100%">
