@@ -4,6 +4,10 @@ import flagGB from "@assets/images/flags/gb.svg";
 export const SHOW_PROGRESSIVE_WORKS = true;
 export const ALLOW_MEASUREMENT_PURCHASE = true;
 
+export const APP_NAME = import.meta.env.VITE_APP_NAME;
+export const COVER_IMAGE = import.meta.env.VITE_APP_COVER_IMAGE;
+export const BRAND_IMAGE = import.meta.env.VITE_APP_BRAND_IMAGE;
+
 export const CHARACTER_SET = [
 	"PC437_USA",
 	"PC850_MULTILINGUAL",

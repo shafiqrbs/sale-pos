@@ -18,13 +18,14 @@ import classes from "@assets/css/AuthenticationImage.module.css";
 import { getHotkeyHandler, useHotkeys } from "@mantine/hooks";
 import { IconInfoCircle, IconLogin } from "@tabler/icons-react";
 import { isNotEmpty, useForm } from "@mantine/form";
-import {Navigate, useNavigate} from "react-router";
+import { Navigate, useNavigate } from "react-router";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
 import orderProcessDropdownLocalDataStore from "@utils/local-storage/orderProcessDropdownLocalDataStore.js";
 import commonDataStoreIntoLocalStorage from "@utils/local-storage/commonDataStoreIntoLocalStorage.js";
 import { APP_NAVLINKS, MASTER_APIS } from "@/routes/routes";
+import { APP_NAME, COVER_IMAGE } from "@/constants";
 
 export default function Login() {
 	const [ user, setUser ] = useState(null);
@@ -36,7 +37,7 @@ export default function Login() {
 	const [ errorMessage, setErrorMessage ] = useState("");
 	const [ activated, setActivated ] = useState({ is_activated: false });
 
-	const [height, setHeight] = useState(window.innerHeight);
+	const [ height, setHeight ] = useState(window.innerHeight);
 
 	useEffect(() => {
 		const handleResize = () => setHeight(window.innerHeight);
@@ -169,106 +170,108 @@ export default function Login() {
 					justify="center"
 					gap="md"
 				>
-				<Paper className={classes.form} radius={0} p={30}>
-					<Title order={2} className={`${classes.title} ${classes.formTitle}`} ta="center" mt="md">
-						{t("WelcomeBackToPOSH")}
-					</Title>
-					{errorMessage && (
-						<Alert
-							variant="light"
-							color="red"
-							radius="md"
-							title={errorMessage}
-							icon={icon}
-							mb="md"
-						/>
-					)}
-					<Box className={classes.inputWrapper}>
-						<Tooltip
-							label={t("UserNameRequired")}
-							px={20}
-							py={3}
-							opened={!!form.errors.username}
-							position="top-end"
-							color="red"
-							withArrow
-							offset={2}
-							transitionProps={{ transition: "pop-bottom-left", duration: 500 }}
-						>
-							<TextInput
-								withAsterisk
-								label={t("UserName")}
-								placeholder="your username"
-								size="md"
-								id="Username"
-								classNames={{ input: classes.styledInput }}
-								disabled={spinner}
-								{...form.getInputProps("username")}
-								onKeyDown={getHotkeyHandler([
-									[ "Enter", () => document.getElementById("Password")?.focus() ],
-								])}
+					<Paper className={classes.form} radius={0} p={30}>
+						<Title order={2} className={`${classes.title} ${classes.formTitle}`} ta="center" mt="md">
+							Welcome Back to {APP_NAME}
+						</Title>
+						{errorMessage && (
+							<Alert
+								variant="light"
+								color="red"
+								radius="md"
+								title={errorMessage}
+								icon={icon}
+								mb="md"
 							/>
-						</Tooltip>
-					</Box>
+						)}
+						<Box className={classes.inputWrapper}>
+							<Tooltip
+								label={t("UserNameRequired")}
+								px={20}
+								py={3}
+								opened={!!form.errors.username}
+								position="top-end"
+								color="red"
+								withArrow
+								offset={2}
+								transitionProps={{ transition: "pop-bottom-left", duration: 500 }}
+							>
+								<TextInput
+									withAsterisk
+									label={t("UserName")}
+									placeholder="your username"
+									size="md"
+									id="Username"
+									classNames={{ input: classes.styledInput }}
+									disabled={spinner}
+									{...form.getInputProps("username")}
+									onKeyDown={getHotkeyHandler([
+										[ "Enter", () => document.getElementById("Password")?.focus() ],
+									])}
+								/>
+							</Tooltip>
+						</Box>
 
-					<Box className={classes.inputWrapper} mt="md">
-						<Tooltip
-							label={t("RequiredPassword")}
-							px={20}
-							py={3}
-							opened={!!form.errors.password}
-							position="top-end"
-							color="red"
-							withArrow
-							offset={2}
-							transitionProps={{ transition: "pop-bottom-left", duration: 500 }}
+						<Box className={classes.inputWrapper} mt="md">
+							<Tooltip
+								label={t("RequiredPassword")}
+								px={20}
+								py={3}
+								opened={!!form.errors.password}
+								position="top-end"
+								color="red"
+								withArrow
+								offset={2}
+								transitionProps={{ transition: "pop-bottom-left", duration: 500 }}
+							>
+								<PasswordInput
+									withAsterisk
+									label={t("Password")}
+									placeholder="ex. abc1234"
+									size="md"
+									classNames={{ input: classes.styledInput }}
+									disabled={spinner}
+									{...form.getInputProps("password")}
+									id="Password"
+									onKeyDown={getHotkeyHandler([
+										[ "Enter", () => document.getElementById("LoginSubmit")?.click() ],
+									])}
+								/>
+							</Tooltip>
+						</Box>
+						<Button
+							fullWidth
+							mt="lg"
+							bg="var(--theme-primary-color-6)"
+							size="md"
+							type="submit"
+							id="LoginSubmit"
+							className={`${LoginPage.control} ${classes.loginButton}`}
+							rightSection={<IconLogin />}
+							disabled={spinner}
 						>
-							<PasswordInput
-								withAsterisk
-								label={t("Password")}
-								placeholder="ex. abc1234"
-								size="md"
-								classNames={{ input: classes.styledInput }}
-								disabled={spinner}
-								{...form.getInputProps("password")}
-								id="Password"
-								onKeyDown={getHotkeyHandler([
-									[ "Enter", () => document.getElementById("LoginSubmit")?.click() ],
-								])}
-							/>
-						</Tooltip>
-					</Box>
-					<Button
-						fullWidth
-						mt="lg"
-						bg="var(--theme-primary-color-6)"
-						size="md"
-						type="submit"
-						id="LoginSubmit"
-						className={`${LoginPage.control} ${classes.loginButton}`}
-						rightSection={<IconLogin />}
-						disabled={spinner}
-					>
-						{spinner ? <Loader color="white" type="dots" size={30} /> : "Login"}
-					</Button>
-					<Flex justify="flex-end" align="center" gap="4xs" mt="xs" className={classes.resetLinks}>
-						<Text
-							className="cursor-pointer"
-							fz="sm"
-							fw={400}
-							c="var(--theme-tertiary-color-6)"
-							onClick={openResetModal}
-						>
-							Reset local data?
-						</Text>
-						<Text className="cursor-pointer" fz="sm" fw={400} c="red.6" onClick={openResetModal}>
-							Reset now
-						</Text>
-					</Flex>
-				</Paper>
+							{spinner ? <Loader color="white" type="dots" size={30} /> : "Login"}
+						</Button>
+						<Flex justify="flex-end" align="center" gap="4xs" mt="xs" className={classes.resetLinks}>
+							<Text
+								className="cursor-pointer"
+								fz="sm"
+								fw={400}
+								c="var(--theme-tertiary-color-6)"
+								onClick={openResetModal}
+							>
+								Reset local data?
+							</Text>
+							<Text className="cursor-pointer" fz="sm" fw={400} c="red.6" onClick={openResetModal}>
+								Reset now
+							</Text>
+						</Flex>
+					</Paper>
 				</Stack>
 			</Box>
-			<Box className={classes.wrapperImage} />
+			<Box className={classes.wrapperImage}>
+				<img style={{ width: '100%', height: '100vh', objectFit: 'cover', objectPosition: "top" }} src={`./${COVER_IMAGE}`} alt={APP_NAME} />
+			</Box>
 		</Box>
 	);
 }

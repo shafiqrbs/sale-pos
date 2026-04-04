@@ -21,6 +21,7 @@ import { useEffect, useState } from "react";
 import { MASTER_APIS } from "@/routes/routes";
 import { useTranslation } from "react-i18next";
 import DatabaseInsertProgress from "@components/DatabaseInsertProgress";
+import { BRAND_IMAGE } from "@/constants";
 
 // =============== tables synced from the server on activation ================
 const dataMap = {
@@ -168,7 +169,7 @@ export default function Activate() {
 
 				<Paper radius="md" p="xl" withBorder shadow="lg">
 					<Box ta="center" mb="md">
-						<img src="./sandra.jpg" height="90px" alt="Sandra" />
+						<img src={`./${BRAND_IMAGE}`} height="90px" alt="Sandra" />
 					</Box>
 
 					<Stack gap="lg">
