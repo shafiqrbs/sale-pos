@@ -50,7 +50,10 @@ export default function InvoiceForm({ refetch, onAddItem, onVendorChange }) {
 
 	// =============== fetch products in db entry order (id ASC), same as sales product select ===============
 	useEffect(() => {
-		getLocalProducts({ vendor_id: itemsForm.values.vendor_id, category_id: selectedCategoryId }, "id", {
+
+		const filterCondition = { vendor_id: itemsForm.values.vendor_id, category_id: selectedCategoryId ? selectedCategoryId : undefined }
+
+		getLocalProducts(filterCondition, "id", {
 			orderBy: "product_name ASC",
 		}).then((fetchedProducts) => {
 			setProducts(fetchedProducts);
@@ -126,13 +129,13 @@ export default function InvoiceForm({ refetch, onAddItem, onVendorChange }) {
 		itemsForm.reset();
 		setProductResetKey((prev) => prev + 1);
 		requestAnimationFrame(() => {
-			document.getElementById("productId")?.open?.();
+			document.getElementById("productId")?.open();
 		});
 	};
 
 	const focusProductSelect = () => {
 		requestAnimationFrame(() => {
-			document.getElementById("productId")?.open?.();
+			document.getElementById("productId")?.open();
 		});
 	};
 
@@ -153,13 +156,13 @@ export default function InvoiceForm({ refetch, onAddItem, onVendorChange }) {
 				bg="white"
 				className="borderRadiusAll"
 			>
-				<Box p="sm" fz="sm" fw={600} bg={'var(--theme-primary-color-8)'} c={'white'} className="boxBackground textColor borderRadiusAll">
+				<Box p="sm" fz="sm" fw={600} bg="var(--theme-primary-color-8)" c="white" className="boxBackground textColor borderRadiusAll">
 					Vendor Requisition
 				</Box>
 				<Divider />
 				<ScrollArea h={containerHeight} bg={'#f0f4f83d'} type="never">
 					<Box p="sm">
-						<Flex mt="md" gap="4" align="flex-end" bg={'var(--theme-primary-color-2)'} p={'xs'} ml={'-xs'} mr={'-xs'} >
+						<Flex mt="md" gap="4" align="flex-end" bg="var(--theme-primary-color-2)" p="xs" ml="-xs" mr="-xs" >
 							<Box w="100%">
 								<SelectForm
 									name="vendor_id"
@@ -174,7 +177,7 @@ export default function InvoiceForm({ refetch, onAddItem, onVendorChange }) {
 								/>
 							</Box>
 						</Flex>
-						<Flex mt="md" gap="4" align="flex-end" bg={'var(--theme-primary-color-1)'} p={'xs'} ml={'-xs'} mr={'-xs'} >
+						<Flex mt="md" gap="4" align="flex-end" bg="var(--theme-primary-color-1)" p="xs" ml="-xs" mr="-xs" >
 							<Box w="100%">
 								<Select
 									placeholder="All categories"
@@ -201,7 +204,7 @@ export default function InvoiceForm({ refetch, onAddItem, onVendorChange }) {
 								/>
 							</Box>
 						</Flex>
-						<Flex mt="md" gap="4" align="flex-end" bg={'var(--theme-primary-color-4)'} p={'xs'} ml={'-xs'} mr={'-xs'} >
+						<Flex mt="md" gap="4" align="flex-end" bg="var(--theme-primary-color-4)" p="xs" ml="-xs" mr="-xs" >
 							<Box w="100%">
 								<FormValidationWrapper
 									errorMessage="Product is required"
@@ -214,6 +217,7 @@ export default function InvoiceForm({ refetch, onAddItem, onVendorChange }) {
 											options={productOptions}
 											placeholder="Choose Product"
 											searchable
+											disabled={!itemsForm.values.vendor_id}
 											nothingFoundMessage="Change the search term to find a product"
 											onChange={handleProductSelect}
 											id="productId"
@@ -225,7 +229,7 @@ export default function InvoiceForm({ refetch, onAddItem, onVendorChange }) {
 						</Flex>
 					</Box>
 				</ScrollArea>
-				<Flex p="sm" gap="xs" justify="space-between" align="center" bg={"#fffbeb85"}>
+				<Flex p="sm" gap="xs" justify="space-between" align="center" bg="#fffbeb85">
 					<InputNumberForm
 						form={itemsForm}
 						name="quantity"
