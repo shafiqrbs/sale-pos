@@ -46,7 +46,13 @@ Use `showNotification` from `@components/ShowNotificationComponent.jsx`.
 
 ### Translations
 
-Always wrap user-facing text with `t()` from `useTranslation()`.
+Always wrap user-facing text with `t()` from `useTranslation()`. **Never use raw string literals in JSX rendered output.**
+
+- Translation files: `src/lang/en/translation.json` (English) and `src/lang/bn/translation.json` (Bangla)
+- When adding any new UI text, add the key to **both** JSON files simultaneously
+- Key naming: PascalCase, descriptive (e.g. `GrandTotal`, `StillDue`, `TransactionModeRequired`)
+- Exceptions to translation: keyboard shortcut hints (`alt+s`), date format tokens (`DD-MM-YYYY`), CSS/prop values
+- For Select `data` arrays with translatable labels, always use `{ value: 'stableKey', label: t("Key") }` objects to keep stored values language-independent
 
 ### Action Menus in Tables
 

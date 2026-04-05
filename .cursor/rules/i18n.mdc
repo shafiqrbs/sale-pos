@@ -1,0 +1,68 @@
+---
+description: Enforce i18n translation for all user-facing text in JSX
+globs: ["src/**/*.jsx", "src/**/*.tsx", "src/**/*.js", "src/**/*.ts"]
+alwaysApply: true
+---
+
+# i18n Translation Rule
+
+Every string literal visible to the user in JSX **must** be wrapped with `t()` from `useTranslation()`.
+
+## Required Steps When Adding Any New UI Text
+
+1. Wrap the text in JSX: `{t("MyNewKey")}`
+2. Add the English entry to `src/lang/en/translation.json`: `"MyNewKey": "My new text"`
+3. Add the Bangla entry to `src/lang/bn/translation.json`: `"MyNewKey": "আমার নতুন টেক্সট"`
+
+Both JSON files must be updated together — never add to one without the other.
+
+## Key Naming Convention
+
+- PascalCase, no spaces
+- Descriptive, not abbreviated
+- Examples: `GrandTotal`, `StillDue`, `TransactionModeRequired`, `ClickHereForChangeMode`
+
+## What Must Be Translated
+
+- Button labels
+- Placeholder text (`placeholder={t("Key")}`)
+- Tooltip labels (`label={t("Key")}`)
+- Error / validation messages (`errorMessage={t("Key")}`)
+- Section headings and labels
+- Dropdown `nothingFoundMessage`, `placeholder`
+- `showNotification(...)` message arguments
+- Select dropdown option labels
+
+## What Must NOT Be Translated
+
+- Keyboard shortcut hints: `alt+s`, `alt+h`, `alt+p`, `alt+r` (always displayed as-is)
+- Date format tokens: `DD-MM-YYYY`, `MMMM D, YYYY`
+- CSS class names, color values, size values, IDs
+- Technical prop values not shown to users
+
+## Select Dropdowns with Translatable Labels
+
+Keep stored `value` stable (English) while translating the display `label`:
+
+```jsx
+// correct — value stays consistent across languages
+data={[
+  { value: 'Refund', label: t("Refund") },
+  { value: 'Exchange', label: t("Exchange") },
+  { value: 'Store Credit', label: t("StoreCredit") },
+]}
+
+// wrong — stored value changes with language
+data={[t("Refund"), t("Exchange"), t("StoreCredit")]}
+```
+
+## Adding useTranslation to a File
+
+If a component file does not yet import `useTranslation`, add:
+
+```js
+import { useTranslation } from "react-i18next";
+
+// inside the component function:
+const { t } = useTranslation();
+```

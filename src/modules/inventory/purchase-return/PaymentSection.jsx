@@ -18,6 +18,7 @@ import useTransactionMode from "@hooks/useTransactionMode";
 import { formatCurrency } from "@utils/index";
 import FormValidationWrapper from "@components/form-builders/FormValidationWrapper";
 import { useHotkeys } from "@mantine/hooks";
+import { useTranslation } from "react-i18next";
 import DateInputForm from "@components/form-builders/DateInputForm";
 import SelectForm from "@components/form-builders/SelectForm";
 import {useGetVendorsQuery} from "@services/core/vendors";
@@ -28,6 +29,7 @@ export default function PaymentSection({
 	isAddingItem,
 	isEditMode = false,
 }) {
+	const { t } = useTranslation();
 	const { transactionMode } = useTransactionMode();
 	const { data: vendors } = useGetVendorsQuery();
 	const { discountAmount, isDiscountPercentage, purchaseNarration, paymentAmount } =
@@ -123,7 +125,10 @@ export default function PaymentSection({
 		</Group>
 	);
 
-	useHotkeys([ [ "alt+s", () => document.getElementById("ItemsFormSubmit")?.click() ] ]);
+	useHotkeys([
+		[ "alt+s", () => document.getElementById("ItemsFormSubmit")?.click() ],
+		[ "alt+p", () => document.getElementById("PurchasePrintFormSubmit")?.click() ],
+	]);
 
 	return (
 		<>
@@ -145,7 +150,7 @@ export default function PaymentSection({
 										onChange={(event) =>
 											itemsForm.setFieldValue("purchaseNarration", event.currentTarget.value)
 										}
-										placeholder="Narration"
+										placeholder={t("Narration")}
 										minRows={2}
 									/>
 								</Grid.Col>
@@ -159,10 +164,14 @@ export default function PaymentSection({
 									<Select
 										name="return_mode"
 										form={itemsForm}
-										data={['Refund', 'Exchange', 'Store Credit']}
-										nextField="invoice_date"
-										placeholder="Search Return Mode"
-										tooltip="Return mode is required"
+								data={[
+									{ value: 'Refund', label: t("Refund") },
+									{ value: 'Exchange', label: t("Exchange") },
+									{ value: 'Store Credit', label: t("StoreCredit") },
+								]}
+								nextField="invoice_date"
+								placeholder={t("SearchReturnMode")}
+								tooltip={t("ReturnModeRequired")}
 									/>
 								</Grid.Col>
 								<Grid.Col span={12}>
@@ -190,28 +199,28 @@ export default function PaymentSection({
 									gap="1"
 									h={'100'}
 								>
+							<Button
+								fullWidth
+								bg="var(--theme-print-btn-color)"
+								color="white"
+								radius={0}
+								type="button"
+								id="PurchasePrintFormSubmit"
+							>
+								<Stack gap={0}>{t("Print")} <Text size="xs" component="span">alt+p</Text></Stack>
+							</Button>
 								<Button
 									fullWidth
-									bg="var(--theme-print-btn-color)"
+									bg="var(--theme-pos-btn-color)"
 									color="white"
 									radius={0}
-									type="button"
-									id="PurchasePrintFormSubmit"
+									form="itemsForm"
+									type="submit"
+									loading={isAddingItem}
+									id="ItemsFormSubmit"
 								>
-									Print
+									<Stack gap={0}>{isEditMode ? t("Update") : t("Save")} <Text size="xs" component="span">alt+s</Text></Stack>
 								</Button>
-									<Button
-										fullWidth
-										bg="var(--theme-pos-btn-color)"
-										color="white"
-										radius={0}
-										form="itemsForm"
-										type="submit"
-										loading={isAddingItem}
-										id="ItemsFormSubmit"
-									>
-										{isEditMode ? "Update" : "Save"}
-									</Button>
 								</Stack>
 							</Grid.Col>
 

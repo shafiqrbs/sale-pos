@@ -191,7 +191,11 @@ export default function PaymentSection({
 		itemsForm.setFieldValue("paymentAmount", grandTotal);
 	};
 
-	useHotkeys([ [ "alt+s", () => document.getElementById("ItemsFormSubmit")?.click() ] ]);
+	useHotkeys([
+		[ "alt+s", () => document.getElementById("ItemsFormSubmit")?.click() ],
+		[ "alt+h", () => document.getElementById("ItemsHoldFormSubmit")?.click() ],
+		[ "alt+p", () => document.getElementById("ItemsPrintFormSubmit")?.click() ],
+	]);
 
 	return (
 		<>
@@ -229,14 +233,14 @@ export default function PaymentSection({
 										valueFormat="MMMM D, YYYY"
 										size="xs"
 										label={null}
-										placeholder="Select date"
+										placeholder={t("SelectDate")}
 									/>
 									<Textarea
 										value={salesNarration}
 										onChange={(event) =>
 											itemsForm.setFieldValue("salesNarration", event.currentTarget.value)
 										}
-										placeholder="Narration"
+										placeholder={t("Narration")}
 										size="md"
 										minRows={6}
 									/>
@@ -248,7 +252,7 @@ export default function PaymentSection({
 										<Stack gap={0}>
 											<Group justify="space-between" gap={0}>
 												<Text fz="sm" fw={500} c="black">
-													DIS.
+													{t("DisAbbr")}
 												</Text>
 												<Text fz="sm" fw={800} c="black">
 													{currencySymbol} {formatCurrency(discountValue)}
@@ -256,14 +260,14 @@ export default function PaymentSection({
 											</Group>
 											<Group justify="space-between">
 												<Text fz="sm" fw={500} c="black">
-													Type
+													{t("Type")}
 												</Text>
 												<Text fz="sm" fw={800} c="black">
 													{discount_type === "percentage"
-														? "Percent"
+														? t("Percent")
 														: discount_type === "coupon"
-															? "Coupon"
-															: "Flat"}
+															? t("Coupon")
+															: t("Flat")}
 												</Text>
 											</Group>
 										</Stack>
@@ -271,7 +275,7 @@ export default function PaymentSection({
 									<Grid.Col span={6}>
 										<Group justify="space-between">
 											<Text fz="sm" fw={500} c="black">
-												VAT {configData?.inventory_config?.config_vat?.vat_percent} %
+												{t("VAT")} {configData?.inventory_config?.config_vat?.vat_percent} %
 											</Text>
 											<Text fz="sm" fw={800} c="black">
 												{configData?.inventory_config?.config_vat &&
@@ -282,7 +286,7 @@ export default function PaymentSection({
 										</Group>
 										<Group justify="space-between">
 											<Text fz="sm" fw={500} c="black">
-												SD
+												{t("SD")}
 											</Text>
 											<Text fz="sm" fw={800} c="black">
 												{currencySymbol} 0
@@ -295,7 +299,7 @@ export default function PaymentSection({
 												{currencySymbol} {formatCurrency(itemsTotal)}
 											</Text>
 											<Text fw={500} c="gray" size="xs">
-												Sub-Total
+												{t("SubTotal")}
 											</Text>
 										</Stack>
 									</Grid.Col>
@@ -311,7 +315,7 @@ export default function PaymentSection({
 													opened={!!itemsForm.errors.coupon_code}
 												>
 													<Tooltip
-														label="Click here for change mode"
+														label={t("ClickHereForChangeMode")}
 														c="white"
 														bg={"yellow"}
 														withArrow
@@ -447,7 +451,7 @@ export default function PaymentSection({
 													{currencySymbol} {formatCurrency(grandTotal)}
 												</Text>
 												<Text fw={500} c="white" size="md">
-													Grand Total
+													{t("GrandTotal")}
 												</Text>
 											</Stack>
 										</Grid.Col>
@@ -465,7 +469,7 @@ export default function PaymentSection({
 													{currencySymbol} {formatCurrency(dueAmount)}
 												</Text>
 												<Text fw={500} c="#1e40af" size="xs">
-													Still Due
+													{t("StillDue")}
 												</Text>
 											</Stack>
 										</Grid.Col>
@@ -603,7 +607,7 @@ export default function PaymentSection({
 										<Grid.Col span={8}>
 											<Stack gap={0} align="center" justify="center" py={"3"} bdrs={4}>
 												<Tooltip
-													label="Digital Payment"
+													label={t("DigitalPayment")}
 													c="white"
 													bg="red"
 													withArrow
@@ -620,14 +624,14 @@ export default function PaymentSection({
 													</ActionIcon>
 												</Tooltip>
 												<Text fz={"xs"} fw={"600"} c="red">
-													Digital Payment
-												</Text>
+											{t("DigitalPayment")}
+										</Text>
 											</Stack>
 										</Grid.Col>
 										<Grid.Col span={8} ta={"center"}>
 											<Text c="#1e40af" fz={"md"} fw={"600"}>
-												Cash
-											</Text>
+										{t("Cash")}
+									</Text>
 										</Grid.Col>
 										<Grid.Col span={8} bg="#405bb112">
 											<FormValidationWrapper
@@ -646,7 +650,7 @@ export default function PaymentSection({
 													leftSection={<IconPlusMinus size={16} opacity={0.5} />}
 													rightSection={
 														<Tooltip
-															label="Profit"
+															label={t("Profit")}
 															c="white"
 															bg="red"
 															withArrow
@@ -738,7 +742,7 @@ export default function PaymentSection({
 											leftSection={<IconCheck size={16} />}
 											disabled={isAddingItem}
 										>
-											{isEditMode ? "Update" : "Save"}
+											<Stack gap={0}><Text size="xs">{isEditMode ? t("Update") : t("Save")}</Text><Text size="xs" component="span" c="green.1">alt+s</Text></Stack>
 										</Button>
 										<Button
 											fullWidth
@@ -752,7 +756,7 @@ export default function PaymentSection({
 											leftSection={<IconPlayerPause size={16} />}
 											disabled={isAddingItem}
 										>
-											{t("Hold")}
+											<Stack gap={0}><Text size="xs">{t("Hold")}</Text><Text size="xs" component="span" c="red.3">alt+h</Text></Stack>
 										</Button>
 									</Button.Group>
 
@@ -765,11 +769,11 @@ export default function PaymentSection({
 										size="lg"
 										form="itemsForm"
 										type="submit"
-										id="ItemsFormSubmit"
+										id="ItemsPrintFormSubmit"
 										disabled={isAddingItem}
 										leftSection={<IconPrinter size={16} />}
 									>
-										Print
+										<Stack gap={0}>{t("Print")} <Text size="xs" component="span">alt+p</Text></Stack>
 									</Button>
 
 									<Button
@@ -782,8 +786,8 @@ export default function PaymentSection({
 										onClick={onPosPrint}
 										disabled={isAddingItem}
 									>
-										POS
-									</Button>
+									{t("POS")}
+								</Button>
 								</Stack>
 							</Grid.Col>
 						</Grid>

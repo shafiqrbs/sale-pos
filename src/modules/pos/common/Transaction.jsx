@@ -5,10 +5,12 @@ import {
 	Button,
 	Grid,
 	Group,
+	Kbd,
 	NumberInput,
 	Stack,
 	Text,
 	TextInput,
+	Tooltip,
 } from "@mantine/core";
 import {
 	IconChefHat,
@@ -35,7 +37,7 @@ import useConfigData from "@hooks/useConfigData";
 import useLocalProducts from "@hooks/useLocalProducts";
 import { formatDateTime, generateInvoiceId } from "@utils/index";
 import CustomerDrawer from "@components/drawers/CustomerDrawer";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useHotkeys } from "@mantine/hooks";
 import FormValidationWrapper from "@components/form-builders/FormValidationWrapper";
 import { modals } from "@mantine/modals";
 import useLoggedInUser from "@hooks/useLoggedInUser";
@@ -46,27 +48,27 @@ export default function Transaction({ form, tableId = null }) {
 	const { t } = useTranslation();
 	const { isOnline } = useOutletContext();
 	const { configData } = useConfigData({ offlineFetch: !isOnline });
-	const [coreUsers, setCoreUsers] = useState([]);
+	const [ coreUsers, setCoreUsers ] = useState([]);
 	const { invoiceData, getCartTotal, refetchInvoice } = useCartOperation();
 	const { getProduct } = useLocalProducts({ fetchOnMount: false });
-	const [isLoading, setIsLoading] = useState({ saveAll: false, save: false, print: false });
-	const [customersDropdownData, setCustomersDropdownData] = useState([]);
-	const [customerDrawerOpened, { open: customerDrawerOpen, close: customerDrawerClose }] =
+	const [ isLoading, setIsLoading ] = useState({ saveAll: false, save: false, print: false });
+	const [ customersDropdownData, setCustomersDropdownData ] = useState([]);
+	const [ customerDrawerOpened, { open: customerDrawerOpen, close: customerDrawerClose } ] =
 		useDisclosure(false);
-	const [customerObject, setCustomerObject] = useState(null);
+	const [ customerObject, setCustomerObject ] = useState(null);
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 	const editingSale = useSelector((state) => state.checkout.editingSale);
 	const isEditing = !!editingSale;
-	const [discountMode, setDiscountMode] = useState("flat");
-	const [percentageValue, setPercentageValue] = useState(0);
+	const [ discountMode, setDiscountMode ] = useState("flat");
+	const [ percentageValue, setPercentageValue ] = useState(0);
 
-	const [transactionModeData, setTransactionModeData] = useState([]);
+	const [ transactionModeData, setTransactionModeData ] = useState([]);
 
 	// ============= wreckage start =============
 	const enableTable = false;
 	const salesByUser = "";
-	const handleClick = () => {};
+	const handleClick = () => { };
 	// ============= wreckage stop ==============
 
 	// =============== check if split payment is active ================
@@ -112,7 +114,7 @@ export default function Transaction({ form, tableId = null }) {
 			form.setFieldValue("receive_amount", cartTotal);
 
 			if (form.values.payments.length === 1) {
-				const currentPayment = form.values.payments[0];
+				const currentPayment = form.values.payments[ 0 ];
 				form.setFieldValue("payments", [
 					{
 						...currentPayment,
@@ -121,7 +123,7 @@ export default function Transaction({ form, tableId = null }) {
 				]);
 			}
 		}
-	}, [getCartTotal(), form.values.discount, isSplitPaymentActive]);
+	}, [ getCartTotal(), form.values.discount, isSplitPaymentActive ]);
 
 	useEffect(() => {
 		fetchCustomers();
@@ -132,7 +134,7 @@ export default function Transaction({ form, tableId = null }) {
 		if (!customerDrawerOpened) {
 			fetchCustomers();
 		}
-	}, [customerDrawerOpened]);
+	}, [ customerDrawerOpened ]);
 
 	// =============== restore customer when editing a sale ================
 	useEffect(() => {
@@ -144,7 +146,7 @@ export default function Transaction({ form, tableId = null }) {
 				address: editingSale.customer_address,
 			});
 		}
-	}, [editingSale]);
+	}, [ editingSale ]);
 
 	// =============== handle customer selection from drawer ================
 	const handleCustomerSelect = (customer) => {
@@ -205,10 +207,10 @@ export default function Transaction({ form, tableId = null }) {
 
 							if (batchIndex !== -1) {
 								// =============== update sales_quantity and remain_quantity ================
-								purchaseItems[batchIndex].sales_quantity =
-									(purchaseItems[batchIndex].sales_quantity || 0) + soldBatch.quantity;
-								purchaseItems[batchIndex].remain_quantity =
-									(purchaseItems[batchIndex].remain_quantity || 0) - soldBatch.quantity;
+								purchaseItems[ batchIndex ].sales_quantity =
+									(purchaseItems[ batchIndex ].sales_quantity || 0) + soldBatch.quantity;
+								purchaseItems[ batchIndex ].remain_quantity =
+									(purchaseItems[ batchIndex ].remain_quantity || 0) - soldBatch.quantity;
 							}
 						});
 
@@ -253,7 +255,7 @@ export default function Transaction({ form, tableId = null }) {
 		// =============== check if any quantity is 0 ================
 		const hasZeroQuantity = invoiceData.some((item) => !item.quantity || item.quantity <= 0);
 		if (hasZeroQuantity) {
-			showNotification("Quantity can't be 0, check your cart", "red", "", "", true, 2000, true);
+			showNotification(t("QuantityCantBeZeroCheckCart"), "red", "", "", true, 2000, true);
 			return;
 		}
 
@@ -286,7 +288,7 @@ export default function Transaction({ form, tableId = null }) {
 			setCustomerObject(null);
 			form.reset();
 
-			const firstMode = transactionModeData[0];
+			const firstMode = transactionModeData[ 0 ];
 			if (firstMode) {
 				form.setFieldValue("payments", [
 					{
@@ -352,7 +354,7 @@ export default function Transaction({ form, tableId = null }) {
 
 		const modeName =
 			form.values.payments.length === 1
-				? form.values.payments[0].transaction_mode_name
+				? form.values.payments[ 0 ].transaction_mode_name
 				: "Multiple";
 
 		const salesData = {
@@ -365,8 +367,8 @@ export default function Transaction({ form, tableId = null }) {
 			discount_calculation: 0,
 			discount_type: discountMode,
 			customerId: form.values.customer_id,
-			customerName: customerInfo?.name || customerInfo?.label?.split(" -- ")[1],
-			customerMobile: customerInfo?.mobile || customerInfo?.label?.split(" -- ")[0],
+			customerName: customerInfo?.name || customerInfo?.label?.split(" -- ")[ 1 ],
+			customerMobile: customerInfo?.mobile || customerInfo?.label?.split(" -- ")[ 0 ],
 			customer_address: customerInfo?.address || "",
 			createdByUser: "Sandra",
 			createdById: form.values.sales_by_id,
@@ -491,7 +493,7 @@ export default function Transaction({ form, tableId = null }) {
 				form.reset();
 
 				// Restore default payment mode
-				const firstMode = transactionModeData[0];
+				const firstMode = transactionModeData[ 0 ];
 				if (firstMode) {
 					form.setFieldValue("payments", [
 						{
@@ -551,6 +553,13 @@ export default function Transaction({ form, tableId = null }) {
 		const discountType = form.values.discount_type === "flat" ? "percentage" : "flat";
 		form.setFieldValue("discount_type", discountType);
 	};
+
+	useHotkeys([
+		[ "alt+s", () => handleSave({ withPos: false }) ],
+		[ "alt+h", () => handlePrintAll() ],
+		[ "alt+p", () => handleSave({ withPos: true }) ],
+		[ "alt+r", () => handleReset() ],
+	]);
 
 	return (
 		<Stack bg="gray.0" align="stretch" justify="center" mt={6} gap={4} pl={4} pr={2} mb={0}>
@@ -764,16 +773,18 @@ export default function Transaction({ form, tableId = null }) {
 			</Box>
 			<Grid columns={17} gutter={{ base: 2 }}>
 				<Grid.Col span={2}>
-					<ActionIcon
-						size="xl"
-						h="100%"
-						w="100%"
-						variant="filled"
-						color="red.7"
-						onClick={handleReset}
-					>
-						<IconRotate size={20} />
-					</ActionIcon>
+					<Tooltip label="Reset (alt+r)" withArrow position="top">
+						<ActionIcon
+							size="xl"
+							h="100%"
+							w="100%"
+							variant="filled"
+							color="red.7"
+							onClick={handleReset}
+						>
+							<IconRotate size={20} />
+						</ActionIcon>
+					</Tooltip>
 				</Grid.Col>
 				<Grid.Col span={5}>
 					<FormValidationWrapper errorMessage={t("PrintAll")} opened={!!form.errors.print_all}>
@@ -785,7 +796,7 @@ export default function Transaction({ form, tableId = null }) {
 							leftSection={<IconHandStop size={18} />}
 							onClick={handlePrintAll}
 						>
-							<Text fz="md">{t("Hold")}</Text>
+							<Stack gap={0}><Text fz="md">{t("Hold")}</Text><Text size="xs" component="span">alt+h</Text></Stack>
 						</Button>
 					</FormValidationWrapper>
 				</Grid.Col>
@@ -799,7 +810,7 @@ export default function Transaction({ form, tableId = null }) {
 						leftSection={<IconPrinter />}
 						onClick={() => handleSave({ withPos: true })}
 					>
-						{t("Pos")}
+						<Stack gap={0}>{t("Pos")} <Text size="xs" component="span">alt+p</Text></Stack>
 					</Button>
 				</Grid.Col>
 				<Grid.Col span={5}>
@@ -811,7 +822,7 @@ export default function Transaction({ form, tableId = null }) {
 						leftSection={isEditing ? <IconRefresh /> : <IconDeviceFloppy />}
 						onClick={() => handleSave({ withPos: false })}
 					>
-						{isEditing ? t("Update") : t("Save")}
+						<Stack gap={0}>{isEditing ? t("Update") : t("Save")} <Text size="xs" component="span">alt+s</Text></Stack>
 					</Button>
 				</Grid.Col>
 			</Grid>

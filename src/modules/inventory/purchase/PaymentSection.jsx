@@ -14,6 +14,7 @@ import {
 	Textarea,
 } from "@mantine/core";
 import { IconCheck, IconCurrencyTaka, IconNumber123, IconPercentage } from "@tabler/icons-react";
+import { useTranslation } from "react-i18next";
 import useConfigData from "@hooks/useConfigData";
 import VendorInfoSection from "./VendorInfoSection";
 import useTransactionMode from "@hooks/useTransactionMode";
@@ -28,6 +29,7 @@ export default function PaymentSection({
 	isAddingItem,
 	isEditMode = false,
 }) {
+	const { t } = useTranslation();
 	const { transactionMode } = useTransactionMode();
 	const { currencySymbol } = useConfigData();
 
@@ -124,7 +126,12 @@ export default function PaymentSection({
 		</Group>
 	);
 
-	useHotkeys([ [ "alt+s", () => document.getElementById("ItemsFormSubmit")?.click() ] ]);
+	useHotkeys([
+		[ "alt+s", () => document.getElementById("ItemsFormSubmit")?.click() ],
+		[ "alt+h", () => document.getElementById("ItemsHoldFormSubmit")?.click() ],
+		[ "alt+p", () => document.getElementById("ItemsPrintFormSubmit")?.click() ],
+		[ "alt+r", () => document.getElementById("ItemsResetFormSubmit")?.click() ],
+	]);
 
 	return (
 		<>
@@ -140,13 +147,13 @@ export default function PaymentSection({
 							<Grid gutter={6}>
 								<Grid.Col span={4}>
 									<Text fz="sm" fw={600} mt={6}>
-										Payment Mode
+										{t("PaymentMode")}
 									</Text>
 								</Grid.Col>
 								<Grid.Col span={8}>
 									<Box bg="white" h="100%">
 										<FormValidationWrapper
-											errorMessage="Transaction mode is required"
+											errorMessage={t("TransactionModeRequired")}
 											opened={!!itemsForm.errors.transactionModeId}
 										>
 											<Select
@@ -158,8 +165,8 @@ export default function PaymentSection({
 													itemsForm.setFieldValue("transactionMode", option.label);
 													itemsForm.setFieldValue("transactionModeId", String(value));
 												}}
-												nothingFoundMessage="No transaction mode found"
-												placeholder="Select transaction mode"
+											nothingFoundMessage={t("NoTransactionModeFound")}
+											placeholder={t("SelectTransactionMode")}
 												size="sm"
 											/>
 										</FormValidationWrapper>
@@ -171,7 +178,7 @@ export default function PaymentSection({
 										onChange={(event) =>
 											itemsForm.setFieldValue("purchaseNarration", event.currentTarget.value)
 										}
-										placeholder="Narration"
+										placeholder={t("Narration")}
 										size="xs"
 										minRows={2}
 									/>
@@ -192,7 +199,7 @@ export default function PaymentSection({
 								>
 									<Flex py={8} justify="space-between" align="center">
 										<Text fz="sm" fw={600}>
-											Discount
+											{t("Discount")}
 										</Text>
 										<Flex align="center" gap={4}>
 											<Flex justify="center" align="center" gap={4}>
@@ -202,7 +209,7 @@ export default function PaymentSection({
 												</Text>
 											</Flex>
 											<Text fz={10} c="dimmed">
-												{isDiscountPercentage ? "Percent" : "Flat"}
+												{isDiscountPercentage ? t("Percent") : t("Flat")}
 											</Text>
 										</Flex>
 									</Flex>
@@ -273,8 +280,8 @@ export default function PaymentSection({
 								>
 									<Flex py={8} justify="space-between" align="center">
 										<Text fz="sm" c={"white"} fw={600}>
-											Due
-										</Text>
+										{t("Due")}
+									</Text>
 										<Flex align="center" gap={4}>
 											<Text fz="sm" c={"white"} fw={500}>
 												{currencySymbol}
@@ -285,13 +292,13 @@ export default function PaymentSection({
 										</Flex>
 									</Flex>
 									<FormValidationWrapper
-										errorMessage="Payment amount is required"
+										errorMessage={t("PaymentAmountRequired")}
 										opened={!!itemsForm.errors.paymentAmount}
 									>
 										<NumberInput
 											hideControls
 											size="sm"
-											placeholder="Amount"
+											placeholder={t("Amount")}
 											thousandSeparator=","
 											leftSection={<IconCurrencyTaka size={14} />}
 											styles={{
@@ -316,7 +323,7 @@ export default function PaymentSection({
 						type="button"
 						id="ItemsResetFormSubmit"
 					>
-						Reset
+						<Stack gap={0}>{t("Reset")} <Text size="xs" component="span">alt+r</Text></Stack>
 					</Button>
 					<Button
 						fullWidth
@@ -326,7 +333,7 @@ export default function PaymentSection({
 						type="button"
 						id="ItemsHoldFormSubmit"
 					>
-						Hold
+						<Stack gap={0}>{t("Hold")} <Text size="xs" component="span">alt+h</Text></Stack>
 					</Button>
 					<Button
 						fullWidth
@@ -336,7 +343,7 @@ export default function PaymentSection({
 						type="button"
 						id="ItemsPrintFormSubmit"
 					>
-						Print
+						<Stack gap={0}>{t("Print")} <Text size="xs" component="span">alt+p</Text></Stack>
 					</Button>
 					<Button
 						fullWidth
@@ -348,7 +355,7 @@ export default function PaymentSection({
 						loading={isAddingItem}
 						id="ItemsFormSubmit"
 					>
-						{isEditMode ? "Update" : "Save"}
+						<Stack gap={0}>{isEditMode ? t("Update") : t("Save")} <Text size="xs" component="span">alt+s</Text></Stack>
 					</Button>
 				</Button.Group>
 			</Box>

@@ -4,10 +4,12 @@ import {
 	Button,
 	Grid,
 	Stack,
+	Text,
 	Textarea,
 } from "@mantine/core";
 import useTransactionMode from "@hooks/useTransactionMode";
 import { useHotkeys } from "@mantine/hooks";
+import { useTranslation } from "react-i18next";
 import DateInputForm from "@components/form-builders/DateInputForm";
 import SelectForm from "@components/form-builders/SelectForm";
 import { useGetVendorsQuery } from "@services/core/vendors";
@@ -18,6 +20,7 @@ export default function PaymentSection({
 	isAddingItem,
 	isEditMode = false,
 }) {
+	const { t } = useTranslation();
 	const { transactionMode } = useTransactionMode();
 	const { data: vendors } = useGetVendorsQuery();
 	const { discountAmount, isDiscountPercentage, purchaseNarration } =
@@ -60,7 +63,10 @@ export default function PaymentSection({
 		itemsForm.setFieldValue("paymentAmount", grandTotal);
 	}, [ grandTotal ]);
 
-	useHotkeys([ [ "alt+s", () => document.getElementById("ItemsFormSubmit")?.click() ] ]);
+	useHotkeys([
+		[ "alt+s", () => document.getElementById("ItemsFormSubmit")?.click() ],
+		[ "alt+p", () => document.getElementById("PurchasePrintFormSubmit")?.click() ],
+	]);
 
 	return (
 		<>
@@ -83,7 +89,7 @@ export default function PaymentSection({
 										onChange={(event) =>
 											itemsForm.setFieldValue("purchaseNarration", event.currentTarget.value)
 										}
-										placeholder="Narration"
+										placeholder={t("Narration")}
 										minRows={2}
 									/>
 								</Grid.Col>
@@ -102,8 +108,8 @@ export default function PaymentSection({
 											label: vendor.name,
 										}))}
 										nextField="invoice_date"
-										placeholder="Search vendor/supplier"
-										tooltip="Vendor is required"
+								placeholder={t("SearchVendorSupplier")}
+									tooltip={t("VendorRequired")}
 									/>
 								</Grid.Col>
 								<Grid.Col span={6}>
@@ -143,27 +149,27 @@ export default function PaymentSection({
 									gap="1"
 									h={'100'}
 								>
-									<Button
-										fullWidth
-										bg="var(--theme-print-btn-color)"
-										color="white"
-										radius={0}
-										type="button"
-										id="PurchasePrintFormSubmit"
-									>
-										Print
-									</Button>
-									<Button
-										fullWidth
-										bg="var(--theme-pos-btn-color)"
-										color="white"
-										radius={0}
-										type="submit"
-										loading={isAddingItem}
-										id="ItemsFormSubmit"
-									>
-										{isEditMode ? "Update" : "Save"}
-									</Button>
+								<Button
+									fullWidth
+									bg="var(--theme-print-btn-color)"
+									color="white"
+									radius={0}
+									type="button"
+									id="PurchasePrintFormSubmit"
+								>
+									<Stack gap={0}>{t("Print")} <Text size="xs" component="span">alt+p</Text></Stack>
+								</Button>
+								<Button
+									fullWidth
+									bg="var(--theme-pos-btn-color)"
+									color="white"
+									radius={0}
+									type="submit"
+									loading={isAddingItem}
+									id="ItemsFormSubmit"
+								>
+									<Stack gap={0}>{isEditMode ? t("Update") : t("Save")} <Text size="xs" component="span">alt+s</Text></Stack>
+								</Button>
 								</Stack>
 							</Grid.Col>
 
