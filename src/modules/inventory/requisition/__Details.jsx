@@ -123,7 +123,7 @@ export default function Details({ loading, viewData }) {
                 >
                   {t("Print")}
                 </Button>
-                <SalesPrintThermal salesViewData={viewData} salesItems={salesItems} />
+                {/*<SalesPrintThermal salesViewData={viewData} salesItems={salesItems} />*/}
               </Button.Group>
             </Grid.Col>
           </Grid>

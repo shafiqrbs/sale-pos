@@ -9,7 +9,7 @@ import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import {useGetDamageItemQuery} from "@services/report";
 import {formatCurrency} from "@utils/index";
-import {IconPlus} from "@tabler/icons-react";
+import {IconGlobe, IconGlobeOff, IconPlus} from "@tabler/icons-react";
 import {APP_NAVLINKS} from "@/routes/routes";
 
 
@@ -38,11 +38,11 @@ export default function Table() {
 		page,
 		offset: PER_PAGE,
 	});
-	console.log(entities?.data)
+	// console.log(entities?.data)
 	return (
 		<Box>
-			<Flex pl="xs" pb={'xs'} gap="sm" justify="space-between" align="center">
-				<Text>{t("DamageStockReport")}</Text>
+			<Flex mb="xs" gap="sm" justify="space-between" align="center">
+				<KeywordSearch reportName={'Damage Items'} showStartEndDate form={form} w={'100%'} />
 			</Flex>
 			<Grid columns={24} gutter={{ base: 8 }}>
 				<Grid.Col span={24}>
@@ -63,6 +63,15 @@ export default function Table() {
 									width:80,
 									textAlign: "center",
 									render: (_, index) => index + 1,
+								},
+								{
+									accessor: "created",
+									title: t("Created"),
+									render: (item) => (
+										<Text component="a" size="sm" variant="subtle">
+											{item?.created}
+										</Text>
+									),
 								},
 								{
 									accessor: "item_name",

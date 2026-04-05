@@ -1,4 +1,4 @@
-import { ActionIcon, Flex, Select, TextInput,Button } from "@mantine/core";
+import {ActionIcon, Flex, Select, TextInput, Button, Text, Box} from "@mantine/core";
 import { IconFileTypeXls, IconRestore, IconSearch, IconX } from "@tabler/icons-react";
 import AdvancedFilter from "@components/AdvancedFilter";
 import React, { useState, useEffect } from "react";
@@ -14,6 +14,7 @@ export default function KeywordSearch({
 	onSearch,
 	onReset,
 	placeholder = "Keyword Search",
+	reportName,
 	tooltip = "Search by product name, unit, quantity, price, etc.",
 	showDatePicker = false,
 	showStartEndDate = false,
@@ -133,6 +134,9 @@ export default function KeywordSearch({
 
 	return (
 		<Flex gap="xs" className={className} w="100%">
+			{reportName &&(
+				<Box mt={'4'}>{reportName}</Box>
+			)}
 			{showDatePicker && (
 				<DateInput
 					clearable
