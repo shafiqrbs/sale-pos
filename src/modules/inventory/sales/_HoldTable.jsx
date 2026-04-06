@@ -43,15 +43,15 @@ const PER_PAGE = 25;
 export default function HoldTable() {
 	const dispatch = useDispatch();
 	const { t } = useTranslation();
-	const [opened, { open, close }] = useDisclosure(false);
+	const [ opened, { open, close } ] = useDisclosure(false);
 	useDisclosure(false);
 	const navigate = useNavigate();
-	const [page, setPage] = useState(1);
-	const [selectedRow, setSelectedRow] = useState(null);
-	const [loading, setLoading] = useState(false);
-	const [salesViewData, setSalesViewData] = useState(null);
-	const [deletedSaleIds, setDeletedSaleIds] = useState(new Set());
-	const [dataSource, setDataSource] = useState("offline");
+	const [ page, setPage ] = useState(1);
+	const [ selectedRow, setSelectedRow ] = useState(null);
+	const [ loading, setLoading ] = useState(false);
+	const [ salesViewData, setSalesViewData ] = useState(null);
+	const [ deletedSaleIds, setDeletedSaleIds ] = useState(new Set());
+	const [ dataSource, setDataSource ] = useState("offline");
 	const { mainAreaHeight, isOnline } = useOutletContext();
 	const { isOnlinePermissionIncludes } = useLoggedInUser();
 	// =============== when offline or user lacks permission, always use offline data ===============
@@ -89,7 +89,7 @@ export default function HoldTable() {
 
 	const handleConfirmDelete = async (record) => {
 		await window.dbAPI.deleteDataFromTable("sales", { id: record.id });
-		setDeletedSaleIds((previousIds) => new Set([...previousIds, record.id]));
+		setDeletedSaleIds((previousIds) => new Set([ ...previousIds, record.id ]));
 		showNotification(t("InvoiceDeletedSuccess", { invoice: record.invoice }), "teal");
 	};
 
@@ -141,7 +141,6 @@ export default function HoldTable() {
 	};
 
 	const handleShowDetails = (item) => {
-		console.info("item:", item);
 		setLoading(true);
 		setSelectedRow(item.invoice);
 		setSalesViewData(item);
@@ -157,36 +156,36 @@ export default function HoldTable() {
 			<Flex mb="xs" gap="sm" justify="space-between" align="center">
 				<KeywordSearch showStartEndDate form={form} />
 				<Group gap="sm" wrap="nowrap" >
-				{isOnline && isOnlinePermissionIncludes && (
-					<SegmentedControl
-						value={effectiveDataSource}
-						onChange={(value) => {
-							setDataSource(value);
-							setPage(1);
-						}}
-						color={effectiveDataSource === "online" ? "green" : "red"}
-						data={[
-							{
-								value: "online",
-								label: (
-									<Group gap={4} wrap="nowrap">
-										<IconGlobe size={13} color={effectiveDataSource === "online" ? "white" : "var(--mantine-color-green-6)"} />
-										{t("Online")}
-									</Group>
-								),
-							},
-							{
-								value: "offline",
-								label: (
-									<Group gap={4} wrap="nowrap">
-										<IconGlobeOff size={13} color={effectiveDataSource === "offline" ? "white" : "var(--mantine-color-red-6)"} />
-										{t("Offline")}
-									</Group>
-								),
-							},
-						]}
-					/>
-				)}
+					{isOnline && isOnlinePermissionIncludes && (
+						<SegmentedControl
+							value={effectiveDataSource}
+							onChange={(value) => {
+								setDataSource(value);
+								setPage(1);
+							}}
+							color={effectiveDataSource === "online" ? "green" : "red"}
+							data={[
+								{
+									value: "online",
+									label: (
+										<Group gap={4} wrap="nowrap">
+											<IconGlobe size={13} color={effectiveDataSource === "online" ? "white" : "var(--mantine-color-green-6)"} />
+											{t("Online")}
+										</Group>
+									),
+								},
+								{
+									value: "offline",
+									label: (
+										<Group gap={4} wrap="nowrap">
+											<IconGlobeOff size={13} color={effectiveDataSource === "offline" ? "white" : "var(--mantine-color-red-6)"} />
+											{t("Offline")}
+										</Group>
+									),
+								},
+							]}
+						/>
+					)}
 					<Button
 						w={170}
 						size="md"
@@ -305,7 +304,7 @@ export default function HoldTable() {
 							scrollAreaProps={{ type: "never" }}
 							rowStyle={(item) =>
 								item.invoice === selectedRow
-									? { background: "var(--theme-primary-color-0)"}
+									? { background: "var(--theme-primary-color-0)" }
 									: undefined
 							}
 						/>

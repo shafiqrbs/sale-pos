@@ -948,7 +948,6 @@
 	"SalesProcess": "সেলস প্রসেস",
 	"SalesReturn": "সেলস রিটার্ন",
 	"SalesReturnItems": "সেলস রিটার্ন আইটেমস",
-	"Save": "সেভ",
 	"ScanOrTypeBarcode": "বারকোড স্ক্যান বা টাইপ করুন",
 	"SdEnable": "SD এনাবল",
 	"SDEnabled": "SD এনাবল",
@@ -1328,5 +1327,7 @@
 	"EditRequisition": "রিকুইজিশন সম্পাদনা",
 	"EditPurchaseReturn": "ক্রয় রিটার্ন সম্পাদনা",
 	"EditSalesReturn": "বিক্রয় রিটার্ন সম্পাদনা",
-	"Back": "পিছনে"
+	"Back": "পিছনে",
+	"RequisitionNo": "রিকুইজিশন নম্বর",
+	"RequisitionList": "রিকুইজিশন তালিকা"
 }

@@ -1305,5 +1305,7 @@
 	"EditRequisition": "Edit Requisition",
 	"EditPurchaseReturn": "Edit Purchase Return",
 	"EditSalesReturn": "Edit Sales Return",
-	"Back": "Back"
+	"Back": "Back",
+	"RequisitionNo": "Requisition No",
+	"RequisitionList": "Requisition List"
 }

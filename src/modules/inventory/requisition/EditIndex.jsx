@@ -23,18 +23,21 @@ export default function EditIndex() {
 	const itemsForm = useForm(vendorOverviewRequest(t));
 
 	const { data: requisitionResponse, isLoading: isLoadingRequisition } = useGetRequisitionByIdQuery(requisitionId);
-	const [updateRequisition] = useUpdateRequisitionMutation();
+	const [ updateRequisition ] = useUpdateRequisitionMutation();
 
 	const { purchaseProducts: itemsProducts, refetch } = useTempPurchaseProducts({ type: "requisition" });
-	const [isAddingItem, setIsAddingItem] = useState(false);
-	const [isEditInitialized, setIsEditInitialized] = useState(false);
+	const [ isAddingItem, setIsAddingItem ] = useState(false);
+	const isEditInitializedRef = useRef(false);
 	const warehouseIdRef = useRef(null);
 
 	const requisition = requisitionResponse?.data;
 
 	// =============== clear temp items and populate from API response ===============
 	useEffect(() => {
-		if (!requisition || isEditInitialized) return;
+		if (!requisition || isEditInitializedRef.current) return;
+
+		// =============== set synchronously before async work so concurrent effect fires are blocked ===============
+		isEditInitializedRef.current = true;
 
 		const populateTempTable = async () => {
 			// =============== clear any existing temp requisition items first ===============
@@ -46,10 +49,12 @@ export default function EditIndex() {
 					product_id: item.product_id,
 					display_name: item.display_name,
 					quantity: Number(item.quantity) || 0,
+					category_id: item.category_id?.toString() ?? null,
 					purchase_price: Number(item.purchase_price) || 0,
 					sales_price: Number(item.sales_price) || Number(item.purchase_price) || 0,
 					sub_total: Number(item.sub_total) || 0,
 					unit_name: item.unit_name ?? "",
+					category_name: item.category_name ?? "",
 					warehouse_id: item.warehouse_id ?? null,
 					type: "requisition",
 				});
@@ -62,7 +67,7 @@ export default function EditIndex() {
 				if (!dateStr) return null;
 				const parts = dateStr.split("-");
 				if (parts.length === 3) {
-					return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+					return new Date(`${parts[ 2 ]}-${parts[ 1 ]}-${parts[ 0 ]}`);
 				}
 				return new Date(dateStr);
 			};
@@ -82,12 +87,11 @@ export default function EditIndex() {
 			});
 
 			warehouseIdRef.current = requisition.warehouse_id ?? null;
-			setIsEditInitialized(true);
 		};
 
 		populateTempTable();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [requisition]);
+	}, [ requisition ]);
 
 	// =============== cleanup temp items when leaving edit page ===============
 	useEffect(() => {

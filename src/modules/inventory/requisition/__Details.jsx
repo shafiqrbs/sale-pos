@@ -6,17 +6,19 @@ import { useTranslation } from 'react-i18next';
 import { useOutletContext } from 'react-router';
 import SalesPrintA4 from '@components/print-formats/SalesPrintA4';
 import useConfigData from '@hooks/useConfigData';
+import { formatCurrency } from '@utils/index';
 
 export default function Details({ loading, viewData }) {
   const printRef = useRef();
-  const { isOnline, mainAreaHeight } = useOutletContext()
+  const { mainAreaHeight } = useOutletContext()
   const { t } = useTranslation();
   const [ printA4, setPrintA4 ] = useState(false);
   const { configData } = useConfigData();
 
-  const salesItems =  Array.isArray(viewData?.requisition_items)
-      ? viewData?.requisition_items
-      : JSON.parse(viewData?.requisition_items || "[]");
+  const salesItems = Array.isArray(viewData?.requisition_items)
+    ? viewData?.requisition_items
+    : JSON.parse(viewData?.requisition_items || "[]");
+
   const rows =
     Array.isArray(salesItems) &&
     salesItems?.map((element, index) => (
@@ -34,15 +36,15 @@ export default function Details({ loading, viewData }) {
           {element?.unit_name}
         </Table.Td>
         <Table.Td ta="right" fz="xs" width="80">
-          {element?.sales_price}
+          {formatCurrency(element?.sales_price)}
         </Table.Td>
         <Table.Td ta="right" fz="xs" width="100">
-          {element?.sub_total}
+          {formatCurrency(element?.sub_total)}
         </Table.Td>
       </Table.Tr>
     ));
 
-  const dueOrReturnValue = Number(viewData.total) - Number(viewData.payment);
+  // const dueOrReturnValue = Number(viewData.total) - Number(viewData.payment);
 
   return (
     <>
@@ -66,7 +68,7 @@ export default function Details({ loading, viewData }) {
                 </Grid.Col>
                 <Grid.Col span={9}>
                   <Text fz="sm" lh="xs">
-                    {viewData.vendor_name || "N/A"}
+                    {viewData?.vendor_name || "N/A"}
                   </Text>
                 </Grid.Col>
               </Grid>
@@ -78,7 +80,7 @@ export default function Details({ loading, viewData }) {
                 </Grid.Col>
                 <Grid.Col span={9}>
                   <Text fz="sm" lh="xs">
-                    {viewData.vendor_mobile || "N/A"}
+                    {viewData?.vendor_mobile || "N/A"}
                   </Text>
                 </Grid.Col>
               </Grid>
@@ -92,7 +94,7 @@ export default function Details({ loading, viewData }) {
                 </Grid.Col>
                 <Grid.Col span={9}>
                   <Text fz="sm" lh="xs">
-                    {viewData.created}
+                    {viewData?.created}
                   </Text>
                 </Grid.Col>
               </Grid>
@@ -104,7 +106,7 @@ export default function Details({ loading, viewData }) {
                 </Grid.Col>
                 <Grid.Col span={9}>
                   <Text fz="sm" lh="xs">
-                    {viewData.createdByName || "N/A"}
+                    {viewData?.createdByName || "N/A"}
                   </Text>
                 </Grid.Col>
               </Grid>
@@ -112,14 +114,14 @@ export default function Details({ loading, viewData }) {
             <Grid.Col span="2">
               <Button.Group mb="1">
                 <Button
-                    size={'compact-xs'}
-                    fullWidth
-                    variant="filled"
-                    leftSection={<IconPrinter size={14} />}
-                    color="green.5"
-                    onClick={() => {
-                      setPrintA4(true);
-                    }}
+                  size={'compact-xs'}
+                  fullWidth
+                  variant="filled"
+                  leftSection={<IconPrinter size={14} />}
+                  color="green.5"
+                  onClick={() => {
+                    setPrintA4(true);
+                  }}
                 >
                   {t("Print")}
                 </Button>
@@ -128,7 +130,7 @@ export default function Details({ loading, viewData }) {
             </Grid.Col>
           </Grid>
         </Box>
-        <Box  fz="sm">
+        <Box fz="sm">
           <ScrollArea h={mainAreaHeight - 246} scrollbarSize={2} type="never">
             <Table stickyHeader className='sales-details-table'>
               <Table.Thead>
@@ -160,7 +162,7 @@ export default function Details({ loading, viewData }) {
                     {t("SubTotal")}
                   </Table.Th>
                   <Table.Th ta="right" fz="xs" w="100">
-                    {viewData.sub_total}
+                    {formatCurrency(viewData.sub_total)}
                   </Table.Th>
                 </Table.Tr>
               </Table.Tfoot>

@@ -45,15 +45,15 @@ export default function Table() {
 	const dispatch = useDispatch();
 	const { configData } = useConfigData();
 	const { t } = useTranslation();
-	const [opened, { open, close }] = useDisclosure(false);
+	const [ opened, { open, close } ] = useDisclosure(false);
 	useDisclosure(false);
 	const navigate = useNavigate();
-	const [page, setPage] = useState(1);
-	const [selectedRow, setSelectedRow] = useState(null);
-	const [loading, setLoading] = useState(false);
-	const [salesViewData, setSalesViewData] = useState(null);
-	const [deletedSaleIds, setDeletedSaleIds] = useState(new Set());
-	const [dataSource, setDataSource] = useState("offline");
+	const [ page, setPage ] = useState(1);
+	const [ selectedRow, setSelectedRow ] = useState(null);
+	const [ loading, setLoading ] = useState(false);
+	const [ salesViewData, setSalesViewData ] = useState(null);
+	const [ deletedSaleIds, setDeletedSaleIds ] = useState(new Set());
+	const [ dataSource, setDataSource ] = useState("offline");
 	const { mainAreaHeight, isOnline } = useOutletContext();
 	const { isOnlinePermissionIncludes } = useLoggedInUser();
 	// =============== when offline or user lacks permission, always use offline data ===============
@@ -91,7 +91,7 @@ export default function Table() {
 
 	const handleConfirmDelete = async (record) => {
 		await window.dbAPI.deleteDataFromTable("sales", { id: record.id });
-		setDeletedSaleIds((previousIds) => new Set([...previousIds, record.id]));
+		setDeletedSaleIds((previousIds) => new Set([ ...previousIds, record.id ]));
 		showNotification(`Invoice ${record.invoice} deleted`, "teal");
 	};
 
@@ -146,7 +146,6 @@ export default function Table() {
 	};
 
 	const handleShowDetails = (item) => {
-		console.info("item:", item);
 		setLoading(true);
 		setSelectedRow(item.invoice);
 		setSalesViewData(item);

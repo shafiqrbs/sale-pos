@@ -43,17 +43,17 @@ import PageBreadcrumb from "@components/layout/PageBreadcrumb";
 const PER_PAGE = 25;
 
 export default function Table() {
-	const [approvePurchaseReturn] = useApprovePurchaseReturnMutation();
-	const [useSendToVendorMutation] = usePurchaseReturnSendToVendorMutation();
+	const [ approvePurchaseReturn ] = useApprovePurchaseReturnMutation();
+	const [ useSendToVendorMutation ] = usePurchaseReturnSendToVendorMutation();
 	const navigate = useNavigate();
 	const { t } = useTranslation();
-	const [opened, { open, close }] = useDisclosure(false);
-	const [page, setPage] = useState(1);
-	const [selectedRow, setSelectedRow] = useState(null);
-	const [loading, setLoading] = useState(false);
-	const [viewData, setViewData] = useState(null);
-	const [deletedPurchaseIds, setDeletedPurchaseIds] = useState(new Set());
-	const [dataSource, setDataSource] = useState("offline");
+	const [ opened, { open, close } ] = useDisclosure(false);
+	const [ page, setPage ] = useState(1);
+	const [ selectedRow, setSelectedRow ] = useState(null);
+	const [ loading, setLoading ] = useState(false);
+	const [ viewData, setViewData ] = useState(null);
+	const [ deletedPurchaseIds, setDeletedPurchaseIds ] = useState(new Set());
+	const [ dataSource, setDataSource ] = useState("offline");
 	const { mainAreaHeight, isOnline } = useOutletContext();
 	// =============== when offline, always use offline data (online segment disabled) ===============
 	const effectiveDataSource = isOnline ? dataSource : "offline";
@@ -149,7 +149,6 @@ export default function Table() {
 	};
 
 	const handleShowDetails = (item) => {
-		console.info("item:", item);
 		setLoading(true);
 		setSelectedRow(item.invoice);
 		setViewData(item);
@@ -191,7 +190,7 @@ export default function Table() {
 
 	const handleConfirmDelete = async (record) => {
 		await window.dbAPI.deleteDataFromTable("purchase", { id: record.id });
-		setDeletedPurchaseIds((previousIds) => new Set([...previousIds, record.id]));
+		setDeletedPurchaseIds((previousIds) => new Set([ ...previousIds, record.id ]));
 		showNotification(`Invoice ${record.invoice} deleted`, "teal");
 	};
 
@@ -274,7 +273,7 @@ export default function Table() {
 											Created: "blue",
 											Approved: "red",
 										};
-										const badgeColor = colorMap[item.process] || "gray";
+										const badgeColor = colorMap[ item.process ] || "gray";
 										return (
 											item.process && (
 												<Badge variant="dot" radius="xs" color={badgeColor}>

@@ -45,18 +45,18 @@ import PageBreadcrumb from "@components/layout/PageBreadcrumb";
 const PER_PAGE = 25;
 
 export default function Table() {
-	const [approvePurchase] = useApprovePurchaseMutation();
-	const [copyPurchase] = useCopyPurchaseMutation();
+	const [ approvePurchase ] = useApprovePurchaseMutation();
+	const [ copyPurchase ] = useCopyPurchaseMutation();
 	const { syncOnlineProductsToLocal } = useSyncProducts();
 	const navigate = useNavigate();
 	const { t } = useTranslation();
-	const [opened, { open, close }] = useDisclosure(false);
-	const [page, setPage] = useState(1);
-	const [selectedRow, setSelectedRow] = useState(null);
-	const [loading, setLoading] = useState(false);
-	const [viewData, setViewData] = useState(null);
-	const [deletedPurchaseIds, setDeletedPurchaseIds] = useState(new Set());
-	const [dataSource, setDataSource] = useState("offline");
+	const [ opened, { open, close } ] = useDisclosure(false);
+	const [ page, setPage ] = useState(1);
+	const [ selectedRow, setSelectedRow ] = useState(null);
+	const [ loading, setLoading ] = useState(false);
+	const [ viewData, setViewData ] = useState(null);
+	const [ deletedPurchaseIds, setDeletedPurchaseIds ] = useState(new Set());
+	const [ dataSource, setDataSource ] = useState("offline");
 	const { mainAreaHeight, isOnline } = useOutletContext();
 	const { isOnlinePermissionIncludes } = useLoggedInUser();
 	// =============== when offline or user lacks permission, always use offline data ===============
@@ -135,7 +135,6 @@ export default function Table() {
 	};
 
 	const handleShowDetails = (item) => {
-		console.info("item:", item);
 		setLoading(true);
 		setSelectedRow(item.invoice);
 		setViewData(item);
@@ -177,7 +176,7 @@ export default function Table() {
 
 	const handleConfirmDelete = async (record) => {
 		await window.dbAPI.deleteDataFromTable("purchase", { id: record.id });
-		setDeletedPurchaseIds((previousIds) => new Set([...previousIds, record.id]));
+		setDeletedPurchaseIds((previousIds) => new Set([ ...previousIds, record.id ]));
 		showNotification(t("InvoiceDeletedSuccess", { invoice: record.invoice }), "teal");
 	};
 
@@ -327,7 +326,7 @@ export default function Table() {
 											Approved: "red",
 										};
 
-										const badgeColor = colorMap[item.process] || "gray";
+										const badgeColor = colorMap[ item.process ] || "gray";
 
 										return item.process && <Badge color={badgeColor}>{item.process}</Badge>;
 									},

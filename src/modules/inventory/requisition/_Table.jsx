@@ -38,19 +38,19 @@ import { useApproveRequisitionMutation, useGetRequisitionQuery } from "@services
 import PageBreadcrumb from "@components/layout/PageBreadcrumb";
 
 const PER_PAGE = 25;
-const RESTRICTED_STATUSES = ["generated", "approved"];
+const RESTRICTED_STATUSES = [ "generated", "approved" ];
 
 export default function Table() {
-	const [approveRequisition] = useApproveRequisitionMutation();
-	const [copyPurchase] = useCopyPurchaseMutation();
+	const [ approveRequisition ] = useApproveRequisitionMutation();
+	const [ copyPurchase ] = useCopyPurchaseMutation();
 	const navigate = useNavigate();
 	const { t } = useTranslation();
-	const [opened, { open, close }] = useDisclosure(false);
-	const [page, setPage] = useState(1);
-	const [selectedRow, setSelectedRow] = useState(null);
-	const [loading, setLoading] = useState(false);
-	const [viewData, setViewData] = useState(null);
-	const [deletedPurchaseIds, setDeletedPurchaseIds] = useState(new Set());
+	const [ opened, { open, close } ] = useDisclosure(false);
+	const [ page, setPage ] = useState(1);
+	const [ selectedRow, setSelectedRow ] = useState(null);
+	const [ loading, setLoading ] = useState(false);
+	const [ viewData, setViewData ] = useState(null);
+	const [ deletedPurchaseIds, setDeletedPurchaseIds ] = useState(new Set());
 	const { mainAreaHeight } = useOutletContext();
 
 	const form = useForm({
@@ -117,7 +117,6 @@ export default function Table() {
 	};
 
 	const handleShowDetails = (item) => {
-		console.info("item:", item);
 		setLoading(true);
 		setSelectedRow(item.invoice);
 		setViewData(item);
@@ -159,7 +158,7 @@ export default function Table() {
 
 	const handleConfirmDelete = async (record) => {
 		await window.dbAPI.deleteDataFromTable("purchase", { id: record.id });
-		setDeletedPurchaseIds((previousIds) => new Set([...previousIds, record.id]));
+		setDeletedPurchaseIds((previousIds) => new Set([ ...previousIds, record.id ]));
 		showNotification(t("InvoiceDeletedSuccess", { invoice: record.invoice }), "teal");
 	};
 
@@ -248,7 +247,7 @@ export default function Table() {
 											Created: "blue",
 											Approved: "red",
 										};
-										const badgeColor = colorMap[item.process] || "gray";
+										const badgeColor = colorMap[ item.process ] || "gray";
 										return item.process && <Badge color={badgeColor}>{item.process}</Badge>;
 									},
 								},
@@ -371,7 +370,7 @@ export default function Table() {
 				onClose={close}
 				size="80%"
 				padding="md"
-				title={`${t("Requisition No")}: ${viewData?.invoice || ""}`}
+				title={`${t("RequisitionNo")}: ${viewData?.invoice || ""}`}
 			>
 				<Details loading={loading} viewData={viewData} />
 			</GlobalModal>
