@@ -5,7 +5,6 @@ import {
 	Button,
 	Grid,
 	Group,
-	Kbd,
 	NumberInput,
 	Stack,
 	Text,
@@ -25,7 +24,7 @@ import {
 	IconTicket,
 	IconUserPlus,
 } from "@tabler/icons-react";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import TransactionInformation from "./TransactionInformation";
 import useCartOperation from "@hooks/useCartOperation";

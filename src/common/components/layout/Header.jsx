@@ -167,7 +167,7 @@ export default function Header({ isOnline, toggleNetwork }) {
 
 	return (
 		<>
-			<Box bg="var(--theme-primary-card-color)" mb={"2"} pos={`relative`}>
+			<Box bg="var(--theme-primary-card-color)" mb={"2"} pos="relative">
 				<Flex align="center" justify="space-between">
 					<Flex gap="sm">
 						<Box

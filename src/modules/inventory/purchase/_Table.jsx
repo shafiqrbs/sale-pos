@@ -1,6 +1,28 @@
 import { useState } from "react";
-import { Box, Grid, Text, ActionIcon, Group, Menu, Flex, Button, Badge, SegmentedControl, Tooltip } from "@mantine/core";
-import { IconCopy, IconDotsVertical, IconEdit, IconEye, IconPlus, IconRefresh, IconTrashX, IconGlobe, IconGlobeOff } from "@tabler/icons-react";
+import {
+	Box,
+	Grid,
+	Text,
+	ActionIcon,
+	Group,
+	Menu,
+	Flex,
+	Button,
+	Badge,
+	SegmentedControl,
+	Tooltip,
+} from "@mantine/core";
+import {
+	IconCopy,
+	IconDotsVertical,
+	IconEdit,
+	IconEye,
+	IconPlus,
+	IconRefresh,
+	IconTrashX,
+	IconGlobe,
+	IconGlobeOff,
+} from "@tabler/icons-react";
 import { useNavigate, useOutletContext } from "react-router";
 import { DataTable } from "mantine-datatable";
 import tableCss from "@assets/css/Table.module.css";
@@ -11,16 +33,14 @@ import GlobalModal from "@components/modals/GlobalModal";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import { APP_NAVLINKS } from "@/routes/routes";
-import {
-	useApprovePurchaseMutation,
-	useCopyPurchaseMutation,
-} from "@services/purchase";
+import { useApprovePurchaseMutation, useCopyPurchaseMutation } from "@services/purchase";
 import usePurchaseList from "@hooks/usePurchaseList";
 import useSyncProducts from "@hooks/useSyncProducts";
 import { modals } from "@mantine/modals";
 import { showNotification } from "@components/ShowNotificationComponent";
 import { formatCurrency } from "@utils/index";
 import useLoggedInUser from "@hooks/useLoggedInUser";
+import PageBreadcrumb from "@components/layout/PageBreadcrumb";
 
 const PER_PAGE = 25;
 
@@ -50,7 +70,11 @@ export default function Table() {
 		},
 	});
 
-	const { purchases: purchaseData, isLoading, refetch } = usePurchaseList({
+	const {
+		purchases: purchaseData,
+		isLoading,
+		refetch,
+	} = usePurchaseList({
 		params: {
 			term: form.values.term,
 			start_date: form.values.start_date,
@@ -160,39 +184,52 @@ export default function Table() {
 	return (
 		<Box>
 			<Flex mb="xs" gap="sm" justify="space-between" align="center">
+				<PageBreadcrumb label={t("PurchaseList")} />
 				<KeywordSearch showStartEndDate form={form} />
 
-				<Group gap="sm" wrap="nowrap" >
-				{isOnline && isOnlinePermissionIncludes && (
-					<SegmentedControl
-						value={effectiveDataSource}
-						onChange={(value) => {
-							setDataSource(value);
-							setPage(1);
-						}}
-						color={effectiveDataSource === "online" ? "green" : "red"}
-						data={[
-							{
-								value: "online",
-								label: (
-									<Group gap={4} wrap="nowrap">
-										<IconGlobe size={13} color={effectiveDataSource === "online" ? "white" : "var(--mantine-color-green-6)"} />
-										{t("Online")}
-									</Group>
-								),
-							},
-							{
-								value: "offline",
-								label: (
-									<Group gap={4} wrap="nowrap">
-										<IconGlobeOff size={13} color={effectiveDataSource === "offline" ? "white" : "var(--mantine-color-red-6)"} />
-										{t("Offline")}
-									</Group>
-								),
-							},
-						]}
-					/>
-				)}
+				<Group gap="sm" wrap="nowrap">
+					{isOnline && isOnlinePermissionIncludes && (
+						<SegmentedControl
+							value={effectiveDataSource}
+							onChange={(value) => {
+								setDataSource(value);
+								setPage(1);
+							}}
+							color={effectiveDataSource === "online" ? "green" : "red"}
+							data={[
+								{
+									value: "online",
+									label: (
+										<Group gap={4} wrap="nowrap">
+											<IconGlobe
+												size={13}
+												color={
+													effectiveDataSource === "online"
+														? "white"
+														: "var(--mantine-color-green-6)"
+												}
+											/>
+											{t("Online")}
+										</Group>
+									),
+								},
+								{
+									value: "offline",
+									label: (
+										<Group gap={4} wrap="nowrap">
+											<IconGlobeOff
+												size={13}
+												color={
+													effectiveDataSource === "offline" ? "white" : "var(--mantine-color-red-6)"
+												}
+											/>
+											{t("Offline")}
+										</Group>
+									),
+								},
+							]}
+						/>
+					)}
 					{effectiveDataSource === "online" && (
 						<Tooltip label={t("RefreshData")}>
 							<ActionIcon variant="light" color="green" size="lg" onClick={refetch}>
@@ -225,7 +262,9 @@ export default function Table() {
 							onRowClick={(rowData) => {
 								handleShowDetails(rowData.record);
 							}}
-							records={(purchaseData?.data ?? []).filter((item) => !deletedPurchaseIds.has(item.id))}
+							records={(purchaseData?.data ?? []).filter(
+								(item) => !deletedPurchaseIds.has(item.id)
+							)}
 							columns={[
 								{
 									accessor: "created",
@@ -298,7 +337,6 @@ export default function Table() {
 									title: t("Action"),
 									textAlign: "right",
 									render: (data) => (
-
 										<Group gap={4} justify="right" wrap="nowrap">
 											{!data.approved_by_id && (
 												<Button

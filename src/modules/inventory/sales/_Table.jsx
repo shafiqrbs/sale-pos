@@ -8,9 +8,16 @@ import {
 	Flex,
 	Button,
 	SegmentedControl,
-	Tooltip,
 } from "@mantine/core";
-import { IconDotsVertical, IconEdit, IconEye, IconPlus, IconRefresh, IconTrash, IconGlobe, IconGlobeOff } from "@tabler/icons-react";
+import {
+	IconDotsVertical,
+	IconEdit,
+	IconEye,
+	IconPlus,
+	IconTrash,
+	IconGlobe,
+	IconGlobeOff,
+} from "@tabler/icons-react";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useOutletContext, useNavigate } from "react-router";
@@ -30,6 +37,7 @@ import { modals } from "@mantine/modals";
 import useConfigData from "@hooks/useConfigData";
 import { setEditingSale } from "@features/checkout";
 import useLoggedInUser from "@hooks/useLoggedInUser";
+import PageBreadcrumb from "@components/layout/PageBreadcrumb";
 
 const PER_PAGE = 25;
 
@@ -58,7 +66,7 @@ export default function Table() {
 		},
 	});
 
-	const { sales: salesData, isLoading, refetch } = useSalesList({
+	const { sales: salesData, isLoading } = useSalesList({
 		params: {
 			term: form.values.term,
 			start_date: form.values.start_date,
@@ -84,7 +92,7 @@ export default function Table() {
 	const handleConfirmDelete = async (record) => {
 		await window.dbAPI.deleteDataFromTable("sales", { id: record.id });
 		setDeletedSaleIds((previousIds) => new Set([...previousIds, record.id]));
-		showNotification(t("InvoiceDeletedSuccess", { invoice: record.invoice }), "teal");
+		showNotification(`Invoice ${record.invoice} deleted`, "teal");
 	};
 
 	const handleEditInPos = async (data) => {
@@ -133,7 +141,7 @@ export default function Table() {
 			navigate(APP_NAVLINKS.BAKERY);
 		} catch (err) {
 			console.error("Error loading sale into POS:", err);
-			showNotification(t("FailedToLoadSaleIntoPOS"), "red");
+			showNotification("Failed to load sale into POS", "red");
 		}
 	};
 
@@ -152,44 +160,50 @@ export default function Table() {
 	return (
 		<Box>
 			<Flex mb="xs" gap="sm" justify="space-between" align="center">
+				<PageBreadcrumb label={t("SalesList")} />
 				<KeywordSearch showStartEndDate form={form} />
 				<Group gap="sm" wrap="nowrap">
-				{isOnline && isOnlinePermissionIncludes && (
-					<SegmentedControl
-						value={effectiveDataSource}
-						onChange={(value) => {
-							setDataSource(value);
-							setPage(1);
-						}}
-						color={effectiveDataSource === "online" ? "green" : "red"}
-						data={[
-							{
-								value: "online",
-								label: (
-									<Group gap={4} wrap="nowrap">
-										<IconGlobe size={13} color={effectiveDataSource === "online" ? "white" : "var(--mantine-color-green-6)"} />
-										{t("Online")}
-									</Group>
-								),
-							},
-							{
-								value: "offline",
-								label: (
-									<Group gap={4} wrap="nowrap">
-										<IconGlobeOff size={13} color={effectiveDataSource === "offline" ? "white" : "var(--mantine-color-red-6)"} />
-										{t("Offline")}
-									</Group>
-								),
-							},
-						]}
-					/>
-				)}
-					{effectiveDataSource === "online" && (
-						<Tooltip label={t("RefreshData")}>
-							<ActionIcon variant="light" color="green" size="lg" onClick={refetch}>
-								<IconRefresh size={20} />
-							</ActionIcon>
-						</Tooltip>
+					{isOnline && isOnlinePermissionIncludes && (
+						<SegmentedControl
+							value={effectiveDataSource}
+							onChange={(value) => {
+								setDataSource(value);
+								setPage(1);
+							}}
+							color={effectiveDataSource === "online" ? "green" : "red"}
+							data={[
+								{
+									value: "online",
+									label: (
+										<Group gap={4} wrap="nowrap">
+											<IconGlobe
+												size={13}
+												color={
+													effectiveDataSource === "online"
+														? "white"
+														: "var(--mantine-color-green-6)"
+												}
+											/>
+											{t("Online")}
+										</Group>
+									),
+								},
+								{
+									value: "offline",
+									label: (
+										<Group gap={4} wrap="nowrap">
+											<IconGlobeOff
+												size={13}
+												color={
+													effectiveDataSource === "offline" ? "white" : "var(--mantine-color-red-6)"
+												}
+											/>
+											{t("Offline")}
+										</Group>
+									),
+								},
+							]}
+						/>
 					)}
 					<Button
 						w={170}
@@ -238,7 +252,7 @@ export default function Table() {
 									accessor: "invoice",
 									title: t("Invoice"),
 									render: (item) => (
-										<Text component="a" size="sm" variant="subtle" >
+										<Text component="a" size="sm" variant="subtle">
 											{item.invoice}
 										</Text>
 									),

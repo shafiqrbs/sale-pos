@@ -1299,5 +1299,11 @@
 	"EnterReturnQuantityFirst": "Enter return quantity first",
 	"EnterReturnQuantityForAtLeastOneItem": "Enter return quantity for at least one item",
 	"AllItemsAddedSuccessfully": "All items added successfully",
-	"ItemNameAdded": "{{itemName}} added"
+	"ItemNameAdded": "{{itemName}} added",
+	"EditSale": "Edit Sale",
+	"EditPurchase": "Edit Purchase",
+	"EditRequisition": "Edit Requisition",
+	"EditPurchaseReturn": "Edit Purchase Return",
+	"EditSalesReturn": "Edit Sales Return",
+	"Back": "Back"
 }

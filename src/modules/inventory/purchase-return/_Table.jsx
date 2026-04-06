@@ -1,6 +1,25 @@
 import { useState } from "react";
-import { Box, Grid, Text, ActionIcon, Group, Menu, Flex, Button, Badge, SegmentedControl, Tooltip } from "@mantine/core";
-import { IconDotsVertical, IconEdit, IconEye, IconPlus, IconRefresh, IconTrashX } from "@tabler/icons-react";
+import {
+	Box,
+	Grid,
+	Text,
+	ActionIcon,
+	Group,
+	Menu,
+	Flex,
+	Button,
+	Badge,
+	SegmentedControl,
+	Tooltip,
+} from "@mantine/core";
+import {
+	IconDotsVertical,
+	IconEdit,
+	IconEye,
+	IconPlus,
+	IconRefresh,
+	IconTrashX,
+} from "@tabler/icons-react";
 import { useNavigate, useOutletContext } from "react-router";
 import { DataTable } from "mantine-datatable";
 import tableCss from "@assets/css/Table.module.css";
@@ -14,22 +33,27 @@ import { APP_NAVLINKS } from "@/routes/routes";
 import { modals } from "@mantine/modals";
 import { showNotification } from "@components/ShowNotificationComponent";
 import { formatCurrency } from "@utils/index";
-import { useApprovePurchaseReturnMutation,usePurchaseReturnSendToVendorMutation, useGetPurchaseReturnQuery } from "@services/purchase-return";
+import {
+	useApprovePurchaseReturnMutation,
+	usePurchaseReturnSendToVendorMutation,
+	useGetPurchaseReturnQuery,
+} from "@services/purchase-return";
+import PageBreadcrumb from "@components/layout/PageBreadcrumb";
 
 const PER_PAGE = 25;
 
 export default function Table() {
-	const [ approvePurchaseReturn ] = useApprovePurchaseReturnMutation();
-	const [ useSendToVendorMutation ] = usePurchaseReturnSendToVendorMutation();
+	const [approvePurchaseReturn] = useApprovePurchaseReturnMutation();
+	const [useSendToVendorMutation] = usePurchaseReturnSendToVendorMutation();
 	const navigate = useNavigate();
 	const { t } = useTranslation();
-	const [ opened, { open, close } ] = useDisclosure(false);
-	const [ page, setPage ] = useState(1);
-	const [ selectedRow, setSelectedRow ] = useState(null);
-	const [ loading, setLoading ] = useState(false);
-	const [ viewData, setViewData ] = useState(null);
-	const [ deletedPurchaseIds, setDeletedPurchaseIds ] = useState(new Set());
-	const [ dataSource, setDataSource ] = useState("offline");
+	const [opened, { open, close }] = useDisclosure(false);
+	const [page, setPage] = useState(1);
+	const [selectedRow, setSelectedRow] = useState(null);
+	const [loading, setLoading] = useState(false);
+	const [viewData, setViewData] = useState(null);
+	const [deletedPurchaseIds, setDeletedPurchaseIds] = useState(new Set());
+	const [dataSource, setDataSource] = useState("offline");
 	const { mainAreaHeight, isOnline } = useOutletContext();
 	// =============== when offline, always use offline data (online segment disabled) ===============
 	const effectiveDataSource = isOnline ? dataSource : "offline";
@@ -42,7 +66,11 @@ export default function Table() {
 		},
 	});
 
-	const { data: entities, isLoading, refetch } = useGetPurchaseReturnQuery({
+	const {
+		data: entities,
+		isLoading,
+		refetch,
+	} = useGetPurchaseReturnQuery({
 		params: {
 			term: form.values.term,
 			start_date: form.values.start_date,
@@ -163,15 +191,16 @@ export default function Table() {
 
 	const handleConfirmDelete = async (record) => {
 		await window.dbAPI.deleteDataFromTable("purchase", { id: record.id });
-		setDeletedPurchaseIds((previousIds) => new Set([ ...previousIds, record.id ]));
+		setDeletedPurchaseIds((previousIds) => new Set([...previousIds, record.id]));
 		showNotification(`Invoice ${record.invoice} deleted`, "teal");
 	};
 
 	return (
 		<Box>
 			<Flex mb="xs" gap="sm" justify="space-between" align="center">
+				<PageBreadcrumb label={t("PurchaseReturnList")} />
 				<KeywordSearch showStartEndDate form={form} />
-				<Group gap="sm" wrap="nowrap" >
+				<Group gap="sm" wrap="nowrap">
 					<Tooltip label={t("RefreshData")}>
 						<ActionIcon variant="light" color="green" size="lg" onClick={refetch}>
 							<IconRefresh size={20} />
@@ -214,7 +243,6 @@ export default function Table() {
 									accessor: "invoice",
 									title: t("Invoice"),
 									render: (item) => <Text size="sm">{item?.invoice || "N/A"}</Text>,
-
 								},
 								{
 									accessor: "return_type",
@@ -246,8 +274,14 @@ export default function Table() {
 											Created: "blue",
 											Approved: "red",
 										};
-										const badgeColor = colorMap[ item.process ] || "gray";
-										return item.process && <Badge variant="dot"  radius="xs" color={badgeColor}>{item.process}</Badge>;
+										const badgeColor = colorMap[item.process] || "gray";
+										return (
+											item.process && (
+												<Badge variant="dot" radius="xs" color={badgeColor}>
+													{item.process}
+												</Badge>
+											)
+										);
 									},
 								},
 								{
@@ -255,40 +289,43 @@ export default function Table() {
 									title: t("Action"),
 									textAlign: "right",
 									render: (data) => (
-
 										<Group gap={4} justify="right" wrap="nowrap">
-											{!data.approved_by_id && data.process === "Created" && data.return_type === 'Requisition' &&
-												<Button
-													component="a"
-													size="compact-sm"
-													radius="xs"
-													color="orange"
-													variant="filled"
-													fw={"100"}
-													onClick={(e) => {
-														e.stopPropagation();
-														handleSendVendorApproveConfirm(data.id);
-													}}
-												>
-													{t('SendToVendor')}
-												</Button>
-											}{
-											!data.approved_by_id && data.process === "Created" && data.return_type === 'General' &&
-												<Button
-													component="a"
-													size="compact-sm"
-													radius="xs"
-													color="indigo"
-													variant="filled"
-													fw={"100"}
-													onClick={(e) => {
-														e.stopPropagation();
-														handlePurchaseApprove(data.id);
-													}}
-												>
-													{t("Approve")}
-												</Button>
-											}
+											{!data.approved_by_id &&
+												data.process === "Created" &&
+												data.return_type === "Requisition" && (
+													<Button
+														component="a"
+														size="compact-sm"
+														radius="xs"
+														color="orange"
+														variant="filled"
+														fw={"100"}
+														onClick={(e) => {
+															e.stopPropagation();
+															handleSendVendorApproveConfirm(data.id);
+														}}
+													>
+														{t("SendToVendor")}
+													</Button>
+												)}
+											{!data.approved_by_id &&
+												data.process === "Created" &&
+												data.return_type === "General" && (
+													<Button
+														component="a"
+														size="compact-sm"
+														radius="xs"
+														color="indigo"
+														variant="filled"
+														fw={"100"}
+														onClick={(e) => {
+															e.stopPropagation();
+															handlePurchaseApprove(data.id);
+														}}
+													>
+														{t("Approve")}
+													</Button>
+												)}
 											<Menu
 												position="bottom-end"
 												offset={3}
@@ -305,34 +342,33 @@ export default function Table() {
 														radius="xl"
 														aria-label="Settings"
 													>
-														<IconDotsVertical height={"18"} width={"18"} stroke={1.5}/>
+														<IconDotsVertical height={"18"} width={"18"} stroke={1.5} />
 													</ActionIcon>
 												</Menu.Target>
 												<Menu.Dropdown w="200">
 													<Menu.Item
 														onClick={(event) => handleShowPurchaseFromMenu(event, data)}
-														leftSection={<IconEye height={"18"} width={"18"} stroke={1.5}/>}
+														leftSection={<IconEye height={"18"} width={"18"} stroke={1.5} />}
 														color="blue"
 													>
 														{t("Show")}
 													</Menu.Item>
-													{!data.approved_by_id && data.process === "Created" && data.return_type === 'Requisition' && (
-
-														<Menu.Item
-														onClick={(event) => {
-															event.stopPropagation();
-															handleDeleteClick(data);
-														}}
-														color="red"
-														leftSection={<IconTrashX height={"18"} width={"18"}
-																				 stroke={1.5}/>}
-													>
-														{t("Delete")}
-													</Menu.Item>
-													)}
+													{!data.approved_by_id &&
+														data.process === "Created" &&
+														data.return_type === "Requisition" && (
+															<Menu.Item
+																onClick={(event) => {
+																	event.stopPropagation();
+																	handleDeleteClick(data);
+																}}
+																color="red"
+																leftSection={<IconTrashX height={"18"} width={"18"} stroke={1.5} />}
+															>
+																{t("Delete")}
+															</Menu.Item>
+														)}
 												</Menu.Dropdown>
 											</Menu>
-
 										</Group>
 									),
 								},

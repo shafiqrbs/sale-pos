@@ -1322,5 +1322,11 @@
 	"EnterReturnQuantityFirst": "প্রথমে রিটার্নের পরিমাণ লিখুন",
 	"EnterReturnQuantityForAtLeastOneItem": "অন্তত একটি আইটেমের রিটার্নের পরিমাণ লিখুন",
 	"AllItemsAddedSuccessfully": "সকল আইটেম সফলভাবে যোগ হয়েছে",
-	"ItemNameAdded": "{{itemName}} যোগ হয়েছে"
+	"ItemNameAdded": "{{itemName}} যোগ হয়েছে",
+	"EditSale": "বিক্রয় সম্পাদনা",
+	"EditPurchase": "ক্রয় সম্পাদনা",
+	"EditRequisition": "রিকুইজিশন সম্পাদনা",
+	"EditPurchaseReturn": "ক্রয় রিটার্ন সম্পাদনা",
+	"EditSalesReturn": "বিক্রয় রিটার্ন সম্পাদনা",
+	"Back": "পিছনে"
 }

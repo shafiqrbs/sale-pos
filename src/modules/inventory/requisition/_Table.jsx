@@ -1,5 +1,16 @@
 import { useState } from "react";
-import { Box, Grid, Text, ActionIcon, Group, Menu, Flex, Button, Badge, Tooltip } from "@mantine/core";
+import {
+	Box,
+	Grid,
+	Text,
+	ActionIcon,
+	Group,
+	Menu,
+	Flex,
+	Button,
+	Badge,
+	Tooltip,
+} from "@mantine/core";
 import {
 	IconCopy,
 	IconDotsVertical,
@@ -24,6 +35,7 @@ import { modals } from "@mantine/modals";
 import { showNotification } from "@components/ShowNotificationComponent";
 import { formatCurrency } from "@utils/index";
 import { useApproveRequisitionMutation, useGetRequisitionQuery } from "@services/requisition";
+import PageBreadcrumb from "@components/layout/PageBreadcrumb";
 
 const PER_PAGE = 25;
 const RESTRICTED_STATUSES = ["generated", "approved"];
@@ -49,7 +61,11 @@ export default function Table() {
 		},
 	});
 
-	const { data: entities, isLoading, refetch } = useGetRequisitionQuery({
+	const {
+		data: entities,
+		isLoading,
+		refetch,
+	} = useGetRequisitionQuery({
 		params: {
 			term: form.values.term,
 			start_date: form.values.start_date,
@@ -150,6 +166,7 @@ export default function Table() {
 	return (
 		<Box>
 			<Flex mb="xs" gap="sm" justify="space-between" align="center">
+				<PageBreadcrumb label={t("RequisitionList")} />
 				<KeywordSearch showStartEndDate form={form} />
 				<Group gap="sm" wrap="nowrap">
 					<Tooltip label={t("RefreshData")}>
@@ -242,89 +259,89 @@ export default function Table() {
 									render: (data) => {
 										const isRestricted = RESTRICTED_STATUSES.includes(data?.process?.toLowerCase());
 										return (
-										<Group gap={4} justify="right" wrap="nowrap">
-											{!data.approved_by_id && (
-												<Button
-													component="a"
-													size="compact-xs"
-													radius="xs"
-													variant="filled"
-													fw={"100"}
-													fz={"12"}
-													color="var(--theme-secondary-color-8)"
-													mr={"4"}
-													onClick={(e) => {
-														e.stopPropagation();
-														handleRequisitionApprove(data.id);
-													}}
+											<Group gap={4} justify="right" wrap="nowrap">
+												{!data.approved_by_id && (
+													<Button
+														component="a"
+														size="compact-xs"
+														radius="xs"
+														variant="filled"
+														fw={"100"}
+														fz={"12"}
+														color="var(--theme-secondary-color-8)"
+														mr={"4"}
+														onClick={(e) => {
+															e.stopPropagation();
+															handleRequisitionApprove(data.id);
+														}}
+													>
+														{t("Approve")}
+													</Button>
+												)}
+												<Menu
+													position="bottom-end"
+													offset={3}
+													withArrow
+													trigger="hover"
+													openDelay={100}
+													closeDelay={400}
 												>
-													{t("Approve")}
-												</Button>
-											)}
-											<Menu
-												position="bottom-end"
-												offset={3}
-												withArrow
-												trigger="hover"
-												openDelay={100}
-												closeDelay={400}
-											>
-												<Menu.Target>
-													<ActionIcon
-														size="sm"
-														variant="transparent"
-														color="red"
-														radius="xl"
-														aria-label="Settings"
-													>
-														<IconDotsVertical height={"18"} width={"18"} stroke={1.5} />
-													</ActionIcon>
-												</Menu.Target>
-												<Menu.Dropdown w="200">
-													<Menu.Item
-														onClick={(event) => handleShowPurchaseFromMenu(event, data)}
-														leftSection={<IconEye height={"18"} width={"18"} stroke={1.5} />}
-														color="blue"
-													>
-														{t("Show")}
-													</Menu.Item>
-													{!isRestricted && (
-														<Menu.Item
-															onClick={(event) => {
-																event.stopPropagation();
-																navigate(`${APP_NAVLINKS.REQUISITION_EDIT}/${data.id}`);
-															}}
-															leftSection={<IconEdit height="18" width="18" stroke={1.5} />}
-															color="yellow"
-														>
-															{t("Edit")}
-														</Menu.Item>
-													)}
-													{
-														<Menu.Item
-															color="indigo"
-															onClick={() => handleOpenCopyConfirmModal(data.id)}
-															leftSection={<IconCopy height="18" width="18" stroke={1.5} />}
-														>
-															{t("Copy")}
-														</Menu.Item>
-													}
-													{!isRestricted && (
-														<Menu.Item
-															onClick={(event) => {
-																event.stopPropagation();
-																handleDeleteClick(data);
-															}}
+													<Menu.Target>
+														<ActionIcon
+															size="sm"
+															variant="transparent"
 															color="red"
-															leftSection={<IconTrashX height="18" width="18" stroke={1.5} />}
+															radius="xl"
+															aria-label="Settings"
 														>
-															{t("Delete")}
+															<IconDotsVertical height={"18"} width={"18"} stroke={1.5} />
+														</ActionIcon>
+													</Menu.Target>
+													<Menu.Dropdown w="200">
+														<Menu.Item
+															onClick={(event) => handleShowPurchaseFromMenu(event, data)}
+															leftSection={<IconEye height={"18"} width={"18"} stroke={1.5} />}
+															color="blue"
+														>
+															{t("Show")}
 														</Menu.Item>
-													)}
-												</Menu.Dropdown>
-											</Menu>
-										</Group>
-									);
+														{!isRestricted && (
+															<Menu.Item
+																onClick={(event) => {
+																	event.stopPropagation();
+																	navigate(`${APP_NAVLINKS.REQUISITION_EDIT}/${data.id}`);
+																}}
+																leftSection={<IconEdit height="18" width="18" stroke={1.5} />}
+																color="yellow"
+															>
+																{t("Edit")}
+															</Menu.Item>
+														)}
+														{
+															<Menu.Item
+																color="indigo"
+																onClick={() => handleOpenCopyConfirmModal(data.id)}
+																leftSection={<IconCopy height="18" width="18" stroke={1.5} />}
+															>
+																{t("Copy")}
+															</Menu.Item>
+														}
+														{!isRestricted && (
+															<Menu.Item
+																onClick={(event) => {
+																	event.stopPropagation();
+																	handleDeleteClick(data);
+																}}
+																color="red"
+																leftSection={<IconTrashX height="18" width="18" stroke={1.5} />}
+															>
+																{t("Delete")}
+															</Menu.Item>
+														)}
+													</Menu.Dropdown>
+												</Menu>
+											</Group>
+										);
 									},
 								},
 							]}
