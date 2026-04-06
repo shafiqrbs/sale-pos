@@ -52,14 +52,26 @@ const validateIdentifier = (name, label = "identifier") => {
 
 // Prevents injection via operators in getJoinedTableData conditions
 // e.g. passing "= 1; DROP TABLE sales; --" as an operator
-const VALID_SQL_OPERATORS = new Set([ "=", "!=", "<>", ">", "<", ">=", "<=", "LIKE", "NOT LIKE", "IN", "NOT IN" ]);
+const VALID_SQL_OPERATORS = new Set([
+	"=",
+	"!=",
+	"<>",
+	">",
+	"<",
+	">=",
+	"<=",
+	"LIKE",
+	"NOT LIKE",
+	"IN",
+	"NOT IN",
+]);
 
 // Validates all field names in search objects (equals, like, in) before they reach SQL
 const validateSearchFields = (search) => {
 	if (!search || typeof search !== "object") return;
-	for (const group of [ "equals", "like", "in" ]) {
-		if (search[ group ] && typeof search[ group ] === "object") {
-			for (const field of Object.keys(search[ group ])) {
+	for (const group of ["equals", "like", "in"]) {
+		if (search[group] && typeof search[group] === "object") {
+			for (const field of Object.keys(search[group])) {
 				validateIdentifier(field, "search field");
 			}
 		}
@@ -366,6 +378,7 @@ db.prepare(
 		id INTEGER PRIMARY KEY,
 		name TEXT NOT NULL,
 		slug TEXT NOT NULL,
+		item INTEGER DEFAULT 0,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	)
@@ -489,12 +502,18 @@ db.prepare("CREATE INDEX IF NOT EXISTS idx_purchase_created ON purchase(created)
 db.prepare("CREATE INDEX IF NOT EXISTS idx_purchase_vendor ON purchase(vendor_id)").run();
 
 // invoice_table_item: looked up by invoice_id (loading invoice line items)
-db.prepare("CREATE INDEX IF NOT EXISTS idx_invoice_item_invoice ON invoice_table_item(invoice_id)").run();
-db.prepare("CREATE INDEX IF NOT EXISTS idx_invoice_item_stock ON invoice_table_item(stock_item_id)").run();
+db.prepare(
+	"CREATE INDEX IF NOT EXISTS idx_invoice_item_invoice ON invoice_table_item(invoice_id)"
+).run();
+db.prepare(
+	"CREATE INDEX IF NOT EXISTS idx_invoice_item_stock ON invoice_table_item(stock_item_id)"
+).run();
 
 // temp tables: filtered by type and product_id
 db.prepare("CREATE INDEX IF NOT EXISTS idx_temp_sales_type ON temp_sales_products(type)").run();
-db.prepare("CREATE INDEX IF NOT EXISTS idx_temp_purchase_type ON temp_purchase_products(type)").run();
+db.prepare(
+	"CREATE INDEX IF NOT EXISTS idx_temp_purchase_type ON temp_purchase_products(type)"
+).run();
 
 const formatValue = (value) => {
 	if (value === undefined || value === null) return null;
@@ -520,7 +539,7 @@ const upsertIntoTable = (table, data) => {
 		const validData = Object.keys(data)
 			.filter((key) => columns.includes(key))
 			.reduce((obj, key) => {
-				obj[ key ] = formatValue(data[ key ]);
+				obj[key] = formatValue(data[key]);
 				return obj;
 			}, {});
 
@@ -547,7 +566,7 @@ const upsertIntoTable = (table, data) => {
 
 const getDataFromTable = (table, idOrConditions, property = "id", options = {}) => {
 	table = validateTableName(table);
-	const useGet = [ "config_data", "users", "license_activate", "printer" ].includes(table); // return a single row for these tables
+	const useGet = ["config_data", "users", "license_activate", "printer"].includes(table); // return a single row for these tables
 
 	let stmt;
 	let result;
@@ -561,20 +580,20 @@ const getDataFromTable = (table, idOrConditions, property = "id", options = {}) 
 		const trimmed = orderBy.trim();
 		if (!trimmed) return "ORDER BY created_at DESC";
 		const parts = trimmed.split(/\s+/);
-		const column = parts[ 0 ];
-		const direction = (parts[ 1 ] || "ASC").toUpperCase();
+		const column = parts[0];
+		const direction = (parts[1] || "ASC").toUpperCase();
 		if (!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(column)) return "ORDER BY created_at DESC";
 		if (direction !== "ASC" && direction !== "DESC") return "ORDER BY created_at DESC";
 		return `ORDER BY ${column} ${direction}`;
 	})();
 
 	const buildSearchClause = (initialConditions = [], initialValues = []) => {
-		const conditions = [ ...initialConditions ];
-		const values = [ ...initialValues ];
+		const conditions = [...initialConditions];
+		const values = [...initialValues];
 
 		if (search && typeof search === "object") {
 			if (search.equals && typeof search.equals === "object") {
-				for (const [ field, value ] of Object.entries(search.equals)) {
+				for (const [field, value] of Object.entries(search.equals)) {
 					if (value !== undefined && value !== null && value !== "") {
 						conditions.push(`${field} = ?`);
 						values.push(value);
@@ -583,7 +602,7 @@ const getDataFromTable = (table, idOrConditions, property = "id", options = {}) 
 			}
 
 			if (search.like && typeof search.like === "object") {
-				for (const [ field, value ] of Object.entries(search.like)) {
+				for (const [field, value] of Object.entries(search.like)) {
 					if (value !== undefined && value !== null && value !== "") {
 						conditions.push(`${field} LIKE ?`);
 						values.push(`%${value}%`);
@@ -592,7 +611,7 @@ const getDataFromTable = (table, idOrConditions, property = "id", options = {}) 
 			}
 
 			if (search.in && typeof search.in === "object") {
-				for (const [ field, list ] of Object.entries(search.in)) {
+				for (const [field, list] of Object.entries(search.in)) {
 					if (Array.isArray(list) && list.length > 0) {
 						const placeholders = list.map(() => "?").join(", ");
 						conditions.push(`${field} IN (${placeholders})`);
@@ -607,7 +626,7 @@ const getDataFromTable = (table, idOrConditions, property = "id", options = {}) 
 
 	const buildPaginatedQuery = (baseQuery, baseValues = []) => {
 		let query = baseQuery;
-		const values = [ ...baseValues ];
+		const values = [...baseValues];
 
 		if (!useGet && typeof limit === "number") {
 			query += " LIMIT ?";
@@ -627,7 +646,7 @@ const getDataFromTable = (table, idOrConditions, property = "id", options = {}) 
 		const keys = Object.keys(idOrConditions);
 		keys.forEach((key) => validateIdentifier(key, "column"));
 		const baseConditions = keys.map((key) => `${key} = ?`);
-		const baseValues = keys.map((key) => idOrConditions[ key ]);
+		const baseValues = keys.map((key) => idOrConditions[key]);
 
 		const { conditions, values } = buildSearchClause(baseConditions, baseValues);
 		const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
@@ -688,7 +707,7 @@ const updateDataInTable = (table, { id, data, condition = {}, property = "id" })
 	const setKeys = Object.keys(updatePayload);
 	setKeys.forEach((key) => validateIdentifier(key, "column"));
 	const setClause = setKeys.map((key) => `${key} = ?`).join(", ");
-	const setValues = setKeys.map((key) => updatePayload[ key ]);
+	const setValues = setKeys.map((key) => updatePayload[key]);
 
 	// build WHERE clause
 	let whereClause = "";
@@ -698,12 +717,12 @@ const updateDataInTable = (table, { id, data, condition = {}, property = "id" })
 		// backward compatible: use id + property
 		validateIdentifier(property, "property");
 		whereClause = `WHERE ${property} = ?`;
-		whereValues = [ id ];
+		whereValues = [id];
 	} else if (typeof condition === "object" && Object.keys(condition).length > 0) {
 		const conditionKeys = Object.keys(condition);
 		conditionKeys.forEach((key) => validateIdentifier(key, "column"));
 		whereClause = "WHERE " + conditionKeys.map((key) => `${key} = ?`).join(" AND ");
-		whereValues = conditionKeys.map((key) => condition[ key ]);
+		whereValues = conditionKeys.map((key) => condition[key]);
 	} else {
 		throw new Error("No condition provided for update");
 	}
@@ -720,7 +739,7 @@ const deleteDataFromTable = (table, idOrConditions = 1, property = "id") => {
 		const keys = Object.keys(idOrConditions);
 		keys.forEach((key) => validateIdentifier(key, "column"));
 		const conditions = keys.map((key) => `${key} = ?`).join(" AND ");
-		const values = keys.map((key) => idOrConditions[ key ]);
+		const values = keys.map((key) => idOrConditions[key]);
 		stmt = db.prepare(`DELETE FROM ${table} WHERE ${conditions}`);
 		stmt.run(...values);
 	} else {
@@ -761,7 +780,7 @@ const getTableCount = (table, conditions = {}, options = {}) => {
 		if (conditions && typeof conditions === "object" && Object.keys(conditions).length > 0) {
 			Object.keys(conditions).forEach((key) => validateIdentifier(key, "column"));
 			whereClauses = Object.keys(conditions).map((key) => `${key} = ?`);
-			values.push(...Object.keys(conditions).map((key) => conditions[ key ]));
+			values.push(...Object.keys(conditions).map((key) => conditions[key]));
 		}
 
 		const { search } = options || {};
@@ -769,7 +788,7 @@ const getTableCount = (table, conditions = {}, options = {}) => {
 
 		if (search && typeof search === "object") {
 			if (search.equals && typeof search.equals === "object") {
-				for (const [ field, value ] of Object.entries(search.equals)) {
+				for (const [field, value] of Object.entries(search.equals)) {
 					if (value !== undefined && value !== null && value !== "") {
 						whereClauses.push(`${field} = ?`);
 						values.push(value);
@@ -778,7 +797,7 @@ const getTableCount = (table, conditions = {}, options = {}) => {
 			}
 
 			if (search.like && typeof search.like === "object") {
-				for (const [ field, value ] of Object.entries(search.like)) {
+				for (const [field, value] of Object.entries(search.like)) {
 					if (value !== undefined && value !== null && value !== "") {
 						whereClauses.push(`${field} LIKE ?`);
 						values.push(`%${value}%`);
@@ -787,7 +806,7 @@ const getTableCount = (table, conditions = {}, options = {}) => {
 			}
 
 			if (search.in && typeof search.in === "object") {
-				for (const [ field, list ] of Object.entries(search.in)) {
+				for (const [field, list] of Object.entries(search.in)) {
 					if (Array.isArray(list) && list.length > 0) {
 						const placeholders = list.map(() => "?").join(", ");
 						whereClauses.push(`${field} IN (${placeholders})`);
@@ -847,8 +866,8 @@ const getJoinedTableData = ({
 	foreignKey,
 	conditions = {},
 	select = {
-		table1: [ "*" ], // ['id', 'name', 'price'] or ['*'] for all columns
-		table2: [ "*" ], // ['id', 'name'] or ['*'] for all columns
+		table1: ["*"], // ['id', 'name', 'price'] or ['*'] for all columns
+		table2: ["*"], // ['id', 'name'] or ['*'] for all columns
 	},
 	rename = {}, // { 'table1.id': 'product_id', 'table2.name': 'category_name' }
 	pagination = {
@@ -880,7 +899,7 @@ const getJoinedTableData = ({
 			return columns
 				.map((col) => {
 					const renameKey = `${table}.${col}`;
-					const newName = rename[ renameKey ] || col;
+					const newName = rename[renameKey] || col;
 					return `${alias}.${col} as ${newName}`;
 				})
 				.join(", ");
@@ -898,11 +917,11 @@ const getJoinedTableData = ({
 
 		// Add conditions if provided
 		if (Object.keys(conditions).length > 0) {
-			const conditionClauses = Object.entries(conditions).map(([ key, value ]) => {
+			const conditionClauses = Object.entries(conditions).map(([key, value]) => {
 				validateIdentifier(key, "condition column");
 				if (typeof value === "object") {
 					// Handle operators like IN, LIKE, etc.
-					const [ operator, operand ] = Object.entries(value)[ 0 ];
+					const [operator, operand] = Object.entries(value)[0];
 					if (!VALID_SQL_OPERATORS.has(operator.toUpperCase())) {
 						throw new Error(`Invalid SQL operator: ${operator}`);
 					}
@@ -918,7 +937,7 @@ const getJoinedTableData = ({
 		const stmt = db.prepare(query);
 		const values = Object.values(conditions).map((value) => {
 			if (typeof value === "object") {
-				return Object.values(value)[ 0 ];
+				return Object.values(value)[0];
 			}
 			return value;
 		});

@@ -21,7 +21,6 @@
 	--theme-primary-color-8: #1e40af; /* main color you want */
 	--theme-primary-color-9: #1e3a8a; /* darkest */
 
-
 	--theme-secondary-color-0: var(--mantine-color-green-0);
 	--theme-secondary-color-1: var(--mantine-color-green-1);
 	--theme-secondary-color-2: var(--mantine-color-green-2);
@@ -55,6 +54,7 @@
 
 	--theme-grey-color-0: #f9f9f9;
 	--theme-grey-color-1: #e6e6e6;
+	--active-screen-bg: #f8f9fa;
 
 	--theme-success-color: var(--mantine-color-green-6);
 	--theme-remove-color: var(--mantine-color-red-6);
@@ -104,15 +104,18 @@
 
 	--theme-primary-card-color: #1e40af;
 	--theme-secondary-card-color: #196603;
-
 }
 
-.borderRadiusAll{
-	border: 1px solid #dee2e6!important;
-	border-radius:4px;
+.active-screen-bg {
+	background-color: var(--active-screen-bg);
 }
 
-.tableFooterBg{
+.borderRadiusAll {
+	border: 1px solid #dee2e6 !important;
+	border-radius: 4px;
+}
+
+.tableFooterBg {
 	background-color: #f9fafb !important;
 }
 
@@ -189,12 +192,12 @@ button[data-active="true"].mantine-focus-auto.mantine-active.mantine-datatable-p
 #right-options-drawer-button:hover {
 	opacity: 1 !important;
 }
-.NumberInputStylesNames{
-	border: 3px solid #e5dcff!important;
+.NumberInputStylesNames {
+	border: 3px solid #e5dcff !important;
 }
 
 .sales-price-input {
-	border: 3px solid #e5dcff!important;
+	border: 3px solid #e5dcff !important;
 	border-radius: 4px;
 }
 
@@ -292,4 +295,6 @@ button[data-active="true"].mantine-focus-auto.mantine-active.mantine-datatable-p
 
 	--mantine-color-black: white;
 	--theme-tertiary-color-4: #4a4a4a;
+
+	--active-screen-bg: #333333;
 }

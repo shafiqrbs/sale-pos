@@ -149,7 +149,8 @@ export default function Activate() {
 		<Box
 			component="section"
 			mih="100vh"
-			style={{ display: "flex", alignItems: "center", backgroundColor: "#f8f9fa" }}
+			style={{ display: "flex", alignItems: "center" }}
+			className="active-screen-bg"
 		>
 			<Container size="sm" py="xl" pos="relative">
 				<LoadingOverlay visible={spinner} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
@@ -167,7 +168,7 @@ export default function Activate() {
 							<Title order={2} fw={700} c="red.7">
 								{t("ActivateYourAccount")}
 							</Title>
-							<Text c="gray.7" size="sm" mt="xs">
+							<Text c="dark.5" size="sm" mt="xs">
 								{t("EnterLicenseDetails")}
 							</Text>
 						</Box>
@@ -211,7 +212,7 @@ export default function Activate() {
 								</Tooltip>
 
 								<Box>
-									<Text fw={500} mb={5} c="dark">
+									<Text fw={500} mb={5} c="dark.5">
 										{t("ActivationKey")}{" "}
 										<Box component="span" c="red">
 											*
@@ -264,6 +265,7 @@ export default function Activate() {
 										deg: 160,
 									}}
 									variant="gradient"
+									c="#eaeaea"
 								>
 									{t("ActivateAccount")}
 								</Button>

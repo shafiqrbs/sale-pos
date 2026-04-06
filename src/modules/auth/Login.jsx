@@ -10,7 +10,8 @@ import {
 	Box,
 	Loader,
 	Flex,
-	Text, Stack,
+	Text,
+	Stack,
 } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import LoginPage from "@assets/css/LoginPage.module.css";
@@ -28,16 +29,16 @@ import { APP_NAVLINKS, MASTER_APIS } from "@/routes/routes";
 import { APP_NAME, COVER_IMAGE } from "@/constants";
 
 export default function Login() {
-	const [ user, setUser ] = useState(null);
-	const [ loading, setLoading ] = useState(true);
+	const [user, setUser] = useState(null);
+	const [loading, setLoading] = useState(true);
 	const { t } = useTranslation();
 	const navigate = useNavigate();
 	const icon = <IconInfoCircle />;
-	const [ spinner, setSpinner ] = useState(false);
-	const [ errorMessage, setErrorMessage ] = useState("");
-	const [ activated, setActivated ] = useState({ is_activated: false });
+	const [spinner, setSpinner] = useState(false);
+	const [errorMessage, setErrorMessage] = useState("");
+	const [activated, setActivated] = useState({ is_activated: false });
 
-	const [ height, setHeight ] = useState(window.innerHeight);
+	const [height, setHeight] = useState(window.innerHeight);
 
 	useEffect(() => {
 		const handleResize = () => setHeight(window.innerHeight);
@@ -48,7 +49,7 @@ export default function Login() {
 	useEffect(() => {
 		const checkAuth = async () => {
 			try {
-				const [ res, storedConfigData ] = await Promise.all([
+				const [res, storedConfigData] = await Promise.all([
 					window.dbAPI.getDataFromTable("users"),
 					window.dbAPI.getDataFromTable("config-data"),
 				]);
@@ -66,7 +67,7 @@ export default function Login() {
 			}
 		};
 		checkAuth();
-	}, [ navigate ]);
+	}, [navigate]);
 
 	useEffect(() => {
 		async function checkActivation() {
@@ -77,7 +78,7 @@ export default function Login() {
 		checkActivation();
 	}, []);
 
-	useHotkeys([ [ "alt+n", () => document.getElementById("Username")?.focus() ] ], []);
+	useHotkeys([["alt+n", () => document.getElementById("Username")?.focus()]], []);
 
 	const form = useForm({
 		initialValues: { username: "", password: "" },
@@ -163,15 +164,14 @@ export default function Login() {
 	return (
 		<Box className={classes.wrapper}>
 			<Box component="form" onSubmit={form.onSubmit(login)}>
-				<Stack
-					h={height}
-					bg="var(--mantine-color-body)"
-					align="stretch"
-					justify="center"
-					gap="md"
-				>
+				<Stack h={height} bg="var(--mantine-color-body)" align="stretch" justify="center" gap="md">
 					<Paper className={classes.form} radius={0} p={30}>
-						<Title order={2} className={`${classes.title} ${classes.formTitle}`} ta="center" mt="md">
+						<Title
+							order={2}
+							className={`${classes.title} ${classes.formTitle}`}
+							ta="center"
+							mt="md"
+						>
 							Welcome Back to {APP_NAME}
 						</Title>
 						{errorMessage && (
@@ -206,7 +206,7 @@ export default function Login() {
 									disabled={spinner}
 									{...form.getInputProps("username")}
 									onKeyDown={getHotkeyHandler([
-										[ "Enter", () => document.getElementById("Password")?.focus() ],
+										["Enter", () => document.getElementById("Password")?.focus()],
 									])}
 								/>
 							</Tooltip>
@@ -234,7 +234,7 @@ export default function Login() {
 									{...form.getInputProps("password")}
 									id="Password"
 									onKeyDown={getHotkeyHandler([
-										[ "Enter", () => document.getElementById("LoginSubmit")?.click() ],
+										["Enter", () => document.getElementById("LoginSubmit")?.click()],
 									])}
 								/>
 							</Tooltip>
@@ -248,11 +248,18 @@ export default function Login() {
 							id="LoginSubmit"
 							className={`${LoginPage.control} ${classes.loginButton}`}
 							rightSection={<IconLogin />}
+							c="#eaeaea"
 							disabled={spinner}
 						>
 							{spinner ? <Loader color="white" type="dots" size={30} /> : "Login"}
 						</Button>
-						<Flex justify="flex-end" align="center" gap="4xs" mt="xs" className={classes.resetLinks}>
+						<Flex
+							justify="flex-end"
+							align="center"
+							gap="4xs"
+							mt="xs"
+							className={classes.resetLinks}
+						>
 							<Text
 								className="cursor-pointer"
 								fz="sm"
@@ -270,7 +277,11 @@ export default function Login() {
 				</Stack>
 			</Box>
 			<Box className={classes.wrapperImage}>
-				<img style={{ width: '100%', height: '100vh', objectFit: 'cover', objectPosition: "top" }} src={`./${COVER_IMAGE}`} alt={APP_NAME} />
+				<img
+					style={{ width: "100%", height: "100vh", objectFit: "cover", objectPosition: "top" }}
+					src={`./${COVER_IMAGE}`}
+					alt={APP_NAME}
+				/>
 			</Box>
 		</Box>
 	);

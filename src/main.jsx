@@ -42,7 +42,7 @@ const theme = createTheme({
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Provider store={store}>
-      <MantineProvider theme={theme} withNormalizeCSS withGlobalStyles>
+      <MantineProvider theme={theme} defaultColorScheme="auto" withNormalizeCSS withGlobalStyles>
         <ErrorBoundary FallbackComponent={ErrorFallback}>
           <HashRouter>
             <ModalsProvider>

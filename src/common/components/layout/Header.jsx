@@ -51,8 +51,6 @@ import useConfigData from "@hooks/useConfigData";
 import useLoggedInUser from "@hooks/useLoggedInUser";
 import ChangePasswordDrawer from "@components/drawers/ChangePasswordDrawer";
 
-const COLOR_SCHEME_STORAGE_KEY = "mantine-color-scheme";
-
 const COLOR_SCHEME_CONFIG = {
 	auto: { next: "light", Icon: IconDeviceDesktop, label: "System" },
 	light: { next: "dark", Icon: IconSun, label: "Light" },
@@ -91,26 +89,8 @@ export default function Header({ isOnline, toggleNetwork }) {
 	const { colorScheme, setColorScheme } = useMantineColorScheme({ keepTransitions: true });
 
 	function handleToggleColorScheme() {
-		const nextScheme = getColorSchemeMeta(colorScheme).next;
-		setColorScheme(nextScheme);
-		try {
-			localStorage.setItem(COLOR_SCHEME_STORAGE_KEY, nextScheme);
-		} catch (error) {
-			console.error("Error in handleToggleColorScheme:", error);
-		}
+		setColorScheme(getColorSchemeMeta(colorScheme).next);
 	}
-
-	useEffect(() => {
-		try {
-			const savedScheme = localStorage.getItem(COLOR_SCHEME_STORAGE_KEY) || "auto";
-			if (savedScheme === "auto" || savedScheme === "light" || savedScheme === "dark") {
-				setColorScheme(savedScheme);
-			}
-		} catch (error) {
-			console.error("Error in useEffect:", error);
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
 
 	const modalLinks = [
 		{ label: "Dashboard", icon: <IconDashboard size={18} />, pathname: APP_NAVLINKS.DASHBOARD },
