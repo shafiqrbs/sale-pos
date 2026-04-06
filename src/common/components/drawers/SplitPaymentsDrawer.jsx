@@ -28,7 +28,7 @@ export default function SplitPaymentsDrawer({
 }) {
 	const { t } = useTranslation();
 	const { isOnline, mainAreaHeight } = useOutletContext();
-	const { currencySymbol } = useConfigData({ offlineFetch: !isOnline });
+	const { currencySymbol } = useConfigData();
 	const [methods, setMethods] = useState([]);
 
 	const initialPayments = useMemo(() => {

@@ -32,7 +32,7 @@ import useCartOperation from "@hooks/useCartOperation";
 import { showNotification } from "@components/ShowNotificationComponent";
 import { useSelector, useDispatch } from "react-redux";
 import { clearEditingSale } from "@features/checkout";
-import { useOutletContext, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import useConfigData from "@hooks/useConfigData";
 import useLocalProducts from "@hooks/useLocalProducts";
 import { formatDateTime, generateInvoiceId } from "@utils/index";
@@ -46,8 +46,7 @@ import { APP_NAVLINKS } from "@/routes/routes";
 export default function Transaction({ form, tableId = null }) {
 	const { user } = useLoggedInUser();
 	const { t } = useTranslation();
-	const { isOnline } = useOutletContext();
-	const { configData } = useConfigData({ offlineFetch: !isOnline });
+	const { configData } = useConfigData();
 	const [ coreUsers, setCoreUsers ] = useState([]);
 	const { invoiceData, getCartTotal, refetchInvoice } = useCartOperation();
 	const { getProduct } = useLocalProducts({ fetchOnMount: false });

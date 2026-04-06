@@ -3,7 +3,6 @@ import { Box, Group, Text } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
-import { useOutletContext } from "react-router";
 import CheckoutTable from "./CheckoutTable";
 import { useTranslation } from "react-i18next";
 import useConfigData from "@hooks/useConfigData";
@@ -17,8 +16,7 @@ export default function Checkout() {
 	const { t } = useTranslation();
 
 	const { user } = useLoggedInUser();
-	const { isOnline } = useOutletContext();
-	const { currencySymbol } = useConfigData({ offlineFetch: !isOnline });
+	const { currencySymbol } = useConfigData();
 	const { invoiceData, getCartTotal } = useCartOperation();
 
 	const editingSale = useSelector((state) => state.checkout.editingSale);

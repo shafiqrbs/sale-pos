@@ -149,7 +149,6 @@ export default function Layout() {
 				<Footer />
 			</AppShell.Footer>
 			<OptionsDrawer
-				isOnline={isOnline}
 				opened={leftDrawerOpened}
 				onClose={closeLeftDrawer}
 				drawerPosition={drawerPosition}

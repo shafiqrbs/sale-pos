@@ -35,7 +35,7 @@ export default function Table() {
 	const { isOnline } = useOutletContext();
 	const { isOnlinePermissionIncludes } = useLoggedInUser();
 	const { mainAreaHeight } = useMainAreaHeight();
-	const { currencySymbol } = useConfigData({ offlineFetch: true });
+	const { currencySymbol } = useConfigData();
 	const [ page, setPage ] = useState(1);
 	const [ dataSource, setDataSource ] = useState("offline");
 	const [ onlineSearchTerm, setOnlineSearchTerm ] = useState("");

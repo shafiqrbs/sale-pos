@@ -3,14 +3,12 @@ import { IconReceipt } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 import { notifications } from "@mantine/notifications";
 import useConfigData from "@hooks/useConfigData";
-import { useOutletContext } from "react-router";
 import useLoggedInUser from "@hooks/useLoggedInUser";
 
 export default function SalesPrintThermal({ salesViewData, salesItems }) {
 	const { user } = useLoggedInUser();
 	const { t } = useTranslation();
-	const { isOnline } = useOutletContext();
-	const { configData } = useConfigData({ offlineFetch: !isOnline });
+	const { configData } = useConfigData();
 
 	const handlePrint = async () => {
 		const setup = await window.dbAPI.getDataFromTable("printer");

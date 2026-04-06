@@ -14,8 +14,8 @@ import useLocalProducts from "@hooks/useLocalProducts";
 import { formatCurrency } from "@utils/index";
 
 export default function CheckoutTable() {
-	const { mainAreaHeight, isOnline } = useOutletContext();
-	const { allowSalesZeroStock } = useConfigData({ offlineFetch: !isOnline });
+	const { mainAreaHeight } = useOutletContext();
+	const { allowSalesZeroStock } = useConfigData();
 	const { t } = useTranslation();
 	const { invoiceData, increment, decrement, remove, updateQuantity } = useCartOperation();
 	const [ selectedProduct, setSelectedProduct ] = useState(null);

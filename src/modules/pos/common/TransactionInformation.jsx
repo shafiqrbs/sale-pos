@@ -4,14 +4,12 @@ import { Carousel } from "@mantine/carousel";
 import { IconScissors } from "@tabler/icons-react";
 import { calculateVATAmount, formatCurrency } from "@utils/index";
 import { useTranslation } from "react-i18next";
-import { useOutletContext } from "react-router";
 import useCartOperation from "@hooks/useCartOperation";
 import SplitPaymentsDrawer from "@components/drawers/SplitPaymentsDrawer";
 
 export default function TransactionInformation({ form, transactionModeData }) {
 	const { invoiceData, getCartTotal } = useCartOperation();
-	const { isOnline } = useOutletContext();
-	const { configData, currencySymbol } = useConfigData({ offlineFetch: !isOnline });
+	const { configData, currencySymbol } = useConfigData();
 	const { t } = useTranslation();
 	const totalAmount = Math.round(getCartTotal()) - (form.values.discount ?? 0);
 	const dueAmount = Math.abs(totalAmount - (form.values.receive_amount ?? 0));

@@ -12,8 +12,8 @@ import { useDisclosure } from '@mantine/hooks';
 
 export default function ProductTable({ products }) {
     const { t } = useTranslation()
-    const { mainAreaHeight, isOnline } = useOutletContext()
-    const { currencySymbol } = useConfigData({ offlineFetch: !isOnline })
+    const { mainAreaHeight } = useOutletContext()
+    const { currencySymbol } = useConfigData()
     const { increment } = useCartOperation();
     const [ selectedProduct, setSelectedProduct ] = useState(null);
     const [ batchModalOpened, { open: openBatchModal, close: closeBatchModal } ] = useDisclosure(false);

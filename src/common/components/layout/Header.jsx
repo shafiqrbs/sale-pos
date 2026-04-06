@@ -65,7 +65,7 @@ function getColorSchemeMeta(scheme) {
 
 export default function Header({ isOnline, toggleNetwork }) {
 	const { user, isOnlinePermissionIncludes } = useLoggedInUser();
-	const { configData, is_pos } = useConfigData({ offlineFetch: !isOnline });
+	const { configData, is_pos } = useConfigData();
 	const [openedPrinter, { open: openPrinter, close: closePrinter }] = useDisclosure(false);
 	const [
 		changePasswordDrawerOpened,

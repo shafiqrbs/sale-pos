@@ -22,8 +22,8 @@ export default function ProductList() {
 	const [ selectedProduct, setSelectedProduct ] = useState(null);
 	const [ batchModalOpened, { open: openBatchModal, close: closeBatchModal } ] = useDisclosure(false);
 	const { increment } = useCartOperation();
-	const { mainAreaHeight, isOnline } = useOutletContext();
-	const { currencySymbol, allowSalesZeroStock } = useConfigData({ offlineFetch: !isOnline });
+	const { mainAreaHeight } = useOutletContext();
+	const { currencySymbol, allowSalesZeroStock } = useConfigData();
 	const { t } = useTranslation()
 	const {
 		products: allProducts,

@@ -12,7 +12,7 @@ export default function Details({ loading, salesViewData }) {
   const { isOnline, mainAreaHeight } = useOutletContext()
   const { t } = useTranslation();
   const [ printA4, setPrintA4 ] = useState(false);
-  const { configData } = useConfigData({ offlineFetch: !isOnline });
+  const { configData } = useConfigData();
 
   const salesItems =  Array.isArray(salesViewData?.sales_items)
       ? salesViewData?.sales_items

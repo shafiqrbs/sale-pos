@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import useConfigData from "./useConfigData";
 import { calculateSubTotalWithVAT, withInvoiceId } from "@utils/index";
 // import { useInlineUpdateMutation } from "@services/pos";
-import { useOutletContext } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 import { setCartData } from "@features/checkout";
 import { useEffect, useCallback } from "react";
@@ -12,8 +11,7 @@ export default function useCartOperation(tableId = null) {
 	const { t } = useTranslation();
 	const invoiceData = useSelector((state) => state.checkout.invoiceData);
 	const dispatch = useDispatch();
-	const { isOnline } = useOutletContext();
-	const { configData } = useConfigData({ offlineFetch: !isOnline });
+	const { configData } = useConfigData();
 	// const [inlineUpdate] = useInlineUpdateMutation();
 
 	const refetchInvoice = useCallback(async () => {

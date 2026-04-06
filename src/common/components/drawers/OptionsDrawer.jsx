@@ -87,10 +87,10 @@ const DRAWER_MENU = [
 
 ];
 
-export default function OptionsDrawer({ isOnline, opened, onClose, drawerPosition, setDrawerPosition }) {
+export default function OptionsDrawer({ opened, onClose, drawerPosition, setDrawerPosition }) {
 	const navigate = useNavigate();
 	const location = useLocation();
-	const { configData } = useConfigData({ offlineFetch: !isOnline });
+	const { configData } = useConfigData();
 	const handleSubmenuClick = (pathname) => {
 		navigate(pathname);
 		onClose();

@@ -24,4 +24,4 @@ export const extendedCoreApiSlice = apiSlice.injectEndpoints({
     }),
 });
 
-export const { useGetConfigQuery, useChangePasswordMutation } = extendedCoreApiSlice;
+export const { useGetConfigQuery, useLazyGetConfigQuery, useChangePasswordMutation } = extendedCoreApiSlice;
