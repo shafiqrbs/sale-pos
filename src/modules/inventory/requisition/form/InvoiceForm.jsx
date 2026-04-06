@@ -33,8 +33,6 @@ export default function InvoiceForm({ refetch, onAddItem, onVendorChange }) {
 	const { categories } = useGetCategories();
 	const { vendors } = useCoreVendors();
 
-	console.log(vendors);
-
 	const { data: productCategoryData } = useGetInventoryCategoryQuery({ type: "parent" });
 	const { mainAreaHeight } = useMainAreaHeight();
 	const [isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer }] =
@@ -175,7 +173,7 @@ export default function InvoiceForm({ refetch, onAddItem, onVendorChange }) {
 								<SelectForm
 									name="vendor_id"
 									form={itemsForm}
-									dropdownValue={vendors?.data?.map((vendor) => ({
+									dropdownValue={vendors?.map((vendor) => ({
 										value: String(vendor.id),
 										label: vendor.name,
 									}))}

@@ -21,7 +21,7 @@ export default function VendorInfoSection({ itemsForm }) {
 				<SelectForm
 					name="vendor_id"
 					form={itemsForm}
-					dropdownValue={vendors?.data?.map((vendor) => ({
+					dropdownValue={vendors?.map((vendor) => ({
 						value: String(vendor.id),
 						label: vendor.name,
 					}))}
