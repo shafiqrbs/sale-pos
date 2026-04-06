@@ -73,7 +73,7 @@ export default function NewIndex() {
 				refetch();
 
 				const preservedValues = {
-					vendor_id: itemsForm.values.vendor_id,
+					vendor_id: itemsForm.values.vendor_id?.toString(),
 					vendorName: itemsForm.values.vendorName,
 					vendorPhone: itemsForm.values.vendorPhone,
 					vendorEmail: itemsForm.values.vendorEmail,
@@ -81,6 +81,7 @@ export default function NewIndex() {
 					transactionModeId: itemsForm.values.transactionModeId,
 				};
 				itemsForm.reset();
+
 				Object.entries(preservedValues).forEach(([ key, value ]) => {
 					itemsForm.setFieldValue(key, value);
 				});

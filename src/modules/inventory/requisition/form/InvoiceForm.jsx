@@ -20,15 +20,15 @@ import useCoreVendors from "@hooks/useCoreVendors";
 import { useTranslation } from "react-i18next";
 
 export default function InvoiceForm({ refetch, onAddItem, onVendorChange }) {
-	const [productResetKey, setProductResetKey] = useState(0);
-	const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+	const [ productResetKey, setProductResetKey ] = useState(0);
+	const [ selectedCategoryId, setSelectedCategoryId ] = useState(null);
 	const { currencySymbol } = useConfigData();
 	const { t } = useTranslation();
 	const itemsForm = useForm(invoiceItemFormRequest(t));
 	const { categories: productCategoryData } = useGetCategories();
 	const { vendors } = useCoreVendors();
 	const { mainAreaHeight } = useMainAreaHeight();
-	const [isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer }] =
+	const [ isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer } ] =
 		useDisclosure(false);
 
 	// =============== declarative product list — auto-fetches on vendor/category change ===============
@@ -104,11 +104,13 @@ export default function InvoiceForm({ refetch, onAddItem, onVendorChange }) {
 	};
 
 	const handleResetInvoiceItemForm = () => {
+		const previousVendorId = itemsForm.values.vendor_id;
 		itemsForm.reset();
+		if (previousVendorId) {
+			itemsForm.setFieldValue("vendor_id", previousVendorId);
+		}
 		setProductResetKey((prev) => prev + 1);
-		requestAnimationFrame(() => {
-			document.getElementById("productId")?.open();
-		});
+		focusProductSelect();
 	};
 
 	const focusProductSelect = () => {
@@ -123,7 +125,7 @@ export default function InvoiceForm({ refetch, onAddItem, onVendorChange }) {
 		itemsForm.setFieldValue("unit", option?.unit);
 	};
 
-	useHotkeys([["alt+a", () => document.getElementById("EntityFormSubmit")?.click()]]);
+	useHotkeys([ [ "alt+a", () => document.getElementById("EntityFormSubmit")?.click() ] ]);
 
 	return (
 		<>
@@ -145,7 +147,7 @@ export default function InvoiceForm({ refetch, onAddItem, onVendorChange }) {
 					Vendor Requisition
 				</Box>
 				<Divider />
-				<ScrollArea h={containerHeight} bg={"#f0f4f83d"} type="never">
+				<ScrollArea h={containerHeight} bg="#f0f4f83d" type="never">
 					<Box p="sm">
 						<Flex
 							mt="md"
@@ -273,7 +275,7 @@ export default function InvoiceForm({ refetch, onAddItem, onVendorChange }) {
 			<AddProductDrawer
 				productDrawer={isProductDrawerOpened}
 				closeProductDrawer={closeProductDrawer}
-				setStockProductRestore={() => {}}
+				setStockProductRestore={() => { }}
 				focusField="productId"
 				fieldPrefix=""
 			/>
