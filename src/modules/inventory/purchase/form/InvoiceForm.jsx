@@ -13,11 +13,13 @@ import {
 import { useForm } from "@mantine/form";
 import {
 	IconBarcode,
-	IconCurrencyTaka, IconNumber,
+	IconCurrencyTaka,
+	IconNumber,
 	IconPercentage,
 	IconPlus,
 	IconRefresh,
-	IconShoppingCart, IconSortAscendingNumbers,
+	IconShoppingCart,
+	IconSortAscendingNumbers,
 } from "@tabler/icons-react";
 
 import useMainAreaHeight from "@hooks/useMainAreaHeight";
@@ -36,19 +38,19 @@ import { MonthPickerInput } from "@mantine/dates";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useGetInventoryCategoryQuery } from "@services/settings";
 import { ALLOW_MEASUREMENT_PURCHASE } from "@constants/index";
+import useGetCategories from "@hooks/useGetCategories";
 
 export default function InvoiceForm({ refetch, onAddItem }) {
 	const { t } = useTranslation();
-	const [ productResetKey, setProductResetKey ] = useState(0);
-	const [ selectedCategoryId, setSelectedCategoryId ] = useState(null);
+	const [productResetKey, setProductResetKey] = useState(0);
+	const [selectedCategoryId, setSelectedCategoryId] = useState(null);
 	const { currencySymbol } = useConfigData();
 	const itemsForm = useForm(invoiceItemFormRequest(t));
 
-	const { data: productCategoryData } = useGetInventoryCategoryQuery({ type: "parent" });
+	const { categories: productCategoryData } = useGetCategories();
 	const { mainAreaHeight } = useMainAreaHeight();
-	const [ isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer } ] =
+	const [isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer }] =
 		useDisclosure(false);
 
 	// =============== declarative product list — auto-fetches on category change ===============
@@ -59,13 +61,14 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 
 	// =============== stable reference so VirtualSearchSelect's setOptions effect only fires when products actually change, not on every keystroke ===============
 	const productOptions = useMemo(
-		() => products?.map((product) => ({
-			value: String(product.id),
-			label: `${product.display_name} [${product.quantity}] ${product.unit_name} - ${currencySymbol}${product.purchase_price}`,
-			purchase_price: product.purchase_price,
-			unit: product.unit_name,
-		})),
-		[ products, currencySymbol ]
+		() =>
+			products?.map((product) => ({
+				value: String(product.id),
+				label: `${product.display_name} [${product.quantity}] ${product.unit_name} - ${currencySymbol}${product.purchase_price}`,
+				purchase_price: product.purchase_price,
+				unit: product.unit_name,
+			})),
+		[products, currencySymbol]
 	);
 
 	const containerHeight = mainAreaHeight - 162;
@@ -73,18 +76,26 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 	const isProductSelected = !!itemsForm.values.productId;
 
 	const selectedProduct = useMemo(
-		() => isProductSelected
-			? products?.find((product) => String(product.id) === String(itemsForm.values.productId)) ?? null
-			: null,
+		() =>
+			isProductSelected
+				? (products?.find((product) => String(product.id) === String(itemsForm.values.productId)) ??
+					null)
+				: null,
 		// eslint-disable-next-line react-hooks/exhaustive-deps -- isProductSelected is derived from itemsForm.values.productId which is already in deps
-		[ products, itemsForm.values.productId ]
+		[products, itemsForm.values.productId]
 	);
 
 	const productMeasurements = parseJsonArray(selectedProduct?.measurements);
 
-	const measurementOptions = productMeasurements?.map((measurement) => ({ label: measurement.unit_name, value: measurement.unit_name, quantity: measurement.quantity, is_purchase: measurement.is_purchase }));
+	const measurementOptions = productMeasurements?.map((measurement) => ({
+		label: measurement.unit_name,
+		value: measurement.unit_name,
+		quantity: measurement.quantity,
+		is_purchase: measurement.is_purchase,
+	}));
 
-	const showMeasurementFields = ALLOW_MEASUREMENT_PURCHASE && isProductSelected && productMeasurements.length > 0;
+	const showMeasurementFields =
+		ALLOW_MEASUREMENT_PURCHASE && isProductSelected && productMeasurements.length > 0;
 
 	// =============== when measurement or measurement_quantity changes, derive quantity = measurement_quantity × selected measurement's base quantity ===============
 	useEffect(() => {
@@ -103,14 +114,15 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 
 		itemsForm.setFieldValue("quantity", derivedQuantity > 0 ? String(derivedQuantity) : "");
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ itemsForm.values.measurement, itemsForm.values.measurement_quantity ]);
-
+	}, [itemsForm.values.measurement, itemsForm.values.measurement_quantity]);
 
 	useEffect(() => {
 		if (!showMeasurementFields) return;
-		itemsForm.setFieldValue("measurement", measurementOptions.find((option) => option.is_purchase === 1)?.value?.toString());
-
-	}, [ showMeasurementFields ])
+		itemsForm.setFieldValue(
+			"measurement",
+			measurementOptions.find((option) => option.is_purchase === 1)?.value?.toString()
+		);
+	}, [showMeasurementFields]);
 
 	// =============== ref flag: tells the mrp+discount effect to skip when quantity already computed both fields in one setValues call, collapsing 3 renders into 2 ===============
 	const quantityComputedBothFields = useRef(false);
@@ -128,7 +140,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 			purchase_price: (purchasePrice * quantity).toFixed(2) ?? "",
 		});
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ itemsForm.values.quantity, selectedProduct?.id ]);
+	}, [itemsForm.values.quantity, selectedProduct?.id]);
 
 	// =============== discount changed manually → update purchase_price; skipped when the quantity effect already handled it ===============
 	useEffect(() => {
@@ -140,9 +152,12 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 		const quantity = Number(itemsForm.values.quantity) || 0;
 		const purchasePrice = Number(selectedProduct?.purchase_price) * quantity || 0;
 
-		itemsForm.setFieldValue("purchase_price", (purchasePrice - ((purchasePrice * discountPercent) / 100)).toFixed(2) ?? "");
+		itemsForm.setFieldValue(
+			"purchase_price",
+			(purchasePrice - (purchasePrice * discountPercent) / 100).toFixed(2) ?? ""
+		);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ itemsForm.values.item_percent, itemsForm.values.quantity ]);
+	}, [itemsForm.values.item_percent, itemsForm.values.quantity]);
 
 	const handleAddItemToPurchaseForm = async () => {
 		const { productId, purchase_price, total_mrp, quantity, expired_date } = itemsForm.values;
@@ -163,7 +178,8 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 
 		// =============== form stores batch totals — divide by quantity to get per-unit values for the table row ===============
 		const unitMrp = quantityNumber > 0 ? (Number(total_mrp) || 0) / quantityNumber : 0;
-		const unitPurchasePrice = quantityNumber > 0 ? (Number(purchase_price) || 0) / quantityNumber : 0;
+		const unitPurchasePrice =
+			quantityNumber > 0 ? (Number(purchase_price) || 0) / quantityNumber : 0;
 
 		// =============== resolve category_name from category_id using local categories ===============
 		const categoryId = selectedProduct.category_id ?? null;
@@ -201,8 +217,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 	};
 
 	const invoiceSubTotal =
-		(Number(itemsForm.values.quantity) || 0) *
-		(Number(itemsForm.values.purchase_price) || 0);
+		(Number(itemsForm.values.quantity) || 0) * (Number(itemsForm.values.purchase_price) || 0);
 
 	const handleResetInvoiceItemForm = () => {
 		itemsForm.reset();
@@ -219,7 +234,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 		setTimeout(() => document.getElementById("quantity")?.focus(), 0);
 	};
 
-	useHotkeys([ [ "alt+a", () => document.getElementById("EntityFormSubmit")?.click() ] ]);
+	useHotkeys([["alt+a", () => document.getElementById("EntityFormSubmit")?.click()]]);
 
 	return (
 		<>
@@ -230,11 +245,18 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 				bg="white"
 				className="borderRadiusAll"
 			>
-				<Box p="sm" fz="sm" fw={600} bg={'#1e40af'} c={'white'} className="boxBackground textColor borderRadiusAll">
+				<Box
+					p="sm"
+					fz="sm"
+					fw={600}
+					bg={"#1e40af"}
+					c={"white"}
+					className="boxBackground textColor borderRadiusAll"
+				>
 					Vendor Purchase Invoice
 				</Box>
 				<Divider />
-				<ScrollArea h={containerHeight} bg={'#f0f4f83d'} type="never">
+				<ScrollArea h={containerHeight} bg={"#f0f4f83d"} type="never">
 					<Box p="sm">
 						<InputForm
 							form={itemsForm}
@@ -251,7 +273,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 							placeholder={t("AllCategories")}
 							data={[
 								{ value: "", label: t("AllCategories") },
-								...(productCategoryData?.data?.map((item) => ({
+								...(productCategoryData?.map((item) => ({
 									value: String(item.id),
 									label: item.name,
 								})) ?? []),
@@ -263,7 +285,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 							clearable
 							searchable
 						/>
-						<Flex mt="md" gap="4" align="flex-end" bg={'#1e40af'} p={'xs'} ml={'-xs'} mr={'-xs'} >
+						<Flex mt="md" gap="4" align="flex-end" bg={"#1e40af"} p={"xs"} ml={"-xs"} mr={"-xs"}>
 							<Box w="100%">
 								<FormValidationWrapper
 									errorMessage={t("ProductRequired")}
@@ -296,7 +318,6 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 						</Flex>
 
 						<Grid gutter={4} mt="sm">
-
 							{showMeasurementFields && (
 								<>
 									<Grid.Col span={4}>
@@ -437,14 +458,14 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 					className="borderRadiusAll"
 					bg="var(--theme-primary-card-color)"
 				>
-					<Text fz="sm" fw={500} c='white'>
+					<Text fz="sm" fw={500} c="white">
 						Sub Total
 					</Text>
-					<Flex align="center" gap="4" pr='md'>
-						<Text fz="sm" c='white' fw={500}>
+					<Flex align="center" gap="4" pr="md">
+						<Text fz="sm" c="white" fw={500}>
 							{currencySymbol}
 						</Text>
-						<Text fz="sm" fw={600} c='white'>
+						<Text fz="sm" fw={600} c="white">
 							{formatCurrency(invoiceSubTotal)}
 						</Text>
 					</Flex>
@@ -478,7 +499,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 			<AddProductDrawer
 				productDrawer={isProductDrawerOpened}
 				closeProductDrawer={closeProductDrawer}
-				setStockProductRestore={() => { }}
+				setStockProductRestore={() => {}}
 				focusField="productId"
 				fieldPrefix=""
 			/>

@@ -15,7 +15,6 @@ import FormValidationWrapper from "@components/form-builders/FormValidationWrapp
 import VirtualSearchSelect from "@components/form-builders/VirtualSearchSelect";
 
 import React, { useState } from "react";
-import { useGetInventoryCategoryQuery } from "@services/settings";
 import SelectForm from "@components/form-builders/SelectForm";
 import useCoreVendors from "@hooks/useCoreVendors";
 import { useTranslation } from "react-i18next";
@@ -26,10 +25,8 @@ export default function InvoiceForm({ refetch, onAddItem, onVendorChange }) {
 	const { currencySymbol } = useConfigData();
 	const { t } = useTranslation();
 	const itemsForm = useForm(invoiceItemFormRequest(t));
-	const { categories } = useGetCategories();
+	const { categories: productCategoryData } = useGetCategories();
 	const { vendors } = useCoreVendors();
-
-	const { data: productCategoryData } = useGetInventoryCategoryQuery({ type: "parent" });
 	const { mainAreaHeight } = useMainAreaHeight();
 	const [isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer }] =
 		useDisclosure(false);
@@ -76,7 +73,7 @@ export default function InvoiceForm({ refetch, onAddItem, onVendorChange }) {
 
 		// =============== resolve category_name from category_id using local categories ===============
 		const categoryId = selectedProduct.category_id ?? null;
-		const categoryName = categories?.find((cat) => cat.id === categoryId)?.name ?? "";
+		const categoryName = productCategoryData?.find((cat) => cat.id === categoryId)?.name ?? "";
 
 		const newItem = {
 			product_id: selectedProduct.id,
@@ -187,7 +184,7 @@ export default function InvoiceForm({ refetch, onAddItem, onVendorChange }) {
 									placeholder={t("AllCategories")}
 									data={[
 										{ value: "", label: t("AllCategories") },
-										...(productCategoryData?.data?.map((item) => ({
+										...(productCategoryData?.map((item) => ({
 											value: String(item.id),
 											label: item.name,
 										})) ?? []),

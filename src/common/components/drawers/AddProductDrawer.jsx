@@ -15,10 +15,10 @@ import GlobalDrawer from "./GlobalDrawer.jsx";
 import { useEffect, useRef } from "react";
 import { useAddProductMutation } from "@services/product.js";
 import {
-	useGetInventoryCategoryQuery,
 	useGetInventoryParticularQuery,
 	useGetInventorySettingsQuery,
 } from "@services/settings.js";
+import useGetCategories from "@hooks/useGetCategories";
 import { useTranslation } from "react-i18next";
 import { useForm } from "@mantine/form";
 import { modals } from "@mantine/modals";
@@ -46,7 +46,7 @@ export default function AddProductDrawer({
 	const { data: productTypeData } = useGetInventorySettingsQuery({
 		"dropdown-type": "product-type",
 	});
-	const { data: categoryData } = useGetInventoryCategoryQuery({ type: "parent" });
+	const { categories: categoryData } = useGetCategories();
 	const { data: productUnitData } = useGetInventoryParticularQuery({
 		"dropdown-type": "product-unit",
 	});
@@ -156,7 +156,7 @@ export default function AddProductDrawer({
 														nextField={fieldPrefix + "name"}
 														name={"category_id"}
 														form={productAddedForm}
-														dropdownValue={categoryData?.data?.map((item) => ({
+														dropdownValue={categoryData?.map((item) => ({
 															value: String(item.id),
 															label: item.name,
 														}))}
