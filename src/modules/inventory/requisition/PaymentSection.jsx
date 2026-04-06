@@ -104,7 +104,8 @@ export default function PaymentSection({
 										tooltip={t("VendorRequired")}
 									/>
 								</Grid.Col>
-								<Grid.Col span={6}>
+								<Grid.Col span={2}><Text mt={'xs'} ta={'right'} fz={'xs'}>{t("Invoice")}</Text></Grid.Col>
+								<Grid.Col span={4}>
 									<DateInputForm
 										name="invoice_date"
 										form={itemsForm}
@@ -117,7 +118,8 @@ export default function PaymentSection({
 										{...itemsForm.getInputProps("invoice_date")}
 									/>
 								</Grid.Col>
-								<Grid.Col span={6}>
+								<Grid.Col span={2}><Text mt={'xs'} ta={'right'} fz={'xs'}>{t("Expected")}</Text></Grid.Col>
+								<Grid.Col span={4}>
 									<DateInputForm
 										name="expected_date"
 										form={itemsForm}
