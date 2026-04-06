@@ -1,11 +1,11 @@
 {
-	"name": "pos-system",
+	"name": "poskeeper",
 	"private": true,
-	"version": "0.1.1",
+	"version": "1.1.0",
 	"type": "module",
 	"main": "./index.cjs",
 	"license": "MIT",
-	"description": "Desktop based POS App",
+	"description": "PosKeeper - A smart desktop point-of-sale system for managing sales, inventory, purchases, and business operations.",
 	"author": {
 		"name": "Sharif Md. Minhaz",
 		"email": "minhaz.rbs@gmail.com"
@@ -90,8 +90,8 @@
 		"vite": "^7.2.4"
 	},
 	"build": {
-		"appId": "com.pos.id",
-		"productName": "POS App",
+		"appId": "com.poskeeper.app",
+		"productName": "PosKeeper",
 		"directories": {
 			"output": "dist"
 		},
@@ -101,9 +101,9 @@
 			"index.cjs"
 		],
 		"win": {
-			"publisherName": "POS App",
-			"artifactName": "pos-installer.exe",
-			"icon": "icons/list.ico",
+			"publisherName": "PosKeeper",
+			"artifactName": "poskeeper-installer.exe",
+			"icon": "icons/brand.ico",
 			"publish": [
 				"github"
 			],
@@ -118,7 +118,7 @@
 			]
 		},
 		"linux": {
-			"icon": "icons/list.png",
+			"icon": "icons/brand.png",
 			"target": "AppImage",
 			"category": "Business",
 			"maintainer": "Sharif Md. Minhaz <minhaz.rbs@gmail.com>"
@@ -127,7 +127,7 @@
 			"oneClick": false,
 			"perMachine": false,
 			"allowToChangeInstallationDirectory": true,
-			"installerIcon": "icons/list.ico",
+			"installerIcon": "icons/brand.ico",
 			"createDesktopShortcut": true,
 			"createStartMenuShortcut": true
 		}
