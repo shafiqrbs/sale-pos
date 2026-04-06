@@ -8,12 +8,12 @@ import {
 	IconRefresh,
 	IconShoppingCart,
 } from "@tabler/icons-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import InputNumberForm from "@components/form-builders/InputNumberForm";
 import InputForm from "@components/form-builders/InputForm";
 import AddProductDrawer from "@components/drawers/AddProductDrawer";
-import useLocalProducts from "@hooks/useLocalProducts";
+import useLocalProductList from "@hooks/useLocalProductList";
 import useGetCategories from "@hooks/useGetCategories";
 import useConfigData from "@hooks/useConfigData";
 import { useDisclosure, useHotkeys } from "@mantine/hooks";
@@ -26,25 +26,18 @@ import { useTranslation } from "react-i18next";
 
 export default function InvoiceForm({ refetch, onAddItem }) {
 	const { t } = useTranslation();
-	const [products, setProducts] = useState([]);
 	const [productResetKey, setProductResetKey] = useState(0);
 	const { currencySymbol } = useConfigData();
 	const itemsForm = useForm(salesItemFormRequest(t));
-	const { getLocalProducts } = useLocalProducts({ fetchOnMount: false });
 	const { categories } = useGetCategories();
 
 	const [isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer }] =
 		useDisclosure(false);
 
-	// =============== fetch products in db entry order (id ASC), not by name or created_at ===============
-	useEffect(() => {
-		getLocalProducts({ category_id: null }, "id", { orderBy: "product_name ASC" }).then(
-			(fetchedProducts) => {
-				setProducts(fetchedProducts);
-			}
-		);
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	// =============== declarative product list — fetches all products on mount ===============
+	const { products } = useLocalProductList({
+		queryOptions: { orderBy: "product_name ASC" },
+	});
 
 	const productOptions = products?.map((product) => ({
 		value: String(product.id),

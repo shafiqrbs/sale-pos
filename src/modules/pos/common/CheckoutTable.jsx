@@ -10,7 +10,7 @@ import BatchProductModal from "@components/modals/BatchProductModal";
 import { useDisclosure } from "@mantine/hooks";
 import useConfigData from "@hooks/useConfigData";
 import { showNotification } from "@components/ShowNotificationComponent";
-import useLocalProducts from "@hooks/useLocalProducts";
+import useLocalProductLookup from "@hooks/useLocalProductLookup";
 import { formatCurrency } from "@utils/index";
 
 export default function CheckoutTable() {
@@ -20,7 +20,7 @@ export default function CheckoutTable() {
 	const { invoiceData, increment, decrement, remove, updateQuantity } = useCartOperation();
 	const [ selectedProduct, setSelectedProduct ] = useState(null);
 	const [ batchModalOpened, { open: openBatchModal, close: closeBatchModal } ] = useDisclosure(false);
-	const { getProduct } = useLocalProducts({ fetchOnMount: false });
+	const { getProduct } = useLocalProductLookup();
 	const [ inputValues, setInputValues ] = useState({});
 
 	// =============== sync input values with cart data ================

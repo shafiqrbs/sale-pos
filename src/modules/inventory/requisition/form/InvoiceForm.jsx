@@ -5,7 +5,7 @@ import { IconPlus, IconShoppingCart, IconSortAscendingNumbers } from "@tabler/ic
 import useMainAreaHeight from "@hooks/useMainAreaHeight";
 import InputNumberForm from "@components/form-builders/InputNumberForm";
 import AddProductDrawer from "@components/drawers/AddProductDrawer";
-import useLocalProducts from "@hooks/useLocalProducts";
+import useLocalProductList from "@hooks/useLocalProductList";
 import useGetCategories from "@hooks/useGetCategories";
 import useConfigData from "@hooks/useConfigData";
 import { useDisclosure, useHotkeys } from "@mantine/hooks";
@@ -14,22 +14,18 @@ import { invoiceItemFormRequest } from "../helpers/request";
 import FormValidationWrapper from "@components/form-builders/FormValidationWrapper";
 import VirtualSearchSelect from "@components/form-builders/VirtualSearchSelect";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useGetInventoryCategoryQuery } from "@services/settings";
 import SelectForm from "@components/form-builders/SelectForm";
 import useCoreVendors from "@hooks/useCoreVendors";
 import { useTranslation } from "react-i18next";
 
 export default function InvoiceForm({ refetch, onAddItem, onVendorChange }) {
-	const [products, setProducts] = useState([]);
 	const [productResetKey, setProductResetKey] = useState(0);
 	const [selectedCategoryId, setSelectedCategoryId] = useState(null);
 	const { currencySymbol } = useConfigData();
 	const { t } = useTranslation();
 	const itemsForm = useForm(invoiceItemFormRequest(t));
-	const { getLocalProducts } = useLocalProducts({
-		fetchOnMount: false,
-	});
 	const { categories } = useGetCategories();
 	const { vendors } = useCoreVendors();
 
@@ -38,20 +34,14 @@ export default function InvoiceForm({ refetch, onAddItem, onVendorChange }) {
 	const [isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer }] =
 		useDisclosure(false);
 
-	// =============== fetch products in db entry order (id ASC), same as sales product select ===============
-	useEffect(() => {
-		const filterCondition = {
+	// =============== declarative product list — auto-fetches on vendor/category change ===============
+	const { products } = useLocalProductList({
+		condition: {
 			vendor_id: itemsForm.values.vendor_id,
 			category_id: selectedCategoryId ? selectedCategoryId : undefined,
-		};
-
-		getLocalProducts(filterCondition, "id", {
-			orderBy: "product_name ASC",
-		}).then((fetchedProducts) => {
-			setProducts(fetchedProducts);
-		});
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [selectedCategoryId, itemsForm.values.vendor_id]);
+		},
+		queryOptions: { orderBy: "product_name ASC" },
+	});
 
 	const productOptions = products?.map((product) => ({
 		value: String(product.id),

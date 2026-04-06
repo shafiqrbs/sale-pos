@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { Image, ScrollArea, Box, Card, Grid, Text, Flex } from "@mantine/core";
 import { useOutletContext } from "react-router";
 import useConfigData from "@hooks/useConfigData";
@@ -12,7 +12,7 @@ import ProductPagination from "./ProductPagination";
 import noProductImg from "@assets/images/not-found.webp";
 import noProductImgFound from "@assets/images/no-image.png";
 import { formatCurrency } from "@utils/index";
-import useLocalProducts from "@hooks/useLocalProducts";
+import useLocalProductList from "@hooks/useLocalProductList";
 import { useTranslation } from "react-i18next";
 
 const ITEMS_PER_PAGE = 24;
@@ -25,12 +25,6 @@ export default function ProductList() {
 	const { mainAreaHeight } = useOutletContext();
 	const { currencySymbol, allowSalesZeroStock } = useConfigData();
 	const { t } = useTranslation()
-	const {
-		products: allProducts,
-		totalCount: totalProducts,
-		getLocalProducts,
-		getProductCount,
-	} = useLocalProducts({ fetchOnMount: false });
 	const [ filter, setFilter ] = useState({
 		categories: [],
 		search: "",
@@ -38,59 +32,45 @@ export default function ProductList() {
 		view: "grid", // grid | list | minimal
 	});
 
-	// =============== reusable function to fetch products with current filters ================
-	const fetchProductsPage = useCallback(async () => {
-		try {
-			const offset = (activePage - 1) * ITEMS_PER_PAGE;
+	// =============== declarative local product list — auto-fetches on filter/page change ================
+	const normalizedSearchValue = filter.search.trim();
+	const normalizedBarcodeValue = filter.barcode.trim();
+	const selectedCategoryIds = filter.categories;
 
-			const normalizedSearchValue = filter.search.trim();
-			const normalizedBarcodeValue = filter.barcode.trim();
-			const selectedCategoryIds = filter.categories;
+	const searchConditions = {
+		like: {
+			display_name: normalizedSearchValue || undefined,
+			barcode: normalizedBarcodeValue || undefined,
+		},
+		in: {
+			category_id:
+				Array.isArray(selectedCategoryIds) && selectedCategoryIds.length > 0
+					? selectedCategoryIds
+					: undefined,
+		},
+	};
 
-			const searchConditions = {
-				like: {
-					display_name: normalizedSearchValue || undefined,
-					barcode: normalizedBarcodeValue || undefined,
-				},
-				in: {
-					category_id:
-						Array.isArray(selectedCategoryIds) && selectedCategoryIds.length > 0
-							? selectedCategoryIds
-							: undefined,
-				},
-			};
-
-			await getLocalProducts({}, "id", {
-				limit: ITEMS_PER_PAGE,
-				offset,
-				search: searchConditions,
-				orderBy: "id ASC"
-			});
-
-			await getProductCount(
-				{},
-				{
-					search: searchConditions,
-				}
-			);
-		} catch (error) {
-			console.error("Failed to fetch paginated products from sqlite:", error);
-		}
-	}, [ activePage, filter, getLocalProducts, getProductCount ]);
-
-	// =============== fetch products on mount and when filters change ================
-	useEffect(() => {
-		fetchProductsPage();
-	}, [ fetchProductsPage ]);
+	const {
+		products: allProducts,
+		totalCount: totalProducts,
+		refetch: refetchProducts,
+	} = useLocalProductList({
+		queryOptions: {
+			limit: ITEMS_PER_PAGE,
+			offset: (activePage - 1) * ITEMS_PER_PAGE,
+			search: searchConditions,
+			orderBy: "id ASC",
+		},
+	});
 
 	// =============== listen for product updates from sales and refetch ================
 	useEffect(() => {
-		window.addEventListener("products-updated", fetchProductsPage);
+		window.addEventListener("products-updated", refetchProducts);
 
 		return () => {
-			window.removeEventListener("products-updated", fetchProductsPage);
+			window.removeEventListener("products-updated", refetchProducts);
 		};
-	}, [ fetchProductsPage ]);
+	}, [ refetchProducts ]);
 
 	// =============== check if product should be disabled ================
 	const isProductDisabled = (product) => {

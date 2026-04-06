@@ -34,7 +34,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { clearEditingSale } from "@features/checkout";
 import { useNavigate } from "react-router";
 import useConfigData from "@hooks/useConfigData";
-import useLocalProducts from "@hooks/useLocalProducts";
+import useLocalProductLookup from "@hooks/useLocalProductLookup";
 import { formatDateTime, generateInvoiceId } from "@utils/index";
 import CustomerDrawer from "@components/drawers/CustomerDrawer";
 import { useDisclosure, useHotkeys } from "@mantine/hooks";
@@ -49,7 +49,7 @@ export default function Transaction({ form, tableId = null }) {
 	const { configData } = useConfigData();
 	const [ coreUsers, setCoreUsers ] = useState([]);
 	const { invoiceData, getCartTotal, refetchInvoice } = useCartOperation();
-	const { getProduct } = useLocalProducts({ fetchOnMount: false });
+	const { getProduct } = useLocalProductLookup();
 	const [ isLoading, setIsLoading ] = useState({ saveAll: false, save: false, print: false });
 	const [ customersDropdownData, setCustomersDropdownData ] = useState([]);
 	const [ customerDrawerOpened, { open: customerDrawerOpen, close: customerDrawerClose } ] =

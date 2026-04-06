@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import {
 	Box,
 	Flex,
@@ -23,7 +23,8 @@ import {
 import { DataTable } from "mantine-datatable";
 import tableCss from "@assets/css/Table.module.css";
 import useMainAreaHeight from "@hooks/useMainAreaHeight.js";
-import useLocalProducts from "@hooks/useLocalProducts.js";
+import useLocalProductList from "@hooks/useLocalProductList.js";
+import useSyncProducts from "@hooks/useSyncProducts.js";
 import useConfigData from "@hooks/useConfigData.js";
 import { formatCurrency } from "@utils/index.js";
 import KeywordSearch from "@components/KeywordSearch";
@@ -46,7 +47,7 @@ export default function Table() {
 	const [page, setPage] = useState(1);
 	const [dataSource, setDataSource] = useState("offline");
 	const [onlineSearchTerm, setOnlineSearchTerm] = useState("");
-	const searchRef = useRef({ term: "" });
+	const [offlineSearchTerm, setOfflineSearchTerm] = useState("");
 
 	const effectiveDataSource = isOnline && isOnlinePermissionIncludes ? dataSource : "offline";
 
@@ -66,17 +67,28 @@ export default function Table() {
 		initialValues: { term: "" },
 	});
 
+	// =============== declarative local product list — auto-fetches on param change ================
+	const offlineTerm = offlineSearchTerm.trim();
+	const offlineSearchConditions = offlineTerm
+		? { like: { display_name: offlineTerm } }
+		: undefined;
+
 	const {
 		products,
 		totalCount,
-		getLocalProducts,
-		getProductCount,
-		syncOnlineProductsToLocal,
 		loading,
-		isSyncing,
-	} = useLocalProducts({
-		fetchOnMount: false,
+		refetch: refetchLocal,
+	} = useLocalProductList({
+		queryOptions: {
+			limit: PER_PAGE,
+			offset: (page - 1) * PER_PAGE,
+			orderBy: "id ASC",
+			...(offlineSearchConditions && { search: offlineSearchConditions }),
+		},
+		enabled: effectiveDataSource === "offline",
 	});
+
+	const { syncOnlineProductsToLocal, isSyncing } = useSyncProducts();
 
 	// =============== online stock products via RTK Query ================
 	const {
@@ -95,65 +107,28 @@ export default function Table() {
 		{ skip: effectiveDataSource !== "online" }
 	);
 
-	// =============== fetch local products with pagination and search ================
-	const fetchLocalProductsPage = useCallback(async () => {
-		const offset = (page - 1) * PER_PAGE;
-		const term = searchRef.current.term?.trim() || "";
-
-		const searchConditions = term
-			? {
-					like: {
-						display_name: term,
-					},
-				}
-			: undefined;
-
-		await getLocalProducts({}, "id", {
-			limit: PER_PAGE,
-			offset,
-			orderBy: "id ASC",
-			...(searchConditions && { search: searchConditions }),
-		});
-
-		await getProductCount(
-			{},
-			{
-				...(searchConditions && { search: searchConditions }),
-			}
-		);
-	}, [page, getLocalProducts, getProductCount]);
-
-	// =============== fetch local products on mount and when page or data source changes ================
-	useEffect(() => {
-		if (effectiveDataSource === "offline") {
-			fetchLocalProductsPage();
-		}
-	}, [fetchLocalProductsPage, effectiveDataSource]);
-
 	// =============== listen for product updates from sales and refetch local products ================
 	useEffect(() => {
-		window.addEventListener("products-updated", fetchLocalProductsPage);
+		window.addEventListener("products-updated", refetchLocal);
 
 		return () => {
-			window.removeEventListener("products-updated", fetchLocalProductsPage);
+			window.removeEventListener("products-updated", refetchLocal);
 		};
-	}, [fetchLocalProductsPage]);
+	}, [refetchLocal]);
 
 	// =============== search handler ================
 	const handleSearch = (data) => {
 		const term = data?.term || "";
-		searchRef.current.term = term;
+		setOfflineSearchTerm(term);
 		setOnlineSearchTerm(term);
 		setPage(1);
-		fetchLocalProductsPage();
 	};
 
 	// =============== reset handler ================
 	const handleReset = () => {
-		searchRef.current.term = "";
+		setOfflineSearchTerm("");
 		setOnlineSearchTerm("");
 		setPage(1);
-		fetchLocalProductsPage();
 	};
 
 	// =============== refresh button handler ================
@@ -164,7 +139,7 @@ export default function Table() {
 			term: "",
 		});
 		refetchOnlineProducts();
-		fetchLocalProductsPage();
+		refetchLocal();
 	};
 
 	// =============== derive active table data based on current data source ================

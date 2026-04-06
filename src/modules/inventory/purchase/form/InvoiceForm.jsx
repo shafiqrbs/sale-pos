@@ -24,7 +24,7 @@ import useMainAreaHeight from "@hooks/useMainAreaHeight";
 import InputNumberForm from "@components/form-builders/InputNumberForm";
 import InputForm from "@components/form-builders/InputForm";
 import AddProductDrawer from "@components/drawers/AddProductDrawer";
-import useLocalProducts from "@hooks/useLocalProducts";
+import useLocalProductList from "@hooks/useLocalProductList";
 import useConfigData from "@hooks/useConfigData";
 import { useDisclosure, useHotkeys } from "@mantine/hooks";
 import { formatCurrency, parseJsonArray } from "@utils/index";
@@ -41,29 +41,21 @@ import { ALLOW_MEASUREMENT_PURCHASE } from "@constants/index";
 
 export default function InvoiceForm({ refetch, onAddItem }) {
 	const { t } = useTranslation();
-	const [ products, setProducts ] = useState([]);
 	const [ productResetKey, setProductResetKey ] = useState(0);
 	const [ selectedCategoryId, setSelectedCategoryId ] = useState(null);
 	const { currencySymbol } = useConfigData();
 	const itemsForm = useForm(invoiceItemFormRequest(t));
-	const { getLocalProducts } = useLocalProducts({
-		fetchOnMount: false,
-	});
 
 	const { data: productCategoryData } = useGetInventoryCategoryQuery({ type: "parent" });
 	const { mainAreaHeight } = useMainAreaHeight();
 	const [ isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer } ] =
 		useDisclosure(false);
 
-	// =============== fetch products in db entry order (id ASC), same as sales product select ===============
-	useEffect(() => {
-		getLocalProducts({ category_id: selectedCategoryId }, "id", {
-			orderBy: "product_name ASC",
-		}).then((fetchedProducts) => {
-			setProducts(fetchedProducts);
-		});
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ selectedCategoryId ]);
+	// =============== declarative product list — auto-fetches on category change ===============
+	const { products } = useLocalProductList({
+		condition: { category_id: selectedCategoryId },
+		queryOptions: { orderBy: "product_name ASC" },
+	});
 
 	// =============== stable reference so VirtualSearchSelect's setOptions effect only fires when products actually change, not on every keystroke ===============
 	const productOptions = useMemo(
