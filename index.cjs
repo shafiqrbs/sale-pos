@@ -140,6 +140,13 @@ ipcMain.handle("relaunch-app", async () => {
 let mainWindow;
 let splash;
 
+// =============== resolve the correct icon based on the OS since windows needs .ico and linux/mac needs .png ================
+const appIcon = path.join(
+	__dirname,
+	"icons",
+	process.platform === "win32" ? "brand.ico" : "brand.png"
+);
+
 // run this as early in the main process as possible
 if (require("electron-squirrel-startup")) app.quit();
 
@@ -165,7 +172,7 @@ app.whenReady().then(() => {
 		transparent: true,
 		frame: false,
 		alwaysOnTop: true,
-		icon: path.join(__dirname, "images", "list"),
+		icon: appIcon,
 	});
 
 	// Load splash screen HTML
@@ -176,7 +183,7 @@ app.whenReady().then(() => {
 		width: 1200,
 		height: 800,
 		show: false,
-		icon: path.join(__dirname, "images", "list"),
+		icon: appIcon,
 		webPreferences: {
 			nodeIntegration: false,
 			contextIsolation: true,
