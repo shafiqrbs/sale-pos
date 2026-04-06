@@ -12,7 +12,14 @@ import {
 import { useDisclosure } from "@mantine/hooks";
 import { useTranslation } from "react-i18next";
 import { useForm } from "@mantine/form";
-import { IconPlus, IconReload, IconDotsVertical, IconTruckReturn, IconGlobe, IconGlobeOff } from "@tabler/icons-react";
+import {
+	IconPlus,
+	IconDotsVertical,
+	IconTruckReturn,
+	IconGlobe,
+	IconGlobeOff,
+	IconCloudDown,
+} from "@tabler/icons-react";
 import { DataTable } from "mantine-datatable";
 import tableCss from "@assets/css/Table.module.css";
 import useMainAreaHeight from "@hooks/useMainAreaHeight.js";
@@ -36,17 +43,17 @@ export default function Table() {
 	const { isOnlinePermissionIncludes } = useLoggedInUser();
 	const { mainAreaHeight } = useMainAreaHeight();
 	const { currencySymbol } = useConfigData();
-	const [ page, setPage ] = useState(1);
-	const [ dataSource, setDataSource ] = useState("offline");
-	const [ onlineSearchTerm, setOnlineSearchTerm ] = useState("");
+	const [page, setPage] = useState(1);
+	const [dataSource, setDataSource] = useState("offline");
+	const [onlineSearchTerm, setOnlineSearchTerm] = useState("");
 	const searchRef = useRef({ term: "" });
 
 	const effectiveDataSource = isOnline && isOnlinePermissionIncludes ? dataSource : "offline";
 
 	// =============== damage process ================
-	const [ damageOpened, { open: openDamage, close: closeDamage } ] = useDisclosure(false);
-	const [ selectedProduct, setSelectedProduct ] = useState(null);
-	const [ triggerGetItemsForDamage, { data: damageResponse, isFetching: isDamageLoading } ] =
+	const [damageOpened, { open: openDamage, close: closeDamage }] = useDisclosure(false);
+	const [selectedProduct, setSelectedProduct] = useState(null);
+	const [triggerGetItemsForDamage, { data: damageResponse, isFetching: isDamageLoading }] =
 		useLazyGetItemsForDamageQuery();
 
 	const handleDamage = async (record) => {
@@ -95,10 +102,10 @@ export default function Table() {
 
 		const searchConditions = term
 			? {
-				like: {
-					display_name: term,
-				},
-			}
+					like: {
+						display_name: term,
+					},
+				}
 			: undefined;
 
 		await getLocalProducts({}, "id", {
@@ -114,14 +121,14 @@ export default function Table() {
 				...(searchConditions && { search: searchConditions }),
 			}
 		);
-	}, [ page, getLocalProducts, getProductCount ]);
+	}, [page, getLocalProducts, getProductCount]);
 
 	// =============== fetch local products on mount and when page or data source changes ================
 	useEffect(() => {
 		if (effectiveDataSource === "offline") {
 			fetchLocalProductsPage();
 		}
-	}, [ fetchLocalProductsPage, effectiveDataSource ]);
+	}, [fetchLocalProductsPage, effectiveDataSource]);
 
 	// =============== listen for product updates from sales and refetch local products ================
 	useEffect(() => {
@@ -130,7 +137,7 @@ export default function Table() {
 		return () => {
 			window.removeEventListener("products-updated", fetchLocalProductsPage);
 		};
-	}, [ fetchLocalProductsPage ]);
+	}, [fetchLocalProductsPage]);
 
 	// =============== search handler ================
 	const handleSearch = (data) => {
@@ -184,36 +191,48 @@ export default function Table() {
 					showAdvancedFilter={false}
 				/>
 				<Group gap="sm" wrap="nowrap">
-				{isOnline && isOnlinePermissionIncludes && (
-					<SegmentedControl
-						value={effectiveDataSource}
-						onChange={(value) => {
-							setDataSource(value);
-							setPage(1);
-						}}
-						color={effectiveDataSource === "online" ? "green" : "red"}
-						data={[
-							{
-								value: "online",
-								label: (
-									<Group gap={4} wrap="nowrap">
-										<IconGlobe size={13} color={effectiveDataSource === "online" ? "white" : "var(--mantine-color-green-6)"} />
-										{t("Online")}
-									</Group>
-								),
-							},
-							{
-								value: "offline",
-								label: (
-									<Group gap={4} wrap="nowrap">
-										<IconGlobeOff size={13} color={effectiveDataSource === "offline" ? "white" : "var(--mantine-color-red-6)"} />
-										{t("Offline")}
-									</Group>
-								),
-							},
-						]}
-					/>
-				)}
+					{isOnline && isOnlinePermissionIncludes && (
+						<SegmentedControl
+							value={effectiveDataSource}
+							onChange={(value) => {
+								setDataSource(value);
+								setPage(1);
+							}}
+							color={effectiveDataSource === "online" ? "green" : "red"}
+							data={[
+								{
+									value: "online",
+									label: (
+										<Group gap={4} wrap="nowrap">
+											<IconGlobe
+												size={13}
+												color={
+													effectiveDataSource === "online"
+														? "white"
+														: "var(--mantine-color-green-6)"
+												}
+											/>
+											{t("Online")}
+										</Group>
+									),
+								},
+								{
+									value: "offline",
+									label: (
+										<Group gap={4} wrap="nowrap">
+											<IconGlobeOff
+												size={13}
+												color={
+													effectiveDataSource === "offline" ? "white" : "var(--mantine-color-red-6)"
+												}
+											/>
+											{t("Offline")}
+										</Group>
+									),
+								},
+							]}
+						/>
+					)}
 					<Tooltip
 						label="Click here for update stock"
 						c="white"
@@ -223,13 +242,13 @@ export default function Table() {
 						transitionProps={{ transition: "pop-bottom-left", duration: 500 }}
 					>
 						<ActionIcon
-							bg="var(--theme-secondary-color-6)"
+							bg="var(--theme-primary-color-4)"
 							onClick={handleRefresh}
 							disabled={isTableLoading || !isOnline}
 							size="lg"
 							aria-label="Refresh"
 						>
-							<IconReload size={16} stroke={1.5} />
+							<IconCloudDown size={16} stroke={1.5} />
 						</ActionIcon>
 					</Tooltip>
 					<Button
@@ -318,56 +337,56 @@ export default function Table() {
 						},
 						...(effectiveDataSource === "online"
 							? [
-								{
-									accessor: "action",
-									title: t("Action"),
-									textAlign: "right",
-									width: 80,
-									render: (record) => {
-										const quantity = Number(record.quantity);
-										if (!quantity || quantity <= 0) return null;
+									{
+										accessor: "action",
+										title: t("Action"),
+										textAlign: "right",
+										width: 80,
+										render: (record) => {
+											const quantity = Number(record.quantity);
+											if (!quantity || quantity <= 0) return null;
 
-										return (
-											<Group gap={4} justify="right" wrap="nowrap">
-												<Menu
-													position="bottom-end"
-													offset={3}
-													withArrow
-													trigger="hover"
-													openDelay={100}
-													closeDelay={400}
-												>
-													<Menu.Target>
-														<ActionIcon
-															size="sm"
-															variant="transparent"
-															color="red"
-															radius="xl"
-															aria-label="Actions"
-														>
-															<IconDotsVertical height={"18"} width={"18"} stroke={1.5} />
-														</ActionIcon>
-													</Menu.Target>
-													<Menu.Dropdown w="160">
-														<Menu.Item
-															onClick={(event) => {
-																event.stopPropagation();
-																handleDamage(record);
-															}}
-															leftSection={
-																<IconTruckReturn height={"18"} width={"18"} stroke={1.5} />
-															}
-															color="red"
-														>
-															{t("Damage")}
-														</Menu.Item>
-													</Menu.Dropdown>
-												</Menu>
-											</Group>
-										);
+											return (
+												<Group gap={4} justify="right" wrap="nowrap">
+													<Menu
+														position="bottom-end"
+														offset={3}
+														withArrow
+														trigger="hover"
+														openDelay={100}
+														closeDelay={400}
+													>
+														<Menu.Target>
+															<ActionIcon
+																size="sm"
+																variant="transparent"
+																color="red"
+																radius="xl"
+																aria-label="Actions"
+															>
+																<IconDotsVertical height={"18"} width={"18"} stroke={1.5} />
+															</ActionIcon>
+														</Menu.Target>
+														<Menu.Dropdown w="160">
+															<Menu.Item
+																onClick={(event) => {
+																	event.stopPropagation();
+																	handleDamage(record);
+																}}
+																leftSection={
+																	<IconTruckReturn height={"18"} width={"18"} stroke={1.5} />
+																}
+																color="red"
+															>
+																{t("Damage")}
+															</Menu.Item>
+														</Menu.Dropdown>
+													</Menu>
+												</Group>
+											);
+										},
 									},
-								},
-							]
+								]
 							: []),
 					]}
 					fetching={isTableLoading}

@@ -11,6 +11,7 @@ export default function usePurchaseList({ params, offlineFetch = false } = {}) {
 		isLoading: isOnlineLoading,
 		isFetching: isOnlineFetching,
 		error: onlineError,
+		refetch,
 	} = useGetPurchaseQuery(params, {
 		skip: shouldUseOffline,
 	});
@@ -59,5 +60,6 @@ export default function usePurchaseList({ params, offlineFetch = false } = {}) {
 		purchases: purchasesResponse,
 		isLoading: isOnlineLoading || isOnlineFetching,
 		error: onlineError,
+		refetch,
 	};
 }

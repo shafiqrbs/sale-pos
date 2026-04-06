@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Box, Grid, Text, ActionIcon, Group, Menu, Flex, Button, Badge, SegmentedControl } from "@mantine/core";
-import { IconDotsVertical, IconEdit, IconEye, IconPlus, IconTrashX } from "@tabler/icons-react";
+import { Box, Grid, Text, ActionIcon, Group, Menu, Flex, Button, Badge, SegmentedControl, Tooltip } from "@mantine/core";
+import { IconDotsVertical, IconEdit, IconEye, IconPlus, IconRefresh, IconTrashX } from "@tabler/icons-react";
 import { useNavigate, useOutletContext } from "react-router";
 import { DataTable } from "mantine-datatable";
 import tableCss from "@assets/css/Table.module.css";
@@ -42,7 +42,7 @@ export default function Table() {
 		},
 	});
 
-	const { data: entities, isLoading } = useGetPurchaseReturnQuery({
+	const { data: entities, isLoading, refetch } = useGetPurchaseReturnQuery({
 		params: {
 			term: form.values.term,
 			start_date: form.values.start_date,
@@ -172,6 +172,11 @@ export default function Table() {
 			<Flex mb="xs" gap="sm" justify="space-between" align="center">
 				<KeywordSearch showStartEndDate form={form} />
 				<Group gap="sm" wrap="nowrap" >
+					<Tooltip label={t("RefreshData")}>
+						<ActionIcon variant="light" color="green" size="lg" onClick={refetch}>
+							<IconRefresh size={20} />
+						</ActionIcon>
+					</Tooltip>
 					<Button
 						size="xs"
 						color="red"

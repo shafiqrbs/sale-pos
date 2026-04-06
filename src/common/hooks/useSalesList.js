@@ -11,6 +11,7 @@ export default function useSalesList({ params, offlineFetch = false } = {}) {
 		isLoading: isOnlineLoading,
 		isFetching: isOnlineFetching,
 		error: onlineError,
+		refetch,
 	} = useGetSalesQuery(params, {
 		skip: shouldUseOffline,
 	});
@@ -60,5 +61,6 @@ export default function useSalesList({ params, offlineFetch = false } = {}) {
 		sales: salesResponse,
 		isLoading: isOnlineLoading || isOnlineFetching,
 		error: onlineError,
+		refetch,
 	};
 }

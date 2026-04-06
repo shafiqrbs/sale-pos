@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Box, Grid, Text, ActionIcon, Group, Menu, Flex, Button, Badge } from "@mantine/core";
+import { Box, Grid, Text, ActionIcon, Group, Menu, Flex, Button, Badge, Tooltip } from "@mantine/core";
 import {
 	IconCopy,
 	IconDotsVertical,
 	IconEdit,
 	IconEye,
 	IconPlus,
+	IconRefresh,
 	IconTrashX,
 } from "@tabler/icons-react";
 import { useNavigate, useOutletContext } from "react-router";
@@ -48,7 +49,7 @@ export default function Table() {
 		},
 	});
 
-	const { data: entities, isLoading } = useGetRequisitionQuery({
+	const { data: entities, isLoading, refetch } = useGetRequisitionQuery({
 		params: {
 			term: form.values.term,
 			start_date: form.values.start_date,
@@ -151,6 +152,11 @@ export default function Table() {
 			<Flex mb="xs" gap="sm" justify="space-between" align="center">
 				<KeywordSearch showStartEndDate form={form} />
 				<Group gap="sm" wrap="nowrap">
+					<Tooltip label={t("RefreshData")}>
+						<ActionIcon variant="light" color="green" size="lg" onClick={refetch}>
+							<IconRefresh size={20} />
+						</ActionIcon>
+					</Tooltip>
 					<Button
 						size="md"
 						color="red"

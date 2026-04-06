@@ -8,8 +8,9 @@ import {
 	Flex,
 	Button,
 	SegmentedControl,
+	Tooltip,
 } from "@mantine/core";
-import { IconDotsVertical, IconEdit, IconEye, IconPlus, IconTrash, IconGlobe, IconGlobeOff } from "@tabler/icons-react";
+import { IconDotsVertical, IconEdit, IconEye, IconPlus, IconRefresh, IconTrash, IconGlobe, IconGlobeOff } from "@tabler/icons-react";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useOutletContext, useNavigate } from "react-router";
@@ -57,7 +58,7 @@ export default function Table() {
 		},
 	});
 
-	const { sales: salesData, isLoading } = useSalesList({
+	const { sales: salesData, isLoading, refetch } = useSalesList({
 		params: {
 			term: form.values.term,
 			start_date: form.values.start_date,
@@ -183,6 +184,13 @@ export default function Table() {
 						]}
 					/>
 				)}
+					{effectiveDataSource === "online" && (
+						<Tooltip label={t("RefreshData")}>
+							<ActionIcon variant="light" color="green" size="lg" onClick={refetch}>
+								<IconRefresh size={20} />
+							</ActionIcon>
+						</Tooltip>
+					)}
 					<Button
 						w={170}
 						size="md"
