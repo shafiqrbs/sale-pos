@@ -35,7 +35,9 @@ import {
 	IconLock,
 	IconDeviceDesktop,
 	IconSun,
-	IconMoon, IconCategory,
+	IconMoon,
+	IconCategory,
+	IconCloudDownload,
 } from "@tabler/icons-react";
 import { NavLink, useLocation, useNavigate } from "react-router";
 import LanguagePickerStyle from "@assets/css/LanguagePicker.module.css";
@@ -74,6 +76,7 @@ export default function Header({ isOnline, toggleNetwork }) {
 	const location = useLocation();
 	const { toggle, fullscreen } = useFullscreen();
 	const [ syncPanelOpen, setSyncPanelOpen ] = useState(false);
+	const [ quickPlatformSyncRequested, setQuickPlatformSyncRequested ] = useState(false);
 	const [ languageOpened, setLanguageOpened ] = useState(false);
 	const [ languageSelected, setLanguageSelected ] = useState(
 		LANGUAGES.find((item) => item.value === i18n.language)
@@ -242,20 +245,32 @@ export default function Header({ isOnline, toggleNetwork }) {
 							withArrow
 							arrowPosition="center"
 						>
-							{isOnlinePermissionIncludes ? (
-								<Tooltip label="Sync Data" bg="red.5" withArrow>
-									<ActionIcon
-										disabled={!isOnline}
-										mt="4xs"
-										onClick={toggleSyncPanel}
-										variant="filled"
-										color="white"
-										bg={isOnline ? "green.8" : "gray.1"}
-									>
-										<IconRefresh size={20} />
-									</ActionIcon>
-								</Tooltip>
-							) : null}
+						{isOnlinePermissionIncludes ? (
+							<Tooltip label="Sync Data" bg="red.5" withArrow>
+								<ActionIcon
+									disabled={!isOnline}
+									mt="4xs"
+									onClick={toggleSyncPanel}
+									variant="filled"
+									color="white"
+									bg={isOnline ? "green.8" : "gray.1"}
+								>
+									<IconRefresh size={20} />
+								</ActionIcon>
+							</Tooltip>
+						) : isOnline ? (
+							<Tooltip label={t("QuickPlatformSync")} bg="blue.6" withArrow>
+								<ActionIcon
+									mt="4xs"
+									onClick={() => setQuickPlatformSyncRequested(true)}
+									variant="filled"
+									color="white"
+									bg="blue.6"
+								>
+									<IconCloudDownload size={20} />
+								</ActionIcon>
+							</Tooltip>
+						) : null}
 							<Tooltip label="Pos printer setup" bg="red.5" withArrow>
 								<ActionIcon mt="4xs" onClick={openPrinter} variant="transparent" color="white">
 									<IconPrinter size={20} />
@@ -426,6 +441,8 @@ export default function Header({ isOnline, toggleNetwork }) {
 				syncPanelOpen={syncPanelOpen}
 				configData={configData}
 				setSyncPanelOpen={setSyncPanelOpen}
+				quickPlatformSyncRequested={quickPlatformSyncRequested}
+				onQuickPlatformSyncHandled={() => setQuickPlatformSyncRequested(false)}
 			/>
 			<ChangePasswordDrawer
 				opened={changePasswordDrawerOpened}

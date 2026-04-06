@@ -24,7 +24,7 @@ import {
 	getSyncRecordsFromLocalStorage,
 	saveSyncRecordToLocalStorage,
 } from "@utils/index";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { apiSlice } from "@services/api.mjs";
 import { useDispatch } from "react-redux";
@@ -59,7 +59,13 @@ const PLATFORM_SYNC_DATA_MAP = {
 	core_products: "stock_item",
 };
 
-export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen }) {
+export default function SyncDrawer({
+	configData,
+	syncPanelOpen,
+	setSyncPanelOpen,
+	quickPlatformSyncRequested,
+	onQuickPlatformSyncHandled,
+}) {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const [ syncPos ] = useSyncPosMutation();
@@ -75,6 +81,14 @@ export default function SyncDrawer({ configData, syncPanelOpen, setSyncPanelOpen
 	const [ insertProgress, setInsertProgress ] = useState(null);
 	const [ activeTab, setActiveTab ] = useState("export");
 	const lastSyncRecord = useMemo(() => getLastSyncRecord(syncRecords), [ syncRecords ]);
+
+	useEffect(() => {
+		if (quickPlatformSyncRequested) {
+			onQuickPlatformSyncHandled?.();
+			confirmAndSyncPlatform();
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ quickPlatformSyncRequested ]);
 
 	const buildSalesSyncPayload = (sale) => {
 		const items = [];
