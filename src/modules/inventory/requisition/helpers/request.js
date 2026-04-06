@@ -11,8 +11,8 @@ const vendorOverviewInitialValues = {
 	discountAmount: 0,
 	isDiscountPercentage: false,
 	paymentAmount: 0,
-	invoice_date: null,
-	expected_date: null,
+	invoice_date: new Date(),
+	expected_date: new Date(),
 };
 
 export const vendorOverviewRequest = (t) => {
