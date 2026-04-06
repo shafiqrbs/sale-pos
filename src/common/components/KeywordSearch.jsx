@@ -134,9 +134,6 @@ export default function KeywordSearch({
 
 	return (
 		<Flex gap="xs" className={className} w="100%">
-			{reportName &&(
-				<Box mt={'4'}>{reportName}</Box>
-			)}
 			{showDatePicker && (
 				<DateInput
 					clearable

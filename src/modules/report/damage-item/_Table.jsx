@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Box, Grid, Text, ActionIcon, Group, Menu, Flex, Button, Badge, SegmentedControl } from "@mantine/core";
 import { useNavigate, useOutletContext } from "react-router";
 import { DataTable } from "mantine-datatable";
@@ -11,6 +11,7 @@ import {useGetDamageItemQuery} from "@services/report";
 import {formatCurrency} from "@utils/index";
 import {IconGlobe, IconGlobeOff, IconPlus} from "@tabler/icons-react";
 import {APP_NAVLINKS} from "@/routes/routes";
+import PageBreadcrumb from "@components/layout/PageBreadcrumb";
 
 
 
@@ -35,13 +36,19 @@ export default function Table() {
 	});
 
 	const { data: entities, isLoading } = useGetDamageItemQuery({
+
+		term: form.values.term,
+		start_date: form.values.start_date,
+		end_date: form.values.end_date,
 		page,
 		offset: PER_PAGE,
 	});
+
 	// console.log(entities?.data)
 	return (
 		<Box>
 			<Flex mb="xs" gap="sm" justify="space-between" align="center">
+				<PageBreadcrumb label={t("Damages")} />
 				<KeywordSearch reportName={'Damage'} showStartEndDate form={form} w={'100%'} />
 			</Flex>
 			<Grid columns={24} gutter={{ base: 8 }}>

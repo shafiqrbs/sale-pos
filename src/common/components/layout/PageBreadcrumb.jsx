@@ -14,7 +14,7 @@ export default function PageBreadcrumb({ label = "empty", showBack = true, h = 3
 	return (
 		<Box h={h} className={classes.breadcrumb}>
 			<Box className={classes.accent} />
-			{canGoBack && (
+			{/*{canGoBack && (
 				<ActionIcon
 					type="button"
 					className={classes.backBtn}
@@ -24,7 +24,7 @@ export default function PageBreadcrumb({ label = "empty", showBack = true, h = 3
 				>
 					<IconArrowLeft size={14} stroke={2.5} />
 				</ActionIcon>
-			)}
+			)}*/}
 			<Text component="span" className={classes.label}>
 				{label}
 			</Text>

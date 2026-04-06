@@ -141,7 +141,7 @@ export default function ProductList() {
 					<Box bg="gray.8" px="les" pt="es" pb="les" mb="les" bdrs={6}>
 						<ProductFilters filter={filter} setFilter={setFilter} />
 					</Box>
-					<Box bg="gray.8" p="4xs" bdrs={6}>
+					<Box bg="gray.4" p="4xs" bdrs={6}>
 						<ScrollArea h={mainAreaHeight - 60} type="never" scrollbars="y">
 							<Grid columns={12} gutter="4xs" mb={58}>
 								{filter.view !== "minimal" ? (

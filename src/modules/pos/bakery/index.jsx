@@ -54,7 +54,7 @@ export default function BakeryIndex() {
 					<Grid.Col span={8}>
 						<ProductList />
 					</Grid.Col>
-					<Grid.Col span={4}>
+					<Grid.Col span={4} >
 						<Checkout />
 					</Grid.Col>
 				</Grid>

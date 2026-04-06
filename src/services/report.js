@@ -3,6 +3,7 @@ import { APP_APIS } from "@/routes/routes";
 
 export const extendedReportApiSlice = apiSlice.injectEndpoints({
 	endpoints: (builder) => ({
+
 		getDailySummary: builder.query({
 			query: (params) => {
 				return {
@@ -13,6 +14,7 @@ export const extendedReportApiSlice = apiSlice.injectEndpoints({
 			},
 			providesTags: [ "Reports" ],
 		}),
+
 		getCategorySummary: builder.query({
 			query: (params) => {
 				return {
@@ -22,14 +24,16 @@ export const extendedReportApiSlice = apiSlice.injectEndpoints({
 			},
 			providesTags: [ "Reports" ],
 		}),
+
 		getDamageItem: builder.query({
 			query: (params) => {
 				return {
 					url: APP_APIS.DAMAGE_ITEM,
-					method: "GET"
+					method: "GET",
+					params,
 				};
 			},
-			providesTags: [ "Reports", "Purchase" ],
+			providesTags: [ "Reports" ],
 		}),
 	}),
 });
