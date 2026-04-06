@@ -42,7 +42,7 @@ export default function Table() {
 	return (
 		<Box>
 			<Flex mb="xs" gap="sm" justify="space-between" align="center">
-				<KeywordSearch reportName={'Damage Items'} showStartEndDate form={form} w={'100%'} />
+				<KeywordSearch reportName={'Damage'} showStartEndDate form={form} w={'100%'} />
 			</Flex>
 			<Grid columns={24} gutter={{ base: 8 }}>
 				<Grid.Col span={24}>
