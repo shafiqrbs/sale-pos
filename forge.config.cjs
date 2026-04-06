@@ -8,6 +8,7 @@ module.exports = {
 		executableName: "poskeeper",
 		appBundleId: "com.poskeeper.app",
 		appCategoryType: "public.app-category.business",
+		icon: "icons/brand.ico"
 	},
 	rebuildConfig: {},
 	makers: [
