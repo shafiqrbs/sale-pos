@@ -35,15 +35,17 @@ import VirtualSearchSelect from "@components/form-builders/VirtualSearchSelect";
 import { MonthPickerInput } from "@mantine/dates";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useGetInventoryCategoryQuery } from "@services/settings";
 import { ALLOW_MEASUREMENT_PURCHASE } from "@constants/index";
 
 export default function InvoiceForm({ refetch, onAddItem }) {
+	const { t } = useTranslation();
 	const [ products, setProducts ] = useState([]);
 	const [ productResetKey, setProductResetKey ] = useState(0);
 	const [ selectedCategoryId, setSelectedCategoryId ] = useState(null);
 	const { currencySymbol } = useConfigData();
-	const itemsForm = useForm(invoiceItemFormRequest());
+	const itemsForm = useForm(invoiceItemFormRequest(t));
 	const { getLocalProducts } = useLocalProducts({
 		fetchOnMount: false,
 	});
@@ -154,14 +156,14 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 		const { productId, purchase_price, total_mrp, quantity, expired_date } = itemsForm.values;
 
 		if (!productId || !quantity) {
-			showNotification("Product and quantity are required", "red");
+			showNotification(t("ProductAndQuantityRequired"), "red");
 			return;
 		}
 
 		const selectedProduct = products?.find((product) => String(product.id) === String(productId));
 
 		if (!selectedProduct) {
-			showNotification("Product not found", "red");
+			showNotification(t("ProductNotFound"), "red");
 			return;
 		}
 
@@ -203,7 +205,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 		}
 
 		handleResetInvoiceItemForm();
-		showNotification("Item added successfully", "teal");
+		showNotification(t("ItemAddedSuccessfully"), "teal");
 	};
 
 	const invoiceSubTotal =
@@ -247,16 +249,16 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 							name="barcode"
 							id="barcode"
 							label=""
-							placeholder="Barcode"
+							placeholder={t("Barcode")}
 							required={false}
 							tooltip=""
 							leftSection={<IconBarcode size={16} opacity={0.6} />}
 						/>
 						<Select
 							mt="xs"
-							placeholder="All categories"
+							placeholder={t("AllCategories")}
 							data={[
-								{ value: "", label: "All categories" },
+								{ value: "", label: t("AllCategories") },
 								...(productCategoryData?.data?.map((item) => ({
 									value: String(item.id),
 									label: item.name,
@@ -272,7 +274,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 						<Flex mt="md" gap="4" align="flex-end" bg={'#1e40af'} p={'xs'} ml={'-xs'} mr={'-xs'} >
 							<Box w="100%">
 								<FormValidationWrapper
-									errorMessage="Product is required"
+									errorMessage={t("ProductRequired")}
 									opened={!!itemsForm.errors.productId}
 								>
 									<Box pos="relative">
@@ -280,9 +282,9 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 											key={productResetKey}
 											value={itemsForm.values.productId}
 											options={productOptions}
-											placeholder="Choose Product"
+											placeholder={t("ChooseProduct")}
 											searchable
-											nothingFoundMessage="Change the search term to find a product"
+											nothingFoundMessage={t("ChangeSearchTermProduct")}
 											onChange={handleProductSelect}
 											id="productId"
 											nextField="quantity"
@@ -321,7 +323,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 										<Select
 											name="measurement"
 											label="Measurement"
-											placeholder="Select unit"
+											placeholder={t("SelectUnit")}
 											disabled={!isProductSelected || itemsForm.values?.measurement_quantity === ""}
 											data={measurementOptions}
 											{...itemsForm.getInputProps("measurement")}

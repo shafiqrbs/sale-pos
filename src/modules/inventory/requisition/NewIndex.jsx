@@ -9,11 +9,13 @@ import useTempPurchaseProducts from "@hooks/useTempPurchaseProducts";
 import useLoggedInUser from "@hooks/useLoggedInUser";
 import { formatDateISO } from "@utils/index";
 import { useAddRequisitionMutation } from "@services/requisition";
+import { useTranslation } from "react-i18next";
 
 export default function NewIndex() {
+	const { t } = useTranslation();
 	const [ addRequisition ] = useAddRequisitionMutation();
 	const { user } = useLoggedInUser();
-	const itemsForm = useForm(vendorOverviewRequest());
+	const itemsForm = useForm(vendorOverviewRequest(t));
 	const { purchaseProducts: itemsProducts, refetch } = useTempPurchaseProducts({ type: "requisition" });
 	const [ isAddingItem, setIsAddingItem ] = useState(false);
 
@@ -29,12 +31,12 @@ export default function NewIndex() {
 
 	const handleSubmit = async (formValues) => {
 		if (!itemsProducts?.length) {
-			showNotification("Add minimum one purchase item first", "red");
+			showNotification(t("AddMinimumOnePurchaseItemFirst"), "red");
 			return;
 		}
 
 		if (!formValues.vendor_id) {
-			showNotification("Vendor is required", "red");
+			showNotification(t("VendorRequired"), "red");
 			return;
 		}
 
@@ -64,7 +66,7 @@ export default function NewIndex() {
 			const res = await addRequisition(newRequisition).unwrap();
 
 			if (res.data) {
-				showNotification("Requisition added successfully", "teal");
+				showNotification(t("RequisitionAddedSuccessfully"), "teal");
 
 				// =============== clear persisted temp items after successful purchase submission ===============
 				await window.dbAPI.deleteDataFromTable("temp_purchase_products", { type: "requisition" });
@@ -83,11 +85,11 @@ export default function NewIndex() {
 					itemsForm.setFieldValue(key, value);
 				});
 			} else {
-				showNotification("Failed to save requisition", "red");
+				showNotification(t("FailedToSaveRequisition"), "red");
 			}
 		} catch (error) {
 			console.error(error);
-			showNotification(error?.message || "Failed to save requisition", "red");
+			showNotification(error?.message || t("FailedToSaveRequisition"), "red");
 		} finally {
 			setIsAddingItem(false);
 		}

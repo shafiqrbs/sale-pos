@@ -77,12 +77,12 @@ export default function AddProductDrawer({
 			status: true,
 		},
 		validate: {
-			name: (value) => (value.trim() === "" ? "Name is required" : null),
-			product_type_id: (value) => (value.trim() === "" ? "Product type is required" : null),
-			category_id: (value) => (value.trim() === "" ? "Category is required" : null),
-			unit_id: (value) => (value.trim() === "" ? "Unit is required" : null),
-			purchase_price: (value) => (value.trim() === "" ? "Purchase price is required" : null),
-			sales_price: (value) => (value.trim() === "" ? "Sales price is required" : null),
+			name: (value) => (value.trim() === "" ? t("NameIsRequired") : null),
+			product_type_id: (value) => (value.trim() === "" ? t("ProductTypeRequired") : null),
+			category_id: (value) => (value.trim() === "" ? t("CategoryRequired") : null),
+			unit_id: (value) => (value.trim() === "" ? t("UnitRequired") : null),
+			purchase_price: (value) => (value.trim() === "" ? t("PurchasePriceRequired") : null),
+			sales_price: (value) => (value.trim() === "" ? t("SalesPriceRequired") : null),
 		},
 	});
 
@@ -117,7 +117,7 @@ export default function AddProductDrawer({
 			onClose={closeProductDrawer}
 			position="right"
 			size="30%"
-			title="Create Instant Product"
+			title={t("CreateInstantProduct")}
 		>
 			<Divider />
 			<ScrollArea h={mainAreaHeight} scrollbarSize={2} type="never" bg="white">

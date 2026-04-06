@@ -1,4 +1,5 @@
 import { showNotification } from "@components/ShowNotificationComponent";
+import { useTranslation } from "react-i18next";
 import useConfigData from "./useConfigData";
 import { calculateSubTotalWithVAT, withInvoiceId } from "@utils/index";
 // import { useInlineUpdateMutation } from "@services/pos";
@@ -8,6 +9,7 @@ import { setCartData } from "@features/checkout";
 import { useEffect, useCallback } from "react";
 
 export default function useCartOperation(tableId = null) {
+	const { t } = useTranslation();
 	const invoiceData = useSelector((state) => state.checkout.invoiceData);
 	const dispatch = useDispatch();
 	const { isOnline } = useOutletContext();
@@ -161,7 +163,7 @@ export default function useCartOperation(tableId = null) {
 
 			refetchInvoice();
 		} catch (error) {
-			showNotification("Request failed. Please try again.", "red", "", "", true);
+			showNotification(t("RequestFailedTryAgain"), "red", "", "", true);
 			console.error(error);
 		}
 	};
@@ -253,7 +255,7 @@ export default function useCartOperation(tableId = null) {
 
 			refetchInvoice();
 		} catch (error) {
-			showNotification("Request failed. Please try again.", "red", "", "", true);
+			showNotification(t("RequestFailedTryAgain"), "red", "", "", true);
 			console.error(error);
 		}
 	};
@@ -297,7 +299,7 @@ export default function useCartOperation(tableId = null) {
 
 			refetchInvoice();
 		} catch (error) {
-			showNotification("Request failed. Please try again.", "red", "", "", true);
+			showNotification(t("RequestFailedTryAgain"), "red", "", "", true);
 			console.error(error);
 		}
 	};
@@ -317,7 +319,7 @@ export default function useCartOperation(tableId = null) {
 			]);
 
 			if (!items?.length) {
-				showNotification("Item not found in cart", "red", "", "", true);
+				showNotification(t("ItemNotFoundInCart"), "red", "", "", true);
 				return;
 			}
 
@@ -366,7 +368,7 @@ export default function useCartOperation(tableId = null) {
 
 			refetchInvoice();
 		} catch (error) {
-			showNotification("Request failed. Please try again.", "red", "", "", true);
+			showNotification(t("RequestFailedTryAgain"), "red", "", "", true);
 			console.error(error);
 		}
 	};

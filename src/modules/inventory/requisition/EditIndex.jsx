@@ -13,12 +13,14 @@ import { useGetRequisitionByIdQuery, useUpdateRequisitionMutation } from "@servi
 import { formatDateISO } from "@utils/index";
 import { APP_NAVLINKS } from "@/routes/routes";
 import RequisitionEditSkeleton from "@components/skeletons/RequisitionEditSkeleton";
+import { useTranslation } from "react-i18next";
 
 export default function EditIndex() {
+	const { t } = useTranslation();
 	const { id: requisitionId } = useParams();
 	const navigate = useNavigate();
 	const { user } = useLoggedInUser();
-	const itemsForm = useForm(vendorOverviewRequest());
+	const itemsForm = useForm(vendorOverviewRequest(t));
 
 	const { data: requisitionResponse, isLoading: isLoadingRequisition } = useGetRequisitionByIdQuery(requisitionId);
 	const [updateRequisition] = useUpdateRequisitionMutation();
@@ -96,12 +98,12 @@ export default function EditIndex() {
 
 	const handleSubmit = async (formValues) => {
 		if (!itemsProducts?.length) {
-			showNotification("Add minimum one requisition item first", "red");
+			showNotification(t("AddMinimumOneRequisitionItemFirst"), "red");
 			return;
 		}
 
 		if (!formValues.vendor_id) {
-			showNotification("Vendor is required", "red");
+			showNotification(t("VendorRequired"), "red");
 			return;
 		}
 
@@ -132,16 +134,16 @@ export default function EditIndex() {
 			const res = await updateRequisition(payload).unwrap();
 
 			if (res.data || res.status === 200) {
-				showNotification("Requisition updated successfully", "teal");
+				showNotification(t("RequisitionUpdatedSuccessfully"), "teal");
 
 				await window.dbAPI.deleteDataFromTable("temp_purchase_products", { type: "requisition" });
 				navigate(APP_NAVLINKS.REQUISITION);
 			} else {
-				showNotification("Failed to update requisition", "red");
+				showNotification(t("FailedToUpdateRequisition"), "red");
 			}
 		} catch (error) {
 			console.error(error);
-			showNotification(error?.message || "Failed to update requisition", "red");
+			showNotification(error?.message || t("FailedToUpdateRequisition"), "red");
 		} finally {
 			setIsAddingItem(false);
 		}

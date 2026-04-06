@@ -1,8 +1,10 @@
 import { Box, Flex, Grid, Select, Text } from "@mantine/core";
 import useConfigData from "@hooks/useConfigData";
 import useGetCoreCustomers from "@hooks/useGetCoreCustomers";
+import { useTranslation } from "react-i18next";
 
 export default function CustomerInfoSection({ itemsForm }) {
+	const { t } = useTranslation();
 	const { currencySymbol } = useConfigData();
 	const { coreCustomers } = useGetCoreCustomers();
 
@@ -14,13 +16,13 @@ export default function CustomerInfoSection({ itemsForm }) {
 	return (
 		<Box bd="1px solid #dee2e6" bg="white" p="3xs" className="borderRadiusAll">
 			<Select
-				placeholder="Search customer (optional)"
+				placeholder={t("SearchCustomerOptional")}
 				data={customerOptions}
 				searchable
 				clearable
 				value={itemsForm.values.customer_id || null}
 				onChange={(value) => itemsForm.setFieldValue("customer_id", value ?? "")}
-				nothingFoundMessage="No customer found"
+				nothingFoundMessage={t("NoCustomerFound")}
 			/>
 
 			<Box mt="xs" className="boxBackground textColor borderRadiusAll">

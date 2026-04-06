@@ -20,14 +20,14 @@ export default function AddVendorModal({ opened, onClose }) {
 			address: "",
 		},
 		validate: {
-			name: (value) => (value.trim() === "" ? "Name is required" : null),
+			name: (value) => (value.trim() === "" ? t("NameIsRequired") : null),
 			mobile: (value) => {
-				if (!value) return "Mobile is required";
-				if (value.trim().length < 11) return "Mobile must be at least 11 digits";
+				if (!value) return t("MobileIsRequired");
+				if (value.trim().length < 11) return t("MobileMinLength");
 				return null;
 			},
-			email: (value) => (value.trim() === "" ? "Email is required" : null),
-			company_name: (value) => (value.trim() === "" ? "Company name is required" : null),
+			email: (value) => (value.trim() === "" ? t("EmailIsRequired") : null),
+			company_name: (value) => (value.trim() === "" ? t("CompanyNameRequired") : null),
 		},
 	});
 
@@ -74,7 +74,7 @@ export default function AddVendorModal({ opened, onClose }) {
 							<TextInput
 								value={vendorForm.values.name}
 								onChange={(event) => vendorForm.setFieldValue("name", event.currentTarget.value)}
-								placeholder="Vendor Name"
+								placeholder={t("VendorName")}
 								size="xs"
 								name="name"
 							/>
@@ -99,7 +99,7 @@ export default function AddVendorModal({ opened, onClose }) {
 							<TextInput
 								value={vendorForm.values.email}
 								onChange={(event) => vendorForm.setFieldValue("email", event.currentTarget.value)}
-								placeholder="Email"
+								placeholder={t("Email")}
 								size="xs"
 								name="email"
 							/>
@@ -115,7 +115,7 @@ export default function AddVendorModal({ opened, onClose }) {
 								onChange={(event) =>
 									vendorForm.setFieldValue("company_name", event.currentTarget.value)
 								}
-								placeholder="Company Name"
+								placeholder={t("CompanyName")}
 								name="company_name"
 							/>
 						</FormValidationWrapper>
@@ -128,7 +128,7 @@ export default function AddVendorModal({ opened, onClose }) {
 							<Textarea
 								value={vendorForm.values.address}
 								onChange={(event) => vendorForm.setFieldValue("address", event.currentTarget.value)}
-								placeholder="Address"
+								placeholder={t("Address")}
 								name="address"
 								minRows={2}
 								maxRows={4}

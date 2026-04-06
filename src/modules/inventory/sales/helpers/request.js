@@ -14,19 +14,19 @@ const salesOverviewInitialValues = {
 	splitPaymentDrawerOpened: false,
 };
 
-export const salesOverviewRequest = () => {
+export const salesOverviewRequest = (t) => {
 	return {
 		initialValues: salesOverviewInitialValues,
 		validate: {
 			payments: (value) => {
 				if (!value?.length) {
-					return "Transaction mode is required";
+					return t("TransactionModeRequired");
 				}
 				return null;
 			},
 			paymentAmount: (value) => {
 				if (Number(value) <= 0) {
-					return "Payment amount is required";
+					return t("PaymentAmountRequired");
 				}
 				return null;
 			},
@@ -43,25 +43,25 @@ const salesItemFormInitialValues = {
 	discount: 0,
 };
 
-export const salesItemFormRequest = () => {
+export const salesItemFormRequest = (t) => {
 	return {
 		initialValues: salesItemFormInitialValues,
 		validate: {
 			productId: (value) => {
 				if (!value) {
-					return "Product is required";
+					return t("ProductRequired");
 				}
 				return null;
 			},
 			salesPrice: (value) => {
 				if (!value) {
-					return "Sales price is required";
+					return t("SalesPriceRequired");
 				}
 				return null;
 			},
 			quantity: (value) => {
 				if (!value) {
-					return "Quantity is required";
+					return t("QuantityRequired");
 				}
 				return null;
 			},

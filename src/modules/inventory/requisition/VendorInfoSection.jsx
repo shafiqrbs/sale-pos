@@ -4,17 +4,19 @@ import useConfigData from "@hooks/useConfigData";
 import SelectForm from "@components/form-builders/SelectForm";
 import AddVendorModal from "@components/modals/AddVendorModal";
 import { IconUserPlus } from "@tabler/icons-react";
-import { useGetVendorsQuery } from "@services/core/vendors";
+import useCoreVendors from "@hooks/useCoreVendors";
+import { useTranslation } from "react-i18next";
 
 export default function VendorInfoSection({ itemsForm }) {
+	const { t } = useTranslation();
 	const { currencySymbol } = useConfigData();
 
-	const { data: vendors } = useGetVendorsQuery();
+	const { vendors } = useCoreVendors();
 	const [isAddVendorModalOpened, { open: openAddVendorModal, close: closeAddVendorModal }] =
 		useDisclosure(false);
 
 	return (
-		<Box  bg="white">
+		<Box bg="white">
 			<Box>
 				<SelectForm
 					name="vendor_id"
@@ -23,7 +25,7 @@ export default function VendorInfoSection({ itemsForm }) {
 						value: String(vendor.id),
 						label: vendor.name,
 					}))}
-					placeholder="Search vendor/supplier"
+					placeholder={t("SearchVendorSupplier")}
 					rightSection={
 						<ActionIcon
 							onClick={(event) => {
@@ -36,7 +38,7 @@ export default function VendorInfoSection({ itemsForm }) {
 					}
 					// clearable={false}
 					// allowDeselect={false}
-					tooltip="Vendor is required"
+					tooltip={t("VendorRequired")}
 					rightSectionPointerEvents="pointer-events"
 				/>
 

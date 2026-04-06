@@ -15,31 +15,31 @@ const vendorOverviewInitialValues = {
 	expected_date: null,
 };
 
-export const vendorOverviewRequest = () => {
+export const vendorOverviewRequest = (t) => {
 	return {
 		initialValues: vendorOverviewInitialValues,
 		validate: {
 			transactionModeId: (value) => {
 				if (!value) {
-					return "Transaction mode is required";
+					return t("TransactionModeRequired");
 				}
 				return null;
 			},
 			vendor_id: (value) => {
 				if (!value) {
-					return "Vendor is required";
+					return t("VendorRequired");
 				}
 				return null;
 			},
 			invoice_date: (value) => {
 				if (!value) {
-					return "Invoice date is required";
+					return t("InvoiceDateRequired");
 				}
 				return null;
 			},
 			expected_date: (value) => {
 				if (!value) {
-					return "Expected date is required";
+					return t("ExpectedDateRequired");
 				}
 				return null;
 			},
@@ -56,25 +56,25 @@ const invoiceItemFormInitialValues = {
 	expired_date: "",
 };
 
-export const invoiceItemFormRequest = () => {
+export const invoiceItemFormRequest = (t) => {
 	return {
 		initialValues: invoiceItemFormInitialValues,
 		validate: {
 			productId: (value) => {
 				if (!value) {
-					return "Product is required";
+					return t("ProductRequired");
 				}
 				return null;
 			},
 			purchasePrice: (value) => {
 				if (!value) {
-					return "Purchase price is required";
+					return t("PurchasePriceRequired");
 				}
 				return null;
 			},
 			quantity: (value) => {
 				if (!value) {
-					return "Quantity is required";
+					return t("QuantityRequired");
 				}
 				return null;
 			},

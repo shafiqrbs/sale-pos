@@ -12,7 +12,7 @@ import {
 } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { IconRefresh, IconCloudUpload, IconCloudDownload } from "@tabler/icons-react";
-import { SYNC_DATA } from "@/constants";
+import { PLATFORM_SYNC_DATA_MAP, SYNC_DATA } from "@/constants";
 import { showNotification } from "@components/ShowNotificationComponent";
 import { useSyncPosMutation } from "@services/pos";
 import GlobalDrawer from "../drawers/GlobalDrawer";
@@ -33,6 +33,7 @@ import axios from "axios";
 import { APP_NAVLINKS, MASTER_APIS } from "@/routes/routes";
 import commonDataStoreIntoLocalStorage from "@utils/local-storage/commonDataStoreIntoLocalStorage";
 import DatabaseInsertProgress from "@components/DatabaseInsertProgress";
+import { useTranslation } from "react-i18next";
 
 const TABLE_MAPPING = {
 	sales: "sales",
@@ -42,22 +43,13 @@ const TABLE_MAPPING = {
 	vendors: "vendors",
 };
 
-const EXPORT_MODES = [ "sales", "purchases", "customers", "vendors" ];
+const EXPORT_MODES = ["sales", "purchases", "customers", "vendors"];
 
 const IMPORT_ITEMS = [
 	{ mode: "platform", label: "Platform Sync", description: "Sync all platform data from server" },
 	{ mode: "customers", label: "Customers", description: "Import customer data from server" },
 	{ mode: "vendors", label: "Vendors", description: "Import vendor data from server" },
 ];
-
-const PLATFORM_SYNC_DATA_MAP = {
-	core_customers: "customers",
-	core_users: "users",
-	core_vendors: "vendors",
-	accounting_transaction_mode: "transaction_modes",
-	config_data: "domain_config",
-	core_products: "stock_item",
-};
 
 export default function SyncDrawer({
 	configData,
@@ -66,21 +58,22 @@ export default function SyncDrawer({
 	quickPlatformSyncRequested,
 	onQuickPlatformSyncHandled,
 }) {
+	const { t } = useTranslation();
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
-	const [ syncPos ] = useSyncPosMutation();
-	const [ syncRecords, setSyncRecords ] = useState(() => getSyncRecordsFromLocalStorage());
-	const [ loadingStates, setLoadingStates ] = useState(() => {
+	const [syncPos] = useSyncPosMutation();
+	const [syncRecords, setSyncRecords] = useState(() => getSyncRecordsFromLocalStorage());
+	const [loadingStates, setLoadingStates] = useState(() => {
 		return SYNC_DATA.reduce((accumulator, item) => {
-			accumulator[ item.mode ] = false;
+			accumulator[item.mode] = false;
 			return accumulator;
 		}, {});
 	});
-	const [ platformSyncing, setPlatformSyncing ] = useState(false);
-	const [ isInserting, setIsInserting ] = useState(false);
-	const [ insertProgress, setInsertProgress ] = useState(null);
-	const [ activeTab, setActiveTab ] = useState("export");
-	const lastSyncRecord = useMemo(() => getLastSyncRecord(syncRecords), [ syncRecords ]);
+	const [platformSyncing, setPlatformSyncing] = useState(false);
+	const [isInserting, setIsInserting] = useState(false);
+	const [insertProgress, setInsertProgress] = useState(null);
+	const [activeTab, setActiveTab] = useState("export");
+	const lastSyncRecord = useMemo(() => getLastSyncRecord(syncRecords), [syncRecords]);
 
 	useEffect(() => {
 		if (quickPlatformSyncRequested) {
@@ -88,7 +81,7 @@ export default function SyncDrawer({
 			confirmAndSyncPlatform();
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ quickPlatformSyncRequested ]);
+	}, [quickPlatformSyncRequested]);
 
 	const buildSalesSyncPayload = (sale) => {
 		const items = [];
@@ -204,9 +197,7 @@ export default function SyncDrawer({
 			case "products":
 				return {
 					...basePayload,
-					content: syncData.map((sale) => ({
-
-					})),
+					content: syncData.map((sale) => ({})),
 				};
 			case "customers":
 			case "vendors":
@@ -224,14 +215,14 @@ export default function SyncDrawer({
 	const runSync = async (syncOption) => {
 		setLoadingStates((previousStates) => ({
 			...previousStates,
-			[ syncOption ]: true,
+			[syncOption]: true,
 		}));
 
 		try {
 			let tableName = syncOption;
 			let syncData = null;
 
-			tableName = TABLE_MAPPING[ syncOption ] || syncOption;
+			tableName = TABLE_MAPPING[syncOption] || syncOption;
 			syncData = await window.dbAPI.getDataFromTable(tableName);
 
 			const payload = buildSyncPayload({ syncType: syncOption, syncData: syncData || [] });
@@ -261,11 +252,11 @@ export default function SyncDrawer({
 			}
 		} catch (error) {
 			console.error(`Error syncing ${syncOption} data:`, error);
-			showNotification(`Failed to sync ${syncOption} data. Please try again.`, "red", "", "", true);
+			showNotification(t("FailedToSyncData", { syncOption }), "red", "", "", true);
 		} finally {
 			setLoadingStates((previousStates) => ({
 				...previousStates,
-				[ syncOption ]: false,
+				[syncOption]: false,
 			}));
 		}
 	};
@@ -350,10 +341,10 @@ export default function SyncDrawer({
 
 			try {
 				// =============== insert tables one by one so progress displays per-table ================
-				for (const [ table, property ] of Object.entries(PLATFORM_SYNC_DATA_MAP)) {
-					const dataList = Array.isArray(response.data.data[ property ])
-						? response.data.data[ property ]
-						: [ response.data.data[ property ] ];
+				for (const [table, property] of Object.entries(PLATFORM_SYNC_DATA_MAP)) {
+					const dataList = Array.isArray(response.data.data[property])
+						? response.data.data[property]
+						: [response.data.data[property]];
 
 					// =============== config_data is a single object, format it before inserting ================
 					if (table === "config_data") {
@@ -373,17 +364,15 @@ export default function SyncDrawer({
 			}
 
 			// =============== clear tables that will be populated by commonDataStoreIntoLocalStorage ================
-			await window.dbAPI.destroyTableData("categories");
 			await window.dbAPI.destroyTableData("invoice_table");
 
 			// =============== get user id from users table and call common data store function ================
 			const userData = await window.dbAPI.getDataFromTable("users");
 			if (userData?.id) {
-				const navigationPathFromConfig =
-					await commonDataStoreIntoLocalStorage(userData.id);
+				const navigationPathFromConfig = await commonDataStoreIntoLocalStorage(userData.id);
 				const targetPath = navigationPathFromConfig ?? APP_NAVLINKS.BAKERY;
 				// =============== HashRouter: read path when sync finishes (avoids stale closure) ================
-				const hashSegment = window.location.hash.replace(/^#/, "").split("?")[ 0 ];
+				const hashSegment = window.location.hash.replace(/^#/, "").split("?")[0];
 				const currentPathname = hashSegment === "" ? "/" : hashSegment;
 				// =============== only adjust route when user is on pos bakery or new sales entry (login-style routing) ================
 				const isSalesNewOrBakeryRoute =
@@ -404,17 +393,17 @@ export default function SyncDrawer({
 			});
 			setSyncRecords(nextSyncRecords);
 
-			showNotification("Platform data synced successfully", "teal", "lightgray", "", "", true);
+			showNotification(t("PlatformDataSyncedSuccessfully"), "teal", "lightgray", "", "", true);
 
-			dispatch(apiSlice.util.invalidateTags([ "Sales" ]));
+			dispatch(apiSlice.util.invalidateTags(["Sales"]));
 
 			setTimeout(() => window.location.reload(), 100);
 		} catch (error) {
 			console.error("Error syncing platform data:", error);
 			showNotification(
 				error?.response?.data?.message ||
-				error?.message ||
-				"Failed to sync platform data. Please try again.",
+					error?.message ||
+					"Failed to sync platform data. Please try again.",
 				"red",
 				"",
 				"",
@@ -515,7 +504,7 @@ export default function SyncDrawer({
 											</Text>
 										</Stack>
 										<ActionIcon
-											loading={loadingStates[ item.mode ] || false}
+											loading={loadingStates[item.mode] || false}
 											loaderProps={{
 												children: (
 													<Flex justify="center" align="center" h="100%">
@@ -544,9 +533,7 @@ export default function SyncDrawer({
 								<Paper key={importItem.mode} p="md" radius="md" withBorder shadow="sm">
 									<Group justify="space-between" wrap="nowrap">
 										<Stack gap={4}>
-											<Text fw={600}>
-												{importItem.label}
-											</Text>
+											<Text fw={600}>{importItem.label}</Text>
 											<Text size="sm" c="dimmed">
 												{getLastModeRecord(importItem.mode)}
 											</Text>

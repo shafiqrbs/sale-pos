@@ -154,7 +154,7 @@ export default function Table() {
 	const handleConfirmDelete = async (record) => {
 		await window.dbAPI.deleteDataFromTable("purchase", { id: record.id });
 		setDeletedPurchaseIds((previousIds) => new Set([...previousIds, record.id]));
-		showNotification(`Invoice ${record.invoice} deleted`, "teal");
+		showNotification(t("InvoiceDeletedSuccess", { invoice: record.invoice }), "teal");
 	};
 
 	return (

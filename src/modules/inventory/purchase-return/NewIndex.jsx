@@ -8,10 +8,12 @@ import { vendorOverviewRequest } from "./helpers/request";
 import { showNotification } from "@components/ShowNotificationComponent";
 import useLoggedInUser from "@hooks/useLoggedInUser";
 import { useAddPurchaseReturnMutation } from "@services/purchase-return";
+import { useTranslation } from "react-i18next";
 
 export default function NewIndex() {
+	const { t } = useTranslation();
 	const { user } = useLoggedInUser();
-	const itemsForm = useForm(vendorOverviewRequest());
+	const itemsForm = useForm(vendorOverviewRequest(t));
 	const [purchaseItems, setPurchaseItems] = useState([]);
 	const [isAddingItem, setIsAddingItem] = useState(false);
 	const [returnType, setReturnType] = useState(null);
@@ -59,17 +61,17 @@ export default function NewIndex() {
 
 	const handleSubmit = async (formValues) => {
 		if (!purchaseItems.length) {
-			showNotification("Add minimum one purchase item first", "red");
+			showNotification(t("AddMinimumOnePurchaseItemFirst"), "red");
 			return;
 		}
 
 		if (!formValues.vendor_id) {
-			showNotification("Vendor is required", "red");
+			showNotification(t("VendorRequired"), "red");
 			return;
 		}
 
 		if (!returnType) {
-			showNotification("Return type is required", "red");
+			showNotification(t("ReturnTypeRequired"), "red");
 			return;
 		}
 
@@ -99,7 +101,7 @@ export default function NewIndex() {
 		try {
 			await addPurchaseReturn(payload).unwrap();
 
-			showNotification("Purchase return saved successfully", "teal");
+			showNotification(t("PurchaseReturnSavedSuccessfully"), "teal");
 			setPurchaseItems([]);
 			itemIdCounter.current = 0;
 			setReturnType(null);

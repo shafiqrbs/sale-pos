@@ -50,7 +50,7 @@ export default function FilterPopover() {
       name: (value, values) => {
         // First check if any main field is filled
         if (!value && !values.mobile && !values.invoice) {
-          return "At least one main field is required";
+          return t("AtLeastOneMainFieldRequired");
         }
         return null;
       },
@@ -75,13 +75,13 @@ export default function FilterPopover() {
       },
       invoice: (value, values) => {
         if (!value && !values.name && !values.mobile) {
-          return "At least one main field is required";
+          return t("AtLeastOneMainFieldRequired");
         }
         return null;
       },
       invoice_dropdown: (value, values) => {
         if (values.invoice && !value) {
-          return "Please select an option for Invoice";
+          return t("SelectInvoiceOption");
         }
         return null;
       },
@@ -184,7 +184,7 @@ export default function FilterPopover() {
                             id="name_dropdown"
                             label=""
                             nextField="name"
-                            placeholder="Search Like"
+                            placeholder={t("SearchLike")}
                             dropdownValue={name_drop_data}
                             changeValue={setNameDropdown}
                             data={[ "React", "Angular", "Vue", "Svelte" ]}
@@ -229,7 +229,7 @@ export default function FilterPopover() {
                             id="mobile_dropdown"
                             nextField="mobile"
                             label=""
-                            placeholder="Search Like"
+                            placeholder={t("SearchLike")}
                             dropdownValue={mobile_drop_data}
                             value={mobileDropdown}
                             changeValue={setMobileDropdown}
@@ -274,7 +274,7 @@ export default function FilterPopover() {
                             id="invoice_dropdown"
                             nextField="invoice"
                             label=""
-                            placeholder="Search Like"
+                            placeholder={t("SearchLike")}
                             dropdownValue={invoice_drop_data}
                             value={invoiceDropdown}
                             changeValue={setInvoiceDropdown}

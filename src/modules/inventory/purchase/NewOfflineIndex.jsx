@@ -8,11 +8,13 @@ import { showNotification } from "@components/ShowNotificationComponent";
 import useTempPurchaseProducts from "@hooks/useTempPurchaseProducts";
 import useLoggedInUser from "@hooks/useLoggedInUser";
 import { generateInvoiceId, formatDateTime } from "@utils/index";
+import { useTranslation } from "react-i18next";
 
 export default function NewOfflineIndex() {
+	const { t } = useTranslation();
 
 	const { user } = useLoggedInUser();
-	const itemsForm = useForm(vendorOverviewRequest());
+	const itemsForm = useForm(vendorOverviewRequest(t));
 	const { purchaseProducts: itemsProducts, refetch } = useTempPurchaseProducts({ type: "purchase" });
 	const [ isAddingItem, setIsAddingItem ] = useState(false);
 
@@ -49,20 +51,20 @@ export default function NewOfflineIndex() {
 
 	const handleSubmit = async (formValues) => {
 		if (!itemsProducts?.length) {
-			showNotification("Add minimum one purchase item first", "red");
+			showNotification(t("AddMinimumOnePurchaseItemFirst"), "red");
 			return;
 		}
 
 		if (!formValues.vendor_id) {
-			showNotification("Vendor is required", "red");
+			showNotification(t("VendorRequired"), "red");
 			return;
 		}
 		if (!formValues.transactionModeId) {
-			showNotification("Transaction mode is required", "red");
+			showNotification(t("TransactionModeRequired"), "red");
 			return;
 		}
 		if (!formValues.paymentAmount) {
-			showNotification("Payment amount is required", "red");
+			showNotification(t("PaymentAmountRequired"), "red");
 			return;
 		}
 
@@ -131,7 +133,7 @@ export default function NewOfflineIndex() {
 			await window.dbAPI.upsertIntoTable("purchase", localPurchaseRecord);
 			await updateProductsAfterPurchase();
 
-			showNotification("Purchase added successfully", "teal");
+			showNotification(t("PurchaseAddedSuccessfully"), "teal");
 
 			// =============== clear persisted temp items after successful purchase submission ===============
 			await window.dbAPI.deleteDataFromTable("temp_purchase_products", { type: "purchase" });

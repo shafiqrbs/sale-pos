@@ -135,7 +135,7 @@ export default function ProductFilters({ filter, setFilter }) {
                             </Tooltip>
                         ) : (
                             <Tooltip
-                                label="Field is required"
+                                label={t("FieldIsRequired")}
                                 withArrow
                                 position="top"
                                 color="red"

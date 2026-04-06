@@ -7,6 +7,7 @@ import { formatDate, formatDateISO } from "@utils";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { parseDateString } from "@utils/index";
 import DateInputForm from "@components/form-builders/DateInputForm";
+import { useTranslation } from "react-i18next";
 
 export default function KeywordSearch({
 	form,
@@ -21,6 +22,7 @@ export default function KeywordSearch({
 	className = "keyword-search-box",
 	handleCSVDownload = () => {},
 }) {
+	const { t } = useTranslation();
 	const [term, setTerm] = useState(form.values.term || "");
 	const [date, setDate] = useState(null);
 	const [startDate, setStartDate] = useState(null);
@@ -135,7 +137,7 @@ export default function KeywordSearch({
 				<DateInput
 					clearable
 					name="created"
-					placeholder="Select Date"
+					placeholder={t("SelectDate")}
 					value={date}
 					onChange={handleDateChange}
 					miw={200}
@@ -146,7 +148,7 @@ export default function KeywordSearch({
 					<DateInput
 						clearable
 						name="start_date"
-						placeholder="Start Date"
+						placeholder={t("StartDate")}
 						value={startDate}
 						onChange={handleStartDateChange}
 						miw={200}
@@ -154,7 +156,7 @@ export default function KeywordSearch({
 					<DateInput
 						clearable
 						name="end_date"
-						placeholder="End Date"
+						placeholder={t("EndDate")}
 						value={endDate}
 						onChange={handleEndDateChange}
 						miw={200}

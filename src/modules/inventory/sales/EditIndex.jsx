@@ -19,7 +19,7 @@ export default function EditIndex() {
 	const navigate = useNavigate();
 	const { user } = useLoggedInUser();
 	const { configData } = useConfigData();
-	const itemsForm = useForm(salesOverviewRequest());
+	const itemsForm = useForm(salesOverviewRequest(t));
 
 	const { sale, isLoading: isLoadingSale } = useGetSale(saleId);
 
@@ -159,18 +159,18 @@ export default function EditIndex() {
 
 	const handleSubmit = async (formValues) => {
 		if (!editItems.length) {
-			showNotification("Add minimum one sales item first", "red");
+			showNotification(t("AddMinimumOneSalesItemFirst"), "red");
 			return;
 		}
 
 		const payments = formValues.payments ?? [];
 		if (!payments.length) {
-			showNotification("Transaction mode is required", "red");
+			showNotification(t("TransactionModeRequired"), "red");
 			return;
 		}
 
 		if (!formValues.paymentAmount || Number(formValues.paymentAmount) <= 0) {
-			showNotification("Payment amount is required", "red");
+			showNotification(t("PaymentAmountRequired"), "red");
 			return;
 		}
 
@@ -257,7 +257,7 @@ export default function EditIndex() {
 
 			const shouldPrint = withPosPrintRef.current;
 
-			showNotification("Sale updated successfully", "teal");
+			showNotification(t("SaleUpdatedSuccessfully"), "teal");
 
 			// =============== after a successful save the current items become the new baseline for
 			// future resets and the next product-qty restoration cycle ===============

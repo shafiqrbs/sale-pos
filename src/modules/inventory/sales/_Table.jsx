@@ -83,7 +83,7 @@ export default function Table() {
 	const handleConfirmDelete = async (record) => {
 		await window.dbAPI.deleteDataFromTable("sales", { id: record.id });
 		setDeletedSaleIds((previousIds) => new Set([...previousIds, record.id]));
-		showNotification(`Invoice ${record.invoice} deleted`, "teal");
+		showNotification(t("InvoiceDeletedSuccess", { invoice: record.invoice }), "teal");
 	};
 
 	const handleEditInPos = async (data) => {
@@ -132,7 +132,7 @@ export default function Table() {
 			navigate(APP_NAVLINKS.BAKERY);
 		} catch (err) {
 			console.error("Error loading sale into POS:", err);
-			showNotification("Failed to load sale into POS", "red");
+			showNotification(t("FailedToLoadSaleIntoPOS"), "red");
 		}
 	};
 

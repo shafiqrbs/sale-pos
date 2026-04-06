@@ -47,7 +47,7 @@ export default function AdvancedFilter({ mainAreaHeight, bd = "1px solid var(--t
 			name: (value, values) => {
 				// First check if any main field is filled
 				if (!value && !values.mobile && !values.company_name) {
-					return "At least one main field is required";
+					return t("AtLeastOneMainFieldRequired");
 				}
 				return null;
 			},
@@ -72,7 +72,7 @@ export default function AdvancedFilter({ mainAreaHeight, bd = "1px solid var(--t
 			},
 			company_name: (value, values) => {
 				if (!value && !values.name && !values.mobile) {
-					return "At least one main field is required";
+					return t("AtLeastOneMainFieldRequired");
 				}
 				return null;
 			},
@@ -153,7 +153,7 @@ export default function AdvancedFilter({ mainAreaHeight, bd = "1px solid var(--t
 													id="name_dropdown"
 													label=""
 													nextField="name"
-													placeholder="Search Like"
+													placeholder={t("SearchLike")}
 													dropdownValue={DROPDOWN_DATA}
 													value={nameDropdown}
 													changeValue={setNameDropdown}
@@ -191,7 +191,7 @@ export default function AdvancedFilter({ mainAreaHeight, bd = "1px solid var(--t
 													id="mobile_dropdown"
 													nextField="mobile"
 													label=""
-													placeholder="Search Like"
+													placeholder={t("SearchLike")}
 													dropdownValue={DROPDOWN_DATA}
 													value={mobileDropdown}
 													changeValue={setMobileDropdown}
@@ -229,7 +229,7 @@ export default function AdvancedFilter({ mainAreaHeight, bd = "1px solid var(--t
 													id="company_name_dropdown"
 													nextField="company_name"
 													label=""
-													placeholder="Search Like"
+													placeholder={t("SearchLike")}
 													dropdownValue={DROPDOWN_DATA}
 													value={companyNameDropdown}
 													changeValue={setCompanyNameDropdown}

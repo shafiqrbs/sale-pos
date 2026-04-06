@@ -21,7 +21,7 @@ export default function NewIndex() {
 	const { configData, is_sales_online } = useConfigData();
 	const [ addSales ] = useAddSalesMutation();
 	const shouldSubmitSalesOnline = isOnline && is_sales_online;
-	const itemsForm = useForm(salesOverviewRequest());
+	const itemsForm = useForm(salesOverviewRequest(t));
 	const { salesProducts: itemsProducts, refetch } = useTempSalesProducts({ type: "sales" });
 	const [ resetKey, setResetKey ] = useState(0);
 	const [ isAddingItem, setIsAddingItem ] = useState(false);
@@ -66,18 +66,18 @@ export default function NewIndex() {
 
 	const handleSubmit = async (formValues) => {
 		if (!itemsProducts?.length) {
-			showNotification("Add minimum one sales item first", "red");
+			showNotification(t("AddMinimumOneSalesItemFirst"), "red");
 			return;
 		}
 
 		const payments = formValues.payments ?? [];
 		if (!payments.length) {
-			showNotification("Transaction mode is required", "red");
+			showNotification(t("TransactionModeRequired"), "red");
 			return;
 		}
 
 		if (!formValues.paymentAmount || Number(formValues.paymentAmount) <= 0) {
-			showNotification("Payment amount is required", "red");
+			showNotification(t("PaymentAmountRequired"), "red");
 			return;
 		}
 
@@ -210,7 +210,7 @@ export default function NewIndex() {
 
 			const shouldPrint = withPosPrintRef.current;
 
-			showNotification("Sale added successfully", "teal");
+			showNotification(t("SaleAddedSuccessfully"), "teal");
 
 			await window.dbAPI.deleteDataFromTable("temp_sales_products", { type: "sales" });
 			refetch();

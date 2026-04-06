@@ -130,7 +130,7 @@ export default function CheckoutTable() {
 
 		if (!allowSalesZeroStock && numberValue > maxLimit) {
 			setInputValues((prev) => ({ ...prev, [ data.stock_item_id ]: maxLimit }));
-			showNotification(`Maximum available quantity is ${maxLimit}`, "red", "", "", true, 800, true);
+			showNotification(t("MaxAvailableQuantityIs", { max: maxLimit }), "red", "", "", true, 800, true);
 			updateQuantity(data, maxLimit);
 			return;
 		}

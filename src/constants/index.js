@@ -75,6 +75,26 @@ export const SYNC_DATA = [
 	},
 ];
 
+export const DATA_MAP = {
+	core_customers: "customers",
+	core_users: "users",
+	core_vendors: "vendors",
+	accounting_transaction_mode: "transaction_methods",
+	config_data: "domain_config",
+	core_products: "stocks",
+	categories: "productCategory",
+};
+
+export const PLATFORM_SYNC_DATA_MAP = {
+	core_customers: DATA_MAP.core_customers,
+	core_users: DATA_MAP.core_users,
+	core_vendors: DATA_MAP.core_vendors,
+	accounting_transaction_mode: DATA_MAP.accounting_transaction_mode,
+	config_data: DATA_MAP.config_data,
+	core_products: DATA_MAP.core_products,
+	categories: DATA_MAP.categories,
+};
+
 export const ADVANCED_FILTER_SEARCH_OPERATOR = {
 	INPUT_PARAMETER: {
 		equal: "=",

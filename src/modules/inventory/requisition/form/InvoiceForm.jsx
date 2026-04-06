@@ -1,18 +1,6 @@
-import {
-	Box,
-	Button,
-	Divider,
-	Flex,
-	ScrollArea,
-	Select,
-	Text,
-} from "@mantine/core";
+import { Box, Button, Divider, Flex, ScrollArea, Select, Text } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import {
-	IconPlus,
-	IconShoppingCart,
-	IconSortAscendingNumbers,
-} from "@tabler/icons-react";
+import { IconPlus, IconShoppingCart, IconSortAscendingNumbers } from "@tabler/icons-react";
 
 import useMainAreaHeight from "@hooks/useMainAreaHeight";
 import InputNumberForm from "@components/form-builders/InputNumberForm";
@@ -29,29 +17,35 @@ import VirtualSearchSelect from "@components/form-builders/VirtualSearchSelect";
 import React, { useEffect, useState } from "react";
 import { useGetInventoryCategoryQuery } from "@services/settings";
 import SelectForm from "@components/form-builders/SelectForm";
-import { useGetVendorsQuery } from "@services/core/vendors";
+import useCoreVendors from "@hooks/useCoreVendors";
+import { useTranslation } from "react-i18next";
 
 export default function InvoiceForm({ refetch, onAddItem, onVendorChange }) {
-	const [ products, setProducts ] = useState([]);
-	const [ productResetKey, setProductResetKey ] = useState(0);
-	const [ selectedCategoryId, setSelectedCategoryId ] = useState(null);
+	const [products, setProducts] = useState([]);
+	const [productResetKey, setProductResetKey] = useState(0);
+	const [selectedCategoryId, setSelectedCategoryId] = useState(null);
 	const { currencySymbol } = useConfigData();
-	const itemsForm = useForm(invoiceItemFormRequest());
+	const { t } = useTranslation();
+	const itemsForm = useForm(invoiceItemFormRequest(t));
 	const { getLocalProducts } = useLocalProducts({
 		fetchOnMount: false,
 	});
 	const { categories } = useGetCategories();
-	const { data: vendors } = useGetVendorsQuery();
+	const { vendors } = useCoreVendors();
+
+	console.log(vendors);
 
 	const { data: productCategoryData } = useGetInventoryCategoryQuery({ type: "parent" });
 	const { mainAreaHeight } = useMainAreaHeight();
-	const [ isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer } ] =
+	const [isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer }] =
 		useDisclosure(false);
 
 	// =============== fetch products in db entry order (id ASC), same as sales product select ===============
 	useEffect(() => {
-
-		const filterCondition = { vendor_id: itemsForm.values.vendor_id, category_id: selectedCategoryId ? selectedCategoryId : undefined }
+		const filterCondition = {
+			vendor_id: itemsForm.values.vendor_id,
+			category_id: selectedCategoryId ? selectedCategoryId : undefined,
+		};
 
 		getLocalProducts(filterCondition, "id", {
 			orderBy: "product_name ASC",
@@ -59,7 +53,7 @@ export default function InvoiceForm({ refetch, onAddItem, onVendorChange }) {
 			setProducts(fetchedProducts);
 		});
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ selectedCategoryId, itemsForm.values.vendor_id ]);
+	}, [selectedCategoryId, itemsForm.values.vendor_id]);
 
 	const productOptions = products?.map((product) => ({
 		value: String(product.id),
@@ -74,14 +68,14 @@ export default function InvoiceForm({ refetch, onAddItem, onVendorChange }) {
 		const { productId, purchasePrice, quantity } = itemsForm.values;
 
 		if (!productId || !quantity) {
-			showNotification("Product and quantity are required", "red");
+			showNotification(t("ProductAndQuantityRequired"), "red");
 			return;
 		}
 
 		const selectedProduct = products?.find((product) => String(product.id) === String(productId));
 
 		if (!selectedProduct) {
-			showNotification("Product not found", "red");
+			showNotification(t("ProductNotFound"), "red");
 			return;
 		}
 
@@ -94,8 +88,7 @@ export default function InvoiceForm({ refetch, onAddItem, onVendorChange }) {
 
 		// =============== resolve category_name from category_id using local categories ===============
 		const categoryId = selectedProduct.category_id ?? null;
-		const categoryName =
-			categories?.find((cat) => cat.id === categoryId)?.name ?? "";
+		const categoryName = categories?.find((cat) => cat.id === categoryId)?.name ?? "";
 
 		const newItem = {
 			product_id: selectedProduct.id,
@@ -122,7 +115,7 @@ export default function InvoiceForm({ refetch, onAddItem, onVendorChange }) {
 		}
 
 		handleResetInvoiceItemForm();
-		showNotification("Item added successfully", "teal");
+		showNotification(t("ItemAddedSuccessfully"), "teal");
 	};
 
 	const handleResetInvoiceItemForm = () => {
@@ -145,7 +138,7 @@ export default function InvoiceForm({ refetch, onAddItem, onVendorChange }) {
 		itemsForm.setFieldValue("unit", option?.unit);
 	};
 
-	useHotkeys([ [ "alt+a", () => document.getElementById("EntityFormSubmit")?.click() ] ]);
+	useHotkeys([["alt+a", () => document.getElementById("EntityFormSubmit")?.click()]]);
 
 	return (
 		<>
@@ -156,13 +149,28 @@ export default function InvoiceForm({ refetch, onAddItem, onVendorChange }) {
 				bg="white"
 				className="borderRadiusAll"
 			>
-				<Box p="sm" fz="sm" fw={600} bg="var(--theme-primary-color-8)" c="white" className="boxBackground textColor borderRadiusAll">
+				<Box
+					p="sm"
+					fz="sm"
+					fw={600}
+					bg="var(--theme-primary-color-8)"
+					c="white"
+					className="boxBackground textColor borderRadiusAll"
+				>
 					Vendor Requisition
 				</Box>
 				<Divider />
-				<ScrollArea h={containerHeight} bg={'#f0f4f83d'} type="never">
+				<ScrollArea h={containerHeight} bg={"#f0f4f83d"} type="never">
 					<Box p="sm">
-						<Flex mt="md" gap="4" align="flex-end" bg="var(--theme-primary-color-2)" p="xs" ml="-xs" mr="-xs" >
+						<Flex
+							mt="md"
+							gap="4"
+							align="flex-end"
+							bg="var(--theme-primary-color-2)"
+							p="xs"
+							ml="-xs"
+							mr="-xs"
+						>
 							<Box w="100%">
 								<SelectForm
 									name="vendor_id"
@@ -171,18 +179,26 @@ export default function InvoiceForm({ refetch, onAddItem, onVendorChange }) {
 										value: String(vendor.id),
 										label: vendor.name,
 									}))}
-									placeholder="Search vendor/supplier"
-									tooltip="Vendor is required"
+									placeholder={t("SearchVendorSupplier")}
+									tooltip={t("VendorRequired")}
 									changeValue={onVendorChange}
 								/>
 							</Box>
 						</Flex>
-						<Flex mt="md" gap="4" align="flex-end" bg="var(--theme-primary-color-1)" p="xs" ml="-xs" mr="-xs" >
+						<Flex
+							mt="md"
+							gap="4"
+							align="flex-end"
+							bg="var(--theme-primary-color-1)"
+							p="xs"
+							ml="-xs"
+							mr="-xs"
+						>
 							<Box w="100%">
 								<Select
-									placeholder="All categories"
+									placeholder={t("AllCategories")}
 									data={[
-										{ value: "", label: "All categories" },
+										{ value: "", label: t("AllCategories") },
 										...(productCategoryData?.data?.map((item) => ({
 											value: String(item.id),
 											label: item.name,
@@ -204,10 +220,18 @@ export default function InvoiceForm({ refetch, onAddItem, onVendorChange }) {
 								/>
 							</Box>
 						</Flex>
-						<Flex mt="md" gap="4" align="flex-end" bg="var(--theme-primary-color-4)" p="xs" ml="-xs" mr="-xs" >
+						<Flex
+							mt="md"
+							gap="4"
+							align="flex-end"
+							bg="var(--theme-primary-color-4)"
+							p="xs"
+							ml="-xs"
+							mr="-xs"
+						>
 							<Box w="100%">
 								<FormValidationWrapper
-									errorMessage="Product is required"
+									errorMessage={t("ProductRequired")}
 									opened={!!itemsForm.errors.productId}
 								>
 									<Box pos="relative">
@@ -215,10 +239,10 @@ export default function InvoiceForm({ refetch, onAddItem, onVendorChange }) {
 											key={productResetKey}
 											value={itemsForm.values.productId}
 											options={productOptions}
-											placeholder="Choose Product"
+											placeholder={t("ChooseProduct")}
 											searchable
 											disabled={!itemsForm.values.vendor_id}
-											nothingFoundMessage="Change the search term to find a product"
+											nothingFoundMessage={t("ChangeSearchTermProduct")}
 											onChange={handleProductSelect}
 											id="productId"
 											nextField="quantity"
@@ -264,7 +288,7 @@ export default function InvoiceForm({ refetch, onAddItem, onVendorChange }) {
 			<AddProductDrawer
 				productDrawer={isProductDrawerOpened}
 				closeProductDrawer={closeProductDrawer}
-				setStockProductRestore={() => { }}
+				setStockProductRestore={() => {}}
 				focusField="productId"
 				fieldPrefix=""
 			/>

@@ -46,13 +46,50 @@ Use `showNotification` from `@components/ShowNotificationComponent.jsx`.
 
 ### Translations
 
-Always wrap user-facing text with `t()` from `useTranslation()`. **Never use raw string literals in JSX rendered output.**
+Always wrap **every** user-facing text with `t()` from `useTranslation()`. **Never use raw string literals in JSX rendered output, props, or notification messages.**
 
 - Translation files: `src/lang/en/translation.json` (English) and `src/lang/bn/translation.json` (Bangla)
 - When adding any new UI text, add the key to **both** JSON files simultaneously
 - Key naming: PascalCase, descriptive (e.g. `GrandTotal`, `StillDue`, `TransactionModeRequired`)
-- Exceptions to translation: keyboard shortcut hints (`alt+s`), date format tokens (`DD-MM-YYYY`), CSS/prop values
-- For Select `data` arrays with translatable labels, always use `{ value: 'stableKey', label: t("Key") }` objects to keep stored values language-independent
+- Exceptions to translation: keyboard shortcut hints (`alt+s`), date format tokens (`DD-MM-YYYY`), CSS/prop values, technical example placeholders (e.g. printer model codes)
+
+#### What Must Be Translated
+
+- **Placeholders**: `placeholder={t("SearchVendorSupplier")}` — never `placeholder="Search vendor/supplier"`
+- **Tooltips**: `tooltip={t("VendorRequired")}` — never `tooltip="Vendor is required"`
+- **Error/validation messages**: `errorMessage={t("ProductRequired")}` — never `errorMessage="Product is required"`
+- **Notification messages**: `showNotification(t("PurchaseAddedSuccessfully"), "teal")` — never raw strings in `showNotification()`
+- **Titles & descriptions**: `title={t("SetupPrinter")}`, `description={t("PrinterNameDescription")}`
+- **nothingFoundMessage**: `nothingFoundMessage={t("ChangeSearchTermProduct")}`
+- **Labels in forms**: section headings, button text, input labels
+- **Select dropdown labels**: `{ value: 'stableKey', label: t("Key") }` objects to keep stored values language-independent
+
+#### Dynamic Translation with Interpolation
+
+For messages containing dynamic values, use i18next interpolation:
+
+```js
+// Translation key: "InvoiceDeletedSuccess": "Invoice {{invoice}} deleted"
+showNotification(t("InvoiceDeletedSuccess", { invoice: record.invoice }), "teal");
+```
+
+#### Non-Component Files (helpers, utils)
+
+For validation helpers or utility files that are not React components, accept `t` as a parameter:
+
+```js
+// In helpers/request.js
+export const vendorOverviewRequest = (t) => ({
+  initialValues: { ... },
+  validate: {
+    vendor_id: (value) => (!value ? t("VendorRequired") : null),
+  },
+});
+
+// In the component
+const { t } = useTranslation();
+const itemsForm = useForm(vendorOverviewRequest(t));
+```
 
 ### Action Menus in Tables
 

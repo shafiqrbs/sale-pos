@@ -11,15 +11,17 @@ import useConfigData from "@hooks/useConfigData";
 import { useAddPurchaseMutation } from "@services/purchase";
 import { generateInvoiceId, formatDateTime, formatDateISO } from "@utils/index";
 import { useOutletContext } from "react-router";
+import { useTranslation } from "react-i18next";
 
 export default function NewIndex() {
+	const { t } = useTranslation();
 
 	const { user } = useLoggedInUser();
 	const { isOnline } = useOutletContext();
 	const { is_purchase_online } = useConfigData();
 	const [ addPurchase ] = useAddPurchaseMutation();
 	const shouldSubmitPurchaseOnline = isOnline && is_purchase_online;
-	const itemsForm = useForm(vendorOverviewRequest());
+	const itemsForm = useForm(vendorOverviewRequest(t));
 	const { purchaseProducts: itemsProducts, refetch } = useTempPurchaseProducts({ type: "purchase" });
 	const [ isAddingItem, setIsAddingItem ] = useState(false);
 
@@ -56,20 +58,20 @@ export default function NewIndex() {
 
 	const handleSubmit = async (formValues) => {
 		if (!itemsProducts?.length) {
-			showNotification("Add minimum one purchase item first", "red");
+			showNotification(t("AddMinimumOnePurchaseItemFirst"), "red");
 			return;
 		}
 
 		if (!formValues.vendor_id) {
-			showNotification("Vendor is required", "red");
+			showNotification(t("VendorRequired"), "red");
 			return;
 		}
 		if (!formValues.transactionModeId) {
-			showNotification("Transaction mode is required", "red");
+			showNotification(t("TransactionModeRequired"), "red");
 			return;
 		}
 		if (!formValues.paymentAmount) {
-			showNotification("Payment amount is required", "red");
+			showNotification(t("PaymentAmountRequired"), "red");
 			return;
 		}
 
@@ -175,7 +177,7 @@ export default function NewIndex() {
 			}
 			await updateProductsAfterPurchase();
 
-			showNotification("Purchase added successfully", "teal");
+			showNotification(t("PurchaseAddedSuccessfully"), "teal");
 
 			// =============== clear persisted temp items after successful purchase submission ===============
 			await window.dbAPI.deleteDataFromTable("temp_purchase_products", { type: "purchase" });

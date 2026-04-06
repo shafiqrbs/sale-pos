@@ -34,7 +34,7 @@ export default function ChangePasswordDrawer({ opened, onClose }) {
 			confirm_password: "",
 		},
 		validate: {
-			current_password: isNotEmpty("Current Password is required"),
+			current_password: isNotEmpty(t("CurrentPasswordRequired")),
 			new_password: (value) => {
 				if (!value) return t("NewPassword");
 				if (value.length < 8) return t("PasswordValidateMessage");

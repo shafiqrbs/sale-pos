@@ -37,7 +37,7 @@ import {
 	IconSun,
 	IconMoon,
 	IconCategory,
-	IconCloudDownload,
+	IconClockCog,
 } from "@tabler/icons-react";
 import { NavLink, useLocation, useNavigate } from "react-router";
 import LanguagePickerStyle from "@assets/css/LanguagePicker.module.css";
@@ -60,13 +60,13 @@ const COLOR_SCHEME_CONFIG = {
 };
 
 function getColorSchemeMeta(scheme) {
-	return COLOR_SCHEME_CONFIG[ scheme ] ?? COLOR_SCHEME_CONFIG.auto;
+	return COLOR_SCHEME_CONFIG[scheme] ?? COLOR_SCHEME_CONFIG.auto;
 }
 
 export default function Header({ isOnline, toggleNetwork }) {
 	const { user, isOnlinePermissionIncludes } = useLoggedInUser();
 	const { configData, is_pos } = useConfigData({ offlineFetch: !isOnline });
-	const [ openedPrinter, { open: openPrinter, close: closePrinter } ] = useDisclosure(false);
+	const [openedPrinter, { open: openPrinter, close: closePrinter }] = useDisclosure(false);
 	const [
 		changePasswordDrawerOpened,
 		{ open: openChangePasswordDrawer, close: closeChangePasswordDrawer },
@@ -75,14 +75,14 @@ export default function Header({ isOnline, toggleNetwork }) {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const { toggle, fullscreen } = useFullscreen();
-	const [ syncPanelOpen, setSyncPanelOpen ] = useState(false);
-	const [ quickPlatformSyncRequested, setQuickPlatformSyncRequested ] = useState(false);
-	const [ languageOpened, setLanguageOpened ] = useState(false);
-	const [ languageSelected, setLanguageSelected ] = useState(
+	const [syncPanelOpen, setSyncPanelOpen] = useState(false);
+	const [quickPlatformSyncRequested, setQuickPlatformSyncRequested] = useState(false);
+	const [languageOpened, setLanguageOpened] = useState(false);
+	const [languageSelected, setLanguageSelected] = useState(
 		LANGUAGES.find((item) => item.value === i18n.language)
 	);
 
-	const [ printerSetup, setPrinterSetup ] = useState({
+	const [printerSetup, setPrinterSetup] = useState({
 		printerName: "",
 		characterSet: "PC437_USA",
 		lineCharacter: "-",
@@ -126,12 +126,11 @@ export default function Header({ isOnline, toggleNetwork }) {
 		}
 
 		if (!isOnlinePermissionIncludes) {
-			return ![ "Hold", "Stock" ].includes(item.label);
+			return !["Hold", "Stock"].includes(item.label);
 		}
 
 		return true;
 	});
-
 
 	useEffect(() => {
 		const checkPrinterData = async () => {
@@ -148,7 +147,7 @@ export default function Header({ isOnline, toggleNetwork }) {
 		if (openedPrinter) {
 			checkPrinterData();
 		}
-	}, [ openedPrinter ]);
+	}, [openedPrinter]);
 
 	async function logout() {
 		await window.dbAPI.destroyTableData();
@@ -245,32 +244,32 @@ export default function Header({ isOnline, toggleNetwork }) {
 							withArrow
 							arrowPosition="center"
 						>
-						{isOnlinePermissionIncludes ? (
-							<Tooltip label="Sync Data" bg="red.5" withArrow>
-								<ActionIcon
-									disabled={!isOnline}
-									mt="4xs"
-									onClick={toggleSyncPanel}
-									variant="filled"
-									color="white"
-									bg={isOnline ? "green.8" : "gray.1"}
-								>
-									<IconRefresh size={20} />
-								</ActionIcon>
-							</Tooltip>
-						) : isOnline ? (
-							<Tooltip label={t("QuickPlatformSync")} bg="blue.6" withArrow>
-								<ActionIcon
-									mt="4xs"
-									onClick={() => setQuickPlatformSyncRequested(true)}
-									variant="filled"
-									color="white"
-									bg="blue.6"
-								>
-									<IconCloudDownload size={20} />
-								</ActionIcon>
-							</Tooltip>
-						) : null}
+							{isOnlinePermissionIncludes ? (
+								<Tooltip label="Sync Data" bg="red.5" withArrow>
+									<ActionIcon
+										disabled={!isOnline}
+										mt="4xs"
+										onClick={toggleSyncPanel}
+										variant="filled"
+										color="white"
+										bg={isOnline ? "green.8" : "gray.1"}
+									>
+										<IconRefresh size={20} />
+									</ActionIcon>
+								</Tooltip>
+							) : isOnline ? (
+								<Tooltip label={t("QuickPlatformSync")} bg="blue.6" withArrow>
+									<ActionIcon
+										mt="4xs"
+										onClick={() => setQuickPlatformSyncRequested(true)}
+										variant="filled"
+										color="white"
+										bg="blue.6"
+									>
+										<IconClockCog size={20} />
+									</ActionIcon>
+								</Tooltip>
+							) : null}
 							<Tooltip label="Pos printer setup" bg="red.5" withArrow>
 								<ActionIcon mt="4xs" onClick={openPrinter} variant="transparent" color="white">
 									<IconPrinter size={20} />
@@ -380,13 +379,12 @@ export default function Header({ isOnline, toggleNetwork }) {
 								</ActionIcon>
 							</Tooltip>
 						)}
-
 					</Flex>
 				</Flex>
 			</Box>
 
 			{/* ---------- printer modal ------- */}
-			<Modal opened={openedPrinter} onClose={closePrinter} title="Setup Printer">
+			<Modal opened={openedPrinter} onClose={closePrinter} title={t("SetupPrinter")}>
 				<form onSubmit={handlePrinterSetup}>
 					<TextInput
 						mb={10}
@@ -400,7 +398,7 @@ export default function Header({ isOnline, toggleNetwork }) {
 							})
 						}
 						placeholder="RT378"
-						description="Same as printer name and printer sharing name"
+						description={t("PrinterNameDescription")}
 					/>
 					<Select
 						mb={10}
@@ -427,7 +425,7 @@ export default function Header({ isOnline, toggleNetwork }) {
 								lineCharacter: value,
 							})
 						}
-						description="How the lines separator will build"
+						description={t("LineCharacterDescription")}
 						data={LINE_CHARACTER}
 						placeholder="="
 					/>

@@ -571,7 +571,7 @@ export default function Transaction({ form, tableId = null }) {
 				<SelectForm
 					pt="4"
 					label=""
-					tooltip="SalesBy"
+					tooltip={t("SalesBy")}
 					placeholder={t("OrderTakenBy")}
 					name="sales_by_id"
 					form={form}

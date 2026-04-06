@@ -29,7 +29,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 	const [products, setProducts] = useState([]);
 	const [productResetKey, setProductResetKey] = useState(0);
 	const { currencySymbol } = useConfigData();
-	const itemsForm = useForm(salesItemFormRequest());
+	const itemsForm = useForm(salesItemFormRequest(t));
 	const { getLocalProducts } = useLocalProducts({ fetchOnMount: false });
 	const { categories } = useGetCategories();
 
@@ -63,14 +63,14 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 		const { productId, salesPrice, quantity } = itemsForm.values;
 
 		if (!productId || !quantity) {
-			showNotification("Product and quantity are required", "red");
+			showNotification(t("ProductAndQuantityRequired"), "red");
 			return;
 		}
 
 		const selectedProduct = products?.find((product) => String(product.id) === String(productId));
 
 		if (!selectedProduct) {
-			showNotification("Product not found", "red");
+			showNotification(t("ProductNotFound"), "red");
 			return;
 		}
 
@@ -114,7 +114,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 		}
 
 		handleResetSalesItemForm();
-		showNotification("Item added successfully", "teal");
+		showNotification(t("ItemAddedSuccessfully"), "teal");
 	};
 
 	const invoiceSubTotal = (Number(itemsForm.values.quantity) || 0) * effectivePrice;
@@ -155,7 +155,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 							name="barcode"
 							id="barcode"
 							label=""
-							placeholder="Barcode"
+							placeholder={t("Barcode")}
 							required={false}
 							tooltip=""
 							leftSection={<IconBarcode size={16} opacity={0.6} />}
@@ -186,7 +186,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 					<Flex gap={4} align="flex-end" style={{ flex: 1, minWidth: 200 }}>
 						<Box style={{ flex: 1 }}>
 							<FormValidationWrapper
-								errorMessage="Product is required"
+								errorMessage={t("ProductRequired")}
 								opened={!!itemsForm.errors.productId}
 							>
 								<Box pos="relative">
@@ -194,10 +194,10 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 										key={productResetKey}
 										value={itemsForm.values.productId}
 										options={productOptions}
-										placeholder="Enter stock product name"
+										placeholder={t("EnterStockProductName")}
 										searchable
 										showOptionsOnlyOnSearch={true}
-										nothingFoundMessage="Change the search term to find a product"
+										nothingFoundMessage={t("ChangeSearchTermProduct")}
 										onChange={handleProductSelect}
 										id="productId"
 									/>
@@ -224,7 +224,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 							name="quantity"
 							id="quantity"
 							label=""
-							placeholder="QTY"
+							placeholder={t("QTY")}
 							nextField="salesPrice"
 							required={false}
 									tooltip={itemsForm.errors.quantity}
@@ -251,7 +251,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 					{/* =============== sales price input =============== */}
 					<Box w={130} style={{ flexShrink: 0 }}>
 						<FormValidationWrapper
-							errorMessage="Sales price is required"
+							errorMessage={t("SalesPriceRequired")}
 							opened={!!itemsForm.errors.salesPrice}
 						>
 							<NumberInput

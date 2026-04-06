@@ -1,12 +1,12 @@
 ---
-description: Enforce i18n translation for all user-facing text in JSX
+description: Enforce i18n translation for all user-facing text in JSX and helper files
 globs: ["src/**/*.jsx", "src/**/*.tsx", "src/**/*.js", "src/**/*.ts"]
 alwaysApply: true
 ---
 
 # i18n Translation Rule
 
-Every string literal visible to the user in JSX **must** be wrapped with `t()` from `useTranslation()`.
+Every string literal visible to the user — in JSX, props, or function calls — **must** be wrapped with `t()` from `useTranslation()`.
 
 ## Required Steps When Adding Any New UI Text
 
@@ -24,21 +24,40 @@ Both JSON files must be updated together — never add to one without the other.
 
 ## What Must Be Translated
 
-- Button labels
-- Placeholder text (`placeholder={t("Key")}`)
-- Tooltip labels (`label={t("Key")}`)
-- Error / validation messages (`errorMessage={t("Key")}`)
+- Button labels and text content
+- Placeholder text: `placeholder={t("SearchVendorSupplier")}`
+- Tooltip labels: `tooltip={t("VendorRequired")}`
+- Error / validation messages: `errorMessage={t("ProductRequired")}`
 - Section headings and labels
-- Dropdown `nothingFoundMessage`, `placeholder`
-- `showNotification(...)` message arguments
+- Dropdown `nothingFoundMessage={t("ChangeSearchTermProduct")}`
+- Dropdown `placeholder={t("AllCategories")}`
+- `showNotification(t("PurchaseAddedSuccessfully"), "teal")` — all notification message arguments
+- Modal/drawer `title={t("SetupPrinter")}`
+- Form field `description={t("PrinterNameDescription")}`
 - Select dropdown option labels
+- Form validation error messages (in helper/request files too)
 
 ## What Must NOT Be Translated
 
 - Keyboard shortcut hints: `alt+s`, `alt+h`, `alt+p`, `alt+r` (always displayed as-is)
-- Date format tokens: `DD-MM-YYYY`, `MMMM D, YYYY`
+- Date format tokens: `DD-MM-YYYY`, `MM-YYYY`, `MMMM D, YYYY`
 - CSS class names, color values, size values, IDs
 - Technical prop values not shown to users
+- Technical example placeholders in inputs (e.g. printer model codes like `RT378`, character sets like `PC437_USA`)
+- License key format patterns (e.g. `XXX-XXXXX-XXX`)
+- Phone country code prefixes (e.g. `+880`)
+
+## Dynamic Translation with Interpolation
+
+For messages containing dynamic values, use i18next interpolation syntax:
+
+```jsx
+// In translation JSON: "InvoiceDeletedSuccess": "Invoice {{invoice}} deleted"
+showNotification(t("InvoiceDeletedSuccess", { invoice: record.invoice }), "teal");
+
+// In translation JSON: "MaxAvailableQuantityIs": "Maximum available quantity is {{max}}"
+showNotification(t("MaxAvailableQuantityIs", { max: maxLimit }), "red");
+```
 
 ## Select Dropdowns with Translatable Labels
 
@@ -54,6 +73,24 @@ data={[
 
 // wrong — stored value changes with language
 data={[t("Refund"), t("Exchange"), t("StoreCredit")]}
+```
+
+## Non-Component Files (helpers, utils, request.js)
+
+Files that are not React components cannot use `useTranslation()` directly. Pass `t` as a parameter:
+
+```js
+// In helpers/request.js
+export const vendorOverviewRequest = (t) => ({
+  initialValues: { ... },
+  validate: {
+    vendor_id: (value) => (!value ? t("VendorRequired") : null),
+  },
+});
+
+// In the component that calls it
+const { t } = useTranslation();
+const itemsForm = useForm(vendorOverviewRequest(t));
 ```
 
 ## Adding useTranslation to a File

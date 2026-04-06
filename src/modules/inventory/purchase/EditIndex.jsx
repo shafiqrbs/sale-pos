@@ -10,12 +10,14 @@ import { showNotification } from "@components/ShowNotificationComponent";
 import useLoggedInUser from "@hooks/useLoggedInUser";
 import useGetPurchase from "@hooks/useGetPurchase";
 import { APP_NAVLINKS } from "@/routes/routes";
+import { useTranslation } from "react-i18next";
 
 export default function EditIndex() {
+	const { t } = useTranslation();
 	const { id: purchaseId } = useParams();
 	const navigate = useNavigate();
 	const { user } = useLoggedInUser();
-	const itemsForm = useForm(vendorOverviewRequest());
+	const itemsForm = useForm(vendorOverviewRequest(t));
 
 	const { purchase, isLoading: isLoadingPurchase } = useGetPurchase(purchaseId);
 
@@ -140,17 +142,17 @@ export default function EditIndex() {
 
 	const handleSubmit = async (formValues) => {
 		if (!editItems.length) {
-			showNotification("Add minimum one purchase item first", "red");
+			showNotification(t("AddMinimumOnePurchaseItemFirst"), "red");
 			return;
 		}
 
 		if (!formValues.transactionModeId && !formValues.transactionMode) {
-			showNotification("Transaction mode is required", "red");
+			showNotification(t("TransactionModeRequired"), "red");
 			return;
 		}
 
 		if (!formValues.paymentAmount || Number(formValues.paymentAmount) <= 0) {
-			showNotification("Payment amount is required", "red");
+			showNotification(t("PaymentAmountRequired"), "red");
 			return;
 		}
 
@@ -226,7 +228,7 @@ export default function EditIndex() {
 
 			await updateProductsAfterEdit(originalItemsSnapshot, editItems);
 
-			showNotification("Purchase updated successfully", "teal");
+			showNotification(t("PurchaseUpdatedSuccessfully"), "teal");
 
 			// =============== after a successful save the current items become the new baseline ===============
 			const newBaseline = editItems.map((item) => ({ ...item }));

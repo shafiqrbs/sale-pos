@@ -65,7 +65,7 @@ export default function InvoiceForm({ onAddItem, onReturnTypeChange, onVendorCha
 	const handleAddSingleItem = (purchaseItem) => {
 		const returnQuantity = itemReturnQuantities[ purchaseItem.id ] || 0;
 		if (returnQuantity <= 0) {
-			showNotification("Enter return quantity first", "red");
+			showNotification(t("EnterReturnQuantityFirst"), "red");
 			return;
 		}
 
@@ -80,7 +80,7 @@ export default function InvoiceForm({ onAddItem, onReturnTypeChange, onVendorCha
 			purchase_item_id: purchaseItem.id,
 		});
 
-		showNotification(`${purchaseItem.item_name} added`, "teal");
+		showNotification(t("ItemNameAdded", { itemName: purchaseItem.item_name }), "teal");
 	};
 
 	const handleAddAllItems = () => {
@@ -89,7 +89,7 @@ export default function InvoiceForm({ onAddItem, onReturnTypeChange, onVendorCha
 		);
 
 		if (!itemsWithQuantity.length) {
-			showNotification("Enter return quantity for at least one item", "red");
+			showNotification(t("EnterReturnQuantityForAtLeastOneItem"), "red");
 			return;
 		}
 
@@ -106,7 +106,7 @@ export default function InvoiceForm({ onAddItem, onReturnTypeChange, onVendorCha
 			});
 		}
 
-		showNotification("All items added successfully", "teal");
+		showNotification(t("AllItemsAddedSuccessfully"), "teal");
 	};
 
 	const handleReturnModeChange = (value) => {
@@ -154,7 +154,7 @@ export default function InvoiceForm({ onAddItem, onReturnTypeChange, onVendorCha
 				<Box p="sm">
 					<Box mt="xs">
 						<Select
-							placeholder="Choose return type"
+							placeholder={t("ChooseReturnType")}
 							data={[ "General", "Requisition" ]}
 							value={selectedReturnMode}
 							onChange={handleReturnModeChange}
@@ -164,7 +164,7 @@ export default function InvoiceForm({ onAddItem, onReturnTypeChange, onVendorCha
 					</Box>
 					<Box mt="xs">
 						<Select
-							placeholder="Vendor"
+							placeholder={t("Vendor")}
 							data={vendorOptions}
 							value={selectedVendorId}
 							onChange={handleVendorChange}
@@ -175,7 +175,7 @@ export default function InvoiceForm({ onAddItem, onReturnTypeChange, onVendorCha
 					</Box>
 					<Box mt="xs">
 						<Select
-							placeholder="Purchase"
+							placeholder={t("Purchase")}
 							data={purchaseOptions}
 							value={selectedPurchaseId}
 							onChange={handlePurchaseChange}
@@ -240,7 +240,7 @@ export default function InvoiceForm({ onAddItem, onReturnTypeChange, onVendorCha
 												handleItemQuantityChange(item.id, value)
 											}
 											hideControls
-											placeholder="Qty"
+											placeholder={t("QTY")}
 										/>
 										<ActionIcon
 											size="sm"

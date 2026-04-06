@@ -23,13 +23,13 @@ export default function CustomerDrawer({ opened, onClose, form, customersDropdow
             email: '',
         },
         validate: {
-            name: (value) => (!value || value.trim() === '' ? t('NameIsRequired') || 'Name is required' : null),
+            name: (value) => (!value || value.trim() === '' ? t('NameIsRequired') : null),
             mobile: (value) => {
                 if (!value || value.trim() === '') {
-                    return t('MobileIsRequired') || 'Mobile is required';
+                    return t('MobileIsRequired');
                 }
                 if (value.trim().length < 11) {
-                    return t('MobileLengthMustBeAtLeast11') || 'Mobile length must be at least 11';
+                    return t('MobileLengthValidation');
                 }
                 return null;
             },
