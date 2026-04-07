@@ -18,6 +18,7 @@ module.exports = {
 				name: "PosKeeper",
 				setupExe: "poskeeper-setup.exe",
 				setupIcon: "icons/brand.ico",
+				iconUrl: "https://raw.githubusercontent.com/shafiqrbs/sale-pos/master/icons/brand.ico",
 			},
 		},
 		{
