@@ -2,12 +2,12 @@ import { useEffect, useMemo, useState } from "react";
 import {
 	ActionIcon,
 	Box,
-	Button,
+	Button, Card,
 	Flex,
 	Grid,
 	Group,
 	NumberInput,
-	Select,
+	Select, SimpleGrid,
 	Stack,
 	Text,
 	Textarea,
@@ -35,6 +35,7 @@ import FormValidationWrapper from "@components/form-builders/FormValidationWrapp
 import SplitPaymentsDrawer from "@components/drawers/SplitPaymentsDrawer";
 import SalesCustomerDrawer from "@components/drawers/SalesCustomerDrawer";
 import { DateInput } from "@mantine/dates";
+import VendorInfoSection from "@modules/inventory/purchase/VendorInfoSection";
 
 export default function PaymentSection({
 										   itemsForm,
@@ -199,282 +200,271 @@ export default function PaymentSection({
 
 	return (
 		<>
-			<Box p={"xs"} bg={"gray.4"}>
-				<Grid columns={24} gutter={8} mt="xs">
-					<Grid.Col span={12}>
-						<Grid columns={18} gutter={4} justify="center" align="center" p={"xs"} bg="gray.1">
-							<Grid.Col span={9} px={4}>
-								<Box bg={"gray.2"} p={"4"} pt={"4"} pr={"4"}>
-									<FormValidationWrapper
-										errorMessage={t("ChooseCustomer")}
-										opened={!!itemsForm.errors.customer_id}
-									>
-										<Select
-											placeholder={t("ChooseCustomer")}
-											data={dropdownOptions}
-											searchable
-											clearable
-											value={itemsForm.values.customer_id}
-											onChange={(value) => itemsForm.setFieldValue("customer_id", value ?? "")}
-											size="sm"
-											nothingFoundMessage={t("NoCustomerFound")}
-											rightSectionPointerEvents="pointer-events"
-											rightSection={
-												<ActionIcon variant="filled" onClick={handleCustomerAdd}>
-													<IconUserPlus size={16} />
-												</ActionIcon>
-											}
-										/>
-									</FormValidationWrapper>
-									<DateInput
-										my="4"
-										value={itemsForm.values.salesDate}
-										onChange={(value) => itemsForm.setFieldValue("salesDate", value)}
-										valueFormat="MMMM D, YYYY"
-										size="xs"
-										label={null}
-										placeholder={t("SelectDate")}
-									/>
-									<Textarea
-										value={salesNarration}
-										onChange={(event) =>
-											itemsForm.setFieldValue("salesNarration", event.currentTarget.value)
+			<SimpleGrid cols={{ base: 1, md: 2 }} mt="xs" p={"xs"} bg={"gray.4"}>
+				<Card padding="0">
+					<Grid columns={18} gutter={4} justify="center" align="center" p={"xs"} bg="gray.1">
+						<Grid.Col span={9} px={4}>
+							<Box bg={"gray.2"} p={"4"} pt={"4"} pr={"4"}>
+								<FormValidationWrapper
+									errorMessage={t("ChooseCustomer")}
+									opened={!!itemsForm.errors.customer_id}
+								>
+									<Select
+										placeholder={t("ChooseCustomer")}
+										data={dropdownOptions}
+										searchable
+										clearable
+										value={itemsForm.values.customer_id}
+										onChange={(value) => itemsForm.setFieldValue("customer_id", value ?? "")}
+										size="sm"
+										nothingFoundMessage={t("NoCustomerFound")}
+										rightSectionPointerEvents="pointer-events"
+										rightSection={
+											<ActionIcon variant="filled" onClick={handleCustomerAdd}>
+												<IconUserPlus size={16} />
+											</ActionIcon>
 										}
-										placeholder={t("Narration")}
-										size="md"
-										minRows={6}
 									/>
-								</Box>
-							</Grid.Col>
-							<Grid.Col span={9} px={4} pb={"xs"} bg={"white"}>
-								<Grid columns={18} p={"xs"}>
-									<Grid.Col span={6}>
-										<Stack gap={0}>
-											<Group justify="space-between" gap={0}>
-												<Text fz="sm" fw={500} c="black">
-													{t("DisAbbr")}
-												</Text>
-												<Text fz="sm" fw={800} c="black">
-													{currencySymbol} {formatCurrency(discountValue)}
-												</Text>
-											</Group>
-											<Group justify="space-between">
-												<Text fz="sm" fw={500} c="black">
-													{t("Type")}
-												</Text>
-												<Text fz="sm" fw={800} c="black">
-													{discount_type === "percentage"
-														? t("Percent")
-														: discount_type === "coupon"
-															? t("Coupon")
-															: t("Flat")}
-												</Text>
-											</Group>
-										</Stack>
-									</Grid.Col>
-									<Grid.Col span={6}>
-										<Group justify="space-between">
-											<Text fz="sm" fw={500} c="black">
-												{t("VAT")} {configData?.inventory_config?.config_vat?.vat_percent} %
+								</FormValidationWrapper>
+								<DateInput
+									my="4"
+									value={itemsForm.values.salesDate}
+									onChange={(value) => itemsForm.setFieldValue("salesDate", value)}
+									valueFormat="MMMM D, YYYY"
+									size="xs"
+									label={null}
+									placeholder={t("SelectDate")}
+								/>
+								<Textarea
+									value={salesNarration}
+									onChange={(event) =>
+										itemsForm.setFieldValue("salesNarration", event.currentTarget.value)
+									}
+									placeholder={t("Narration")}
+									size="md"
+									minRows={6}
+								/>
+							</Box>
+						</Grid.Col>
+						<Grid.Col span={9} px={4} pb={"xs"} bg={"white"}>
+							<Grid columns={18} p={"xs"}>
+								<Grid.Col span={6}>
+									<Stack gap={0}>
+										<Group justify="space-between" gap={0}>
+											<Text fz="xs" fw={500} c="black">
+												{t("DisAbbr")}
 											</Text>
 											<Text fz="sm" fw={800} c="black">
-												{configData?.inventory_config?.config_vat &&
-												formatCurrency(
-													calculateVATAmount(itemsTotal, configData?.inventory_config?.config_vat)
-												)}
+												{currencySymbol} {formatCurrency(discountValue)}
 											</Text>
 										</Group>
 										<Group justify="space-between">
-											<Text fz="sm" fw={500} c="black">
-												{t("SD")}
+											<Text fz="xs" fw={500} c="black">
+												{t("Type")}
 											</Text>
-											<Text fz="sm" fw={800} c="black">
-												{currencySymbol} 0
+											<Text fz="xs" fw={800} c="black">
+												{discount_type === "percentage"
+													? t("Percent")
+													: discount_type === "coupon"
+														? t("Coupon")
+														: t("Flat")}
 											</Text>
 										</Group>
-									</Grid.Col>
-									<Grid.Col span={6}>
-										<Stack gap={0} align="center" justify="center" p={"4"} bg="gray.4" bdrs={4}>
-											<Text fw={800} c="black" size="lg">
-												{currencySymbol} {formatCurrency(itemsTotal)}
-											</Text>
-											<Text fw={500} c="gray" size="xs">
-												{t("SubTotal")}
-											</Text>
-										</Stack>
-									</Grid.Col>
-									<Grid.Col span={18} bg={"#fffbeb85"}>
-										<Flex
-											direction={{ base: "column", sm: "row" }}
-											gap={{ base: "sm", sm: "lg" }}
-											justify={{ sm: "center" }}
-										>
-											<Box w={"50%"}>
+									</Stack>
+								</Grid.Col>
+								<Grid.Col span={6}>
+									<Group justify="space-between">
+										<Text fz="xs" fw={500} c="black">
+											{t("VAT")} {configData?.inventory_config?.config_vat?.vat_percent} %
+										</Text>
+										<Text fz="sm" fw={800} c="black">
+											{configData?.inventory_config?.config_vat &&
+											formatCurrency(
+												calculateVATAmount(itemsTotal, configData?.inventory_config?.config_vat)
+											)}
+										</Text>
+									</Group>
+									<Group justify="space-between">
+										<Text fz="xs" fw={500} c="black">
+											{t("SD")}
+										</Text>
+										<Text fz="sm" fw={800} c="black">
+											{currencySymbol} 0
+										</Text>
+									</Group>
+								</Grid.Col>
+								<Grid.Col span={18} bg={"#fffbeb85"}>
+									<Flex
+										direction={{ base: "column", sm: "row" }}
+										gap={{ base: "sm", sm: "lg" }}
+										justify={{ sm: "center" }}
+									>
+										<Box w={"50%"} mt={"4"}>
+											<FormValidationWrapper
+												errorMessage={t("ClickRightButtonForPercentFlat")}
+												opened={!!itemsForm.errors.coupon_code}
+											>
+												<Tooltip
+													label={t("ClickHereForChangeMode")}
+													c="white"
+													bg={"yellow"}
+													withArrow
+													zIndex={999}
+													transitionProps={{ transition: "pop-bottom-left", duration: 500 }}
+												>
+													<Button
+														fullWidth
+														onClick={handleDiscountModeChange}
+														variant="outline"
+														bg={"#fffbeb85"}
+														px="md"
+														fz="md"
+														size={"sm"}
+														leftSection={
+															discountMode === "coupon" ? (
+																<IconTicket size={14} />
+															) : (
+																<IconPercentage size={14} />
+															)
+														}
+														color="#b45309"
+													>
+														{discountMode === "coupon" ? t("Coupon") : t("Discount")}
+													</Button>
+												</Tooltip>
+											</FormValidationWrapper>
+										</Box>
+										<Box w={"50%"} mt={"4"}>
+											{discountMode === "coupon" ? (
+												<TextInput
+													type="text"
+													placeholder={t("CouponCode")}
+													value={coupon_code}
+													error={itemsForm.errors.coupon_code}
+													size="sm"
+													onChange={(event) => {
+														itemsForm.setFieldValue("coupon_code", event.target.value);
+													}}
+													rightSection={
+														<FormValidationWrapper
+															errorMessage={t("CouponCode")}
+															opened={!!itemsForm.errors.coupon_code}
+															position="left"
+														>
+															<IconTicket size={16} opacity={0.5} />
+														</FormValidationWrapper>
+													}
+												/>
+											) : (
 												<FormValidationWrapper
 													errorMessage={t("ClickRightButtonForPercentFlat")}
-													opened={!!itemsForm.errors.coupon_code}
+													opened={!!itemsForm.errors.discount}
+													position="left"
 												>
-													<Tooltip
-														label={t("ClickHereForChangeMode")}
-														c="white"
-														bg={"yellow"}
-														withArrow
-														zIndex={999}
-														transitionProps={{ transition: "pop-bottom-left", duration: 500 }}
-													>
-														<Button
-															fullWidth
-															onClick={handleDiscountModeChange}
-															variant="outline"
-															bg={"#fffbeb85"}
-															px="md"
-															fz="md"
-															size={"md"}
-															leftSection={
-																discountMode === "coupon" ? (
-																	<IconTicket size={14} />
-																) : (
-																	<IconPercentage size={14} />
-																)
+													{discount_type === "flat" ? (
+														<NumberInput
+															placeholder={t("Discount")}
+															value={discount}
+															error={itemsForm.errors.discount}
+															size="sm"
+															onChange={(value) => itemsForm.setFieldValue("discount", value)}
+															rightSection={
+																<ActionIcon
+																	size={32}
+																	bg="red.5"
+																	variant="filled"
+																	mr={10}
+																	onClick={toggleDiscountMode}
+																>
+																	<IconNumber123 size={16} />
+																</ActionIcon>
 															}
-															color="#b45309"
-														>
-															{discountMode === "coupon" ? t("Coupon") : t("Discount")}
-														</Button>
-													</Tooltip>
+														/>
+													) : (
+														<NumberInput
+															placeholder={t("Discount")}
+															value={percentageValue}
+															error={itemsForm.errors.discount}
+															size="sm"
+															suffix="%"
+															max={99}
+															min={0}
+															allowNegative={false}
+															step={1}
+															decimalScale={2}
+															hideControls
+															onChange={handlePercentageChange}
+															rightSection={
+																<ActionIcon
+																	size={32}
+																	bg="violet.5"
+																	variant="filled"
+																	mr={10}
+																	onClick={toggleDiscountMode}
+																>
+																	<IconPercentage size={16} />
+																</ActionIcon>
+															}
+														/>
+													)}
 												</FormValidationWrapper>
-											</Box>
-											<Box w={"50%"} mt={"4"}>
-												{discountMode === "coupon" ? (
-													<TextInput
-														type="text"
-														placeholder={t("CouponCode")}
-														value={coupon_code}
-														error={itemsForm.errors.coupon_code}
-														size="sm"
-														onChange={(event) => {
-															itemsForm.setFieldValue("coupon_code", event.target.value);
-														}}
-														rightSection={
-															<FormValidationWrapper
-																errorMessage={t("CouponCode")}
-																opened={!!itemsForm.errors.coupon_code}
-																position="left"
-															>
-																<IconTicket size={16} opacity={0.5} />
-															</FormValidationWrapper>
-														}
-													/>
-												) : (
-													<FormValidationWrapper
-														errorMessage={t("ClickRightButtonForPercentFlat")}
-														opened={!!itemsForm.errors.discount}
-														position="left"
-													>
-														{discount_type === "flat" ? (
-															<NumberInput
-																placeholder={t("Discount")}
-																value={discount}
-																error={itemsForm.errors.discount}
-																size="sm"
-																onChange={(value) => itemsForm.setFieldValue("discount", value)}
-																rightSection={
-																	<ActionIcon
-																		size={32}
-																		bg="red.5"
-																		variant="filled"
-																		mr={10}
-																		onClick={toggleDiscountMode}
-																	>
-																		<IconNumber123 size={16} />
-																	</ActionIcon>
-																}
-															/>
-														) : (
-															<NumberInput
-																placeholder={t("Discount")}
-																value={percentageValue}
-																error={itemsForm.errors.discount}
-																size="sm"
-																suffix="%"
-																max={99}
-																min={0}
-																allowNegative={false}
-																step={1}
-																decimalScale={2}
-																hideControls
-																onChange={handlePercentageChange}
-																rightSection={
-																	<ActionIcon
-																		size={32}
-																		bg="violet.5"
-																		variant="filled"
-																		mr={10}
-																		onClick={toggleDiscountMode}
-																	>
-																		<IconPercentage size={16} />
-																	</ActionIcon>
-																}
-															/>
-														)}
-													</FormValidationWrapper>
-												)}
-											</Box>
-										</Flex>
+											)}
+										</Box>
+									</Flex>
+								</Grid.Col>
+							</Grid>
+						</Grid.Col>
+					</Grid>
+				</Card>
+				<Card padding="0">
+					<Grid columns={24} gutter={2} bg="white">
+						<Grid.Col span={16}>
+							<Stack
+								p={"xs"}
+								bg={"white"}
+								className="borderRadiusAll"
+								h="100%"
+								justify="space-between"
+								gap={0}
+							>
+								<Grid
+									columns={24}
+									gutter={{ base: 8 }}
+									pr="2px"
+									align="center"
+									bg="#1e40af"
+									justify="center"
+								>
+									<Grid.Col span={16}>
+										<Stack gap={0} align="center" justify="center" py={"xs"} bdrs={4}>
+											<Text fw={800} c="white" size="xl">
+												{currencySymbol} {formatCurrency(grandTotal)}
+											</Text>
+											<Text fw={500} c="white" size="md">
+												{t("GrandTotal")}
+											</Text>
+										</Stack>
+									</Grid.Col>
+									<Grid.Col span={8}>
+										<Stack
+											gap={0}
+											align="center"
+											justify="center"
+											bg="white"
+											py={"xs"}
+											mr={"3"}
+											bdrs={4}
+										>
+											<Text fw={800} c="#1e40af" size="lg">
+												{currencySymbol} {formatCurrency(dueAmount)}
+											</Text>
+											<Text fw={500} c="#1e40af" size="xs">
+												{t("StillDue")}
+											</Text>
+										</Stack>
 									</Grid.Col>
 								</Grid>
-							</Grid.Col>
-						</Grid>
-					</Grid.Col>
-					<Grid.Col span={12}>
-						<Grid columns={24} gutter={2} bg="white">
-							<Grid.Col span={16}>
-								<Stack
-									p={"xs"}
-									bg={"white"}
-									className="borderRadiusAll"
-									h="100%"
-									justify="space-between"
-									gap={0}
-								>
-									<Grid
-										columns={24}
-										gutter={{ base: 8 }}
-										pr="2px"
-										align="center"
-										bg="#1e40af"
-										justify="center"
-									>
-										<Grid.Col span={16}>
-											<Stack gap={0} align="center" justify="center" py={"xs"} bdrs={4}>
-												<Text fw={800} c="white" size="xl">
-													{currencySymbol} {formatCurrency(grandTotal)}
-												</Text>
-												<Text fw={500} c="white" size="md">
-													{t("GrandTotal")}
-												</Text>
-											</Stack>
-										</Grid.Col>
-										<Grid.Col span={8}>
-											<Stack
-												gap={0}
-												align="center"
-												justify="center"
-												bg="white"
-												py={"xs"}
-												mr={"3"}
-												bdrs={4}
-											>
-												<Text fw={800} c="#1e40af" size="lg">
-													{currencySymbol} {formatCurrency(dueAmount)}
-												</Text>
-												<Text fw={500} c="#1e40af" size="xs">
-													{t("StillDue")}
-												</Text>
-											</Stack>
-										</Grid.Col>
-									</Grid>
-									{/*<Grid columns={24} gutter={{ base: 8 }} pr="2px" align="center" justify="center">
+								{/*<Grid columns={24} gutter={{ base: 8 }} pr="2px" align="center" justify="center">
 								<Grid.Col span={8}>
 									<FormValidationWrapper
 										errorMessage={t("ClickRightButtonForPercentFlat")}
@@ -596,204 +586,150 @@ export default function PaymentSection({
 									</Stack>
 								</Grid.Col>
 							</Grid>*/}
-									<Grid
-										columns={24}
-										gutter={{ base: 8 }}
-										bg={"#405bb112"}
-										pr="2px"
-										align="center"
-										justify="center"
-									>
-										<Grid.Col span={8}>
-											<Stack gap={0} align="center" justify="center" py={"3"} bdrs={4}>
-												<Tooltip
-													label={t("DigitalPayment")}
-													c="white"
-													bg="red"
-													withArrow
-													zIndex={999}
-													transitionProps={{ transition: "pop-bottom-left", duration: 500 }}
+								<Grid
+									columns={24}
+									gutter={{ base: 8 }}
+									bg={"#405bb112"}
+									pr="2px"
+									align="center"
+									justify="center"
+								>
+									<Grid.Col span={8}>
+										<Stack gap={0} align="center" justify="center" py={"3"} bdrs={4}>
+											<Tooltip
+												label={t("DigitalPayment")}
+												c="white"
+												bg="red"
+												withArrow
+												zIndex={999}
+												transitionProps={{ transition: "pop-bottom-left", duration: 500 }}
+											>
+												<ActionIcon
+													size="xl"
+													color={isSplitPaymentActive ? "green" : "red"}
+													variant="transparent"
+													onClick={handleOpenSplitPaymentDrawer}
 												>
-													<ActionIcon
-														size="xl"
-														color={isSplitPaymentActive ? "green" : "red"}
-														variant="transparent"
-														onClick={handleOpenSplitPaymentDrawer}
-													>
-														<IconCashPlus style={{ width: "70%", height: "70%" }} stroke={1.5} />
-													</ActionIcon>
-												</Tooltip>
-												<Text fz={"xs"} fw={"600"} c="red">
-											{t("DigitalPayment")}
+													<IconCashPlus style={{ width: "70%", height: "70%" }} stroke={1.5} />
+												</ActionIcon>
+											</Tooltip>
+											<Text fz={"xs"} fw={"600"} c="red">
+												{t("DigitalPayment")}
+											</Text>
+										</Stack>
+									</Grid.Col>
+									<Grid.Col span={8} ta={"center"}>
+										<Text c="#1e40af" fz={"md"} fw={"600"}>
+											{t("Cash")}
 										</Text>
-											</Stack>
-										</Grid.Col>
-										<Grid.Col span={8} ta={"center"}>
-											<Text c="#1e40af" fz={"md"} fw={"600"}>
-										{t("Cash")}
-									</Text>
-										</Grid.Col>
-										<Grid.Col span={8} bg="#405bb112">
-											<FormValidationWrapper
-												errorMessage={t("ReceiveAmountValidateMessage")}
-												opened={!!itemsForm.errors.paymentAmount}
-											>
-												<NumberInput
-													allowNegative={false}
-													hideControls
-													decimalScale={3}
-													thousandSeparator=","
-													placeholder={isSplitPaymentActive ? t("SplitPaymentActive") : t("Amount")}
-													size={"lg"}
-													min={0}
-													readOnly={isSplitPaymentActive}
-													leftSection={<IconPlusMinus size={16} opacity={0.5} />}
-													rightSection={
-														<Tooltip
-															label={t("Profit")}
-															c="white"
-															bg="red"
-															withArrow
-															zIndex={999}
-															transitionProps={{ transition: "pop-bottom-left", duration: 500 }}
-														>
-															<IconEyeDollar size={16} opacity={0.5} />
-														</Tooltip>
-													}
-													{...itemsForm.getInputProps("paymentAmount", { type: "number" })}
-												/>
-											</FormValidationWrapper>
-										</Grid.Col>
-									</Grid>
-								</Stack>
-							</Grid.Col>
-							{/*<Grid.Col span={6}>
-								<Stack
-									h="100%"
-									justify="space-between"
-									gap={0}
-								>
-									<ScrollArea h={174} scrollbarSize={2}>
-										{transactionMode?.map((mode) => (
-											<Box
-												onClick={() => handleSelectTransactionMode(mode.id, mode.name)}
-												pos="relative"
-												style={{
-													border:
-														payments.length === 1 &&
-														payments[0]?.transaction_mode_id === mode.id
-															? "2px solid #228be6"
-															: "2px solid #dddddd",
-													marginBottom: 4,
-												}}
-												className={
-													isSplitPaymentActive ? "cursor-not-allowed" : "cursor-pointer"
-												}
-											>
-												<Flex
-													bg={'white'}
-													direction="column"
-													align="center"
-													justify="center"
-													c="black"
-												>
+									</Grid.Col>
+									<Grid.Col span={8} bg="#405bb112">
+										<FormValidationWrapper
+											errorMessage={t("ReceiveAmountValidateMessage")}
+											opened={!!itemsForm.errors.paymentAmount}
+										>
+											<NumberInput
+												allowNegative={false}
+												hideControls
+												decimalScale={3}
+												thousandSeparator=","
+												placeholder={isSplitPaymentActive ? t("SplitPaymentActive") : t("Amount")}
+												size={"lg"}
+												min={0}
+												readOnly={isSplitPaymentActive}
+												leftSection={<IconPlusMinus size={16} opacity={0.5} />}
+												rightSection={
 													<Tooltip
-														label={mode.name}
+														label={t("Profit")}
+														c="white"
+														bg="red"
 														withArrow
-														px={8}
-														py={2}
-														offset={2}
 														zIndex={999}
-														position="top"
-														color="red"
+														transitionProps={{ transition: "pop-bottom-left", duration: 500 }}
 													>
-														<Image
-															w={80}
-															fit="contain"
-															alt={mode.name}
-															src={mode.path}
-															fallbackSrc={`https://placehold.co/120x80/FFFFFF/2f9e44?text=${mode.name}`}
-														/>
+														<IconEyeDollar size={16} opacity={0.5} />
 													</Tooltip>
-												</Flex>
-											</Box>
-										))}
-									</ScrollArea>
-								</Stack>
-							</Grid.Col>*/}
-							<Grid.Col span={8}>
-								<Stack
-									p={"xs"}
-									bg={"gray.1"}
-									className="borderRadiusAll"
-									h="100%"
-									justify="space-between"
-									gap={0}
-								>
-									<Button.Group>
-										<Button
-											fullWidth
-											color="green"
-											radius={0}
-											size="xs"
-											form="itemsForm"
-											type="submit"
-											id="ItemsFormSubmit"
-											leftSection={<IconCheck size={16} />}
-											disabled={isAddingItem}
-										>
-											<Stack gap={0}><Text size="xs">{isEditMode ? t("Update") : t("Save")}</Text><Text size="xs" component="span" c="green.1">alt+s</Text></Stack>
-										</Button>
-										<Button
-											fullWidth
-											variant="light"
-											color="red"
-											radius={0}
-											size="xs"
-											form="itemsForm"
-											type="submit"
-											id="ItemsHoldFormSubmit"
-											leftSection={<IconPlayerPause size={16} />}
-											disabled={isAddingItem}
-										>
-											<Stack gap={0}><Text size="xs">{t("Hold")}</Text><Text size="xs" component="span" c="red.3">alt+h</Text></Stack>
-										</Button>
-									</Button.Group>
-
+												}
+												{...itemsForm.getInputProps("paymentAmount", { type: "number" })}
+											/>
+										</FormValidationWrapper>
+									</Grid.Col>
+								</Grid>
+							</Stack>
+						</Grid.Col>
+						<Grid.Col span={8}>
+							<Stack
+								p={"xs"}
+								bg={"gray.1"}
+								className="borderRadiusAll"
+								h="100%"
+								justify="space-between"
+								gap={0}
+							>
+								<Button.Group>
+									<Button
+										fullWidth
+										color="green"
+										radius={0}
+										size="sm"
+										form="itemsForm"
+										type="submit"
+										id="ItemsFormSubmit"
+										leftSection={<IconCheck size={16} />}
+										disabled={isAddingItem}
+									>
+										<Stack gap={0}><Text size="xs">{isEditMode ? t("Update") : t("Save")}</Text><Text size="xs" component="span" c="green.1">alt+s</Text></Stack>
+									</Button>
 									<Button
 										fullWidth
 										variant="light"
-										bg="white"
-										color="gray"
+										color="red"
 										radius={0}
-										size="lg"
+										size="sm"
 										form="itemsForm"
 										type="submit"
-										id="ItemsPrintFormSubmit"
+										id="ItemsHoldFormSubmit"
+										leftSection={<IconPlayerPause size={16} />}
 										disabled={isAddingItem}
-										leftSection={<IconPrinter size={16} />}
 									>
-										<Stack gap={0}>{t("Print")} <Text size="xs" component="span">alt+p</Text></Stack>
+										<Stack gap={0}><Text size="xs">{t("Hold")}</Text><Text size="xs" component="span" c="red.3">alt+h</Text></Stack>
 									</Button>
+								</Button.Group>
 
-									<Button
-										fullWidth
-										bg="var(--theme-pos-btn-color)"
-										color="white"
-										radius={0}
-										size="lg"
-										type="button"
-										onClick={onPosPrint}
-										disabled={isAddingItem}
-									>
+								<Button
+									fullWidth
+									variant="light"
+									bg="white"
+									color="gray"
+									radius={0}
+									size="lg"
+									form="itemsForm"
+									type="submit"
+									id="ItemsPrintFormSubmit"
+									disabled={isAddingItem}
+									leftSection={<IconPrinter size={16} />}
+								>
+									<Stack gap={0}>{t("Print")} <Text size="xs" component="span">alt+p</Text></Stack>
+								</Button>
+
+								<Button
+									fullWidth
+									bg="var(--theme-pos-btn-color)"
+									color="white"
+									radius={0}
+									size="lg"
+									type="button"
+									onClick={onPosPrint}
+									disabled={isAddingItem}
+								>
 									{t("POS")}
 								</Button>
-								</Stack>
-							</Grid.Col>
-						</Grid>
-					</Grid.Col>
-				</Grid>
-			</Box>
+							</Stack>
+						</Grid.Col>
+					</Grid>
+				</Card>
+			</SimpleGrid>
+
 			{/* =============== split payments drawer =============== */}
 			<SplitPaymentsDrawer
 				opened={splitPaymentDrawerOpened}
