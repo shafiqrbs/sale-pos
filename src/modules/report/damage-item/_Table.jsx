@@ -1,29 +1,21 @@
 import React, { useState } from "react";
-import { Box, Grid, Text, ActionIcon, Group, Menu, Flex, Button, Badge, SegmentedControl } from "@mantine/core";
-import { useNavigate, useOutletContext } from "react-router";
+import { Box, Grid, Text, Flex } from "@mantine/core";
 import { DataTable } from "mantine-datatable";
 import tableCss from "@assets/css/Table.module.css";
 import { useTranslation } from "react-i18next";
 import KeywordSearch from "@components/KeywordSearch";
 import { useForm } from "@mantine/form";
-import { useDisclosure } from "@mantine/hooks";
-import {useGetDamageItemQuery} from "@services/report";
-import {formatCurrency} from "@utils/index";
-import {IconGlobe, IconGlobeOff, IconPlus} from "@tabler/icons-react";
-import {APP_NAVLINKS} from "@/routes/routes";
+import { formatCurrency } from "@utils/index";
+import useMainAreaHeight from "@hooks/useMainAreaHeight";
+import { useGetDamageItemQuery } from "@services/report";
 import PageBreadcrumb from "@components/layout/PageBreadcrumb";
 
-
-
-const PER_PAGE = 2500;
+const PER_PAGE = 50;
 
 export default function Table() {
-	const navigate = useNavigate();
 	const { t } = useTranslation();
-	const [opened, { open, close }] = useDisclosure(false);
 	const [page, setPage] = useState(1);
-	const [deletedPurchaseIds, setDeletedPurchaseIds] = useState(new Set());
-	const { mainAreaHeight, isOnline } = useOutletContext();
+	const { mainAreaHeight } = useMainAreaHeight();
 
 	// =============== when offline, always use offline data (online segment disabled) ===============
 
@@ -36,7 +28,6 @@ export default function Table() {
 	});
 
 	const { data: entities, isLoading } = useGetDamageItemQuery({
-
 		term: form.values.term,
 		start_date: form.values.start_date,
 		end_date: form.values.end_date,
@@ -49,7 +40,7 @@ export default function Table() {
 		<Box>
 			<Flex mb="xs" gap="sm" justify="space-between" align="center">
 				<PageBreadcrumb label={t("Damages")} />
-				<KeywordSearch reportName={'Damage'} showStartEndDate form={form} w={'100%'} />
+				<KeywordSearch reportName={"Damage"} showStartEndDate form={form} w={"100%"} />
 			</Flex>
 			<Grid columns={24} gutter={{ base: 8 }}>
 				<Grid.Col span={24}>
@@ -67,7 +58,7 @@ export default function Table() {
 								{
 									accessor: "index",
 									title: "S/N",
-									width:80,
+									width: 80,
 									textAlign: "center",
 									render: (_, index) => index + 1,
 								},
@@ -120,9 +111,8 @@ export default function Table() {
 									accessor: "total",
 									title: t("Amount"),
 									textAlign: "right",
-									render: (item) => <>{formatCurrency((item?.quantity * item?.price) || 0)}</>,
+									render: (item) => <>{formatCurrency(item?.quantity * item?.price || 0)}</>,
 								},
-
 							]}
 							fetching={isLoading}
 							totalRecords={entities?.count || 0}
@@ -133,7 +123,7 @@ export default function Table() {
 							onPageChange={(p) => {
 								setPage(p);
 							}}
-							height={mainAreaHeight-36}
+							height={mainAreaHeight - 36}
 							scrollAreaProps={{ type: "never" }}
 						/>
 					</Box>

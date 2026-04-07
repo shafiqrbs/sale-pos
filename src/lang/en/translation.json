@@ -1308,5 +1308,7 @@
 	"Back": "Back",
 	"PurchaseReturnList": "Purchase Return List",
 	"RequisitionNo": "Requisition No",
-	"RequisitionList": "Requisition List"
+	"RequisitionList": "Requisition List",
+	"ManualPurchase": "Manual Purchase",
+	"InvoicePurchase": "Invoice Purchase"
 }

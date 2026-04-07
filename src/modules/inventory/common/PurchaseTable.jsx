@@ -216,9 +216,7 @@ export default function PurchaseTable({
 											<IconGlobeOff
 												size={13}
 												color={
-													effectiveDataSource === "offline"
-														? "white"
-														: "var(--mantine-color-red-6)"
+													effectiveDataSource === "offline" ? "white" : "var(--mantine-color-red-6)"
 												}
 											/>
 											{t("Offline")}
@@ -242,7 +240,7 @@ export default function PurchaseTable({
 						leftSection={<IconPlus size={20} />}
 						onClick={() => navigate(APP_NAVLINKS.INVOICE_PURCHASE_NEW)}
 					>
-						{t("NewInvoicePurchase")}
+						{t("InvoicePurchase")}
 					</Button>
 					<Button
 						size="xs"
@@ -286,12 +284,7 @@ export default function PurchaseTable({
 									accessor: "invoice",
 									title: t("Invoice"),
 									render: (item) => (
-										<Text
-											component="a"
-											size="sm"
-											variant="subtle"
-											c="var(--theme-primary-color-6)"
-										>
+										<Text component="a" size="sm" variant="subtle" c="var(--theme-primary-color-6)">
 											{item.invoice}
 										</Text>
 									),
@@ -299,9 +292,7 @@ export default function PurchaseTable({
 								{
 									accessor: "vendor_name",
 									title: t("Vendor"),
-									render: (item) => (
-										<Text size="sm">{item?.vendor_name || "N/A"}</Text>
-									),
+									render: (item) => <Text size="sm">{item?.vendor_name || "N/A"}</Text>,
 								},
 								{
 									accessor: "subtotal",
@@ -326,13 +317,7 @@ export default function PurchaseTable({
 									title: t("Payable"),
 									textAlign: "right",
 									render: (data) => {
-										return (
-											<>
-												{formatCurrency(
-													Number(data.total) - Number(data.payment)
-												)}
-											</>
-										);
+										return <>{formatCurrency(Number(data.total) - Number(data.payment))}</>;
 									},
 								},
 								{ accessor: "mode", title: t("Mode") },
@@ -348,11 +333,7 @@ export default function PurchaseTable({
 
 										const badgeColor = colorMap[item.process] || "gray";
 
-										return (
-											item.process && (
-												<Badge color={badgeColor}>{item.process}</Badge>
-											)
-										);
+										return item.process && <Badge color={badgeColor}>{item.process}</Badge>;
 									},
 								},
 								{
@@ -395,25 +376,13 @@ export default function PurchaseTable({
 														radius="xl"
 														aria-label="Settings"
 													>
-														<IconDotsVertical
-															height={"18"}
-															width={"18"}
-															stroke={1.5}
-														/>
+														<IconDotsVertical height={"18"} width={"18"} stroke={1.5} />
 													</ActionIcon>
 												</Menu.Target>
 												<Menu.Dropdown w="200">
 													<Menu.Item
-														onClick={(event) =>
-															handleShowPurchaseFromMenu(event, data)
-														}
-														leftSection={
-															<IconEye
-																height={"18"}
-																width={"18"}
-																stroke={1.5}
-															/>
-														}
+														onClick={(event) => handleShowPurchaseFromMenu(event, data)}
+														leftSection={<IconEye height={"18"} width={"18"} stroke={1.5} />}
 														color="blue"
 													>
 														{t("Show")}
@@ -423,13 +392,7 @@ export default function PurchaseTable({
 															event.stopPropagation();
 															navigate(`${editLink}/${data.id}`);
 														}}
-														leftSection={
-															<IconEdit
-																height={"18"}
-																width={"18"}
-																stroke={1.5}
-															/>
-														}
+														leftSection={<IconEdit height={"18"} width={"18"} stroke={1.5} />}
 														color="yellow"
 													>
 														{t("Edit")}
@@ -437,16 +400,8 @@ export default function PurchaseTable({
 													{
 														<Menu.Item
 															color="indigo"
-															onClick={() =>
-																handleOpenCopyConfirmModal(data.id)
-															}
-															leftSection={
-																<IconCopy
-																	height={"18"}
-																	width={"18"}
-																	stroke={1.5}
-																/>
-															}
+															onClick={() => handleOpenCopyConfirmModal(data.id)}
+															leftSection={<IconCopy height={"18"} width={"18"} stroke={1.5} />}
 														>
 															{t("Copy")}
 														</Menu.Item>
@@ -457,13 +412,7 @@ export default function PurchaseTable({
 															handleDeleteClick(data);
 														}}
 														color="red"
-														leftSection={
-															<IconTrashX
-																height={"18"}
-																width={"18"}
-																stroke={1.5}
-															/>
-														}
+														leftSection={<IconTrashX height={"18"} width={"18"} stroke={1.5} />}
 													>
 														{t("Delete")}
 													</Menu.Item>

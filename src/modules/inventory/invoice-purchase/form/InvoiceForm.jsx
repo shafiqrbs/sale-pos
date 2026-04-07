@@ -365,7 +365,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 								/>
 							</Grid.Col>
 
-							<Grid.Col span={12}>
+							<Grid.Col span={6}>
 								<InputNumberForm
 									form={itemsForm}
 									name="total_mrp"
@@ -378,21 +378,21 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 									leftSection={<IconCurrencyTaka size={16} opacity={0.6} />}
 								/>
 							</Grid.Col>
-							<Grid.Col span={12}>
+							<Grid.Col span={6}>
 								<InputNumberForm
 									form={itemsForm}
 									name="item_percent"
 									id="item_percent"
-									label="Discount Percent"
+									label="Discount %"
 									placeholder="0"
 									max={100}
-									nextField="purchase_price"
+									nextField="bonus_quantity"
 									disabled={!isProductSelected}
 									tooltip={itemsForm.errors.item_percent}
 									leftSection={<IconPercentage size={16} opacity={0.6} />}
 								/>
 							</Grid.Col>
-							<Grid.Col span={12}>
+							<Grid.Col span={6}>
 								<InputNumberForm
 									form={itemsForm}
 									name="bonus_quantity"
@@ -405,18 +405,31 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 									leftSection={<IconSortAscendingNumbers size={16} opacity={0.6} />}
 								/>
 							</Grid.Col>
-							<Grid.Col span={12}>
+							<Grid.Col span={6}>
 								<InputNumberForm
 									form={itemsForm}
 									name="purchase_price"
 									id="purchase_price"
 									label="Total Purchase"
-									nextField="expired_date"
+									nextField="minimum_quantity"
 									placeholder="0.00"
 									step={0.01}
 									disabled={!isProductSelected}
 									tooltip={itemsForm.errors.purchase_price}
 									leftSection={<IconCurrencyTaka size={16} opacity={0.6} />}
+								/>
+							</Grid.Col>
+							<Grid.Col span={6}>
+								<InputNumberForm
+									form={itemsForm}
+									name="minimum_quantity"
+									id="minimum_quantity"
+									label="Min. Quantity"
+									placeholder="0"
+									nextField="expired_date"
+									disabled={!isProductSelected}
+									tooltip={itemsForm.errors.minimum_quantity}
+									leftSection={<IconSortAscendingNumbers size={16} opacity={0.6} />}
 								/>
 							</Grid.Col>
 							<Grid.Col span={12}>
@@ -445,19 +458,6 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 										error={itemsForm.errors.expired_date}
 									/>
 								</Tooltip>
-							</Grid.Col>
-							<Grid.Col span={12}>
-								<InputNumberForm
-									form={itemsForm}
-									name="minimum_quantity"
-									id="minimum_quantity"
-									label="Minimum Quantity"
-									placeholder="0"
-									nextField="EntityFormSubmit"
-									disabled={!isProductSelected}
-									tooltip={itemsForm.errors.minimum_quantity}
-									leftSection={<IconSortAscendingNumbers size={16} opacity={0.6} />}
-								/>
 							</Grid.Col>
 						</Grid>
 					</Box>
