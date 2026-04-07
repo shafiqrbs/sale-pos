@@ -77,6 +77,7 @@ export default function useDailyMatrixData({ offlineFetch = true } = {}) {
 				return;
 			}
 
+			let totalPurchase = 0;
 			let totalSales = 0;
 			let totalDiscount = 0;
 			let totalPayment = 0;
@@ -229,11 +230,14 @@ export default function useDailyMatrixData({ offlineFetch = true } = {}) {
 			: [];
 
 		return {
+			totalPurchase: Number(sales?.totalPurchase) || 0,
 			totalSales: Number(sales?.totalSales) || 0,
 			totalDiscount: Number(sales?.totalDiscount) || 0,
+			total: Number(sales?.total) || 0,
 			receive: Number(sales?.receive) || 0,
 			totalDue: Number(sales?.totalDue) || 0,
 			totalInvoices: Number(sales?.totalInvoices) || 0,
+			totalStock: Number(sales?.totalStock) || 0,
 			totalClosingBalance: Number(sales?.totalClosingBalance) || 0,
 			totalOpeningBalance: Number(sales?.totalOpeningBalance) || 0,
 			wastage: Number(sales?.wastage) || 0,
