@@ -82,13 +82,13 @@ export default function ItemsTableSection({
 				</Box>
 				<Box>
 					<Button
-						onClick={() => navigate(APP_NAVLINKS.INVOICE_PURCHASE_NEW)}
+						onClick={() => navigate(APP_NAVLINKS.PURCHASE_NEW)}
 						bg="blue"
 						color="white"
 						leftSection={<IconPlus size={18} />}
 						mr="xs"
 					>
-						{t("InvoicePurchase")}
+						{t("ManualPurchase")}
 					</Button>
 					<Button
 						onClick={() => navigate(APP_NAVLINKS.PURCHASE)}

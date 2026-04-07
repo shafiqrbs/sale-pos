@@ -27,13 +27,10 @@ import { useNavigate, useOutletContext } from "react-router";
 import { DataTable } from "mantine-datatable";
 import tableCss from "@assets/css/Table.module.css";
 import { useTranslation } from "react-i18next";
-import Details from "./__Details";
 import KeywordSearch from "@components/KeywordSearch";
 import GlobalModal from "@components/modals/GlobalModal";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
-import { APP_NAVLINKS } from "@/routes/routes";
-import { useApprovePurchaseMutation, useCopyPurchaseMutation } from "@services/purchase";
 import usePurchaseList from "@hooks/usePurchaseList";
 import useSyncProducts from "@hooks/useSyncProducts";
 import { modals } from "@mantine/modals";
@@ -41,22 +38,27 @@ import { showNotification } from "@components/ShowNotificationComponent";
 import { formatCurrency } from "@utils/index";
 import useLoggedInUser from "@hooks/useLoggedInUser";
 import PageBreadcrumb from "@components/layout/PageBreadcrumb";
+import { APP_NAVLINKS } from "@/routes/routes";
+import PurchaseDetails from "./PurchaseDetails";
 
 const PER_PAGE = 25;
 
-export default function Table() {
-	const [ approvePurchase ] = useApprovePurchaseMutation();
-	const [ copyPurchase ] = useCopyPurchaseMutation();
+export default function PurchaseTable({
+	approveMutation,
+	copyMutation,
+	editLink,
+	modalTitlePrefix,
+}) {
 	const { syncOnlineProductsToLocal } = useSyncProducts();
 	const navigate = useNavigate();
 	const { t } = useTranslation();
-	const [ opened, { open, close } ] = useDisclosure(false);
-	const [ page, setPage ] = useState(1);
-	const [ selectedRow, setSelectedRow ] = useState(null);
-	const [ loading, setLoading ] = useState(false);
-	const [ viewData, setViewData ] = useState(null);
-	const [ deletedPurchaseIds, setDeletedPurchaseIds ] = useState(new Set());
-	const [ dataSource, setDataSource ] = useState("offline");
+	const [opened, { open, close }] = useDisclosure(false);
+	const [page, setPage] = useState(1);
+	const [selectedRow, setSelectedRow] = useState(null);
+	const [loading, setLoading] = useState(false);
+	const [viewData, setViewData] = useState(null);
+	const [deletedPurchaseIds, setDeletedPurchaseIds] = useState(new Set());
+	const [dataSource, setDataSource] = useState("offline");
 	const { mainAreaHeight, isOnline } = useOutletContext();
 	const { isOnlinePermissionIncludes } = useLoggedInUser();
 	// =============== when offline or user lacks permission, always use offline data ===============
@@ -86,7 +88,6 @@ export default function Table() {
 	});
 
 	const handlePurchaseApprove = (id) => {
-		// Open confirmation modal
 		modals.openConfirmModal({
 			title: <Text size="md">{t("FormConfirmationTitle")}</Text>,
 			children: <Text size="sm">{t("FormConfirmationMessage")}</Text>,
@@ -103,12 +104,11 @@ export default function Table() {
 
 	const handleConfirmPurchaseApprove = async (id) => {
 		try {
-			const res = await approvePurchase(id);
+			const res = await approveMutation(id);
 
 			if (res.data.status === 200) {
 				showNotification(t("ApprovedSuccessfully"), "teal");
 
-				// =============== silently refresh local product stock after approval ================
 				if (isOnline) {
 					syncOnlineProductsToLocal({
 						type: "product",
@@ -124,7 +124,7 @@ export default function Table() {
 
 	const handlePurchaseCopy = async (id) => {
 		try {
-			const res = await copyPurchase(id);
+			const res = await copyMutation(id);
 			if (res.data.status === 200) {
 				showNotification(t("CopyPurchaseSuccessfully"), "teal");
 			}
@@ -145,7 +145,6 @@ export default function Table() {
 		}, 700);
 	};
 
-	// =============== open copy purchase confirmation modal ===============
 	const handleOpenCopyConfirmModal = (purchaseId) => {
 		modals.openConfirmModal({
 			title: <Text size="md"> {t("CopyPurchase")}</Text>,
@@ -156,13 +155,11 @@ export default function Table() {
 		});
 	};
 
-	// =============== open purchase details view from menu (stops propagation so row click does not fire) ===============
 	const handleShowPurchaseFromMenu = (event, purchaseData) => {
 		event.stopPropagation();
 		handleShowDetails(purchaseData);
 	};
 
-	// =============== delete purchase with confirmation (local SQLite) ===============
 	const handleDeleteClick = (record) => {
 		modals.openConfirmModal({
 			title: <Text size="md"> {t("FormConfirmationTitle")}</Text>,
@@ -176,7 +173,7 @@ export default function Table() {
 
 	const handleConfirmDelete = async (record) => {
 		await window.dbAPI.deleteDataFromTable("purchase", { id: record.id });
-		setDeletedPurchaseIds((previousIds) => new Set([ ...previousIds, record.id ]));
+		setDeletedPurchaseIds((previousIds) => new Set([...previousIds, record.id]));
 		showNotification(t("InvoiceDeletedSuccess", { invoice: record.invoice }), "teal");
 	};
 
@@ -219,7 +216,9 @@ export default function Table() {
 											<IconGlobeOff
 												size={13}
 												color={
-													effectiveDataSource === "offline" ? "white" : "var(--mantine-color-red-6)"
+													effectiveDataSource === "offline"
+														? "white"
+														: "var(--mantine-color-red-6)"
 												}
 											/>
 											{t("Offline")}
@@ -236,6 +235,15 @@ export default function Table() {
 							</ActionIcon>
 						</Tooltip>
 					)}
+					<Button
+						size="xs"
+						color="blue"
+						variant="filled"
+						leftSection={<IconPlus size={20} />}
+						onClick={() => navigate(APP_NAVLINKS.INVOICE_PURCHASE_NEW)}
+					>
+						{t("NewInvoicePurchase")}
+					</Button>
 					<Button
 						size="xs"
 						color="red"
@@ -278,7 +286,12 @@ export default function Table() {
 									accessor: "invoice",
 									title: t("Invoice"),
 									render: (item) => (
-										<Text component="a" size="sm" variant="subtle" c="var(--theme-primary-color-6)">
+										<Text
+											component="a"
+											size="sm"
+											variant="subtle"
+											c="var(--theme-primary-color-6)"
+										>
 											{item.invoice}
 										</Text>
 									),
@@ -286,7 +299,9 @@ export default function Table() {
 								{
 									accessor: "vendor_name",
 									title: t("Vendor"),
-									render: (item) => <Text size="sm">{item?.vendor_name || "N/A"}</Text>,
+									render: (item) => (
+										<Text size="sm">{item?.vendor_name || "N/A"}</Text>
+									),
 								},
 								{
 									accessor: "subtotal",
@@ -311,10 +326,15 @@ export default function Table() {
 									title: t("Payable"),
 									textAlign: "right",
 									render: (data) => {
-										return <>{formatCurrency(Number(data.total) - Number(data.payment))}</>;
+										return (
+											<>
+												{formatCurrency(
+													Number(data.total) - Number(data.payment)
+												)}
+											</>
+										);
 									},
 								},
-								// { accessor: "payment", title: t("Payment") },
 								{ accessor: "mode", title: t("Mode") },
 								{
 									accessor: "process",
@@ -326,9 +346,13 @@ export default function Table() {
 											Approved: "red",
 										};
 
-										const badgeColor = colorMap[ item.process ] || "gray";
+										const badgeColor = colorMap[item.process] || "gray";
 
-										return item.process && <Badge color={badgeColor}>{item.process}</Badge>;
+										return (
+											item.process && (
+												<Badge color={badgeColor}>{item.process}</Badge>
+											)
+										);
 									},
 								},
 								{
@@ -371,13 +395,25 @@ export default function Table() {
 														radius="xl"
 														aria-label="Settings"
 													>
-														<IconDotsVertical height={"18"} width={"18"} stroke={1.5} />
+														<IconDotsVertical
+															height={"18"}
+															width={"18"}
+															stroke={1.5}
+														/>
 													</ActionIcon>
 												</Menu.Target>
 												<Menu.Dropdown w="200">
 													<Menu.Item
-														onClick={(event) => handleShowPurchaseFromMenu(event, data)}
-														leftSection={<IconEye height={"18"} width={"18"} stroke={1.5} />}
+														onClick={(event) =>
+															handleShowPurchaseFromMenu(event, data)
+														}
+														leftSection={
+															<IconEye
+																height={"18"}
+																width={"18"}
+																stroke={1.5}
+															/>
+														}
 														color="blue"
 													>
 														{t("Show")}
@@ -385,9 +421,15 @@ export default function Table() {
 													<Menu.Item
 														onClick={(event) => {
 															event.stopPropagation();
-															navigate(`${APP_NAVLINKS.PURCHASE_EDIT}/${data.id}`);
+															navigate(`${editLink}/${data.id}`);
 														}}
-														leftSection={<IconEdit height={"18"} width={"18"} stroke={1.5} />}
+														leftSection={
+															<IconEdit
+																height={"18"}
+																width={"18"}
+																stroke={1.5}
+															/>
+														}
 														color="yellow"
 													>
 														{t("Edit")}
@@ -395,8 +437,16 @@ export default function Table() {
 													{
 														<Menu.Item
 															color="indigo"
-															onClick={() => handleOpenCopyConfirmModal(data.id)}
-															leftSection={<IconCopy height={"18"} width={"18"} stroke={1.5} />}
+															onClick={() =>
+																handleOpenCopyConfirmModal(data.id)
+															}
+															leftSection={
+																<IconCopy
+																	height={"18"}
+																	width={"18"}
+																	stroke={1.5}
+																/>
+															}
 														>
 															{t("Copy")}
 														</Menu.Item>
@@ -407,7 +457,13 @@ export default function Table() {
 															handleDeleteClick(data);
 														}}
 														color="red"
-														leftSection={<IconTrashX height={"18"} width={"18"} stroke={1.5} />}
+														leftSection={
+															<IconTrashX
+																height={"18"}
+																width={"18"}
+																stroke={1.5}
+															/>
+														}
 													>
 														{t("Delete")}
 													</Menu.Item>
@@ -430,7 +486,10 @@ export default function Table() {
 							scrollAreaProps={{ type: "never" }}
 							rowStyle={(item) =>
 								item.invoice === selectedRow
-									? { background: "var(--theme-primary-color-3)", color: "#ffffff" }
+									? {
+											background: "var(--theme-primary-color-3)",
+											color: "#ffffff",
+										}
 									: undefined
 							}
 						/>
@@ -443,9 +502,9 @@ export default function Table() {
 				onClose={close}
 				size="80%"
 				padding="md"
-				title={`${t("Purchase")}: ${viewData?.invoice || ""}`}
+				title={`${modalTitlePrefix}: ${viewData?.invoice || ""}`}
 			>
-				<Details loading={loading} viewData={viewData} />
+				<PurchaseDetails loading={loading} viewData={viewData} />
 			</GlobalModal>
 		</Box>
 	);

@@ -197,7 +197,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 			unit_name: selectedProduct.unit_name || itemsForm.values.unit || "",
 			category_id: categoryId,
 			category_name: categoryName,
-			type: "purchase",
+			type: "invoice-purchase",
 			price: unitPurchasePrice,
 			expired_date,
 			measurement: itemsForm.values.measurement,
@@ -253,7 +253,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 					c={"white"}
 					className="boxBackground textColor borderRadiusAll"
 				>
-					Vendor Purchase Invoice
+					Vendor Invoice Purchase
 				</Box>
 				<Divider />
 				<ScrollArea h={containerHeight} bg="#f0f4f83d" type="never">

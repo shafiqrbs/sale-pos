@@ -460,7 +460,7 @@ db.prepare(
 		bonus_quantity REAL,
 		measurement TEXT,
 		measurement_quantity REAL,
-		type TEXT CHECK(type IN ('purchase', 'purchase_return', 'requisition')) DEFAULT 'purchase',
+		type TEXT CHECK(type IN ('purchase', 'invoice_purchase', 'purchase_return', 'requisition')) DEFAULT 'purchase',
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	)`
