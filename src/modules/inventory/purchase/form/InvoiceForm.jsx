@@ -253,7 +253,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 					c={"white"}
 					className="boxBackground textColor borderRadiusAll"
 				>
-					Vendor Purchase Invoice
+					Vendor Manual Purchase
 				</Box>
 				<Divider />
 				<ScrollArea h={containerHeight} bg="#f0f4f83d" type="never">

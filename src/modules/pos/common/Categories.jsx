@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useOutletContext } from "react-router";
-import {ScrollArea, Box, Text, Group, Badge} from "@mantine/core";
+import { ScrollArea, Box, Text, Group, Badge } from "@mantine/core";
 
 export default function Categories({ filter, setFilter }) {
 	const { mainAreaHeight } = useOutletContext();
@@ -44,7 +44,9 @@ export default function Categories({ filter, setFilter }) {
 							{category.name}
 						</Text>
 						{category.item > 0 && (
-							<Badge color="red.6" radius="xl" >{category.item}</Badge>
+							<Badge color="white" c="#1e3a8a" radius="xl">
+								{category.item}
+							</Badge>
 						)}
 					</Group>
 				</Box>

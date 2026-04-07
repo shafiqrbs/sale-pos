@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Image, ScrollArea, Box, Card, Grid, Text, Flex } from "@mantine/core";
+import { Image, ScrollArea, Box, Card, Grid, Text, Flex, ThemeIcon } from "@mantine/core";
+import { IconStack2 } from "@tabler/icons-react";
 import { useOutletContext } from "react-router";
 import useConfigData from "@hooks/useConfigData";
 import Categories from "./Categories";
@@ -18,19 +19,24 @@ import { useTranslation } from "react-i18next";
 const ITEMS_PER_PAGE = 24;
 
 export default function ProductList() {
-	const [ activePage, setActivePage ] = useState(1);
-	const [ selectedProduct, setSelectedProduct ] = useState(null);
-	const [ batchModalOpened, { open: openBatchModal, close: closeBatchModal } ] = useDisclosure(false);
+	const [activePage, setActivePage] = useState(1);
+	const [selectedProduct, setSelectedProduct] = useState(null);
+	const [batchModalOpened, { open: openBatchModal, close: closeBatchModal }] = useDisclosure(false);
 	const { increment } = useCartOperation();
 	const { mainAreaHeight } = useOutletContext();
 	const { currencySymbol, allowSalesZeroStock } = useConfigData();
-	const { t } = useTranslation()
-	const [ filter, setFilter ] = useState({
+	const { t } = useTranslation();
+	const [filter, setFilterRaw] = useState({
 		categories: [],
 		search: "",
 		barcode: "",
 		view: "grid", // grid | list | minimal
 	});
+
+	const setFilter = (valueOrUpdater) => {
+		setFilterRaw(valueOrUpdater);
+		setActivePage(1);
+	};
 
 	// =============== declarative local product list — auto-fetches on filter/page change ================
 	const normalizedSearchValue = filter.search.trim();
@@ -70,7 +76,7 @@ export default function ProductList() {
 		return () => {
 			window.removeEventListener("products-updated", refetchProducts);
 		};
-	}, [ refetchProducts ]);
+	}, [refetchProducts]);
 
 	// =============== check if product should be disabled ================
 	const isProductDisabled = (product) => {
@@ -105,10 +111,10 @@ export default function ProductList() {
 			if (cartItems && cartItems.length > 0) {
 				try {
 					currentBatches =
-						typeof cartItems[ 0 ].batches === "string"
-							? JSON.parse(cartItems[ 0 ].batches)
-							: Array.isArray(cartItems[ 0 ].batches)
-								? cartItems[ 0 ].batches
+						typeof cartItems[0].batches === "string"
+							? JSON.parse(cartItems[0].batches)
+							: Array.isArray(cartItems[0].batches)
+								? cartItems[0].batches
 								: [];
 				} catch {
 					currentBatches = [];
@@ -159,6 +165,7 @@ export default function ProductList() {
 															radius="md"
 															padding="xs"
 															h="100%"
+															pos="relative"
 															title={productDisabled ? "Out of Stock" : "Add to Cart"}
 															className={productDisabled ? "cursor-not-allowed" : "cursor-pointer"}
 															styles={() => ({
@@ -169,6 +176,18 @@ export default function ProductList() {
 															})}
 															onClick={() => handleProductClick(product)}
 														>
+															{JSON.parse(product?.purchase_item_for_sales || "[]").length > 0 && (
+																<ThemeIcon
+																	size="sm"
+																	radius="xl"
+																	color="var(--theme-primary-color-5)"
+																	pos="absolute"
+																	top={8}
+																	right={8}
+																>
+																	<IconStack2 size={14} />
+																</ThemeIcon>
+															)}
 															<Image
 																radius="sm"
 																h={120}
@@ -188,12 +207,13 @@ export default function ProductList() {
 																			QTY: {product?.quantity} {product?.unit_name}
 																		</>
 																	) : (
-																		<Box c="red.7" component="span">{t("OutOfStock")}</Box>
+																		<Box c="red.7" component="span">
+																			{t("OutOfStock")}
+																		</Box>
 																	)}
 																</Text>
 																<Text fw={900} fz="18" size="md" c="green.9">
-																	{currencySymbol}{" "}
-																	{formatCurrency(product?.sales_price)}
+																	{currencySymbol} {formatCurrency(product?.sales_price)}
 																</Text>
 															</Flex>
 														</Card>

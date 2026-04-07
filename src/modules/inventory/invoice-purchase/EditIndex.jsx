@@ -192,6 +192,7 @@ export default function EditIndex() {
 			category_id: item.category_id ?? null,
 			category_name: item.category_name ?? "",
 			unit_name: item.unit_name ?? "",
+			bonus_quantity: Number(item.bonus_quantity) || 0,
 			average_price: Number(item.average_price) || 0,
 			expired_date: item.expired_date ?? null,
 		}));

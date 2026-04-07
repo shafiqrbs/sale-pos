@@ -197,6 +197,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 			unit_name: selectedProduct.unit_name || itemsForm.values.unit || "",
 			category_id: categoryId,
 			category_name: categoryName,
+			bonus_quantity: Number(itemsForm.values.bonus_quantity) || 0,
 			type: "invoice-purchase",
 			price: unitPurchasePrice,
 			expired_date,
@@ -389,6 +390,19 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 									disabled={!isProductSelected}
 									tooltip={itemsForm.errors.item_percent}
 									leftSection={<IconPercentage size={16} opacity={0.6} />}
+								/>
+							</Grid.Col>
+							<Grid.Col span={12}>
+								<InputNumberForm
+									form={itemsForm}
+									name="bonus_quantity"
+									id="bonus_quantity"
+									label={t("BonusQuantity")}
+									placeholder="0"
+									nextField="purchase_price"
+									disabled={!isProductSelected}
+									tooltip={itemsForm.errors.bonus_quantity}
+									leftSection={<IconSortAscendingNumbers size={16} opacity={0.6} />}
 								/>
 							</Grid.Col>
 							<Grid.Col span={12}>

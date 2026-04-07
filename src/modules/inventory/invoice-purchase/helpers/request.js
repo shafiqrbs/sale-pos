@@ -48,6 +48,7 @@ const invoiceItemFormInitialValues = {
 	total_mrp: "",
 	item_percent: "",
 	purchase_price: "",
+	bonus_quantity: "",
 	expired_date: "",
 	minimum_quantity: "",
 	unit: "",
