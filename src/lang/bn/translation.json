@@ -1329,5 +1329,7 @@
 	"EditSalesReturn": "বিক্রয় রিটার্ন সম্পাদনা",
 	"Back": "পিছনে",
 	"RequisitionNo": "রিকুইজিশন নম্বর",
-	"RequisitionList": "রিকুইজিশন তালিকা"
+	"RequisitionList": "রিকুইজিশন তালিকা",
+	"Expiry": "মেয়াদ",
+	"SalesQnt": "বিক্রয় পরিমাণ"
 }

@@ -4,18 +4,20 @@ import ItemsTableSection from "./ItemsTableSection";
 import PaymentSection from "./PaymentSection";
 
 export default function Overview({
-	itemsForm,
 	isAddingItem,
+	itemsForm,
 	itemsProducts,
 	refetch,
 	onQuantityChange,
-	onPriceChange,
 	onRemoveItem,
+	onMrpChange,
+	onBonusQuantityChange,
+	onExpiredDateChange,
 	isEditMode = false,
 }) {
 	const itemsTotal = useMemo(() => {
 		return (itemsProducts || []).reduce(
-			(accumulator, item) => accumulator + (item.quantity || 0) * (item.purchase_price || 0),
+			(accumulator, item) => accumulator + (item.quantity || 0) * (item.mrp || 0),
 			0
 		);
 	}, [itemsProducts]);
@@ -27,8 +29,10 @@ export default function Overview({
 				refetch={refetch}
 				itemsTotal={itemsTotal}
 				onQuantityChange={onQuantityChange}
-				onPriceChange={onPriceChange}
 				onRemoveItem={onRemoveItem}
+				onMrpChange={onMrpChange}
+				onBonusQuantityChange={onBonusQuantityChange}
+				onExpiredDateChange={onExpiredDateChange}
 			/>
 
 			<PaymentSection

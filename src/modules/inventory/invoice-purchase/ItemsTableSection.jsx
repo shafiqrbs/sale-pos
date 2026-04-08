@@ -1,4 +1,3 @@
-import React from "react";
 import { ActionIcon, Box, Flex, NumberInput, Text, Button, Badge } from "@mantine/core";
 import { MonthPickerInput } from "@mantine/dates";
 import { DataTable } from "mantine-datatable";
@@ -21,8 +20,10 @@ export default function ItemsTableSection({
 	refetch,
 	itemsTotal,
 	onQuantityChange,
-	onPriceChange,
 	onRemoveItem,
+	onMrpChange,
+	onBonusQuantityChange,
+	onExpiredDateChange,
 }) {
 	const navigate = useNavigate();
 	const { t } = useTranslation();
@@ -33,23 +34,10 @@ export default function ItemsTableSection({
 	const handleQuantityChange = async (itemId, value) => {
 		const numericValue = parseFloat(value) || 0;
 		const currentItem = itemsProducts.find((item) => item.id === itemId);
-		const newSubTotal = numericValue * (currentItem?.purchase_price || 0);
+		const newSubTotal = numericValue * (currentItem?.mrp || 0);
 		const updatedData = { quantity: numericValue, sub_total: newSubTotal };
 		if (onQuantityChange) {
 			onQuantityChange(itemId, updatedData);
-		} else {
-			await window.dbAPI.upsertIntoTable("temp_purchase_products", { id: itemId, ...updatedData });
-			refetch();
-		}
-	};
-
-	const handlePriceChange = async (itemId, value) => {
-		const numericValue = parseFloat(value) || 0;
-		const currentItem = itemsProducts.find((item) => item.id === itemId);
-		const newSubTotal = (currentItem?.quantity || 0) * numericValue;
-		const updatedData = { purchase_price: numericValue, sub_total: newSubTotal };
-		if (onPriceChange) {
-			onPriceChange(itemId, updatedData);
 		} else {
 			await window.dbAPI.upsertIntoTable("temp_purchase_products", { id: itemId, ...updatedData });
 			refetch();
@@ -67,11 +55,35 @@ export default function ItemsTableSection({
 
 	const handleExpiredDateChange = async (itemId, value) => {
 		const dateValue = value ? dayjs(value).format("YYYY-MM-DD") : null;
-		await window.dbAPI.upsertIntoTable("temp_purchase_products", {
-			id: itemId,
-			expired_date: dateValue,
-		});
-		refetch();
+		const updatedData = { expired_date: dateValue };
+		if (onExpiredDateChange) {
+			onExpiredDateChange(itemId, updatedData);
+		} else {
+			await window.dbAPI.upsertIntoTable("temp_purchase_products", { id: itemId, ...updatedData });
+			refetch();
+		}
+	};
+
+	const handleMrpChange = async (itemId, value) => {
+		const numericValue = parseFloat(value) || 0;
+		const updatedData = { mrp: numericValue };
+		if (onMrpChange) {
+			onMrpChange(itemId, updatedData);
+		} else {
+			await window.dbAPI.upsertIntoTable("temp_purchase_products", { id: itemId, ...updatedData });
+			refetch();
+		}
+	};
+
+	const handleBonusQuantityChange = async (itemId, value) => {
+		const numericValue = parseFloat(value) || 0;
+		const updatedData = { bonus_quantity: numericValue };
+		if (onBonusQuantityChange) {
+			onBonusQuantityChange(itemId, updatedData);
+		} else {
+			await window.dbAPI.upsertIntoTable("temp_purchase_products", { id: itemId, ...updatedData });
+			refetch();
+		}
 	};
 
 	return (
@@ -120,28 +132,28 @@ export default function ItemsTableSection({
 					{
 						accessor: "serial",
 						title: "S/N",
-						width: 60,
+						width: 50,
 						render: (_, index) => index + 1,
 					},
-
 					{
 						accessor: "display_name",
-						title: "Product",
-						render: (record) => <Text size="sm">{record.display_name}</Text>,
+						title: t("Name"),
+						render: (record) => <Text size="xs">{record.display_name}</Text>,
 					},
 					{
-						accessor: "category_name",
-						title: "Category",
+						accessor: "average_price",
+						title: "AVGPP",
 						textAlign: "center",
+						width: 90,
 						render: (record) => (
-							<Text size="sm" c="dimmed">
-								{record.category_name || "—"}
+							<Text size="xs" c="dimmed">
+								{formatCurrency(record.average_price ?? 0)}
 							</Text>
 						),
 					},
 					{
 						accessor: "expired_date",
-						title: t("ExpiredDate"),
+						title: t("Expiry"),
 						textAlign: "center",
 						width: 130,
 						render: (record) => (
@@ -161,51 +173,22 @@ export default function ItemsTableSection({
 						textAlign: "center",
 						width: 100,
 						render: (record) => (
-							<Text size="sm" c="dimmed">
-								<Badge
-									variant="light"
-									color={record.mrp > record.purchase_price ? "red" : "blue"}
-									radius="sm"
-								>
-									{currencySymbol} {formatCurrency(record.mrp ?? 0)}
-								</Badge>
-							</Text>
-						),
-					},
-
-					{
-						accessor: "average_price",
-						title: "Avg. Price",
-						textAlign: "center",
-						width: 120,
-						render: (record) => (
-							<Text size="sm" c="dimmed">
-								{currencySymbol} {formatCurrency(record.average_price ?? 0)}
-							</Text>
-						),
-					},
-					{
-						accessor: "price",
-						title: "Pur. price",
-						textAlign: "left",
-						width: 140,
-						render: (record) => (
 							<NumberInput
 								size="xs"
-								value={record.purchase_price ?? 0}
+								value={record.mrp ?? 0}
 								min={0}
 								step={1}
+								decimalScale={2}
 								hideControls
-								thousandSeparator=","
-								onChange={(value) => handlePriceChange(record.id, value)}
+								onChange={(value) => handleMrpChange(record.id, value)}
 							/>
 						),
 					},
 					{
 						accessor: "quantity",
-						title: "Qty",
+						title: "QTY",
 						textAlign: "left",
-						width: 120,
+						width: 100,
 						render: (record) => (
 							<NumberInput
 								size="xs"
@@ -218,14 +201,30 @@ export default function ItemsTableSection({
 						),
 					},
 					{
+						accessor: "bonus_quantity",
+						title: t("BonusQty"),
+						textAlign: "left",
+						width: 110,
+						render: (record) => (
+							<NumberInput
+								size="xs"
+								value={record.bonus_quantity ?? 0}
+								min={0}
+								step={1}
+								hideControls
+								onChange={(value) => handleBonusQuantityChange(record.id, value)}
+							/>
+						),
+					},
+					{
 						accessor: "subTotal",
-						title: "Sub Total",
+						title: t("Total"),
 						textAlign: "right",
-						width: 120,
+						width: 100,
 						render: (record) => {
-							const subTotal = (record.quantity || 0) * (record.purchase_price || 0);
+							const subTotal = (record.quantity || 0) * (record.mrp || 0);
 							return (
-								<Text size="sm" fw={600}>
+								<Text size="xs" fw={600}>
 									{currencySymbol} {formatCurrency(subTotal)}
 								</Text>
 							);
@@ -235,7 +234,7 @@ export default function ItemsTableSection({
 						accessor: "action",
 						title: "",
 						textAlign: "center",
-						width: 60,
+						width: 50,
 						render: (record) => (
 							<ActionIcon
 								size="sm"

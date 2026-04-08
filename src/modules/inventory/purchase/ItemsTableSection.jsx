@@ -195,6 +195,7 @@ export default function ItemsTableSection({
 								value={record.purchase_price ?? 0}
 								min={0}
 								step={1}
+								decimalScale={2}
 								hideControls
 								thousandSeparator=","
 								onChange={(value) => handlePriceChange(record.id, value)}

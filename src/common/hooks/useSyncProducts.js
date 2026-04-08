@@ -12,6 +12,7 @@ const mapApiProductToLocalSchema = (apiProduct) => ({
 	display_name: apiProduct.product_name ?? "",
 	product_nature: apiProduct.product_type ?? "",
 	slug: apiProduct.slug ?? "",
+	vendor_id: apiProduct.vendor_id ?? null,
 	unit_name: apiProduct.unit_name ?? "",
 	unit_id: 0,
 	category: apiProduct.category_name || apiProduct.category || "",
@@ -51,9 +52,7 @@ export default function useSyncProducts() {
 				).unwrap();
 
 				const totalProductCount = firstPageResponse.total ?? 0;
-				let allProducts = Array.isArray(firstPageResponse.data)
-					? [...firstPageResponse.data]
-					: [];
+				let allProducts = Array.isArray(firstPageResponse.data) ? [...firstPageResponse.data] : [];
 
 				const totalPageCount = Math.ceil(totalProductCount / SYNC_PAGE_SIZE);
 

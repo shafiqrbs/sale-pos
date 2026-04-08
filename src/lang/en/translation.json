@@ -1310,5 +1310,7 @@
 	"RequisitionNo": "Requisition No",
 	"RequisitionList": "Requisition List",
 	"ManualPurchase": "Manual Purchase",
-	"InvoicePurchase": "Invoice Purchase"
+	"InvoicePurchase": "Invoice Purchase",
+	"Expiry": "Expiry",
+	"SalesQnt": "Sales Qnt"
 }

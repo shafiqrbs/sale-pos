@@ -279,19 +279,25 @@ export default function PaymentSection({
 									px="xs"
 									py={6}
 								>
-									<Flex py={8} justify="space-between" align="center">
+									<Flex py={8} gap="sm" justify="space-between" align="center">
 										<Text fz="sm" c={"white"} fw={600}>
 											{t("Due")}
 										</Text>
-										<Flex align="center" gap={4}>
-											<Text fz="sm" c={"white"} fw={500}>
-												{currencySymbol}
-											</Text>
-											<Text fz="sm" c={"white"} fw={700}>
-												{formatCurrency(dueAmount)}
-											</Text>
-										</Flex>
+										<NumberInput
+											hideControls
+											size="sm"
+											placeholder={t("Due")}
+											thousandSeparator=","
+											leftSection={<IconCurrencyTaka size={14} />}
+											value={dueAmount}
+											styles={{
+												input: {
+													backgroundColor: "white",
+												},
+											}}
+										/>
 									</Flex>
+
 									<FormValidationWrapper
 										errorMessage={t("PaymentAmountRequired")}
 										opened={!!itemsForm.errors.paymentAmount}

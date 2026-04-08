@@ -78,7 +78,7 @@ export default function NewIndex() {
 		}
 
 		const subTotal = itemsProducts.reduce(
-			(sum, item) => sum + (Number(item.quantity) || 0) * (Number(item.purchase_price) || 0),
+			(sum, item) => sum + (Number(item.quantity) || 0) * (Number(item.mrp) || 0),
 			0
 		);
 
@@ -108,13 +108,14 @@ export default function NewIndex() {
 			mrp: Number(item.mrp ?? item.purchase_price) || 0,
 			purchase_price: Number(item.purchase_price) || 0,
 			sales_price: Number(item.sales_price) || Number(item.purchase_price) || 0,
-			sub_total: (Number(item.quantity) || 0) * (Number(item.purchase_price) || 0),
+			sub_total: (Number(item.quantity) || 0) * (Number(item.mrp) || 0),
 			category_id: item.category_id ?? null,
 			category_name: item.category_name ?? "",
 			unit_name: item.unit_name ?? "",
 			bonus_quantity: Number(item.bonus_quantity) || 0,
 			average_price: Number(item.average_price) || 0,
 			expired_date: item.expired_date ?? null,
+			sales_quantity: Number(item.sales_quantity) || 0,
 		}));
 
 		const purchaseDiscountTypeLabel = formValues.isDiscountPercentage ? "Percentage" : "Flat";
