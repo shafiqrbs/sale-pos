@@ -9,8 +9,8 @@ import useLoggedInUser from "@hooks/useLoggedInUser";
 
 function Footer() {
 	const { t } = useTranslation();
-	const { user, isOnlinePermissionIncludes } = useLoggedInUser();
-	const [ zoomLevel, setZoomLevel ] = useState(() => {
+	const { isOnlinePermissionIncludes } = useLoggedInUser();
+	const [zoomLevel, setZoomLevel] = useState(() => {
 		const initialZoom = window.zoomAPI.getZoomFactor();
 		return Math.round(initialZoom * 100);
 	});
@@ -69,9 +69,7 @@ function Footer() {
 		</NavLink>
 	));
 
-	const leftLinks = [
-		{ link: "/", label: t("Home") },
-	];
+	const leftLinks = [{ link: "/", label: t("Home") }];
 
 	const leftItems = leftLinks.map((link) => (
 		<NavLink key={link.label} to={link.link} className={classes.link}>
@@ -90,18 +88,18 @@ function Footer() {
 					</Group>
 					<Group>
 						{isOnlinePermissionIncludes ? (
-						<Group ml={50} gap={5} className={classes.links} visibleFrom="sm">
-							<Flex
-								gap="md"
-								mih={42}
-								justify="flex-start"
-								align="center"
-								direction="row"
-								wrap="wrap"
-							>
-								{items}
-							</Flex>
-						</Group>
+							<Group ml={50} gap={5} className={classes.links} visibleFrom="sm">
+								<Flex
+									gap="md"
+									mih={42}
+									justify="flex-start"
+									align="center"
+									direction="row"
+									wrap="wrap"
+								>
+									{items}
+								</Flex>
+							</Group>
 						) : null}
 						<Group>
 							<ActionIcon variant="outline" onClick={zoomOut} size="sm">

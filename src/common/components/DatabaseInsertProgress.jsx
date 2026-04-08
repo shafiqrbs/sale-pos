@@ -1,11 +1,23 @@
 import { Box, Overlay, Paper, Progress, Stack, Text } from "@mantine/core";
 import { IconDatabase } from "@tabler/icons-react";
 
+const TABLE_DISPLAY_NAMES = {
+	core_products: "Products",
+	core_customers: "Customers",
+	core_vendors: "Vendors",
+	core_users: "Users",
+	accounting_transaction_mode: "Transaction Modes",
+	config_data: "Configuration",
+	categories: "Categories",
+	printer: "Printer",
+};
+
 // =============== shown as an overlay during bulk db inserts, accepts a progress object ================
 export default function DatabaseInsertProgress({ visible, progress }) {
 	if (!visible) return null;
 
 	const { table = "", inserted = 0, total = 0, percent = 0 } = progress || {};
+	const displayName = TABLE_DISPLAY_NAMES[table] || table;
 
 	return (
 		<Overlay
@@ -99,11 +111,11 @@ export default function DatabaseInsertProgress({ visible, progress }) {
 									ff="monospace"
 									style={{ wordBreak: "break-all" }}
 								>
-									{table || "—"}
+									{displayName || "—"}
 								</Text>
 								{total > 0 && (
 									<Text size="xs" c="dimmed" mt={2}>
-										Inserting {table}
+										Inserting {displayName}
 									</Text>
 								)}
 							</Stack>

@@ -1,11 +1,11 @@
 {
-	"name": "poskeeper",
+	"name": "sandra",
 	"private": true,
 	"version": "1.1.0",
 	"type": "module",
 	"main": "./index.cjs",
 	"license": "MIT",
-	"description": "PosKeeper - A smart desktop point-of-sale system for managing sales, inventory, purchases, and business operations.",
+	"description": "Sandra - A smart desktop point-of-sale system for managing sales, inventory, purchases, and business operations.",
 	"author": {
 		"name": "Sharif Md. Minhaz",
 		"email": "minhaz.rbs@gmail.com"
@@ -90,8 +90,8 @@
 		"vite": "^7.2.4"
 	},
 	"build": {
-		"appId": "com.poskeeper.app",
-		"productName": "PosKeeper",
+		"appId": "com.sandra.app",
+		"productName": "Sandra",
 		"directories": {
 			"output": "dist"
 		},
@@ -101,8 +101,8 @@
 			"index.cjs"
 		],
 		"win": {
-			"publisherName": "PosKeeper",
-			"artifactName": "poskeeper-installer.exe",
+			"publisherName": "Sandra",
+			"artifactName": "sandra-installer.exe",
 			"icon": "icons/brand.ico",
 			"publish": [
 				"github"
