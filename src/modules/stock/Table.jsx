@@ -150,7 +150,7 @@ export default function Table() {
 		effectiveDataSource === "online" ? (onlineProductsResponse?.total ?? 0) : totalCount;
 
 	const isTableLoading =
-		effectiveDataSource === "online" ? isOnlineLoading || isOnlineFetching || isSyncing : loading;
+		effectiveDataSource === "online" ? isOnlineLoading || isOnlineFetching || isSyncing : loading || isSyncing;
 
 	const height = mainAreaHeight - 60;
 
