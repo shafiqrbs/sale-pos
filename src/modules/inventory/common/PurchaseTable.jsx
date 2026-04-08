@@ -43,12 +43,7 @@ import PurchaseDetails from "./PurchaseDetails";
 
 const PER_PAGE = 25;
 
-export default function PurchaseTable({
-	approveMutation,
-	copyMutation,
-	editLink,
-	modalTitlePrefix,
-}) {
+export default function PurchaseTable({ approveMutation, copyMutation, modalTitlePrefix }) {
 	const { syncOnlineProductsToLocal } = useSyncProducts();
 	const navigate = useNavigate();
 	const { t } = useTranslation();
@@ -387,16 +382,22 @@ export default function PurchaseTable({
 													>
 														{t("Show")}
 													</Menu.Item>
-													<Menu.Item
-														onClick={(event) => {
-															event.stopPropagation();
-															navigate(`${editLink}/${data.id}`);
-														}}
-														leftSection={<IconEdit height={"18"} width={"18"} stroke={1.5} />}
-														color="yellow"
-													>
-														{t("Edit")}
-													</Menu.Item>
+													{effectiveDataSource === "offline" && (
+														<Menu.Item
+															onClick={(event) => {
+																event.stopPropagation();
+																const link =
+																	data.purchase_mode === "invoice"
+																		? APP_NAVLINKS.INVOICE_PURCHASE_EDIT
+																		: APP_NAVLINKS.PURCHASE_EDIT;
+																navigate(`${link}/${data.id}`);
+															}}
+															leftSection={<IconEdit height={"18"} width={"18"} stroke={1.5} />}
+															color="yellow"
+														>
+															{t("Edit")}
+														</Menu.Item>
+													)}
 													{
 														<Menu.Item
 															color="indigo"
@@ -406,16 +407,18 @@ export default function PurchaseTable({
 															{t("Copy")}
 														</Menu.Item>
 													}
-													<Menu.Item
-														onClick={(event) => {
-															event.stopPropagation();
-															handleDeleteClick(data);
-														}}
-														color="red"
-														leftSection={<IconTrashX height={"18"} width={"18"} stroke={1.5} />}
-													>
-														{t("Delete")}
-													</Menu.Item>
+													{effectiveDataSource === "offline" && (
+														<Menu.Item
+															onClick={(event) => {
+																event.stopPropagation();
+																handleDeleteClick(data);
+															}}
+															color="red"
+															leftSection={<IconTrashX height={"18"} width={"18"} stroke={1.5} />}
+														>
+															{t("Delete")}
+														</Menu.Item>
+													)}
 												</Menu.Dropdown>
 											</Menu>
 										</Group>

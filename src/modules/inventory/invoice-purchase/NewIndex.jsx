@@ -141,7 +141,7 @@ export default function NewIndex() {
 				: null,
 			purchase_items: JSON.stringify(purchaseItemsForDb),
 			created: formatDateTime(new Date()),
-			purchase_mode: "manual",
+			purchase_mode: "invoice",
 		};
 
 		const buildPurchaseApiPayload = () => ({
@@ -171,7 +171,7 @@ export default function NewIndex() {
 				sub_total: Number(item.sub_total) || 0,
 				name: item.display_name ?? "",
 			})),
-			purchase_mode: "manual",
+			purchase_mode: "invoice",
 		});
 
 		setIsAddingItem(true);
@@ -187,7 +187,7 @@ export default function NewIndex() {
 
 			// =============== clear persisted temp items after successful purchase submission ===============
 			await window.dbAPI.deleteDataFromTable("temp_purchase_products", {
-				type: "invoice-purchase",
+				type: "invoice_purchase",
 			});
 			refetch();
 

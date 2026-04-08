@@ -1,6 +1,5 @@
 import { Box } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import { APP_NAVLINKS } from "@/routes/routes";
 import { useApproveInvoicePurchaseMutation, useCopyInvoicePurchaseMutation } from "@services/invoice-purchase";
 import PurchaseTable from "../common/PurchaseTable";
 
@@ -14,7 +13,6 @@ export default function InvoicePurchaseIndex() {
 			<PurchaseTable
 				approveMutation={approveInvoicePurchase}
 				copyMutation={copyInvoicePurchase}
-				editLink={APP_NAVLINKS.INVOICE_PURCHASE_EDIT}
 				modalTitlePrefix={t("InvoicePurchase")}
 			/>
 		</Box>

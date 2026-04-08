@@ -325,6 +325,7 @@ db.prepare(
 		createdById INTEGER,
 		process TEXT,
 		mode_name TEXT,
+		purchase_mode TEXT CHECK(purchase_mode IN ('manual', 'invoice')) DEFAULT 'manual',
 		transaction_mode_id INTEGER,
 		balance REAL,
 		purchase_items TEXT,
