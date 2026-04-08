@@ -16,6 +16,7 @@ const mapApiProductToLocalSchema = (apiProduct) => ({
 	unit_name: apiProduct.unit_name ?? "",
 	unit_id: 0,
 	category: apiProduct.category_name || apiProduct.category || "",
+	category_id: apiProduct.category_id,
 	quantity: apiProduct.quantity ?? 0,
 	purchase_price: apiProduct.purchase_price ?? 0,
 	sales_price: apiProduct.sales_price ?? 0,
