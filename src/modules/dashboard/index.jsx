@@ -9,6 +9,7 @@ import TopSellingProductsCard from "@components/dashboard/TopSellingProductsCard
 import TodaysOverviewCard from "@components/dashboard/TodaysOverviewCard";
 import { useOutletContext } from "react-router";
 import useLoggedInUser from "@hooks/useLoggedInUser";
+import DashboardSkeleton from "@components/skeletons/DashboardSkeleton";
 
 export default function DashboardIndex() {
 	const { isOnline, mainAreaHeight } = useOutletContext();
@@ -40,17 +41,13 @@ export default function DashboardIndex() {
 	const cardHeight = (height - 166) / 2;
 
 	if (isLoading) {
-		return (
-			<Center h={height}>
-				<Loader size="lg" />
-			</Center>
-		);
+		return <DashboardSkeleton height={height} cardHeight={cardHeight} />;
 	}
 
 	return (
 		<Box p="md">
 			<Grid gutter="md" mb="md">
-				<Grid.Col span={{ base: 12, md: 6 }} >
+				<Grid.Col span={{ base: 12, md: 6 }}>
 					<Grid gutter="md" mb="md">
 						<Grid.Col span={{ base: 12 }}>
 							<SalesSummaryCard dailyData={dailyData} refetch={refetch} cardHeight={height - 64} />
