@@ -33,6 +33,7 @@ export default function useDailyMatrixData({ offlineFetch = true } = {}) {
 	const {
 		data: summaryResponse,
 		isLoading: summaryLoading,
+		isFetching,
 		error: summaryError,
 		refetch: refetchSummary,
 	} = useGetDailySummaryQuery(
@@ -260,7 +261,7 @@ export default function useDailyMatrixData({ offlineFetch = true } = {}) {
 
 	return {
 		dailyData: onlineData,
-		isLoading: summaryLoading || salesListLoading,
+		isLoading: summaryLoading || salesListLoading || isFetching,
 		error: summaryError || salesListError,
 		refetch: () => {
 			refetchSummary();

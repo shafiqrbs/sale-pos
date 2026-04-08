@@ -12,30 +12,29 @@ import useLoggedInUser from "@hooks/useLoggedInUser";
 
 export default function DashboardIndex() {
 	const { isOnline, mainAreaHeight } = useOutletContext();
-	const [ dashboardOnline, setDashboardOnline ] = useState(false);
 	const { isOnlinePermissionIncludes } = useLoggedInUser();
-	const { dailyData, isLoading } = useDailyMatrixData({ offlineFetch: !dashboardOnline });
+	const { dailyData, isLoading, refetch } = useDailyMatrixData({ offlineFetch: !isOnline });
 
-	const toggleDashboardMode = () => {
-		if (!dashboardOnline && !isOnline) {
-			notifications.show({
-				title: "Dashboard Mode",
-				message: "App must be online to switch to online mode",
-				color: "red",
-				autoClose: 3000,
-			});
-			return;
-		}
+	// const toggleDashboardMode = () => {
+	// 	if (!dashboardOnline && !isOnline) {
+	// 		notifications.show({
+	// 			title: "Dashboard Mode",
+	// 			message: "App must be online to switch to online mode",
+	// 			color: "red",
+	// 			autoClose: 3000,
+	// 		});
+	// 		return;
+	// 	}
 
-		const nextMode = !dashboardOnline;
-		setDashboardOnline(nextMode);
-		notifications.show({
-			title: "Dashboard Mode",
-			message: nextMode ? "Showing online data" : "Showing offline data",
-			color: nextMode ? "teal" : "orange",
-			autoClose: 2000,
-		});
-	};
+	// 	const nextMode = !dashboardOnline;
+	// 	setDashboardOnline(nextMode);
+	// 	notifications.show({
+	// 		title: "Dashboard Mode",
+	// 		message: nextMode ? "Showing online data" : "Showing offline data",
+	// 		color: nextMode ? "teal" : "orange",
+	// 		autoClose: 2000,
+	// 	});
+	// };
 
 	const height = mainAreaHeight - 40;
 	const cardHeight = (height - 166) / 2;
@@ -54,7 +53,7 @@ export default function DashboardIndex() {
 				<Grid.Col span={{ base: 12, md: 6 }} >
 					<Grid gutter="md" mb="md">
 						<Grid.Col span={{ base: 12 }}>
-							<SalesSummaryCard dailyData={dailyData} cardHeight={height - 64} />
+							<SalesSummaryCard dailyData={dailyData} refetch={refetch} cardHeight={height - 64} />
 						</Grid.Col>
 					</Grid>
 				</Grid.Col>
@@ -80,7 +79,7 @@ export default function DashboardIndex() {
 			</Grid>
 
 			{/* =============== floating online/offline toggle ================ */}
-			{isOnlinePermissionIncludes ? (
+			{/* {isOnlinePermissionIncludes ? (
 				<Transition mounted={true} transition="slide-up" duration={300}>
 					{(styles) => (
 						<Tooltip
@@ -109,7 +108,7 @@ export default function DashboardIndex() {
 						</Tooltip>
 					)}
 				</Transition>
-			) : null}
+			) : null} */}
 		</Box>
 	);
 }

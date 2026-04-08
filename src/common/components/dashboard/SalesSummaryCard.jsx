@@ -1,5 +1,5 @@
-import { Divider, Grid, Paper, ScrollArea, Text } from "@mantine/core";
-import { IconCurrencyTaka, IconDiscount, IconReceipt } from "@tabler/icons-react";
+import { ActionIcon, Divider, Flex, Grid, LoadingOverlay, Paper, ScrollArea, Text } from "@mantine/core";
+import { IconCurrencyTaka, IconDiscount, IconReceipt, IconReload } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 import StatCard from "./StatCard";
 import { formatCurrency } from "@utils/index";
@@ -21,14 +21,25 @@ const STAT_ITEMS = [
 
 //console.log(dailyData)
 
-export default function SalesSummaryCard({ dailyData, cardHeight }) {
+export default function SalesSummaryCard({ dailyData, cardHeight, refetch, isLoading }) {
     const { t } = useTranslation();
 	const { currencySymbol } = useConfigData();
     return (
         <Paper shadow="sm" p="lg" radius="md" withBorder h="100%">
-            <Text size="lg" fw={700} mb="md">{t("Today's Stock & Sales Summary")}</Text>
+            <Flex align="center" justify="space-between">
+                <Text size="lg" fw={700} mb="md">{t("Today's Stock & Sales Summary")}</Text>
+                <ActionIcon onClick={refetch}>
+                    <IconReload />
+                </ActionIcon>
+            </Flex>
             <Divider />
-            <ScrollArea scrollbarSize={4} scrollbars="y" type="hover" h={cardHeight}>
+            <ScrollArea scrollbarSize={4} scrollbars="y" type="hover" h={cardHeight} pos="relative">
+                <LoadingOverlay
+                    visible={isLoading}
+                    zIndex={1000}
+                    overlayProps={{ radius: "sm", blur: 2 }}
+                    loaderProps={{ color: "red.6" }}
+                />
                 <Grid gutter="md" mt={'md'}>
                     {STAT_ITEMS.map((item) => {
 						const value =

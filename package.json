@@ -25,7 +25,7 @@
 		"make": "electron-forge make",
 		"make-win": "electron-forge make --platform=win32 --arch=x64",
 		"electron": "electron .",
-		"bin": "SHOW_PROGRESS=false npm run build && npm start"
+		"bin": "npm run build && npm start"
 	},
 	"dependencies": {
 		"@mantine/carousel": "^8.3.12",
