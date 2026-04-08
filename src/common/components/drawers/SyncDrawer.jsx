@@ -12,7 +12,7 @@ import {
 } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { IconRefresh, IconCloudUpload, IconCloudDownload } from "@tabler/icons-react";
-import { PLATFORM_SYNC_DATA_MAP, SYNC_DATA } from "@/constants";
+import { DATA_MAP, SYNC_DATA } from "@/constants";
 import { showNotification } from "@components/ShowNotificationComponent";
 import { useSyncPosMutation } from "@services/pos";
 import GlobalDrawer from "../drawers/GlobalDrawer";
@@ -341,7 +341,7 @@ export default function SyncDrawer({
 
 			try {
 				// =============== insert tables one by one so progress displays per-table ================
-				for (const [table, property] of Object.entries(PLATFORM_SYNC_DATA_MAP)) {
+				for (const [table, property] of Object.entries(DATA_MAP)) {
 					const dataList = Array.isArray(response.data.data[property])
 						? response.data.data[property]
 						: [response.data.data[property]];

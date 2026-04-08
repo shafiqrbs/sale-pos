@@ -281,6 +281,29 @@ export default function PaymentSection({
 								>
 									<Flex py={8} gap="sm" justify="space-between" align="center">
 										<Text fz="sm" c={"white"} fw={600}>
+											{t("Pay")}
+										</Text>
+										<FormValidationWrapper
+											errorMessage={t("PaymentAmountRequired")}
+											opened={!!itemsForm.errors.paymentAmount}
+										>
+											<NumberInput
+												hideControls
+												size="sm"
+												placeholder={t("Amount")}
+												thousandSeparator=","
+												leftSection={<IconCurrencyTaka size={14} />}
+												styles={{
+													input: {
+														backgroundColor: "white",
+													},
+												}}
+												{...itemsForm.getInputProps("paymentAmount", { type: "number" })}
+											/>
+										</FormValidationWrapper>
+									</Flex>
+									<Flex py={8} gap="sm" justify="space-between" align="center">
+										<Text fz="sm" c={"white"} fw={600}>
 											{t("Due")}
 										</Text>
 										<NumberInput
@@ -297,25 +320,6 @@ export default function PaymentSection({
 											}}
 										/>
 									</Flex>
-
-									<FormValidationWrapper
-										errorMessage={t("PaymentAmountRequired")}
-										opened={!!itemsForm.errors.paymentAmount}
-									>
-										<NumberInput
-											hideControls
-											size="sm"
-											placeholder={t("Amount")}
-											thousandSeparator=","
-											leftSection={<IconCurrencyTaka size={14} />}
-											styles={{
-												input: {
-													backgroundColor: "white",
-												},
-											}}
-											{...itemsForm.getInputProps("paymentAmount", { type: "number" })}
-										/>
-									</FormValidationWrapper>
 								</Flex>
 							</Grid.Col>
 						</Grid>

@@ -409,20 +409,6 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 							<Grid.Col span={6}>
 								<InputNumberForm
 									form={itemsForm}
-									name="purchase_price"
-									id="purchase_price"
-									label="Total Purchase"
-									nextField="minimum_quantity"
-									placeholder="0.00"
-									step={0.01}
-									disabled={!isProductSelected}
-									tooltip={itemsForm.errors.purchase_price}
-									leftSection={<IconCurrencyTaka size={16} opacity={0.6} />}
-								/>
-							</Grid.Col>
-							<Grid.Col span={6}>
-								<InputNumberForm
-									form={itemsForm}
 									name="minimum_quantity"
 									id="minimum_quantity"
 									label="Min. Quantity"

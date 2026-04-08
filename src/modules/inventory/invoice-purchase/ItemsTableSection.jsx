@@ -142,7 +142,7 @@ export default function ItemsTableSection({
 					},
 					{
 						accessor: "average_price",
-						title: "AVGPP",
+						title: t("AVGPP"),
 						textAlign: "center",
 						width: 90,
 						render: (record) => (

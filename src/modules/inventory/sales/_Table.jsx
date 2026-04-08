@@ -43,17 +43,16 @@ const PER_PAGE = 25;
 
 export default function Table() {
 	const dispatch = useDispatch();
-	const { configData } = useConfigData();
+	const { is_pos } = useConfigData();
 	const { t } = useTranslation();
-	const [ opened, { open, close } ] = useDisclosure(false);
-	useDisclosure(false);
+	const [opened, { open, close }] = useDisclosure(false);
 	const navigate = useNavigate();
-	const [ page, setPage ] = useState(1);
-	const [ selectedRow, setSelectedRow ] = useState(null);
-	const [ loading, setLoading ] = useState(false);
-	const [ salesViewData, setSalesViewData ] = useState(null);
-	const [ deletedSaleIds, setDeletedSaleIds ] = useState(new Set());
-	const [ dataSource, setDataSource ] = useState("offline");
+	const [page, setPage] = useState(1);
+	const [selectedRow, setSelectedRow] = useState(null);
+	const [loading, setLoading] = useState(false);
+	const [salesViewData, setSalesViewData] = useState(null);
+	const [deletedSaleIds, setDeletedSaleIds] = useState(new Set());
+	const [dataSource, setDataSource] = useState("offline");
 	const { mainAreaHeight, isOnline } = useOutletContext();
 	const { isOnlinePermissionIncludes } = useLoggedInUser();
 	// =============== when offline or user lacks permission, always use offline data ===============
@@ -91,7 +90,7 @@ export default function Table() {
 
 	const handleConfirmDelete = async (record) => {
 		await window.dbAPI.deleteDataFromTable("sales", { id: record.id });
-		setDeletedSaleIds((previousIds) => new Set([ ...previousIds, record.id ]));
+		setDeletedSaleIds((previousIds) => new Set([...previousIds, record.id]));
 		showNotification(`Invoice ${record.invoice} deleted`, "teal");
 	};
 
@@ -211,7 +210,7 @@ export default function Table() {
 						variant="filled"
 						leftSection={<IconPlus size={20} />}
 						onClick={() => {
-							if (configData?.is_pos) {
+							if (is_pos) {
 								navigate(APP_NAVLINKS.BAKERY);
 							} else {
 								navigate(APP_NAVLINKS.SALES_NEW);
@@ -335,7 +334,7 @@ export default function Table() {
 													{/*<Menu.Item
 														onClick={(e) => {
 															e.stopPropagation();
-															if (configData?.is_pos) {
+															if (is_pos) {
 																handleEditInPos(data);
 															} else {
 																navigate(`${APP_NAVLINKS.SALES_EDIT}/${data.id}`);

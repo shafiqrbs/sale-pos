@@ -1312,5 +1312,6 @@
 	"ManualPurchase": "Manual Purchase",
 	"InvoicePurchase": "Invoice Purchase",
 	"Expiry": "Expiry",
-	"SalesQnt": "Sales Qnt"
+	"SalesQnt": "Sales Qnt",
+	"AVGPP": "AVG. PP"
 }
