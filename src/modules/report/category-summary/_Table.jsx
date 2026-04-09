@@ -34,11 +34,8 @@ export default function Table() {
 		},
 	});
 
-	const { data: entities, isLoading } = useGetCategorySummaryQuery({
-		page,
-		offset: PER_PAGE,
-	});
-
+	const { data: entities, isLoading } = useGetCategorySummaryQuery();
+	console.log(entities)
 	return (
 		<Box>
 			<Flex pl="xs" pb={'xs'} gap="sm" justify="space-between" align="center">
@@ -71,22 +68,36 @@ export default function Table() {
 								},
 
 								{
-									accessor: "total",
-									title: t("Amount"),
+									accessor: "opening_balance",
+									title: t("Opening"),
 									textAlign: "right",
-									render: (item) => <>{formatCurrency(item?.total || 0)}</>,
+									render: (item) => <>{formatCurrency(item?.opening_balance || 0)}</>,
+								},
+								{
+									accessor: "receive_amount",
+									title: t("Receive"),
+									textAlign: "right",
+									render: (item) => <>{formatCurrency(item?.receive_amount || 0)}</>,
+								},
+
+								{
+									accessor: "issue_amount",
+									title: t("Issue"),
+									textAlign: "right",
+									render: (item) => <>{formatCurrency(item?.issue_amount || 0)}</>,
+								},
+
+								{
+									accessor: "closing_balance",
+									title: t("Closing"),
+									textAlign: "right",
+									render: (item) => <>{formatCurrency(item?.closing_balance || 0)}</>,
 								},
 
 							]}
 							fetching={isLoading}
-							totalRecords={entities?.total || 0}
-							recordsPerPage={PER_PAGE}
 							loaderSize="xs"
 							loaderColor="grape"
-							page={page}
-							onPageChange={(p) => {
-								setPage(p);
-							}}
 							height={mainAreaHeight-36}
 							scrollAreaProps={{ type: "never" }}
 						/>
