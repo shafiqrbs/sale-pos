@@ -2,31 +2,32 @@ import { apiSlice } from "@services/api.mjs";
 import { APP_APIS } from "@/routes/routes";
 
 export const extendedProductApiSlice = apiSlice.injectEndpoints({
-    endpoints: (builder) => ({
-        getProduct: builder.query({
-            query: (params = {}) => {
-                return {
-                    url: APP_APIS.INVENTORY_PRODUCT,
-                    method: "GET",
-                    params,
-                };
-            },
+	endpoints: (builder) => ({
+		getProduct: builder.query({
+			query: (params = {}) => {
+				return {
+					url: APP_APIS.POS_PRODUCT,
+					method: "GET",
+					params,
+				};
+			},
 
-            providesTags: [ "Product" ]
-        }),
+			providesTags: ["Product"],
+		}),
 
-        addProduct: builder.mutation({
-            query: (body) => {
-                return {
-                    url: APP_APIS.INVENTORY_PRODUCT,
-                    method: "POST",
-                    body,
-                };
-            },
+		addProduct: builder.mutation({
+			query: (body) => {
+				return {
+					url: APP_APIS.INVENTORY_PRODUCT,
+					method: "POST",
+					body,
+				};
+			},
 
-            invalidatesTags: [ "Product" ]
-        }),
-    }),
+			invalidatesTags: ["Product"],
+		}),
+	}),
 });
 
-export const { useGetProductQuery, useLazyGetProductQuery, useAddProductMutation } = extendedProductApiSlice;
+export const { useGetProductQuery, useLazyGetProductQuery, useAddProductMutation } =
+	extendedProductApiSlice;
