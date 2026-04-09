@@ -34,32 +34,18 @@ export default function PaymentSection({
 	const { transactionMode } = useTransactionMode();
 	const { currencySymbol } = useConfigData();
 
-	const { discountAmount, isDiscountPercentage, purchaseNarration, paymentAmount } =
-		itemsForm.values;
+	const { purchaseNarration } = itemsForm.values;
+	const paymentAmount = Number(itemsForm.values.paymentAmount) || 0;
+	const dueAmountValue = Number(itemsForm.values.dueAmount) || 0;
 
-	const vatAmount = 0;
+	const grandTotal = itemsTotal;
 
-	const discountValue = useMemo(() => {
-		if (!discountAmount) {
-			return 0;
-		}
-
-		if (isDiscountPercentage) {
-			return (itemsTotal * discountAmount) / 100;
-		}
-
-		return discountAmount;
-	}, [discountAmount, isDiscountPercentage, itemsTotal]);
-
-	const grandTotal = useMemo(
-		() => Math.max(itemsTotal - discountValue + vatAmount, 0),
-		[itemsTotal, discountValue]
+	const discountValue = useMemo(
+		() => Math.max(grandTotal - paymentAmount - dueAmountValue, 0),
+		[grandTotal, paymentAmount, dueAmountValue]
 	);
 
-	const dueAmount = useMemo(
-		() => Math.max(grandTotal - (paymentAmount || 0), 0),
-		[grandTotal, paymentAmount]
-	);
+	const discountPercent = grandTotal > 0 ? (discountValue / grandTotal) * 100 : 0;
 
 	// =============== group transaction modes by method_name ===============
 	const groupedTransactionMode = useMemo(() => {
@@ -101,12 +87,6 @@ export default function PaymentSection({
 		if (isEditMode) return;
 		itemsForm.setFieldValue("paymentAmount", grandTotal);
 	}, [grandTotal]);
-
-	// =============== toggle between flat and percentage discount; reset amount on switch ===============
-	const toggleDiscountType = () => {
-		itemsForm.setFieldValue("discountAmount", 0);
-		itemsForm.setFieldValue("isDiscountPercentage", !isDiscountPercentage);
-	};
 
 	// =============== render option with image and label ===============
 	const iconProps = { stroke: 1.5, color: "currentColor", opacity: 0.6, size: 18 };
@@ -188,141 +168,72 @@ export default function PaymentSection({
 						</Box>
 					</Card>
 					<Card padding="xs">
-						<Grid columns={24} gutter={{ base: 1 }}>
-							<Grid.Col span={12}>
-								<Flex
-									direction="column"
-									gap={6}
-									className="borderRadiusAll"
-									px="xs"
-									py={6}
-									bg={"#fffbeb85"}
-								>
-									<Flex py={8} justify="space-between" align="center">
-										<Text fz="sm" fw={600}>
-											{t("Discount")}
-										</Text>
-										<Flex align="center" gap={4}>
-											<Flex justify="center" align="center" gap={4}>
-												<Text fz={11}>{currencySymbol}</Text>
-												<Text fz={12} fw={600}>
-													{formatCurrency(discountValue)}
-												</Text>
-											</Flex>
-											<Text fz={10} c="dimmed">
-												{isDiscountPercentage ? t("Percent") : t("Flat")}
-											</Text>
-										</Flex>
-									</Flex>
-									<Flex justify="space-between" align="center" gap={4}>
-										<Box style={{ flex: 1 }}>
-											{isDiscountPercentage ? (
-												<NumberInput
-													value={discountAmount}
-													onChange={(value) =>
-														itemsForm.setFieldValue("discountAmount", parseFloat(value) || 0)
-													}
-													hideControls
-													size="sm"
-													placeholder="0"
-													suffix="%"
-													max={99}
-													min={0}
-													allowNegative={false}
-													decimalScale={2}
-													rightSection={
-														<ActionIcon
-															size={32}
-															bg="violet.5"
-															variant="filled"
-															mr={10}
-															onClick={toggleDiscountType}
-														>
-															<IconPercentage size={16} />
-														</ActionIcon>
-													}
-												/>
-											) : (
-												<NumberInput
-													value={discountAmount}
-													onChange={(value) =>
-														itemsForm.setFieldValue("discountAmount", parseFloat(value) || 0)
-													}
-													hideControls
-													size="sm"
-													placeholder="0"
-													leftSection={<IconCurrencyTaka size={14} />}
-													rightSection={
-														<ActionIcon
-															size={32}
-															bg="red.5"
-															variant="filled"
-															mr={10}
-															onClick={toggleDiscountType}
-														>
-															<IconNumber123 size={16} />
-														</ActionIcon>
-													}
-												/>
-											)}
-										</Box>
-									</Flex>
+						<Flex direction="column" gap={6} className="borderRadiusAll" px="xs" bg={"#fffbeb85"}>
+							<Flex py={8} justify="space-between" align="center">
+								<Text fz="sm" fw={600}>
+									{t("Discount")}
+								</Text>
+								<Flex align="center" gap={4}>
+									<Text fz={11} fw={600}>
+										{discountPercent.toFixed(2)}%
+									</Text>
+									<Text fz={11} c="dimmed">
+										({currencySymbol}
+										{formatCurrency(discountValue)})
+									</Text>
 								</Flex>
-							</Grid.Col>
-							<Grid.Col span={12}>
-								<Flex
-									direction="column"
-									gap={6}
-									bg="var(--theme-primary-card-color)"
-									color={"white"}
-									className="borderRadiusAll"
-									px="xs"
-									py={6}
+							</Flex>
+						</Flex>
+						<Flex
+							gap={16}
+							bg="var(--theme-primary-card-color)"
+							color={"white"}
+							className="borderRadiusAll"
+							px="xs"
+							py={6}
+						>
+							<Flex py={8} gap="xs" justify="space-between" align="center">
+								<Text fz="sm" c={"white"} fw={600}>
+									{t("Pay")}
+								</Text>
+								<FormValidationWrapper
+									errorMessage={t("PaymentAmountRequired")}
+									opened={!!itemsForm.errors.paymentAmount}
 								>
-									<Flex py={8} gap="sm" justify="space-between" align="center">
-										<Text fz="sm" c={"white"} fw={600}>
-											{t("Pay")}
-										</Text>
-										<FormValidationWrapper
-											errorMessage={t("PaymentAmountRequired")}
-											opened={!!itemsForm.errors.paymentAmount}
-										>
-											<NumberInput
-												hideControls
-												size="sm"
-												placeholder={t("Amount")}
-												thousandSeparator=","
-												leftSection={<IconCurrencyTaka size={14} />}
-												styles={{
-													input: {
-														backgroundColor: "white",
-													},
-												}}
-												{...itemsForm.getInputProps("paymentAmount", { type: "number" })}
-											/>
-										</FormValidationWrapper>
-									</Flex>
-									<Flex py={8} gap="sm" justify="space-between" align="center">
-										<Text fz="sm" c={"white"} fw={600}>
-											{t("Due")}
-										</Text>
-										<NumberInput
-											hideControls
-											size="sm"
-											placeholder={t("Due")}
-											thousandSeparator=","
-											leftSection={<IconCurrencyTaka size={14} />}
-											value={dueAmount}
-											styles={{
-												input: {
-													backgroundColor: "white",
-												},
-											}}
-										/>
-									</Flex>
-								</Flex>
-							</Grid.Col>
-						</Grid>
+									<NumberInput
+										hideControls
+										size="sm"
+										placeholder={t("Amount")}
+										thousandSeparator=","
+										leftSection={<IconCurrencyTaka size={14} />}
+										styles={{
+											input: {
+												backgroundColor: "white",
+											},
+										}}
+										{...itemsForm.getInputProps("paymentAmount", { type: "number" })}
+									/>
+								</FormValidationWrapper>
+							</Flex>
+							<Flex py={8} gap="xs" justify="space-between" align="center">
+								<Text fz="sm" c={"white"} fw={600}>
+									{t("Due")}
+								</Text>
+								<NumberInput
+									hideControls
+									size="sm"
+									placeholder={t("Due")}
+									thousandSeparator=","
+									leftSection={<IconCurrencyTaka size={14} />}
+									styles={{
+										input: {
+											backgroundColor: "white",
+										},
+									}}
+									{...itemsForm.getInputProps("dueAmount", { type: "number" })}
+								/>
+							</Flex>
+						</Flex>
 					</Card>
 				</SimpleGrid>
 				<Button.Group mt="xs">

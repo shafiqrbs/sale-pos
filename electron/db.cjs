@@ -317,6 +317,7 @@ db.prepare(
 		discount REAL,
 		discount_calculation REAL,
 		discount_type TEXT,
+		due REAL DEFAULT 0,
 		approved_by_id INTEGER,
 		vendor_id INTEGER,
 		vendor_name TEXT,

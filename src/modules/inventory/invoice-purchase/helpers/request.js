@@ -11,6 +11,7 @@ const vendorOverviewInitialValues = {
 	discountAmount: 0,
 	isDiscountPercentage: false,
 	paymentAmount: 0,
+	dueAmount: 0,
 };
 
 export const vendorOverviewRequest = (t) => {

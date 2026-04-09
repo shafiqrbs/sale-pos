@@ -161,13 +161,10 @@ export default function EditIndex() {
 			0
 		);
 
-		const discountValue = formValues.isDiscountPercentage
-			? (subTotal * (Number(formValues.discountAmount) || 0)) / 100
-			: Number(formValues.discountAmount) || 0;
-
-		const vat = 0;
-		const grandTotal = Math.max(subTotal - discountValue + vat, 0);
-		const fullAmount = Number(formValues.paymentAmount) || 0;
+		const paymentAmount = Number(formValues.paymentAmount) || 0;
+		const dueAmount = Number(formValues.dueAmount) || 0;
+		const discountValue = Math.max(subTotal - paymentAmount - dueAmount, 0);
+		const grandTotal = subTotal;
 
 		// =============== get vendor info from local vendors table ===============
 		let vendorName = formValues.vendorName ?? "";
@@ -203,10 +200,11 @@ export default function EditIndex() {
 			invoice: purchase.invoice,
 			sub_total: subTotal,
 			total: Math.round(grandTotal),
-			payment: fullAmount,
-			discount: Number(formValues.discountAmount) || 0,
+			payment: paymentAmount,
+			due: dueAmount,
+			discount: discountValue,
 			discount_calculation: discountValue,
-			discount_type: formValues.isDiscountPercentage ? "Percentage" : "Flat",
+			discount_type: "Flat",
 			approved_by_id: user?.id ?? null,
 			vendor_id: formValues.vendor_id ? Number(formValues.vendor_id) : null,
 			vendor_name: vendorName,

@@ -82,12 +82,10 @@ export default function NewIndex() {
 			0
 		);
 
-		const discountValue = formValues.isDiscountPercentage
-			? (subTotal * (Number(formValues.discountAmount) || 0)) / 100
-			: Number(formValues.discountAmount) || 0;
-
-		const vat = 0;
-		const total = Math.max(subTotal - discountValue + vat, 0);
+		const paymentAmount = Number(formValues.paymentAmount) || 0;
+		const dueAmount = Number(formValues.dueAmount) || 0;
+		const discountValue = Math.max(subTotal - paymentAmount - dueAmount, 0);
+		const total = subTotal;
 
 		// =============== get vendor info from local vendors table ===============
 		let vendorName = formValues.vendorName ?? "";
@@ -118,16 +116,15 @@ export default function NewIndex() {
 			sales_quantity: Number(item.sales_quantity) || 0,
 		}));
 
-		const purchaseDiscountTypeLabel = formValues.isDiscountPercentage ? "Percentage" : "Flat";
-
 		const localPurchaseRecord = {
 			invoice: generateInvoiceId(),
 			sub_total: subTotal,
 			total: Math.round(total),
-			payment: Number(formValues.paymentAmount) || 0,
-			discount: Number(formValues.discountAmount) || 0,
+			payment: paymentAmount,
+			due: dueAmount,
+			discount: discountValue,
 			discount_calculation: discountValue,
-			discount_type: purchaseDiscountTypeLabel,
+			discount_type: "Flat",
 			approved_by_id: user?.id ?? null,
 			vendor_id: formValues.vendor_id ? Number(formValues.vendor_id) : null,
 			vendor_name: vendorName,
