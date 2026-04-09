@@ -11,8 +11,13 @@ export const apiSlice = createApi({
 
 		prepareHeaders: async (headers) => {
 			headers.set("Accept", "application/json");
-			headers.set("Content-Type", "application/json");
 			headers.set("X-Api-Key", API_KEY);
+
+			if (headers.has("X-Multipart-Form")) {
+				headers.delete("X-Multipart-Form");
+			} else {
+				headers.set("Content-Type", "application/json");
+			}
 
 			try {
 				const user = await window.dbAPI.getDataFromTable("users");

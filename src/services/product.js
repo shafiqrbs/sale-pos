@@ -92,6 +92,26 @@ export const extendedProductApiSlice = apiSlice.injectEndpoints({
 
 			invalidatesTags: ["Product"],
 		}),
+
+		uploadProductGalleryImage: builder.mutation({
+			query: (formData) => ({
+				url: `${APP_APIS.INVENTORY_PRODUCT}/gallery`,
+				method: "POST",
+				body: formData,
+				headers: { "X-Multipart-Form": "1" },
+			}),
+			invalidatesTags: ["Product"],
+		}),
+
+		deleteProductGalleryImage: builder.mutation({
+			query: (formData) => ({
+				url: `${APP_APIS.INVENTORY_PRODUCT}/gallery/delete`,
+				method: "POST",
+				body: formData,
+				headers: { "X-Multipart-Form": "1" },
+			}),
+			invalidatesTags: ["Product"],
+		}),
 	}),
 });
 
@@ -105,4 +125,6 @@ export const {
 	useLazyGetProductSkusQuery,
 	useAddProductSkuMutation,
 	useInlineUpdateProductSkuMutation,
+	useUploadProductGalleryImageMutation,
+	useDeleteProductGalleryImageMutation,
 } = extendedProductApiSlice;

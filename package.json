@@ -33,6 +33,7 @@
 		"@mantine/charts": "^8.3.12",
 		"@mantine/core": "^8.3.12",
 		"@mantine/dates": "^8.3.12",
+		"@mantine/dropzone": "^8.3.12",
 		"@mantine/form": "^8.3.12",
 		"@mantine/hooks": "^8.3.12",
 		"@mantine/modals": "^8.3.12",

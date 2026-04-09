@@ -6,6 +6,7 @@ import { IconBox, IconEditCircle, IconPhoto } from "@tabler/icons-react";
 import { useGetProductByIdQuery } from "@services/product";
 import UpdateProductTab from "./form/UpdateProductTab.jsx";
 import SkuManagementTab from "./form/SkuManagementTab.jsx";
+import ImageGallery from "./form/ImageGallery.jsx";
 import useMainAreaHeight from "@hooks/useMainAreaHeight.js";
 
 const TABS = {
@@ -17,7 +18,7 @@ const TABS = {
 export default function EditIndex() {
 	const { t } = useTranslation();
 	const { id: productId } = useParams();
-	const [activeTab, setActiveTab] = useState(TABS.UPDATE);
+	const [ activeTab, setActiveTab ] = useState(TABS.UPDATE);
 	const { mainAreaHeight } = useMainAreaHeight();
 
 	const {
@@ -73,11 +74,11 @@ export default function EditIndex() {
 				<Grid.Col span={9}>
 					<Box bg="white" className="borderRadiusAll" p="md" mih={400}>
 						{isLoading || isFetching ? (
-							<Center h={300}>
+							<Center h={mainAreaHeight - 36}>
 								<Loader size="sm" />
 							</Center>
 						) : !product ? (
-							<Center h={300}>
+							<Center h={mainAreaHeight - 36}>
 								<Text c="dimmed">{t("NothingFound")}</Text>
 							</Center>
 						) : (
@@ -89,9 +90,7 @@ export default function EditIndex() {
 									<SkuManagementTab product={product} productId={productId} />
 								)}
 								{activeTab === TABS.GALLERY && (
-									<Center h={200}>
-										<Text c="dimmed">{t("ProductGallery")}</Text>
-									</Center>
+									<ImageGallery product={product} productId={productId} />
 								)}
 							</>
 						)}
