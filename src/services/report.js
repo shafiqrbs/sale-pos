@@ -19,7 +19,9 @@ export const extendedReportApiSlice = apiSlice.injectEndpoints({
 			query: (params) => {
 				return {
 					url: APP_APIS.CATEGORY_SUMMARY,
-					method: "GET"
+					method: "GET",
+					params,
+
 				};
 			},
 			providesTags: [ "Reports" ],

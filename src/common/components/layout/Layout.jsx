@@ -33,6 +33,7 @@ export default function Layout() {
 		defaultValue: "right",
 	});
 
+
 	useEffect(() => {
 		const initializeData = async () => {
 			try {
@@ -116,7 +117,7 @@ export default function Layout() {
 				<Box
 					pos="fixed"
 					{...(drawerPosition === "right" ? { right: 0 } : { left: 0 })}
-					top="40%"
+					top="50%"
 					style={{ transform: "translateY(-50%)", zIndex: 1000 }}
 				>
 					<Tooltip

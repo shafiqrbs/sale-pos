@@ -22,6 +22,7 @@ import { APP_NAVLINKS } from "@/routes/routes";
 import useLoggedInUser from "@hooks/useLoggedInUser";
 import classes from '@assets/css/Accrodion.module.css';
 import useConfigData from "@hooks/useConfigData";
+import {useEffect, useState} from "react";
 
 
 const DRAWER_MENU = [
@@ -96,6 +97,9 @@ export default function OptionsDrawer({ opened, onClose, drawerPosition, setDraw
 		onClose();
 	};
 
+
+
+
 	return (
 		<GlobalDrawer
 			opened={opened}
@@ -106,7 +110,7 @@ export default function OptionsDrawer({ opened, onClose, drawerPosition, setDraw
 		>
 			<Divider mb="xs" />
 			<Group justify="space-between" align="center" mb="xs">
-				<Text size="sm" c="dimmed">Drawer position</Text>
+				<Text size="sm" c="dimmed">Menu Position</Text>
 				<SegmentedControl
 					size="sm"
 					value={drawerPosition}

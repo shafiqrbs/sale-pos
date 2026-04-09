@@ -19,6 +19,7 @@ export default function KeywordSearch({
 	showDatePicker = false,
 	showStartEndDate = false,
 	showAdvancedFilter = true,
+	showKeywordSearch = true,
 	showReset = true,
 	className = "keyword-search-box",
 	handleCSVDownload = () => {},
@@ -164,6 +165,7 @@ export default function KeywordSearch({
 					/>
 				</>
 			)}
+			{showKeywordSearch === true &&(
 			<TextInput
 				placeholder={placeholder}
 				tooltip={tooltip}
@@ -184,6 +186,7 @@ export default function KeywordSearch({
 					}
 				}}
 			/>
+			)}
 			<Flex gap="3xs" align="center">
 				<Button
 					c="var(--theme-primary-color-6)"

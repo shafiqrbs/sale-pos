@@ -39,7 +39,6 @@ export default function Login() {
 	const [activated, setActivated] = useState({ is_activated: false });
 
 	const [height, setHeight] = useState(window.innerHeight);
-
 	useEffect(() => {
 		const handleResize = () => setHeight(window.innerHeight);
 		window.addEventListener("resize", handleResize);

@@ -34,8 +34,6 @@ export default function Table() {
 		page,
 		offset: PER_PAGE,
 	});
-
-	// console.log(entities?.data)
 	return (
 		<Box>
 			<Flex mb="xs" gap="sm" justify="space-between" align="center">

@@ -67,7 +67,7 @@ export const APP_APIS = {
 	PURCHASE: "/inventory/purchase",
 	PURCHASE_ITEM: "/inventory/purchase-item",
 	CHANGE_PASSWORD: "/core/change-password",
-	INVOICE_PURCHASE: "/inventory/invoice-purchase",
+	INVOICE_PURCHASE: "/inventory/purchase",
 	PURCHASE_CONFIG: "/domain/config/inventory-purchase",
 	DAILY_SUMMARY: "/inventory/report/daily-summary",
 	CATEGORY_SUMMARY: "/inventory/report/category-summary",

@@ -38,7 +38,7 @@ const salesItemFormInitialValues = {
 	barcode: "",
 	productId: "",
 	salesPrice: "",
-	quantity: "",
+	quantity: 1,
 	unit: "",
 	discount: 0,
 };
