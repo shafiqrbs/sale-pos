@@ -28,8 +28,8 @@ import useSyncProducts from "@hooks/useSyncProducts.js";
 import useConfigData from "@hooks/useConfigData.js";
 import { formatCurrency } from "@utils/index.js";
 import KeywordSearch from "@components/KeywordSearch";
-import { APP_NAVLINKS } from "@/routes/routes";
-import { useNavigate, useOutletContext } from "react-router";
+import { useOutletContext } from "react-router";
+import AddProductDrawer from "@components/drawers/AddProductDrawer.jsx";
 import useLoggedInUser from "@hooks/useLoggedInUser.js";
 import { useGetProductQuery } from "@services/product";
 import { useLazyGetItemsForDamageQuery } from "@services/purchase";
@@ -38,7 +38,6 @@ import DamageProcessModal from "@components/modals/DamageProcessModal";
 const PER_PAGE = 25;
 
 export default function Table() {
-	const navigate = useNavigate();
 	const { t } = useTranslation();
 	const { isOnline } = useOutletContext();
 	const { isOnlinePermissionIncludes } = useLoggedInUser();
@@ -50,6 +49,8 @@ export default function Table() {
 	const [offlineSearchTerm, setOfflineSearchTerm] = useState("");
 
 	const effectiveDataSource = isOnline && isOnlinePermissionIncludes ? dataSource : "offline";
+
+	const [productDrawer, { open: openProductDrawer, close: closeProductDrawer }] = useDisclosure(false);
 
 	// =============== damage process ================
 	const [damageOpened, { open: openDamage, close: closeDamage }] = useDisclosure(false);
@@ -232,7 +233,8 @@ export default function Table() {
 						color="red"
 						variant="filled"
 						leftSection={<IconPlus size={20} />}
-						onClick={() => navigate(APP_NAVLINKS.SALES_NEW)}
+						id="stock-new-product-btn"
+					onClick={openProductDrawer}
 					>
 						{t("NewProduct")}
 					</Button>
@@ -375,6 +377,13 @@ export default function Table() {
 					scrollAreaProps={{ type: "never" }}
 				/>
 			</Box>
+			<AddProductDrawer
+				productDrawer={productDrawer}
+				closeProductDrawer={closeProductDrawer}
+				setStockProductRestore={(val) => val && refetchLocal()}
+				focusField="stock-new-product-btn"
+				fieldPrefix="stock_"
+			/>
 			<DamageProcessModal
 				opened={damageOpened}
 				onClose={closeDamage}
