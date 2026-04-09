@@ -11,6 +11,7 @@ import PurchaseItemIndex from "@modules/inventory/purchase-item";
 import PurchaseNewIndex from "@modules/inventory/purchase/NewIndex";
 import PurchaseEditIndex from "@modules/inventory/purchase/EditIndex";
 import StockIndex from "@modules/stock";
+import StockEditIndex from "@modules/stock/EditIndex";
 import DashboardIndex from "@modules/dashboard";
 import CustomersIndex from "@modules/core/customers";
 import ConfigIndex from "@modules/inventory/config";
@@ -82,7 +83,10 @@ export default function AppRoutes() {
                     <Route path="sales-invoice" element={<SalesInvoice />} /> */}
 					{/* <Route path="purchase/edit/:id" element={<PurchaseEdit />} /> */}
 					{/* <Route path="purchase-invoice" element={<PurchaseInvoice />} /> */}
-					<Route path="stock" element={<StockIndex />} />
+					<Route path="stock">
+						<Route index element={<StockIndex />} />
+						<Route path="edit/:id" element={<StockEditIndex />} />
+					</Route>
 				</Route>
 				<Route path="dashboard" element={<DashboardIndex />} />
 				<Route path="pos">

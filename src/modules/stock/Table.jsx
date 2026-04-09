@@ -19,6 +19,7 @@ import {
 	IconGlobe,
 	IconGlobeOff,
 	IconCloudDown,
+	IconEdit,
 } from "@tabler/icons-react";
 import { DataTable } from "mantine-datatable";
 import tableCss from "@assets/css/Table.module.css";
@@ -28,7 +29,8 @@ import useSyncProducts from "@hooks/useSyncProducts.js";
 import useConfigData from "@hooks/useConfigData.js";
 import { formatCurrency } from "@utils/index.js";
 import KeywordSearch from "@components/KeywordSearch";
-import { useOutletContext } from "react-router";
+import { useNavigate, useOutletContext } from "react-router";
+import { APP_NAVLINKS } from "@/routes/routes";
 import AddProductDrawer from "@components/drawers/AddProductDrawer.jsx";
 import useLoggedInUser from "@hooks/useLoggedInUser.js";
 import { useGetProductQuery } from "@services/product";
@@ -39,6 +41,7 @@ const PER_PAGE = 25;
 
 export default function Table() {
 	const { t } = useTranslation();
+	const navigate = useNavigate();
 	const { isOnline } = useOutletContext();
 	const { isOnlinePermissionIncludes } = useLoggedInUser();
 	const { mainAreaHeight } = useMainAreaHeight();
@@ -50,7 +53,8 @@ export default function Table() {
 
 	const effectiveDataSource = isOnline && isOnlinePermissionIncludes ? dataSource : "offline";
 
-	const [productDrawer, { open: openProductDrawer, close: closeProductDrawer }] = useDisclosure(false);
+	const [productDrawer, { open: openProductDrawer, close: closeProductDrawer }] =
+		useDisclosure(false);
 
 	// =============== damage process ================
 	const [damageOpened, { open: openDamage, close: closeDamage }] = useDisclosure(false);
@@ -70,9 +74,7 @@ export default function Table() {
 
 	// =============== declarative local product list — auto-fetches on param change ================
 	const offlineTerm = offlineSearchTerm.trim();
-	const offlineSearchConditions = offlineTerm
-		? { like: { display_name: offlineTerm } }
-		: undefined;
+	const offlineSearchConditions = offlineTerm ? { like: { display_name: offlineTerm } } : undefined;
 
 	const {
 		products,
@@ -143,6 +145,11 @@ export default function Table() {
 		refetchLocal();
 	};
 
+	const handleEdit = (record) => {
+		if (!record?.id) return;
+		navigate(`${APP_NAVLINKS.STOCK_EDIT}/${record.id}`);
+	};
+
 	// =============== derive active table data based on current data source ================
 	const tableRecords =
 		effectiveDataSource === "online" ? (onlineProductsResponse?.data ?? []) : products;
@@ -151,7 +158,9 @@ export default function Table() {
 		effectiveDataSource === "online" ? (onlineProductsResponse?.total ?? 0) : totalCount;
 
 	const isTableLoading =
-		effectiveDataSource === "online" ? isOnlineLoading || isOnlineFetching || isSyncing : loading || isSyncing;
+		effectiveDataSource === "online"
+			? isOnlineLoading || isOnlineFetching || isSyncing
+			: loading || isSyncing;
 
 	const height = mainAreaHeight - 60;
 
@@ -234,7 +243,7 @@ export default function Table() {
 						variant="filled"
 						leftSection={<IconPlus size={20} />}
 						id="stock-new-product-btn"
-					onClick={openProductDrawer}
+						onClick={openProductDrawer}
 					>
 						{t("NewProduct")}
 					</Button>
@@ -320,9 +329,6 @@ export default function Table() {
 										textAlign: "right",
 										width: 80,
 										render: (record) => {
-											const quantity = Number(record.quantity);
-											if (!quantity || quantity <= 0) return null;
-
 											return (
 												<Group gap={4} justify="right" wrap="nowrap">
 													<Menu
@@ -348,15 +354,27 @@ export default function Table() {
 															<Menu.Item
 																onClick={(event) => {
 																	event.stopPropagation();
-																	handleDamage(record);
+																	handleEdit(record);
 																}}
-																leftSection={
-																	<IconTruckReturn height={"18"} width={"18"} stroke={1.5} />
-																}
-																color="red"
+																leftSection={<IconEdit height={"18"} width={"18"} stroke={1.5} />}
+																color="yellow"
 															>
-																{t("Damage")}
+																{t("Edit")}
 															</Menu.Item>
+															{record.quantity > 0 && (
+																<Menu.Item
+																	onClick={(event) => {
+																		event.stopPropagation();
+																		handleDamage(record);
+																	}}
+																	leftSection={
+																		<IconTruckReturn height={"18"} width={"18"} stroke={1.5} />
+																	}
+																	color="red"
+																>
+																	{t("Damage")}
+																</Menu.Item>
+															)}
 														</Menu.Dropdown>
 													</Menu>
 												</Group>

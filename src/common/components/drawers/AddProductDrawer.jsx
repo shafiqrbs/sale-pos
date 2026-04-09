@@ -91,19 +91,24 @@ export default function AddProductDrawer({
 			onCancel: () => console.log("Cancel"),
 			onConfirm: async () => {
 				try {
-					await addProduct(values).unwrap();
+					const response = await addProduct(values).unwrap();
+					if (!response?.status === 200 && response?.message === "success") {
+						showNotification(response?.message || t("CreateFailed"), "red");
+						return;
+					}
+
 					showNotification(t("CreateSuccessfully"), "teal");
+
+					setTimeout(() => {
+						productAddedForm.reset();
+						closeProductDrawer();
+						setStockProductRestore(true);
+						document.getElementById(focusField).focus();
+					}, 700);
 				} catch (error) {
 					console.error(error);
-					showNotification(error.data?.message, "red");
+					showNotification(error.data?.message || t("CreateFailed"), "red");
 				}
-
-				setTimeout(() => {
-					productAddedForm.reset();
-					closeProductDrawer();
-					setStockProductRestore(true);
-					document.getElementById(focusField).focus();
-				}, 700);
 			},
 		});
 	};
@@ -194,7 +199,7 @@ export default function AddProductDrawer({
 								/>
 							</Box>
 							<Box mt="xs">
-								<InputForm
+								<InputNumberForm
 									tooltip={t("ExpiryDurationValidateMessage")}
 									label={t("ExpiryDuration")}
 									placeholder={t("ExpiryDuration")}
