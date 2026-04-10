@@ -130,7 +130,7 @@ export default function CustomerDrawer({ opened, onClose, form, customersDropdow
                             address: savedCustomer.address || '',
                         });
                     }
-                    showNotification(t('CustomerSavedSuccessfully') || 'Customer saved successfully', 'green', '', '', true, 1000, true);
+                 //   showNotification(t('CustomerSavedSuccessfully') || 'Customer saved successfully', 'green', '', '', true, 50, true);
                     onClose();
                 }
             } catch (error) {

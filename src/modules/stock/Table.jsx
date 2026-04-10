@@ -162,7 +162,7 @@ export default function Table() {
 			? isOnlineLoading || isOnlineFetching || isSyncing
 			: loading || isSyncing;
 
-	const height = mainAreaHeight - 60;
+	const height = mainAreaHeight - 56;
 
 	return (
 		<Box>
@@ -236,9 +236,10 @@ export default function Table() {
 							<IconCloudDown size={16} stroke={1.5} />
 						</ActionIcon>
 					</Tooltip>
+					{isOnline && isOnlinePermissionIncludes && (
 					<Button
 						w={170}
-						size="md"
+						size="sm"
 						color="red"
 						variant="filled"
 						leftSection={<IconPlus size={20} />}
@@ -247,6 +248,7 @@ export default function Table() {
 					>
 						{t("NewProduct")}
 					</Button>
+					)}
 				</Group>
 			</Flex>
 			<Box className="border-all-radius border-top-none overflow-hidden">
@@ -350,6 +352,7 @@ export default function Table() {
 															<IconDotsVertical height={"18"} width={"18"} stroke={1.5} />
 														</ActionIcon>
 													</Menu.Target>
+													{!record.vendor_id && (
 													<Menu.Dropdown w="160">
 														<Menu.Item
 															onClick={(event) => {
@@ -376,6 +379,7 @@ export default function Table() {
 															</Menu.Item>
 														)}
 													</Menu.Dropdown>
+													)}
 												</Menu>
 											</Group>
 										);

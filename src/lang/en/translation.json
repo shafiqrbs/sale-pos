@@ -1333,5 +1333,8 @@
 	"Expiry": "Expiry",
 	"SalesQnt": "Sales Qnt",
 	"AVGPP": "AVG. PP",
-	"CategorySummary": "Category Summary"
+	"CategorySummary": "Category Summary",
+	"EnterCustomerName": "Enter customer name",
+	"EnterMobileNumber": "Enter mobile no",
+	"CustomerSavedSuccessfully": "Customer saved successfully"
 }
