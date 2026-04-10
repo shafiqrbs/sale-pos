@@ -2,16 +2,18 @@ import { useState } from "react";
 import { Box, Grid, Stack, Text, Group, Loader, Center } from "@mantine/core";
 import { useParams } from "react-router";
 import { useTranslation } from "react-i18next";
-import { IconBox, IconEditCircle, IconPhoto } from "@tabler/icons-react";
+import { IconBox, IconEditCircle, IconPhoto, IconRulerMeasure } from "@tabler/icons-react";
 import { useGetProductByIdQuery } from "@services/product";
 import UpdateProductTab from "./form/UpdateProductTab.jsx";
 import SkuManagementTab from "./form/SkuManagementTab.jsx";
 import ImageGallery from "./form/ImageGallery.jsx";
+import ProductMeasurementTab from "./form/ProductMeasurementTab.jsx";
 import useMainAreaHeight from "@hooks/useMainAreaHeight.js";
 
 const TABS = {
 	UPDATE: "update",
 	SKU: "sku",
+	MEASUREMENT: "measurement",
 	GALLERY: "gallery",
 };
 
@@ -32,6 +34,7 @@ export default function EditIndex() {
 	const navItems = [
 		{ key: TABS.UPDATE, label: t("UpdateProduct"), icon: IconEditCircle },
 		{ key: TABS.SKU, label: t("SkuManagement"), icon: IconBox },
+		{ key: TABS.MEASUREMENT, label: t("ProductMeasurement"), icon: IconRulerMeasure },
 		{ key: TABS.GALLERY, label: t("ProductGallery"), icon: IconPhoto },
 	];
 
@@ -88,6 +91,9 @@ export default function EditIndex() {
 								)}
 								{activeTab === TABS.SKU && (
 									<SkuManagementTab product={product} productId={productId} />
+								)}
+								{activeTab === TABS.MEASUREMENT && (
+									<ProductMeasurementTab product={product} productId={productId} />
 								)}
 								{activeTab === TABS.GALLERY && (
 									<ImageGallery product={product} productId={productId} />

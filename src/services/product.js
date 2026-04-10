@@ -112,6 +112,48 @@ export const extendedProductApiSlice = apiSlice.injectEndpoints({
 			}),
 			invalidatesTags: ["Product"],
 		}),
+
+		getProductMeasurements: builder.query({
+			query: (productId) => ({
+				url: `${APP_APIS.INVENTORY_PRODUCT}/measurement/${productId}`,
+				method: "GET",
+			}),
+			providesTags: (result, error, productId) => [
+				{ type: "Product", id: `MEASUREMENT-LIST-${productId}` },
+			],
+		}),
+
+		addProductMeasurement: builder.mutation({
+			query: (body) => ({
+				url: `${APP_APIS.INVENTORY_PRODUCT}/measurement`,
+				method: "POST",
+				body,
+			}),
+			invalidatesTags: (result, error, body) => [
+				{ type: "Product", id: `MEASUREMENT-LIST-${body?.product_id}` },
+			],
+		}),
+
+		deleteProductMeasurement: builder.mutation({
+			query: ({ measurementId }) => ({
+				url: `${APP_APIS.INVENTORY_PRODUCT}/measurement/${measurementId}`,
+				method: "DELETE",
+			}),
+			invalidatesTags: (result, error, { productId }) => [
+				{ type: "Product", id: `MEASUREMENT-LIST-${productId}` },
+			],
+		}),
+
+		updateMeasurementSalesPurchase: builder.mutation({
+			query: ({ productId, body }) => ({
+				url: `${APP_APIS.INVENTORY_PRODUCT}/measurement/sales-purchase/${productId}`,
+				method: "POST",
+				body,
+			}),
+			invalidatesTags: (result, error, { productId }) => [
+				{ type: "Product", id: `MEASUREMENT-LIST-${productId}` },
+			],
+		}),
 	}),
 });
 
@@ -127,4 +169,8 @@ export const {
 	useInlineUpdateProductSkuMutation,
 	useUploadProductGalleryImageMutation,
 	useDeleteProductGalleryImageMutation,
+	useGetProductMeasurementsQuery,
+	useAddProductMeasurementMutation,
+	useDeleteProductMeasurementMutation,
+	useUpdateMeasurementSalesPurchaseMutation,
 } = extendedProductApiSlice;

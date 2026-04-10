@@ -93,7 +93,9 @@ function GalleryDropzone({ productId, imageType, currentImagePath, label, height
                     height: "100%",
                     display: "flex",
                     alignItems: "center",
+                    borderRadius: 8,
                     justifyContent: "center",
+                    border: "1px dashed var(--mantine-color-gray-3)",
                 },
             }}
         >
