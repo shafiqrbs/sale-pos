@@ -79,7 +79,7 @@ function TransactionModesSkeleton({ cardHeight }) {
 }
 
 // Right middle: Top Selling Products (table)
-function TopSellingProductsSkeleton({ cardHeight }) {
+function TopSellingProductsSkeleton() {
 	return (
 		<Paper shadow="sm" p="lg" radius="md" withBorder>
 			<Skeleton height={22} width={200} radius="sm" mb="md" />

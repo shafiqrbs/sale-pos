@@ -1,13 +1,5 @@
-import React from 'react'
 import { Box, Grid, Skeleton, ScrollArea, Group, Stack, Card } from '@mantine/core'
 import { useOutletContext } from 'react-router'
-
-// =============== skeleton for tables component ================
-const TablesSkeleton = () => (
-    <Box mb="xs">
-        <Skeleton height={40} radius="md" />
-    </Box>
-)
 
 // =============== skeleton for categories sidebar ================
 const CategoriesSkeleton = ({ mainAreaHeight }) => (
@@ -17,8 +9,7 @@ const CategoriesSkeleton = ({ mainAreaHeight }) => (
                 key={index}
                 height={40}
                 radius={4}
-                mt="xs"
-                mb="xs"
+                my="xs"
             />
         ))}
     </ScrollArea>
@@ -65,7 +56,7 @@ const ProductListSkeleton = ({ mainAreaHeight }) => (
                 <Box bg="gray.8" px="les" pt="es" pb="les" mb="les" bdrs={6}>
                     <ProductFiltersSkeleton />
                 </Box>
-                <Box bg="gray.8" p="4xs" bdrs={6}>
+                <Box bg="gray.3" p="4xs" bdrs={6}>
                     <ScrollArea h={mainAreaHeight - 60} type="never" scrollbars="y">
                         <ProductGridSkeleton />
                     </ScrollArea>
@@ -217,21 +208,6 @@ const TransactionFormSkeleton = () => (
             </Grid.Col>
         </Grid>
     </Box>
-)
-
-// =============== skeleton for action buttons ================
-const ActionButtonsSkeleton = () => (
-    <Grid columns={12} gutter={{ base: 2 }}>
-        <Grid.Col span={4}>
-            <Skeleton height={48} radius="sm" />
-        </Grid.Col>
-        <Grid.Col span={4}>
-            <Skeleton height={48} radius="sm" />
-        </Grid.Col>
-        <Grid.Col span={4}>
-            <Skeleton height={48} radius="sm" />
-        </Grid.Col>
-    </Grid>
 )
 
 // =============== skeleton for checkout section ================
