@@ -35,3 +35,22 @@
         }
     }
 }
+
+.statusBackground {
+	background-color: var(--mantine-color-gray-2) !important;
+}
+
+.receiveBackground {
+	background-color: var(--mantine-color-blue-1) !important;
+	font-weight: bold;
+}
+
+.balanceBackground {
+	background-color: var(--mantine-color-green-1) !important;
+	font-weight: bold;
+}
+
+.issueBackground {
+	background-color: var(--mantine-color-orange-1) !important;
+	font-weight: bold;
+}

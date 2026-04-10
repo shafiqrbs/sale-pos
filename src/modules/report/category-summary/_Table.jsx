@@ -80,16 +80,51 @@ export default function Table() {
 									render: (item) => <>{formatCurrency(item?.opening_balance || 0)}</>,
 								},
 								{
+									accessor: "purchase",
+									title: t("Purchase"),
+									textAlign: "right",
+									render: (item) => <>{formatCurrency(item?.purchase || 0)}</>,
+								},
+								{
+									accessor: "sales_return",
+									title: t("SalesReturn"),
+									textAlign: "right",
+									render: (item) => <>{formatCurrency(item?.sales_return || 0)}</>,
+								},
+								{
 									accessor: "receive_amount",
 									title: t("Receive"),
 									textAlign: "right",
 									render: (item) => <>{formatCurrency(item?.receive_amount || 0)}</>,
+									cellsClassName: tableCss.receiveBackground,
+								},
+
+								{
+									accessor: "sales",
+									title: t("Sales"),
+									textAlign: "right",
+									render: (item) => <>{formatCurrency(item?.sales || 0)}</>,
+								},
+
+								{
+									accessor: "purchase_return",
+									title: t("PurchaseReturn"),
+									textAlign: "right",
+									render: (item) => <>{formatCurrency(item?.purchase_return || 0)}</>,
+								},
+
+								{
+									accessor: "damage",
+									title: t("Damage"),
+									textAlign: "right",
+									render: (item) => <>{formatCurrency(item?.damage || 0)}</>,
 								},
 
 								{
 									accessor: "issue_amount",
 									title: t("Issue"),
 									textAlign: "right",
+									cellsClassName: tableCss.issueBackground,
 									render: (item) => <>{formatCurrency(item?.issue_amount || 0)}</>,
 								},
 
@@ -97,6 +132,7 @@ export default function Table() {
 									accessor: "closing_balance",
 									title: t("Closing"),
 									textAlign: "right",
+									cellsClassName: tableCss.balanceBackground,
 									render: (item) => <>{formatCurrency(item?.closing_balance || 0)}</>,
 								},
 

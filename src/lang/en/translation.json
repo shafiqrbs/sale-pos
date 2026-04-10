@@ -1329,5 +1329,6 @@
 	"InvoicePurchase": "Invoice Purchase",
 	"Expiry": "Expiry",
 	"SalesQnt": "Sales Qnt",
-	"AVGPP": "AVG. PP"
+	"AVGPP": "AVG. PP",
+	"CategorySummary": "Category Summary"
 }
