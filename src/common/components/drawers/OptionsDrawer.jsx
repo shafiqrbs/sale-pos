@@ -16,14 +16,13 @@ import {
 	IconReceiptTax,
 	IconTruckLoading,
 	IconTruckDelivery, IconStack3, IconStackPop, IconAlertTriangle, IconReportAnalytics,
+	IconLayoutGrid, IconListDetails,
 } from "@tabler/icons-react";
+import { useTranslation } from "react-i18next";
 import GlobalDrawer from "./GlobalDrawer";
 import { APP_NAVLINKS } from "@/routes/routes";
-import useLoggedInUser from "@hooks/useLoggedInUser";
 import classes from '@assets/css/Accrodion.module.css';
 import useConfigData from "@hooks/useConfigData";
-import {useEffect, useState} from "react";
-
 
 const DRAWER_MENU = [
 
@@ -60,11 +59,13 @@ const DRAWER_MENU = [
 		],
 	},
 	{
-		value: "stock",
-		label: "Stocks",
+		value: "inventory",
+		labelKey: "Inventory",
 		icon: IconStack3,
 		submenu: [
-			{ label: "Stocks", pathname: APP_NAVLINKS.STOCK, icon: IconStackPop },
+			{ labelKey: "Stocks", pathname: APP_NAVLINKS.STOCK, icon: IconStackPop },
+			{ labelKey: "Category", pathname: APP_NAVLINKS.INVENTORY_CATEGORIES, icon: IconLayoutGrid },
+			{ labelKey: "Particular", pathname: APP_NAVLINKS.INVENTORY_PARTICULAR, icon: IconListDetails },
 		],
 	},
 	{
@@ -89,16 +90,15 @@ const DRAWER_MENU = [
 ];
 
 export default function OptionsDrawer({ opened, onClose, drawerPosition, setDrawerPosition }) {
+	const { t } = useTranslation();
 	const navigate = useNavigate();
 	const location = useLocation();
 	const { configData } = useConfigData();
+
 	const handleSubmenuClick = (pathname) => {
 		navigate(pathname);
 		onClose();
 	};
-
-
-
 
 	return (
 		<GlobalDrawer
@@ -128,7 +128,7 @@ export default function OptionsDrawer({ opened, onClose, drawerPosition, setDraw
 					return (
 						<Accordion.Item key={menuItem.value} value={menuItem.value}>
 							<Accordion.Control fz={'sm'} fw='600' c="var(--theme-primary-color-9)" icon={<MainIcon size={18} />}>
-								{menuItem.label}
+								{menuItem.labelKey ? t(menuItem.labelKey) : menuItem.label}
 							</Accordion.Control>
 							<Accordion.Panel>
 								<Stack gap="xs">
@@ -155,7 +155,7 @@ export default function OptionsDrawer({ opened, onClose, drawerPosition, setDraw
 												<Group gap="sm">
 													<SubIcon size={18} stroke={1.5} />
 													<Text size="xs" fw={isActive ? 600 : 400}>
-														{subItem.label}
+														{subItem.labelKey ? t(subItem.labelKey) : subItem.label}
 													</Text>
 												</Group>
 											</UnstyledButton>

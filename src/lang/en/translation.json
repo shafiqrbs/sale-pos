@@ -270,6 +270,8 @@
 	"Domain": "Domain",
 	"Core": "Core",
 	"Inventory": "Inventory",
+	"Stocks": "Stocks",
+	"Particular": "Particular",
 	"User": "User",
 	"Vendor": "Vendor",
 	"ID": "ID",

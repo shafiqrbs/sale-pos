@@ -30,6 +30,8 @@ export const APP_NAVLINKS = {
 	OPENING_STOCK: "/inventory/opening-stock",
 	STOCK: "/inventory/stock",
 	STOCK_EDIT: "/inventory/stock/edit",
+	INVENTORY_CATEGORIES: "/inventory/select/category",
+	INVENTORY_PARTICULAR: "/inventory/select/particular",
 	ACTIVATE: "/activate",
 	LOGIN: "/login",
 	DASHBOARD: "/dashboard",

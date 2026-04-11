@@ -93,6 +93,10 @@ export default function BatchProductModal({
 		close();
 	};
 
+	// =============== hide batches with no remaining stock ================
+	const batchesWithStock =
+		purchaseItems?.filter((item) => Number(item.remain_quantity) >= 1) ?? [];
+
 	// =============== add/update cart requires at least 1 quantity from any batch ================
 	const totalQuantity = Object.values(selectedBatches).reduce((sum, quantity) => sum + quantity, 0);
 	const isAddOrUpdateCartDisabled = totalQuantity === 0;
@@ -107,8 +111,8 @@ export default function BatchProductModal({
 		>
 			<ScrollArea h={400}>
 				<Box>
-					{purchaseItems?.length > 0 ? (
-						purchaseItems.map((item, index) => (
+					{batchesWithStock.length > 0 ? (
+						batchesWithStock.map((item, index) => (
 							<Box key={item.purchase_item_id || index}>
 								<Group justify="space-between" py="md">
 									<Box>
@@ -170,7 +174,7 @@ export default function BatchProductModal({
 										</ActionIcon>
 									</Group>
 								</Group>
-								{index < purchaseItems.length - 1 && <Divider />}
+								{index < batchesWithStock.length - 1 && <Divider />}
 							</Box>
 						))
 					) : (
