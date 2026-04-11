@@ -22,7 +22,7 @@ export const apiSlice = createApi({
 			try {
 				const user = await window.dbAPI.getDataFromTable("users");
 				if (user?.id) {
-					headers.set("X-Api-User", user.id);
+					headers.set("X-Api-User", user.domain_id);
 				}
 			} catch (err) {
 				console.error("Error getting user data", err);
@@ -56,7 +56,7 @@ export const apiSlice = createApi({
 export const getDataWithoutStore = async ({ url, params }) => {
 	try {
 		const user = await window.dbAPI.getDataFromTable("users");
-		const userId = user ? user.id : null;
+		const userId = user ? user.domain_id : null;
 
 		const response = await axios(`${BASE_URL}/${url}`, {
 			method: "GET",

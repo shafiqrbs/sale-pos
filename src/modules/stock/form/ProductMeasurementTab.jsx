@@ -30,6 +30,7 @@ import { showNotification } from "@components/ShowNotificationComponent.jsx";
 import useMainAreaHeight from "@hooks/useMainAreaHeight";
 
 export default function ProductMeasurementTab({ product, productId }) {
+	const [ resetKey, setResetKey ] = useState(0);
 	const { t } = useTranslation();
 	const { mainAreaHeight } = useMainAreaHeight();
 
@@ -67,7 +68,7 @@ export default function ProductMeasurementTab({ product, productId }) {
 		},
 	});
 
-	const [loadingCheckboxKey, setLoadingCheckboxKey] = useState(null);
+	const [ loadingCheckboxKey, setLoadingCheckboxKey ] = useState(null);
 
 	const [ addMeasurement, { isLoading: isAdding } ] = useAddProductMeasurementMutation();
 	const [ deleteMeasurement ] = useDeleteProductMeasurementMutation();
@@ -82,11 +83,8 @@ export default function ProductMeasurementTab({ product, productId }) {
 				return;
 			}
 			showNotification(t("MeasurementAddedSuccessfully"), "teal");
-			form.setValues({
-				product_id: String(productId ?? ""),
-				unit_id: "",
-				quantity: "",
-			});
+			form.reset()
+			setResetKey(Date.now())
 		} catch (error) {
 			console.error(error);
 			showNotification(error?.data?.message || t("CreateFailed"), "red");
@@ -146,6 +144,7 @@ export default function ProductMeasurementTab({ product, productId }) {
 					{...form.getInputProps("quantity")}
 				/>
 				<Select
+					key={resetKey}
 					w="100%"
 					placeholder={t("ChooseProductUnit")}
 					data={unitOptions}

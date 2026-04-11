@@ -5,24 +5,10 @@ import { useLazyGetProductQuery } from "@services/product";
  * Map API product response fields to the local sqlite schema.
  */
 const mapApiProductToLocalSchema = (apiProduct) => ({
-	id: apiProduct.id,
-	stock_id: apiProduct.id,
-	product_name: apiProduct.product_name ?? "",
-	name: apiProduct.product_name ?? "",
-	display_name: apiProduct.product_name ?? "",
-	product_nature: apiProduct.product_type ?? "",
-	slug: apiProduct.slug ?? "",
-	vendor_id: apiProduct.vendor_id ?? null,
-	unit_name: apiProduct.unit_name ?? "",
-	unit_id: 0,
+	...apiProduct,
+
+	product_nature: apiProduct.product_nature || "N/A",
 	category: apiProduct.category_name || apiProduct.category || "",
-	category_id: apiProduct.category_id,
-	quantity: apiProduct.quantity ?? 0,
-	purchase_price: apiProduct.purchase_price ?? 0,
-	sales_price: apiProduct.sales_price ?? 0,
-	average_price: apiProduct.average_price ?? 0,
-	barcode: apiProduct.barcode ?? null,
-	feature_image: apiProduct.images ?? null,
 	measurements: JSON.stringify(apiProduct.measurements || []),
 	purchase_item_for_sales: JSON.stringify(apiProduct.purchase_item_for_sales || []),
 });
@@ -35,9 +21,9 @@ const mapApiProductToLocalSchema = (apiProduct) => ({
  * @returns {{ syncOnlineProductsToLocal: Function, isSyncing: boolean, error: Error|null }}
  */
 export default function useSyncProducts() {
-	const [triggerGetProduct] = useLazyGetProductQuery();
-	const [isSyncing, setIsSyncing] = useState(false);
-	const [error, setError] = useState(null);
+	const [ triggerGetProduct ] = useLazyGetProductQuery();
+	const [ isSyncing, setIsSyncing ] = useState(false);
+	const [ error, setError ] = useState(null);
 
 	const syncOnlineProductsToLocal = useCallback(
 		async (fetchParams = {}) => {
@@ -53,7 +39,7 @@ export default function useSyncProducts() {
 				).unwrap();
 
 				const totalProductCount = firstPageResponse.total ?? 0;
-				let allProducts = Array.isArray(firstPageResponse.data) ? [...firstPageResponse.data] : [];
+				let allProducts = Array.isArray(firstPageResponse.data) ? [ ...firstPageResponse.data ] : [];
 
 				const totalPageCount = Math.ceil(totalProductCount / SYNC_PAGE_SIZE);
 
@@ -64,7 +50,7 @@ export default function useSyncProducts() {
 					).unwrap();
 
 					if (Array.isArray(pageResponse?.data)) {
-						allProducts = [...allProducts, ...pageResponse.data];
+						allProducts = [ ...allProducts, ...pageResponse.data ];
 					}
 				}
 
@@ -87,7 +73,7 @@ export default function useSyncProducts() {
 				setIsSyncing(false);
 			}
 		},
-		[triggerGetProduct]
+		[ triggerGetProduct ]
 	);
 
 	return { syncOnlineProductsToLocal, isSyncing, error };

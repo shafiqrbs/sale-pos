@@ -237,17 +237,17 @@ export default function Table() {
 						</ActionIcon>
 					</Tooltip>
 					{isOnline && isOnlinePermissionIncludes && (
-					<Button
-						w={170}
-						size="sm"
-						color="red"
-						variant="filled"
-						leftSection={<IconPlus size={20} />}
-						id="stock-new-product-btn"
-						onClick={openProductDrawer}
-					>
-						{t("NewProduct")}
-					</Button>
+						<Button
+							w={170}
+							size="sm"
+							color="red"
+							variant="filled"
+							leftSection={<IconPlus size={20} />}
+							id="stock-new-product-btn"
+							onClick={openProductDrawer}
+						>
+							{t("NewProduct")}
+						</Button>
 					)}
 				</Group>
 			</Flex>
@@ -353,32 +353,32 @@ export default function Table() {
 														</ActionIcon>
 													</Menu.Target>
 													{!record.vendor_id && (
-													<Menu.Dropdown w="160">
-														<Menu.Item
-															onClick={(event) => {
-																event.stopPropagation();
-																handleEdit(record);
-															}}
-															leftSection={<IconEdit height={"18"} width={"18"} stroke={1.5} />}
-															color="yellow"
-														>
-															{t("Edit")}
-														</Menu.Item>
-														{record.quantity > 0 && (
+														<Menu.Dropdown w="160">
 															<Menu.Item
 																onClick={(event) => {
 																	event.stopPropagation();
-																	handleDamage(record);
+																	handleEdit(record);
 																}}
-																leftSection={
-																	<IconTruckReturn height={"18"} width={"18"} stroke={1.5} />
-																}
-																color="red"
+																leftSection={<IconEdit height={"18"} width={"18"} stroke={1.5} />}
+																color="yellow"
 															>
-																{t("Damage")}
+																{t("Edit")}
 															</Menu.Item>
-														)}
-													</Menu.Dropdown>
+															{record.quantity > 0 && (
+																<Menu.Item
+																	onClick={(event) => {
+																		event.stopPropagation();
+																		handleDamage(record);
+																	}}
+																	leftSection={
+																		<IconTruckReturn height={"18"} width={"18"} stroke={1.5} />
+																	}
+																	color="red"
+																>
+																	{t("Damage")}
+																</Menu.Item>
+															)}
+														</Menu.Dropdown>
 													)}
 												</Menu>
 											</Group>
