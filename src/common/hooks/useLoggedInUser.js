@@ -20,7 +20,7 @@ export default function useLoggedInUser() {
     }, []);
 
     const roles = useMemo(() => parseJsonArray(user?.access_control_role), [ user?.access_control_role ]);
-    const isOnlinePermissionIncludes = useMemo(() => roles.includes("role_sales_purchase_manager") || roles.includes("role_portal") || roles.includes("role_sales_purchase_admin"), [ roles ]);
+    const isOnlinePermissionIncludes = useMemo(() => roles.includes("role_sales_purchase_manager") || roles.includes("role_portal") || roles.includes("role_sales_purchase_admin") || roles.includes("role_domain"), [ roles ]);
 
     return { user, roles, isOnlinePermissionIncludes, isLoading };
 }

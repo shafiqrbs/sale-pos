@@ -17,6 +17,7 @@ const normalizeCondition = (condition) => {
  * @param {Object} options.condition - filter condition (e.g., { category_id: 5 })
  * @param {string} options.propertyId - property id field (default: "id")
  * @param {Object} options.queryOptions - { limit, offset, orderBy, search }
+ * @param {Object} [options.queryOptions.search] - { like, in, equals, gt } — e.g. gt: { quantity: 0 } for quantity > 0
  * @param {boolean} options.enabled - whether to fetch (default: true)
  * @returns {{ products: Array, totalCount: number, loading: boolean, error: Error|null, refetch: Function }}
  */

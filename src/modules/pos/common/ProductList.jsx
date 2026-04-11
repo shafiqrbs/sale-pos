@@ -19,14 +19,14 @@ import { useTranslation } from "react-i18next";
 const ITEMS_PER_PAGE = 24;
 
 export default function ProductList() {
-	const [activePage, setActivePage] = useState(1);
-	const [selectedProduct, setSelectedProduct] = useState(null);
-	const [batchModalOpened, { open: openBatchModal, close: closeBatchModal }] = useDisclosure(false);
+	const [ activePage, setActivePage ] = useState(1);
+	const [ selectedProduct, setSelectedProduct ] = useState(null);
+	const [ batchModalOpened, { open: openBatchModal, close: closeBatchModal } ] = useDisclosure(false);
 	const { increment } = useCartOperation();
 	const { mainAreaHeight } = useOutletContext();
 	const { currencySymbol, allowSalesZeroStock } = useConfigData();
 	const { t } = useTranslation();
-	const [filter, setFilterRaw] = useState({
+	const [ filter, setFilterRaw ] = useState({
 		categories: [],
 		search: "",
 		barcode: "",
@@ -54,7 +54,8 @@ export default function ProductList() {
 					? selectedCategoryIds
 					: undefined,
 		},
-	};
+		gt: { quantity: 0 }
+	}
 
 	const {
 		products: allProducts,
@@ -76,7 +77,7 @@ export default function ProductList() {
 		return () => {
 			window.removeEventListener("products-updated", refetchProducts);
 		};
-	}, [refetchProducts]);
+	}, [ refetchProducts ]);
 
 	// =============== check if product should be disabled ================
 	const isProductDisabled = (product) => {
@@ -111,10 +112,10 @@ export default function ProductList() {
 			if (cartItems && cartItems.length > 0) {
 				try {
 					currentBatches =
-						typeof cartItems[0].batches === "string"
-							? JSON.parse(cartItems[0].batches)
-							: Array.isArray(cartItems[0].batches)
-								? cartItems[0].batches
+						typeof cartItems[ 0 ].batches === "string"
+							? JSON.parse(cartItems[ 0 ].batches)
+							: Array.isArray(cartItems[ 0 ].batches)
+								? cartItems[ 0 ].batches
 								: [];
 				} catch {
 					currentBatches = [];

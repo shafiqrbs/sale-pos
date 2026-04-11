@@ -66,10 +66,10 @@ const VALID_SQL_OPERATORS = new Set([
 	"NOT IN",
 ]);
 
-// Validates all field names in search objects (equals, like, in) before they reach SQL
+// Validates all field names in search objects (equals, like, in, gt) before they reach SQL
 const validateSearchFields = (search) => {
 	if (!search || typeof search !== "object") return;
-	for (const group of [ "equals", "like", "in" ]) {
+	for (const group of [ "equals", "like", "in", "gt" ]) {
 		if (search[ group ] && typeof search[ group ] === "object") {
 			for (const field of Object.keys(search[ group ])) {
 				validateIdentifier(field, "search field");
@@ -622,6 +622,15 @@ const getDataFromTable = (table, idOrConditions, property = "id", options = {}) 
 					}
 				}
 			}
+
+			if (search.gt && typeof search.gt === "object") {
+				for (const [ field, value ] of Object.entries(search.gt)) {
+					if (value !== undefined && value !== null && value !== "") {
+						conditions.push(`${field} > ?`);
+						values.push(value);
+					}
+				}
+			}
 		}
 
 		return { conditions, values };
@@ -814,6 +823,15 @@ const getTableCount = (table, conditions = {}, options = {}) => {
 						const placeholders = list.map(() => "?").join(", ");
 						whereClauses.push(`${field} IN (${placeholders})`);
 						values.push(...list);
+					}
+				}
+			}
+
+			if (search.gt && typeof search.gt === "object") {
+				for (const [ field, value ] of Object.entries(search.gt)) {
+					if (value !== undefined && value !== null && value !== "") {
+						whereClauses.push(`${field} > ?`);
+						values.push(value);
 					}
 				}
 			}
