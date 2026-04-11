@@ -59,6 +59,7 @@ export default function EditIndex() {
 			discountAmount: purchase.discount ?? 0,
 			isDiscountPercentage: discountTypeMapped,
 			paymentAmount: purchase.payment ?? 0,
+			dueAmount: purchase.due ?? 0,
 			transactionModeId: purchase.transaction_mode_id ? String(purchase.transaction_mode_id) : "",
 			transactionMode: purchase.mode_name ?? "",
 		};

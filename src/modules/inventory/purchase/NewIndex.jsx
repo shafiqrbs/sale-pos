@@ -122,6 +122,7 @@ export default function NewIndex() {
 			total: Math.round(total),
 			payment: Number(formValues.paymentAmount) || 0,
 			discount: Number(formValues.discountAmount) || 0,
+			due: total - Number(formValues.paymentAmount),
 			discount_calculation: discountValue,
 			discount_type: purchaseDiscountTypeLabel,
 			approved_by_id: user?.id ?? null,

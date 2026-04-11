@@ -19,13 +19,13 @@ export default function NewIndex() {
 	const { user } = useLoggedInUser();
 	const { isOnline } = useOutletContext();
 	const { is_purchase_online } = useConfigData();
-	const [addInvoicePurchase] = useAddInvoicePurchaseMutation();
+	const [ addInvoicePurchase ] = useAddInvoicePurchaseMutation();
 	const shouldSubmitPurchaseOnline = isOnline && is_purchase_online;
 	const itemsForm = useForm(vendorOverviewRequest(t));
 	const { purchaseProducts: itemsProducts, refetch } = useTempPurchaseProducts({
 		type: "invoice_purchase",
 	});
-	const [isAddingItem, setIsAddingItem] = useState(false);
+	const [ isAddingItem, setIsAddingItem ] = useState(false);
 
 	// =============== update product quantities after successful purchase ===============
 	const updateProductsAfterPurchase = async () => {
@@ -36,7 +36,7 @@ export default function NewIndex() {
 					id: productId,
 				});
 				const currentProductData = Array.isArray(currentProduct)
-					? currentProduct[0]
+					? currentProduct[ 0 ]
 					: currentProduct;
 
 				if (!currentProductData) {
@@ -93,7 +93,7 @@ export default function NewIndex() {
 			const vendorResult = await window.dbAPI.getDataFromTable("core_vendors", {
 				id: Number(formValues.vendor_id),
 			});
-			const vendorData = Array.isArray(vendorResult) ? vendorResult[0] : vendorResult;
+			const vendorData = Array.isArray(vendorResult) ? vendorResult[ 0 ] : vendorResult;
 			if (vendorData) {
 				vendorName = vendorData.name ?? vendorName;
 			}
@@ -119,7 +119,7 @@ export default function NewIndex() {
 		const localPurchaseRecord = {
 			invoice: generateInvoiceId(),
 			sub_total: subTotal,
-			total: Math.round(total),
+			total: Math.round(paymentAmount),
 			payment: paymentAmount,
 			due: dueAmount,
 			discount: discountValue,
@@ -148,10 +148,10 @@ export default function NewIndex() {
 			vendor_email: formValues.vendorEmail ?? "",
 			sub_total: subTotal,
 			transaction_mode_id: Number(formValues.transactionModeId) || 0,
-		//	discount_type: purchaseDiscountTypeLabel,
+			//	discount_type: purchaseDiscountTypeLabel,
 			discount: discountValue,
 			discount_calculation: 0,
-		//	vat,
+			//	vat,
 			total: Math.round(total),
 			payment: String(formValues.paymentAmount ?? ""),
 			process: "",
@@ -198,7 +198,7 @@ export default function NewIndex() {
 				transactionModeId: itemsForm.values.transactionModeId,
 			};
 			itemsForm.reset();
-			Object.entries(preservedValues).forEach(([key, value]) => {
+			Object.entries(preservedValues).forEach(([ key, value ]) => {
 				itemsForm.setFieldValue(key, value);
 			});
 		} catch (error) {

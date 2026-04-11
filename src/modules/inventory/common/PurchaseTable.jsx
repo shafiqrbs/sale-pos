@@ -47,13 +47,13 @@ export default function PurchaseTable({ approveMutation, copyMutation, modalTitl
 	const { syncOnlineProductsToLocal } = useSyncProducts();
 	const navigate = useNavigate();
 	const { t } = useTranslation();
-	const [opened, { open, close }] = useDisclosure(false);
-	const [page, setPage] = useState(1);
-	const [selectedRow, setSelectedRow] = useState(null);
-	const [loading, setLoading] = useState(false);
-	const [viewData, setViewData] = useState(null);
-	const [deletedPurchaseIds, setDeletedPurchaseIds] = useState(new Set());
-	const [dataSource, setDataSource] = useState("offline");
+	const [ opened, { open, close } ] = useDisclosure(false);
+	const [ page, setPage ] = useState(1);
+	const [ selectedRow, setSelectedRow ] = useState(null);
+	const [ loading, setLoading ] = useState(false);
+	const [ viewData, setViewData ] = useState(null);
+	const [ deletedPurchaseIds, setDeletedPurchaseIds ] = useState(new Set());
+	const [ dataSource, setDataSource ] = useState("offline");
 	const { mainAreaHeight, isOnline } = useOutletContext();
 	const { isOnlinePermissionIncludes } = useLoggedInUser();
 	// =============== when offline or user lacks permission, always use offline data ===============
@@ -168,7 +168,7 @@ export default function PurchaseTable({ approveMutation, copyMutation, modalTitl
 
 	const handleConfirmDelete = async (record) => {
 		await window.dbAPI.deleteDataFromTable("purchase", { id: record.id });
-		setDeletedPurchaseIds((previousIds) => new Set([...previousIds, record.id]));
+		setDeletedPurchaseIds((previousIds) => new Set([ ...previousIds, record.id ]));
 		showNotification(t("InvoiceDeletedSuccess", { invoice: record.invoice }), "teal");
 	};
 
@@ -309,10 +309,10 @@ export default function PurchaseTable({ approveMutation, copyMutation, modalTitl
 								},
 								{
 									accessor: "due",
-									title: t("Payable"),
+									title: t("Due"),
 									textAlign: "right",
 									render: (data) => {
-										return <>{formatCurrency(Number(data.total) - Number(data.payment))}</>;
+										return <>{formatCurrency(Number(data.due))}</>;
 									},
 								},
 								{ accessor: "mode", title: t("Mode") },
@@ -326,7 +326,7 @@ export default function PurchaseTable({ approveMutation, copyMutation, modalTitl
 											Approved: "red",
 										};
 
-										const badgeColor = colorMap[item.process] || "gray";
+										const badgeColor = colorMap[ item.process ] || "gray";
 
 										return item.process && <Badge color={badgeColor}>{item.process}</Badge>;
 									},
@@ -343,10 +343,10 @@ export default function PurchaseTable({ approveMutation, copyMutation, modalTitl
 													size="compact-xs"
 													radius="xs"
 													variant="filled"
-													fw={"100"}
-													fz={"12"}
+													fw="100"
+													fz="12"
 													color="var(--theme-secondary-color-8)"
-													mr={"4"}
+													mr="4"
 													onClick={(e) => {
 														e.stopPropagation();
 														handlePurchaseApprove(data.id);
@@ -371,13 +371,13 @@ export default function PurchaseTable({ approveMutation, copyMutation, modalTitl
 														radius="xl"
 														aria-label="Settings"
 													>
-														<IconDotsVertical height={"18"} width={"18"} stroke={1.5} />
+														<IconDotsVertical height="18" width="18" stroke={1.5} />
 													</ActionIcon>
 												</Menu.Target>
 												<Menu.Dropdown w="200">
 													<Menu.Item
 														onClick={(event) => handleShowPurchaseFromMenu(event, data)}
-														leftSection={<IconEye height={"18"} width={"18"} stroke={1.5} />}
+														leftSection={<IconEye height="18" width="18" stroke={1.5} />}
 														color="blue"
 													>
 														{t("Show")}
@@ -392,7 +392,7 @@ export default function PurchaseTable({ approveMutation, copyMutation, modalTitl
 																		: APP_NAVLINKS.PURCHASE_EDIT;
 																navigate(`${link}/${data.id}`);
 															}}
-															leftSection={<IconEdit height={"18"} width={"18"} stroke={1.5} />}
+															leftSection={<IconEdit height="18" width="18" stroke={1.5} />}
 															color="yellow"
 														>
 															{t("Edit")}
@@ -402,7 +402,7 @@ export default function PurchaseTable({ approveMutation, copyMutation, modalTitl
 														<Menu.Item
 															color="indigo"
 															onClick={() => handleOpenCopyConfirmModal(data.id)}
-															leftSection={<IconCopy height={"18"} width={"18"} stroke={1.5} />}
+															leftSection={<IconCopy height="18" width="18" stroke={1.5} />}
 														>
 															{t("Copy")}
 														</Menu.Item>
@@ -414,7 +414,7 @@ export default function PurchaseTable({ approveMutation, copyMutation, modalTitl
 																handleDeleteClick(data);
 															}}
 															color="red"
-															leftSection={<IconTrashX height={"18"} width={"18"} stroke={1.5} />}
+															leftSection={<IconTrashX height="18" width="18" stroke={1.5} />}
 														>
 															{t("Delete")}
 														</Menu.Item>
@@ -439,9 +439,9 @@ export default function PurchaseTable({ approveMutation, copyMutation, modalTitl
 							rowStyle={(item) =>
 								item.invoice === selectedRow
 									? {
-											background: "var(--theme-primary-color-3)",
-											color: "#ffffff",
-										}
+										background: "var(--theme-primary-color-3)",
+										color: "#ffffff",
+									}
 									: undefined
 							}
 						/>
