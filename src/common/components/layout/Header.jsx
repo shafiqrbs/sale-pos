@@ -106,7 +106,7 @@ export default function Header({ isOnline, toggleNetwork }) {
 		}
 
 		if (!isOnlinePermissionIncludes) {
-			return !["Hold", "Stock"].includes(item.label);
+			return !["Stock"].includes(item.label);
 		}
 
 		return true;
