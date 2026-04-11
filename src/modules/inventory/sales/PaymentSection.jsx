@@ -729,6 +729,16 @@ export default function PaymentSection({
 					</Grid>
 				</Card>
 			</SimpleGrid>
+			<SimpleGrid cols={{ base: 1, md: 7 }} mt="xs" p={"1"} bg={"gray.4"}>
+				<Card padding="0">Alt+N = Add product</Card>
+				<Card padding="0">Alt+c = New Customer</Card>
+				<Card padding="0">Alt+D</Card>
+				<Card padding="0">Alt+R</Card>
+				<Card padding="0">Alt+P</Card>
+				<Card padding="0">Alt+S</Card>
+				<Card padding="0">Alt+c</Card>
+
+			</SimpleGrid>
 
 			{/* =============== split payments drawer =============== */}
 			<SplitPaymentsDrawer
