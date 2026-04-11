@@ -165,35 +165,22 @@ export default function ItemsTableSection({
 						),
 					},
 					{
-						accessor: "quantity",
-						title: "Qty",
-						textAlign: "left",
-						width: 120,
-						render: (record) => (
-							<NumberInput
-								size="xs"
-								value={record.quantity}
-								min={0}
-								step={1}
-								hideControls
-								onChange={(value) => handleQuantityChange(record.id, value)}
-							/>
-						),
-					},
-					{
-						accessor: "stock",
-						title: "Stock",
+						accessor: "percent",
+						title: "Discount (%)",
 						textAlign: "center",
 						width: 110,
 						render: (record) => (
-							<Text size="sm" c="dimmed">
-								<Badge
-									variant="light"
-									color={record.stock < 0 ? "red" : "blue"}
-									radius="sm">
-									{record.stock ?? 0} {record.unit_name || ""}
-								</Badge>
-							</Text>
+							<NumberInput
+								size="xs"
+								value={record.percent ?? 0}
+								min={0}
+								max={100}
+								clampBehavior="strict"
+								step={1}
+								hideControls
+								suffix="%"
+								onChange={(value) => handleDiscountChange(record.id, value)}
+							/>
 						),
 					},
 					{
@@ -214,26 +201,41 @@ export default function ItemsTableSection({
 							/>
 						),
 					},
-
 					{
-						accessor: "percent",
-						title: "Discount (%)",
+						accessor: "stock",
+						title: "Stock",
 						textAlign: "center",
 						width: 110,
 						render: (record) => (
+							<Text size="sm" c="dimmed">
+								<Badge
+									variant="light"
+									color={record.stock < 0 ? "red" : "blue"}
+									radius="sm">
+									{record.stock ?? 0} {record.unit_name || ""}
+								</Badge>
+							</Text>
+						),
+					},
+					{
+						accessor: "quantity",
+						title: "Qty",
+						textAlign: "left",
+						width: 120,
+						render: (record) => (
 							<NumberInput
 								size="xs"
-								value={record.percent ?? 0}
+								value={record.quantity}
 								min={0}
-								max={100}
-								clampBehavior="strict"
 								step={1}
 								hideControls
-								suffix="%"
-								onChange={(value) => handleDiscountChange(record.id, value)}
+								onChange={(value) => handleQuantityChange(record.id, value)}
 							/>
 						),
 					},
+
+
+
 					{
 						accessor: "sub_total",
 						title: "Sub Total",
@@ -266,7 +268,7 @@ export default function ItemsTableSection({
 						),
 					},
 				]}
-				height={tableHeight}
+				height={tableHeight-100}
 				scrollAreaProps={{ type: "never" }}
 				noRecordsText="No items added"
 			/>
