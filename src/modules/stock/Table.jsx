@@ -352,8 +352,9 @@ export default function Table() {
 															<IconDotsVertical height={"18"} width={"18"} stroke={1.5} />
 														</ActionIcon>
 													</Menu.Target>
-													{!record.vendor_id && (
+
 														<Menu.Dropdown w="160">
+															{!record.vendor_id && (
 															<Menu.Item
 																onClick={(event) => {
 																	event.stopPropagation();
@@ -364,6 +365,7 @@ export default function Table() {
 															>
 																{t("Edit")}
 															</Menu.Item>
+															)}
 															{record.quantity > 0 && (
 																<Menu.Item
 																	onClick={(event) => {
@@ -379,7 +381,7 @@ export default function Table() {
 																</Menu.Item>
 															)}
 														</Menu.Dropdown>
-													)}
+
 												</Menu>
 											</Group>
 										);

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Grid, Text, Flex } from "@mantine/core";
+import {Box, Grid, Text, Flex, ActionIcon, Tooltip} from "@mantine/core";
 import { DataTable } from "mantine-datatable";
 import tableCss from "@assets/css/Table.module.css";
 import { useTranslation } from "react-i18next";
@@ -9,6 +9,8 @@ import { formatCurrency } from "@utils/index";
 import useMainAreaHeight from "@hooks/useMainAreaHeight";
 import { useGetDamageItemQuery } from "@services/report";
 import PageBreadcrumb from "@components/layout/PageBreadcrumb";
+import {IconCloudDown} from "@tabler/icons-react";
+import {useOutletContext} from "react-router";
 
 const PER_PAGE = 50;
 
@@ -16,8 +18,14 @@ export default function Table() {
 	const { t } = useTranslation();
 	const [page, setPage] = useState(1);
 	const { mainAreaHeight } = useMainAreaHeight();
+	const { isOnline } = useOutletContext();
+
 
 	// =============== when offline, always use offline data (online segment disabled) ===============
+
+	const handleRefresh = async () => {
+
+	};
 
 	const form = useForm({
 		initialValues: {
@@ -34,11 +42,30 @@ export default function Table() {
 		page,
 		offset: PER_PAGE,
 	});
+
+
 	return (
 		<Box>
 			<Flex mb="xs" gap="sm" justify="space-between" align="center">
 				<PageBreadcrumb label={t("Damages")} />
 				<KeywordSearch reportName={"Damage"} showStartEndDate form={form} w={"100%"} />
+				<Tooltip
+					label="Click here for expiry to damage"
+					c="white"
+					bg="red"
+					withArrow
+					zIndex={999}
+					transitionProps={{ transition: "pop-bottom-left", duration: 500 }}
+				>
+					<ActionIcon
+						bg="red"
+						onClick={handleRefresh}
+						size="md"
+						aria-label="Refresh"
+					>
+						<IconCloudDown size={16} stroke={1.5} />
+					</ActionIcon>
+				</Tooltip>
 			</Flex>
 			<Grid columns={24} gutter={{ base: 8 }}>
 				<Grid.Col span={24}>
@@ -66,6 +93,15 @@ export default function Table() {
 									render: (item) => (
 										<Text component="a" size="sm" variant="subtle">
 											{item?.created}
+										</Text>
+									),
+								},
+								{
+									accessor: "expired_date",
+									title: t("ExpiredDate"),
+									render: (item) => (
+										<Text component="a" size="sm" variant="subtle">
+											{item?.expired_date}
 										</Text>
 									),
 								},
@@ -121,7 +157,7 @@ export default function Table() {
 							onPageChange={(p) => {
 								setPage(p);
 							}}
-							height={mainAreaHeight - 36}
+							height={mainAreaHeight - 48}
 							scrollAreaProps={{ type: "never" }}
 						/>
 					</Box>
