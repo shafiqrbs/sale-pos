@@ -212,7 +212,7 @@ export default function PaymentSection({
 	};
 
 	const shortcutActions = {
-		focusProduct: () => document.getElementById("productId")?.open(),
+		focusProduct: () => setTimeout(() => document.getElementById("productId")?.open(), 0),
 		newProduct: () => document.getElementById("OpenProductDrawerBtn")?.click(),
 		addProduct: () => document.getElementById("EntityFormSubmit")?.click(),
 		focusCustomer: () => document.getElementById("customerSelect")?.focus(),

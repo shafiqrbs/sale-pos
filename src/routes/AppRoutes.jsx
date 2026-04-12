@@ -12,6 +12,7 @@ import PurchaseNewIndex from "@modules/inventory/purchase/NewIndex";
 import PurchaseEditIndex from "@modules/inventory/purchase/EditIndex";
 import StockIndex from "@modules/stock";
 import StockEditIndex from "@modules/stock/EditIndex";
+import CategoryIndex from "@modules/inventory/category";
 import DashboardIndex from "@modules/dashboard";
 import CustomersIndex from "@modules/core/customers";
 import ConfigIndex from "@modules/inventory/config";
@@ -87,6 +88,7 @@ export default function AppRoutes() {
 						<Route index element={<StockIndex />} />
 						<Route path="edit/:id" element={<StockEditIndex />} />
 					</Route>
+					<Route path="category" element={<CategoryIndex />} />
 				</Route>
 				<Route path="dashboard" element={<DashboardIndex />} />
 				<Route path="pos">

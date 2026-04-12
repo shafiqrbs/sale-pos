@@ -39,6 +39,7 @@ export const apiSlice = createApi({
 		"POS",
 		"Core",
 		"Categories",
+		"CategoryGroups",
 		"InvoiceMode",
 		"Settings",
 		"Customers",

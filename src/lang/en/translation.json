@@ -1339,5 +1339,12 @@
 	"CategorySummary": "Category Summary",
 	"EnterCustomerName": "Enter customer name",
 	"EnterMobileNumber": "Enter mobile no",
-	"CustomerSavedSuccessfully": "Customer saved successfully"
+	"CustomerSavedSuccessfully": "Customer saved successfully",
+	"CreateCategory": "Create Category",
+	"Active": "Active",
+	"Inactive": "Inactive",
+	"Code": "Code",
+	"Confirm": "Confirm",
+	"DeleteFailed": "Delete failed",
+	"AddCategory": "Add Category"
 }

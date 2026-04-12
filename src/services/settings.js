@@ -12,11 +12,11 @@ export const extendedSettingsApiSlice = apiSlice.injectEndpoints({
 				};
 			},
 			providesTags: (result, error, params) => {
-				const dropdownType = params?.[ "dropdown-type" ] || "unknown";
+				const dropdownType = params?.["dropdown-type"] || "unknown";
 				if (dropdownType) {
-					return [ { type: "Settings", id: dropdownType } ];
+					return [{ type: "Settings", id: dropdownType }];
 				}
-				return [ "Settings" ];
+				return ["Settings"];
 			},
 		}),
 
@@ -29,18 +29,18 @@ export const extendedSettingsApiSlice = apiSlice.injectEndpoints({
 				};
 			},
 			providesTags: (result, error, params) => {
-				const dropdownType = params?.[ "dropdown-type" ] || "unknown";
+				const dropdownType = params?.["dropdown-type"] || "unknown";
 				if (dropdownType) {
-					return [ { type: "InventorySettings", id: dropdownType } ];
+					return [{ type: "InventorySettings", id: dropdownType }];
 				}
-				return [ "InventorySettings" ];
+				return ["InventorySettings"];
 			},
 		}),
 
 		getInventoryCategory: builder.query({
 			query: (params) => {
 				return {
-					url: APP_APIS.INVENTORY_CATEGORIES,
+					url: APP_APIS.CATEGORIES,
 					method: "GET",
 					params,
 				};
@@ -49,9 +49,9 @@ export const extendedSettingsApiSlice = apiSlice.injectEndpoints({
 			providesTags: (result, error, params) => {
 				const dropdownType = params?.type || "unknown";
 				if (dropdownType) {
-					return [ { type: "InventoryCategory", id: dropdownType } ];
+					return [{ type: "InventoryCategory", id: dropdownType }];
 				}
-				return [ "InventoryCategory" ];
+				return ["InventoryCategory"];
 			},
 		}),
 
@@ -65,14 +65,19 @@ export const extendedSettingsApiSlice = apiSlice.injectEndpoints({
 			},
 
 			providesTags: (result, error, params) => {
-				const dropdownType = params?.[ "dropdown-type" ] || "unknown";
+				const dropdownType = params?.["dropdown-type"] || "unknown";
 				if (dropdownType) {
-					return [ { type: "InventoryParticular", id: dropdownType } ];
+					return [{ type: "InventoryParticular", id: dropdownType }];
 				}
-				return [ "InventoryParticular" ];
+				return ["InventoryParticular"];
 			},
 		}),
 	}),
 });
 
-export const { useGetDropdownDataQuery, useGetInventorySettingsQuery, useGetInventoryCategoryQuery, useGetInventoryParticularQuery } = extendedSettingsApiSlice;
+export const {
+	useGetDropdownDataQuery,
+	useGetInventorySettingsQuery,
+	useGetInventoryCategoryQuery,
+	useGetInventoryParticularQuery,
+} = extendedSettingsApiSlice;

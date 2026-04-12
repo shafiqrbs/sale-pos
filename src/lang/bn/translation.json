@@ -1350,5 +1350,11 @@
 	"RequisitionNo": "রিকুইজিশন নম্বর",
 	"RequisitionList": "রিকুইজিশন তালিকা",
 	"Expiry": "মেয়াদ",
-	"SalesQnt": "বিক্রয় পরিমাণ"
+	"SalesQnt": "বিক্রয় পরিমাণ",
+	"CreateCategory": "ক্যাটাগরি তৈরী",
+	"Active": "সক্রিয়",
+	"Inactive": "নিষ্ক্রিয়",
+	"Code": "কোড",
+	"Confirm": "নিশ্চিত করুন",
+	"DeleteFailed": "মুছে ফেলা ব্যর্থ"
 }
