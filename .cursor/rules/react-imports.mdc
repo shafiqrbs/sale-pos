@@ -1,0 +1,27 @@
+---
+description: Enforce named-only imports from React — never import the default React export
+globs: ["src/**/*.jsx", "src/**/*.tsx", "src/**/*.js", "src/**/*.ts"]
+alwaysApply: true
+---
+
+# React Import Rule
+
+Never use a default React import. Always use named imports only.
+
+## Correct
+
+```js
+import { useState, useEffect, useRef } from "react";
+import { memo, forwardRef, useCallback } from "react";
+```
+
+## Wrong
+
+```js
+// Do NOT do any of these:
+import React from "react";
+import React, { useState } from "react";
+import * as React from "react";
+```
+
+JSX transformation does not require a React default import. Only import the specific hooks, utilities, or types you actually use.

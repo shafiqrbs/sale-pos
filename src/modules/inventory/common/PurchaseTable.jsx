@@ -53,11 +53,11 @@ export default function PurchaseTable({ approveMutation, copyMutation, modalTitl
 	const [ loading, setLoading ] = useState(false);
 	const [ viewData, setViewData ] = useState(null);
 	const [ deletedPurchaseIds, setDeletedPurchaseIds ] = useState(new Set());
-	const [ dataSource, setDataSource ] = useState("offline");
+	const [ userChoice, setUserChoice ] = useState(null);
 	const { mainAreaHeight, isOnline } = useOutletContext();
 	const { isOnlinePermissionIncludes } = useLoggedInUser();
 	// =============== when offline or user lacks permission, always use offline data ===============
-	const effectiveDataSource = isOnline && isOnlinePermissionIncludes ? dataSource : "offline";
+	const effectiveDataSource = isOnline && isOnlinePermissionIncludes ? (userChoice ?? "online") : "offline";
 
 	const form = useForm({
 		initialValues: {
@@ -183,7 +183,7 @@ export default function PurchaseTable({ approveMutation, copyMutation, modalTitl
 						<SegmentedControl
 							value={effectiveDataSource}
 							onChange={(value) => {
-								setDataSource(value);
+								setUserChoice(value);
 								setPage(1);
 							}}
 							color={effectiveDataSource === "online" ? "green" : "red"}

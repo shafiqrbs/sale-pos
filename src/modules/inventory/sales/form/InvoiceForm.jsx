@@ -198,6 +198,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 							</FormValidationWrapper>
 						</Box>
 						<ActionIcon
+							id="OpenProductDrawerBtn"
 							variant="outline"
 							bg="white"
 							radius="sm"

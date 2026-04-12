@@ -1,7 +1,7 @@
-import React from "react";
-import { ActionIcon, Badge, Box, Flex, NumberInput, Text } from "@mantine/core";
+import { useState } from "react";
+import { ActionIcon, Badge, Box, Flex, NumberInput, Text, Tooltip } from "@mantine/core";
 import { DataTable } from "mantine-datatable";
-import { IconTrashX } from "@tabler/icons-react";
+import { IconEye, IconEyeOff, IconTrashX } from "@tabler/icons-react";
 import tableCss from "@assets/css/Table.module.css";
 import useConfigData from "@hooks/useConfigData";
 import useMainAreaHeight from "@hooks/useMainAreaHeight";
@@ -19,8 +19,10 @@ export default function ItemsTableSection({
 	const { mainAreaHeight } = useMainAreaHeight();
 	// =============== account for invoice form top row (~55px) + payment section + spacing ===============
 
-	const tableHeight = mainAreaHeight - 342;
+	const tableHeight = mainAreaHeight - 374;
 	const { currencySymbol } = useConfigData();
+	const [mrpVisible, setMrpVisible] = useState(false);
+	const [avgPriceVisible, setAvgPriceVisible] = useState(false);
 
 	const handleQuantityChange = async (itemId, value) => {
 		const numericValue = parseFloat(value) || 0;
@@ -139,30 +141,73 @@ export default function ItemsTableSection({
 					},
 					{
 						accessor: "mrp",
-						title: "MRP",
+						title: (
+							<Flex align="center" gap={4} justify="center">
+								<Text size="sm" fw={600}>
+									MRP
+								</Text>
+								<ActionIcon
+									size="xs"
+									variant="subtle"
+									color="gray"
+									onClick={() => setMrpVisible((v) => !v)}
+								>
+									{mrpVisible ? <IconEye size={14} /> : <IconEyeOff size={14} />}
+								</ActionIcon>
+							</Flex>
+						),
 						textAlign: "center",
 						width: 100,
-						render: (record) => (
-							<Text size="sm" c="dimmed">
-								<Badge
-									variant="light"
-									color={record?.average_price > record?.mrp ? "red" : "blue"}
-									radius="sm">
-									{currencySymbol} {formatCurrency(record?.mrp ?? 0)}
-								</Badge>
-							</Text>
-						),
+						render: (record) =>
+							mrpVisible ? (
+								<Text size="sm" c="dimmed">
+									<Badge
+										variant="light"
+										color={record?.average_price > record?.mrp ? "red" : "blue"}
+										radius="sm"
+									>
+										{currencySymbol} {formatCurrency(record?.mrp ?? 0)}
+									</Badge>
+								</Text>
+							) : (
+								<Tooltip label={`${currencySymbol} ${formatCurrency(record?.mrp ?? 0)}`}>
+									<Text size="sm" c="dark.5" ta="center" className="cursor-pointer">
+										*****
+									</Text>
+								</Tooltip>
+							),
 					},
 					{
 						accessor: "average_price",
-						title: "Avg. Price",
+						title: (
+							<Flex align="center" gap={4} justify="center">
+								<Text size="sm" fw={600}>
+									Avg. Price
+								</Text>
+								<ActionIcon
+									size="xs"
+									variant="subtle"
+									color="gray"
+									onClick={() => setAvgPriceVisible((v) => !v)}
+								>
+									{avgPriceVisible ? <IconEye size={14} /> : <IconEyeOff size={14} />}
+								</ActionIcon>
+							</Flex>
+						),
 						textAlign: "center",
 						width: 120,
-						render: (record) => (
-							<Text size="sm" c="dimmed">
-								{currencySymbol} {formatCurrency(record?.average_price ?? 0)}
-							</Text>
-						),
+						render: (record) =>
+							avgPriceVisible ? (
+								<Text size="sm" c="dimmed">
+									{currencySymbol} {formatCurrency(record?.average_price ?? 0)}
+								</Text>
+							) : (
+								<Tooltip label={`${currencySymbol} ${formatCurrency(record?.average_price ?? 0)}`}>
+									<Text size="sm" c="dark.5" ta="center" className="cursor-pointer">
+										*****
+									</Text>
+								</Tooltip>
+							),
 					},
 					{
 						accessor: "percent",
@@ -195,6 +240,7 @@ export default function ItemsTableSection({
 								min={0}
 								step={1}
 								decimalScale={2}
+								readOnly={record.percent > 0}
 								hideControls
 								thousandSeparator=","
 								onChange={(value) => handlePriceChange(record.id, value)}
@@ -207,14 +253,9 @@ export default function ItemsTableSection({
 						textAlign: "center",
 						width: 110,
 						render: (record) => (
-							<Text size="sm" c="dimmed">
-								<Badge
-									variant="light"
-									color={record.stock < 0 ? "red" : "blue"}
-									radius="sm">
-									{record.stock ?? 0} {record.unit_name || ""}
-								</Badge>
-							</Text>
+							<Badge variant="light" color={record.stock < 0 ? "red" : "blue"} radius="sm">
+								{record.stock ?? 0} {record.unit_name || ""}
+							</Badge>
 						),
 					},
 					{
@@ -233,8 +274,6 @@ export default function ItemsTableSection({
 							/>
 						),
 					},
-
-
 
 					{
 						accessor: "sub_total",
@@ -268,7 +307,7 @@ export default function ItemsTableSection({
 						),
 					},
 				]}
-				height={tableHeight-100}
+				height={tableHeight}
 				scrollAreaProps={{ type: "never" }}
 				noRecordsText="No items added"
 			/>

@@ -53,10 +53,10 @@ export default function Table() {
 	const [ loading, setLoading ] = useState(false);
 	const [ viewData, setViewData ] = useState(null);
 	const [ deletedPurchaseIds, setDeletedPurchaseIds ] = useState(new Set());
-	const [ dataSource, setDataSource ] = useState("offline");
+	const [ userChoice, setUserChoice ] = useState(null);
 	const { mainAreaHeight, isOnline } = useOutletContext();
 	// =============== when offline, always use offline data (online segment disabled) ===============
-	const effectiveDataSource = isOnline ? dataSource : "offline";
+	const effectiveDataSource = isOnline ? (userChoice ?? "online") : "offline";
 
 	const form = useForm({
 		initialValues: {

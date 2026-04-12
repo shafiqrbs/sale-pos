@@ -19,7 +19,7 @@ import {
 	IconGlobe,
 	IconGlobeOff,
 } from "@tabler/icons-react";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useOutletContext, useNavigate } from "react-router";
 import { DataTable } from "mantine-datatable";
@@ -51,11 +51,11 @@ export default function HoldTable() {
 	const [ loading, setLoading ] = useState(false);
 	const [ salesViewData, setSalesViewData ] = useState(null);
 	const [ deletedSaleIds, setDeletedSaleIds ] = useState(new Set());
-	const [ dataSource, setDataSource ] = useState("offline");
+	const [ userChoice, setUserChoice ] = useState(null);
 	const { mainAreaHeight, isOnline } = useOutletContext();
 	const { isOnlinePermissionIncludes } = useLoggedInUser();
 	// =============== when offline or user lacks permission, always use offline data ===============
-	const effectiveDataSource = isOnline && isOnlinePermissionIncludes ? dataSource : "offline";
+	const effectiveDataSource = isOnline && isOnlinePermissionIncludes ? (userChoice ?? "online") : "offline";
 	const form = useForm({
 		initialValues: {
 			term: "",
@@ -160,7 +160,7 @@ export default function HoldTable() {
 						<SegmentedControl
 							value={effectiveDataSource}
 							onChange={(value) => {
-								setDataSource(value);
+								setUserChoice(value);
 								setPage(1);
 							}}
 							color={effectiveDataSource === "online" ? "green" : "red"}

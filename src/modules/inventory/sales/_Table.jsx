@@ -52,11 +52,14 @@ export default function Table() {
 	const [loading, setLoading] = useState(false);
 	const [salesViewData, setSalesViewData] = useState(null);
 	const [deletedSaleIds, setDeletedSaleIds] = useState(new Set());
-	const [dataSource, setDataSource] = useState("offline");
 	const { mainAreaHeight, isOnline } = useOutletContext();
 	const { isOnlinePermissionIncludes } = useLoggedInUser();
+	const [userChoice, setUserChoice] = useState(null);
+
 	// =============== when offline or user lacks permission, always use offline data ===============
-	const effectiveDataSource = isOnline && isOnlinePermissionIncludes ? dataSource : "offline";
+	// When user hasn't manually chosen yet (null), default to "online" if permitted, otherwise "offline"
+	const effectiveDataSource =
+		isOnline && isOnlinePermissionIncludes ? (userChoice ?? "online") : "offline";
 	const form = useForm({
 		initialValues: {
 			term: "",
@@ -165,7 +168,7 @@ export default function Table() {
 						<SegmentedControl
 							value={effectiveDataSource}
 							onChange={(value) => {
-								setDataSource(value);
+								setUserChoice(value);
 								setPage(1);
 							}}
 							color={effectiveDataSource === "online" ? "green" : "red"}

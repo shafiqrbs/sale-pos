@@ -2,12 +2,15 @@ import { useEffect, useMemo, useState } from "react";
 import {
 	ActionIcon,
 	Box,
-	Button, Card,
+	Button,
+	Card,
 	Flex,
 	Grid,
 	Group,
+	Kbd,
 	NumberInput,
-	Select, SimpleGrid,
+	Select,
+	SimpleGrid,
 	Stack,
 	Text,
 	Textarea,
@@ -35,24 +38,24 @@ import FormValidationWrapper from "@components/form-builders/FormValidationWrapp
 import SplitPaymentsDrawer from "@components/drawers/SplitPaymentsDrawer";
 import SalesCustomerDrawer from "@components/drawers/SalesCustomerDrawer";
 import { DateInput } from "@mantine/dates";
-import VendorInfoSection from "@modules/inventory/purchase/VendorInfoSection";
+import KeyboardShortcut from "@components/KeyboardShortcut";
 
 export default function PaymentSection({
-										   itemsForm,
-										   itemsTotal,
-										   isAddingItem,
-										   onPosPrint,
-										   resetKey = 0,
-										   isEditMode = false,
-									   }) {
+	itemsForm,
+	itemsTotal,
+	isAddingItem,
+	onPosPrint,
+	resetKey = 0,
+	isEditMode = false,
+}) {
 	const { t } = useTranslation();
 	const { transactionMode } = useTransactionMode();
 	const { configData, currencySymbol } = useConfigData();
 
-	const [ customersDropdownData, setCustomersDropdownData ] = useState([]);
-	const [ discountMode, setDiscountMode ] = useState("discount");
-	const [ percentageValue, setPercentageValue ] = useState(0);
-	const [ customerDrawerOpened, { open: customerDrawerOpen, close: customerDrawerClose } ] =
+	const [customersDropdownData, setCustomersDropdownData] = useState([]);
+	const [discountMode, setDiscountMode] = useState("discount");
+	const [percentageValue, setPercentageValue] = useState(0);
+	const [customerDrawerOpened, { open: customerDrawerOpen, close: customerDrawerClose }] =
 		useDisclosure(false);
 
 	const { discount_type, discount, coupon_code, salesNarration, paymentAmount } = itemsForm.values;
@@ -63,16 +66,21 @@ export default function PaymentSection({
 	const discountValue = useMemo(() => {
 		if (discount_type === "coupon") return 0;
 		return Number(discount) || 0;
-	}, [ discount_type, discount ]);
+	}, [discount_type, discount]);
 
 	const grandTotal = useMemo(
 		() => Math.max(itemsTotal - discountValue + vatAmount, 0),
-		[ itemsTotal, discountValue ]
+		[itemsTotal, discountValue]
 	);
 
 	const dueAmount = useMemo(
 		() => Math.max(grandTotal - (paymentAmount || 0), 0),
-		[ grandTotal, paymentAmount ]
+		[grandTotal, paymentAmount]
+	);
+
+	const returnAmount = useMemo(
+		() => Math.max((paymentAmount || 0) - grandTotal, 0),
+		[grandTotal, paymentAmount]
 	);
 
 	const payments = itemsForm.values.payments ?? [];
@@ -83,7 +91,7 @@ export default function PaymentSection({
 	useEffect(() => {
 		if (transactionMode?.length > 0 && payments.length === 0) {
 			const cashMethod = transactionMode.find((mode) => mode.slug === "cash");
-			const defaultMethod = cashMethod || transactionMode[ 0 ];
+			const defaultMethod = cashMethod || transactionMode[0];
 			itemsForm.setFieldValue("payments", [
 				{
 					transaction_mode_id: defaultMethod.id,
@@ -94,7 +102,13 @@ export default function PaymentSection({
 			]);
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ transactionMode ]);
+	}, [transactionMode, resetKey]);
+
+	// =============== keep _grandTotal in sync so form-level validation can reference it ===============
+	useEffect(() => {
+		itemsForm.setFieldValue("_grandTotal", grandTotal);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [grandTotal]);
 
 	// =============== auto-sync paymentAmount and single payment amount with grandTotal;
 	// skipped in edit mode because paymentAmount is pre-populated from the stored sale
@@ -110,7 +124,7 @@ export default function PaymentSection({
 			}
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ grandTotal, isSplitPaymentActive ]);
+	}, [grandTotal, isSplitPaymentActive]);
 
 	// =============== fetch customers for drawer ===============
 	async function fetchCustomers() {
@@ -131,13 +145,13 @@ export default function PaymentSection({
 		if (!customerDrawerOpened) {
 			fetchCustomers();
 		}
-	}, [ customerDrawerOpened ]);
+	}, [customerDrawerOpened]);
 
 	// =============== reset local state when parent triggers reset ===============
 	useEffect(() => {
 		setDiscountMode("discount");
 		setPercentageValue(0);
-	}, [ resetKey ]);
+	}, [resetKey]);
 
 	const handleCustomerAdd = () => {
 		customerDrawerOpen();
@@ -180,7 +194,7 @@ export default function PaymentSection({
 
 	const clearSplitPayment = () => {
 		const cashMethod = transactionMode?.find((mode) => mode.slug === "cash");
-		const defaultMethod = cashMethod || transactionMode?.[ 0 ];
+		const defaultMethod = cashMethod || transactionMode?.[0];
 		itemsForm.setFieldValue("payments", [
 			{
 				transaction_mode_id: defaultMethod?.id,
@@ -192,11 +206,33 @@ export default function PaymentSection({
 		itemsForm.setFieldValue("paymentAmount", grandTotal);
 	};
 
-	useHotkeys([
-		[ "alt+s", () => document.getElementById("ItemsFormSubmit")?.click() ],
-		[ "alt+h", () => document.getElementById("ItemsHoldFormSubmit")?.click() ],
-		[ "alt+p", () => document.getElementById("ItemsPrintFormSubmit")?.click() ],
-	]);
+	const shortcutActions = {
+		focusProduct: () => document.getElementById("productId")?.open(),
+		newProduct: () => document.getElementById("OpenProductDrawerBtn")?.click(),
+		addProduct: () => document.getElementById("EntityFormSubmit")?.click(),
+		focusCustomer: () => document.getElementById("customerSelect")?.focus(),
+		focusDiscount: () => document.getElementById("discount-input")?.focus(),
+		digitalPayment: () => handleOpenSplitPaymentDrawer(),
+		enterAmount: () => document.getElementById("paymentAmount")?.focus(),
+		finalizePos: () => onPosPrint?.(),
+	};
+
+	useHotkeys(
+		[
+			["alt+s", () => document.getElementById("ItemsFormSubmit")?.click()],
+			["alt+h", () => document.getElementById("ItemsHoldFormSubmit")?.click()],
+			["alt+p", () => document.getElementById("ItemsPrintFormSubmit")?.click()],
+
+			["alt+f", shortcutActions.focusProduct],
+			["alt+n", shortcutActions.newProduct],
+			["alt+c", shortcutActions.focusCustomer],
+			["alt+d", shortcutActions.focusDiscount],
+			["alt+g", shortcutActions.digitalPayment],
+			["alt+m", shortcutActions.enterAmount],
+			["alt+o", shortcutActions.finalizePos],
+		],
+		[]
+	);
 
 	return (
 		<>
@@ -210,6 +246,8 @@ export default function PaymentSection({
 									opened={!!itemsForm.errors.customer_id}
 								>
 									<Select
+										id="customerSelect"
+										key={resetKey}
 										placeholder={t("ChooseCustomer")}
 										data={dropdownOptions}
 										searchable
@@ -279,9 +317,9 @@ export default function PaymentSection({
 										</Text>
 										<Text fz="sm" fw={800} c="black">
 											{configData?.inventory_config?.config_vat &&
-											formatCurrency(
-												calculateVATAmount(itemsTotal, configData?.inventory_config?.config_vat)
-											)}
+												formatCurrency(
+													calculateVATAmount(itemsTotal, configData?.inventory_config?.config_vat)
+												)}
 										</Text>
 									</Group>
 									<Group justify="space-between">
@@ -363,6 +401,7 @@ export default function PaymentSection({
 												>
 													{discount_type === "flat" ? (
 														<NumberInput
+															id="discount-input"
 															placeholder={t("Discount")}
 															value={discount}
 															error={itemsForm.errors.discount}
@@ -382,6 +421,7 @@ export default function PaymentSection({
 														/>
 													) : (
 														<NumberInput
+															id="discount-input"
 															placeholder={t("Discount")}
 															value={percentageValue}
 															error={itemsForm.errors.discount}
@@ -455,137 +495,16 @@ export default function PaymentSection({
 											mr={"3"}
 											bdrs={4}
 										>
-											<Text fw={800} c="#1e40af" size="lg">
-												{currencySymbol} {formatCurrency(dueAmount)}
+											<Text fw={800} c={returnAmount > 0 ? "green" : "#1e40af"} size="lg">
+												{currencySymbol}{" "}
+												{formatCurrency(returnAmount > 0 ? returnAmount : dueAmount)}
 											</Text>
-											<Text fw={500} c="#1e40af" size="xs">
-												{t("StillDue")}
+											<Text fw={500} c={returnAmount > 0 ? "green" : "#1e40af"} size="xs">
+												{returnAmount > 0 ? t("Return") : t("StillDue")}
 											</Text>
 										</Stack>
 									</Grid.Col>
 								</Grid>
-								{/*<Grid columns={24} gutter={{ base: 8 }} pr="2px" align="center" justify="center">
-								<Grid.Col span={8}>
-									<FormValidationWrapper
-										errorMessage={t("ClickRightButtonForPercentFlat")}
-										opened={!!itemsForm.errors.coupon_code}
-									>
-										<Button
-											fullWidth
-											onClick={handleDiscountModeChange}
-											variant="filled"
-											px="md"
-											fz="xl"
-											size={'xl'}
-											leftSection={
-												discountMode === "coupon" ? (
-													<IconTicket size={14} />
-												) : (
-													<IconPercentage size={14} />
-												)
-											}
-											color="orange"
-										>
-											{discountMode === "coupon" ? t("Coupon") : t("Discount")}
-										</Button>
-									</FormValidationWrapper>
-								</Grid.Col>
-								<Grid.Col
-									span={8}
-									bg={
-										discount_type === "flat"
-											? "red.3"
-											: discount_type === "percentage"
-											? "violet.3"
-											: "gray.3"
-									}
-								>
-									{discountMode === "coupon" ? (
-										<TextInput
-											type="text"
-											placeholder={t("CouponCode")}
-											value={coupon_code}
-											error={itemsForm.errors.coupon_code}
-											size={'xl'}
-											onChange={(event) => {
-												itemsForm.setFieldValue("coupon_code", event.target.value);
-											}}
-											rightSection={
-												<FormValidationWrapper
-													errorMessage={t("CouponCode")}
-													opened={!!itemsForm.errors.coupon_code}
-													position="left"
-												>
-													<IconTicket size={16} opacity={0.5} />
-												</FormValidationWrapper>
-											}
-										/>
-									) : (
-										<FormValidationWrapper
-											errorMessage={t("ClickRightButtonForPercentFlat")}
-											opened={!!itemsForm.errors.discount}
-											position="left"
-										>
-											{discount_type === "flat" ? (
-												<NumberInput
-													placeholder={t("Discount")}
-													value={discount}
-													error={itemsForm.errors.discount}
-													size={'xl'}
-													onChange={(value) => itemsForm.setFieldValue("discount", value)}
-													rightSection={
-														<ActionIcon
-															size={32}
-															bg="red.5"
-															variant="filled"
-															mr={10}
-															onClick={toggleDiscountMode}
-														>
-															<IconNumber123 size={16} />
-														</ActionIcon>
-													}
-												/>
-											) : (
-												<NumberInput
-													placeholder={t("Discount")}
-													value={percentageValue}
-													error={itemsForm.errors.discount}
-													size="sm"
-													suffix="%"
-													max={100}
-													min={0}
-													allowNegative={false}
-													step={1}
-													decimalScale={2}
-													hideControls
-													onChange={handlePercentageChange}
-													rightSection={
-														<ActionIcon
-															size={32}
-															bg="violet.5"
-															variant="filled"
-															mr={10}
-															onClick={toggleDiscountMode}
-														>
-															<IconPercentage size={16} />
-														</ActionIcon>
-													}
-												/>
-											)}
-										</FormValidationWrapper>
-									)}
-								</Grid.Col>
-								<Grid.Col span={8}>
-									<Stack gap={0} align="center" justify="center" bg="red" py={'xs'} bdrs={4}>
-										<Text fw={800} c="white" size="lg">
-											{currencySymbol} {formatCurrency(dueAmount)}
-										</Text>
-										<Text fw={500} c="white" size="md">
-											Due
-										</Text>
-									</Stack>
-								</Grid.Col>
-							</Grid>*/}
 								<Grid
 									columns={24}
 									gutter={{ base: 8 }}
@@ -629,6 +548,7 @@ export default function PaymentSection({
 											opened={!!itemsForm.errors.paymentAmount}
 										>
 											<NumberInput
+												id="paymentAmount"
 												allowNegative={false}
 												hideControls
 												decimalScale={3}
@@ -678,7 +598,12 @@ export default function PaymentSection({
 										leftSection={<IconCheck size={16} />}
 										disabled={isAddingItem}
 									>
-										<Stack gap={0}><Text size="xs">{isEditMode ? t("Update") : t("Save")}</Text><Text size="xs" component="span" c="green.1">alt+s</Text></Stack>
+										<Stack gap={0}>
+											<Text size="xs">{isEditMode ? t("Update") : t("Save")}</Text>
+											<Text size="xs" component="span" c="green.1">
+												alt+s
+											</Text>
+										</Stack>
 									</Button>
 									<Button
 										fullWidth
@@ -692,7 +617,12 @@ export default function PaymentSection({
 										leftSection={<IconPlayerPause size={16} />}
 										disabled={isAddingItem}
 									>
-										<Stack gap={0}><Text size="xs">{t("Hold")}</Text><Text size="xs" component="span" c="red.3">alt+h</Text></Stack>
+										<Stack gap={0}>
+											<Text size="xs">{t("Hold")}</Text>
+											<Text size="xs" component="span" c="red.3">
+												alt+h
+											</Text>
+										</Stack>
 									</Button>
 								</Button.Group>
 
@@ -709,7 +639,12 @@ export default function PaymentSection({
 									disabled={isAddingItem}
 									leftSection={<IconPrinter size={16} />}
 								>
-									<Stack gap={0}>{t("Print")} <Text size="xs" component="span">alt+p</Text></Stack>
+									<Stack gap={0}>
+										{t("Print")}{" "}
+										<Text size="xs" component="span">
+											alt+p
+										</Text>
+									</Stack>
 								</Button>
 
 								<Button
@@ -729,15 +664,82 @@ export default function PaymentSection({
 					</Grid>
 				</Card>
 			</SimpleGrid>
-			<SimpleGrid cols={{ base: 1, md: 7 }} mt="xs" p={"1"} bg={"gray.4"}>
-				<Card padding="0">Alt+N = Add product</Card>
-				<Card padding="0">Alt+c = New Customer</Card>
-				<Card padding="0">Alt+D</Card>
-				<Card padding="0">Alt+R</Card>
-				<Card padding="0">Alt+P</Card>
-				<Card padding="0">Alt+S</Card>
-				<Card padding="0">Alt+c</Card>
-
+			<SimpleGrid
+				cols={{ base: 1, md: 8 }}
+				spacing="4px"
+				verticalSpacing="4px"
+				mt="2px"
+				p="3px"
+				bg="gray.4"
+			>
+				<Card
+					padding="0"
+					px="2px"
+					onClick={shortcutActions.focusProduct}
+					className="cursor-pointer"
+				>
+					<Flex align="center" gap={4}>
+						<KeyboardShortcut keys={["alt", "f"]} />
+						<Text fz="xs"> = Focus prod.</Text>
+					</Flex>
+				</Card>
+				<Card padding="0" px="2px" onClick={shortcutActions.newProduct} className="cursor-pointer">
+					<Flex align="center" gap={4}>
+						<KeyboardShortcut keys={["alt", "n"]} />
+						<Text fz="xs"> = New prod.</Text>
+					</Flex>
+				</Card>
+				<Card padding="0" px="2px" onClick={shortcutActions.addProduct} className="cursor-pointer">
+					<Flex align="center" gap={4}>
+						<KeyboardShortcut keys={["alt", "a"]} />
+						<Text fz="xs"> = Add prod.</Text>
+					</Flex>
+				</Card>
+				<Card
+					padding="0"
+					px="2px"
+					onClick={shortcutActions.focusCustomer}
+					className="cursor-pointer"
+				>
+					<Flex align="center" gap={4}>
+						<KeyboardShortcut keys={["alt", "c"]} />
+						<Text fz="xs"> = Focus cus.</Text>
+					</Flex>
+				</Card>
+				<Card
+					padding="0"
+					px="2px"
+					onClick={shortcutActions.focusDiscount}
+					className="cursor-pointer"
+				>
+					<Flex align="center" gap={4}>
+						<KeyboardShortcut keys={["alt", "d"]} />
+						<Text fz="xs"> = Focus dis.</Text>
+					</Flex>
+				</Card>
+				<Card
+					padding="0"
+					px="2px"
+					onClick={shortcutActions.digitalPayment}
+					className="cursor-pointer"
+				>
+					<Flex align="center" gap={4}>
+						<KeyboardShortcut keys={["alt", "g"]} />
+						<Text fz="xs"> = Digital pay</Text>
+					</Flex>
+				</Card>
+				<Card padding="0" px="2px" onClick={shortcutActions.enterAmount} className="cursor-pointer">
+					<Flex align="center" gap={4}>
+						<KeyboardShortcut keys={["alt", "m"]} />
+						<Text fz="xs"> = Enter amount</Text>
+					</Flex>
+				</Card>
+				<Card padding="0" px="2px" onClick={shortcutActions.finalizePos} className="cursor-pointer">
+					<Flex align="center" gap={4}>
+						<KeyboardShortcut keys={["alt", "o"]} />
+						<Text fz="xs"> = Finalize POS</Text>
+					</Flex>
+				</Card>
 			</SimpleGrid>
 
 			{/* =============== split payments drawer =============== */}

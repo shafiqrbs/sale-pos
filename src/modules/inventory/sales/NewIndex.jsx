@@ -1,5 +1,5 @@
-import React, { useRef, useState } from "react";
-import { Box, Flex, Text } from "@mantine/core";
+import { useRef, useState } from "react";
+import { Box } from "@mantine/core";
 import { useForm } from "@mantine/form";
 
 import InvoiceForm from "./form/InvoiceForm";
@@ -19,12 +19,12 @@ export default function NewIndex() {
 	const { user } = useLoggedInUser();
 	const { isOnline } = useOutletContext();
 	const { configData, is_sales_online } = useConfigData();
-	const [ addSales ] = useAddSalesMutation();
+	const [addSales] = useAddSalesMutation();
 	const shouldSubmitSalesOnline = isOnline && is_sales_online;
 	const itemsForm = useForm(salesOverviewRequest(t));
 	const { salesProducts: itemsProducts, refetch } = useTempSalesProducts({ type: "sales" });
-	const [ resetKey, setResetKey ] = useState(0);
-	const [ isAddingItem, setIsAddingItem ] = useState(false);
+	const [resetKey, setResetKey] = useState(0);
+	const [isAddingItem, setIsAddingItem] = useState(false);
 
 	// =============== tracks whether the submit was triggered via POS Print ===============
 	const withPosPrintRef = useRef(false);
@@ -38,7 +38,7 @@ export default function NewIndex() {
 					id: productId,
 				});
 				const currentProductData = Array.isArray(currentProduct)
-					? currentProduct[ 0 ]
+					? currentProduct[0]
 					: currentProduct;
 
 				if (!currentProductData) {
@@ -63,7 +63,6 @@ export default function NewIndex() {
 			console.error("Error updating products after sale:", error);
 		}
 	};
-
 	const handleSubmit = async (formValues) => {
 		if (!itemsProducts?.length) {
 			showNotification(t("AddMinimumOneSalesItemFirst"), "red");
@@ -93,7 +92,7 @@ export default function NewIndex() {
 		const grandTotal = Math.max(subTotal - discountValue + vat, 0);
 		const fullAmount = Number(formValues.paymentAmount) || 0;
 		const isSplitPaymentActive = payments.length > 1;
-		const modeName = isSplitPaymentActive ? "Multiple" : (payments[ 0 ]?.transaction_mode_name ?? "");
+		const modeName = isSplitPaymentActive ? "Multiple" : (payments[0]?.transaction_mode_name ?? "");
 
 		// =============== get customer info from database ===============
 		let customerName = "";
@@ -103,7 +102,7 @@ export default function NewIndex() {
 			const customers = await window.dbAPI.getDataFromTable("core_customers", {
 				id: formValues.customer_id,
 			});
-			const customerData = Array.isArray(customers) ? customers[ 0 ] : customers;
+			const customerData = Array.isArray(customers) ? customers[0] : customers;
 			if (customerData) {
 				customerName = customerData.name ?? "";
 				customerMobile = customerData.mobile ?? "";
@@ -156,7 +155,7 @@ export default function NewIndex() {
 			payments: JSON.stringify(payments),
 		};
 
-		const primaryTransactionModeId = payments[ 0 ]?.transaction_mode_id;
+		const primaryTransactionModeId = payments[0]?.transaction_mode_id;
 
 		const buildSalesApiPayload = () => ({
 			customer_id: String(formValues.customer_id ?? ""),
@@ -254,34 +253,6 @@ export default function NewIndex() {
 
 	return (
 		<Box>
-			{/* <Flex justify="space-between" align="center" mb="4xs">
-                <Box px="xs" fz="sm" fw={600} className="boxBackground textColor borderRadiusAll">
-                    {t("SalesItems")}
-                </Box>
-
-                <Flex gap="sm">
-                    <NavLink to="/">
-                        <Text>
-                            {t("Sales")}
-                        </Text>
-                    </NavLink>
-                    <NavLink to="/">
-                        <Text>
-                            {t("Hold")}
-                        </Text>
-                    </NavLink>
-                    <NavLink to="/">
-                        <Text>
-                            {t("Stock")}
-                        </Text>
-                    </NavLink>
-                    <NavLink to="/">
-                        <Text>
-                            {t("Instant")}
-                        </Text>
-                    </NavLink>
-                </Flex>
-            </Flex>*/}
 			<Box p="xs" pb={0}>
 				<InvoiceForm refetch={refetch} />
 			</Box>

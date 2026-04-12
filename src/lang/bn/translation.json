@@ -1275,6 +1275,7 @@
 	"NoTransactionModeFound": "কোনো লেনদেনের মোড পাওয়া যায়নি",
 	"SelectTransactionMode": "লেনদেনের মোড নির্বাচন করুন",
 	"PaymentAmountRequired": "পেমেন্টের পরিমাণ প্রয়োজন",
+	"ExactAmountRequiredWithoutCustomer": "কাস্টমার ছাড়া সম্পূর্ণ পেমেন্ট প্রয়োজন",
 	"VendorRequired": "সরবরাহকারী প্রয়োজন",
 	"SearchReturnMode": "রিটার্ন মোড খুঁজুন",
 	"ReturnModeRequired": "রিটার্ন মোড প্রয়োজন",

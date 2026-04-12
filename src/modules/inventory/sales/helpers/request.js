@@ -12,6 +12,7 @@ const salesOverviewInitialValues = {
 	// =============== payments array supports both single and split payment modes ===============
 	payments: [],
 	splitPaymentDrawerOpened: false,
+	_grandTotal: 0,
 };
 
 export const salesOverviewRequest = (t) => {
@@ -24,9 +25,14 @@ export const salesOverviewRequest = (t) => {
 				}
 				return null;
 			},
-			paymentAmount: (value) => {
-				if (Number(value) <= 0) {
+			paymentAmount: (value, values) => {
+				const amount = Number(value) || 0;
+				const grandTotal = Number(values._grandTotal) || 0;
+				if (amount <= 0) {
 					return t("PaymentAmountRequired");
+				}
+				if (!values.customer_id && grandTotal > 0 && amount < grandTotal) {
+					return t("ExactAmountRequiredWithoutCustomer");
 				}
 				return null;
 			},

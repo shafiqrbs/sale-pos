@@ -47,11 +47,11 @@ export default function Table() {
 	const { mainAreaHeight } = useMainAreaHeight();
 	const { currencySymbol } = useConfigData();
 	const [ page, setPage ] = useState(1);
-	const [ dataSource, setDataSource ] = useState("offline");
+	const [ userChoice, setUserChoice ] = useState(null);
 	const [ onlineSearchTerm, setOnlineSearchTerm ] = useState("");
 	const [ offlineSearchTerm, setOfflineSearchTerm ] = useState("");
 
-	const effectiveDataSource = isOnline && isOnlinePermissionIncludes ? dataSource : "offline";
+	const effectiveDataSource = isOnline && isOnlinePermissionIncludes ? (userChoice ?? "online") : "offline";
 
 	const [ productDrawer, { open: openProductDrawer, close: closeProductDrawer } ] =
 		useDisclosure(false);
@@ -180,7 +180,7 @@ export default function Table() {
 						<SegmentedControl
 							value={effectiveDataSource}
 							onChange={(value) => {
-								setDataSource(value);
+								setUserChoice(value);
 								setPage(1);
 							}}
 							color={effectiveDataSource === "online" ? "green" : "red"}
