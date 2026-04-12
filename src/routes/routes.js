@@ -31,7 +31,7 @@ export const APP_NAVLINKS = {
 	STOCK: "/inventory/stock",
 	STOCK_EDIT: "/inventory/stock/edit",
 	INVENTORY_CATEGORIES: "/inventory/category",
-	INVENTORY_PARTICULAR: "/inventory/select/particular",
+	INVENTORY_PARTICULAR: "/inventory/particular",
 	ACTIVATE: "/activate",
 	LOGIN: "/login",
 	DASHBOARD: "/dashboard",
@@ -75,4 +75,6 @@ export const APP_APIS = {
 	CATEGORY_GROUP: "/inventory/category-group",
 	PARENT_CATEGORIES: "/inventory/select/group-category",
 	CATEGORIES: "/inventory/select/category",
+	PARTICULAR: "/inventory/particular",
+	PARTICULAR_TYPES: "/inventory/select/particular-type",
 };

@@ -1346,5 +1346,6 @@
 	"Code": "Code",
 	"Confirm": "Confirm",
 	"DeleteFailed": "Delete failed",
-	"AddCategory": "Add Category"
+	"AddCategory": "Add Category",
+	"SettingNameRequired": "Setting name is required"
 }

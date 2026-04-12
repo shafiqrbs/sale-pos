@@ -1356,5 +1356,6 @@
 	"Inactive": "নিষ্ক্রিয়",
 	"Code": "কোড",
 	"Confirm": "নিশ্চিত করুন",
-	"DeleteFailed": "মুছে ফেলা ব্যর্থ"
+	"DeleteFailed": "মুছে ফেলা ব্যর্থ",
+	"SettingNameRequired": "সেটিং নাম আবশ্যক"
 }
