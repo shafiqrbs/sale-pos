@@ -1,6 +1,7 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Box } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { useSelector, useDispatch } from "react-redux";
 
 import InvoiceForm from "./form/InvoiceForm";
 import SalesOverview from "./Overview";
@@ -12,10 +13,14 @@ import useConfigData from "@hooks/useConfigData";
 import { useAddSalesMutation } from "@services/sales";
 import { generateInvoiceId, formatDateTime, formatDateISO } from "@utils/index";
 import { useTranslation } from "react-i18next";
-import { useOutletContext } from "react-router";
+import { useOutletContext, useNavigate } from "react-router";
+import { clearEditingSale } from "@features/checkout";
+import { APP_NAVLINKS } from "@/routes/routes";
 
 export default function NewIndex() {
 	const { t } = useTranslation();
+	const dispatch = useDispatch();
+	const navigate = useNavigate();
 	const { user } = useLoggedInUser();
 	const { isOnline } = useOutletContext();
 	const { configData, is_sales_online } = useConfigData();
@@ -26,8 +31,37 @@ export default function NewIndex() {
 	const [resetKey, setResetKey] = useState(0);
 	const [isAddingItem, setIsAddingItem] = useState(false);
 
+	const editingSale = useSelector((state) => state.checkout.editingSale);
+	const isEditMode = !!editingSale;
+
 	// =============== tracks whether the submit was triggered via POS Print ===============
 	const withPosPrintRef = useRef(false);
+
+	// =============== restore form values from editingSale (hold sale resumption) ===============
+	useEffect(() => {
+		if (editingSale) {
+			if (editingSale.customerId) {
+				itemsForm.setFieldValue("customer_id", editingSale.customerId?.toString());
+			}
+			if (editingSale.discount) {
+				itemsForm.setFieldValue("discount", editingSale.discount);
+			}
+			if (editingSale.discount_type) {
+				itemsForm.setFieldValue("discount_type", editingSale.discount_type);
+			}
+			if (editingSale.payments) {
+				const payments = typeof editingSale.payments === "string"
+					? JSON.parse(editingSale.payments)
+					: editingSale.payments;
+				if (payments?.length) {
+					itemsForm.setFieldValue("payments", payments);
+					const totalAmount = payments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+					itemsForm.setFieldValue("paymentAmount", totalAmount);
+				}
+			}
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [editingSale]);
 
 	// =============== update product quantities and sales after successful sale (same as POS Transaction) ===============
 	const updateProductsAfterSale = async () => {
@@ -153,6 +187,7 @@ export default function NewIndex() {
 			sales_items: JSON.stringify(salesItemsForDb),
 			multi_transaction: isSplitPaymentActive ? 1 : 0,
 			payments: JSON.stringify(payments),
+			status: formValues.status || "completed",
 		};
 
 		const primaryTransactionModeId = payments[0]?.transaction_mode_id;
@@ -196,7 +231,16 @@ export default function NewIndex() {
 
 		setIsAddingItem(true);
 		try {
-			if (shouldSubmitSalesOnline) {
+			if (editingSale) {
+				// =============== update mode: update existing hold sale record ===============
+				if (editingSale.id) {
+					await window.dbAPI.updateDataInTable("sales", {
+						condition: { id: editingSale.id },
+						data: salesData,
+					});
+				}
+				dispatch(clearEditingSale());
+			} else if (shouldSubmitSalesOnline) {
 				const salesResponse = await addSales(buildSalesApiPayload()).unwrap();
 				if (salesResponse.data?.error) {
 					showNotification(salesResponse.data.error || "Failed to save sale", "red");
@@ -209,7 +253,7 @@ export default function NewIndex() {
 
 			const shouldPrint = withPosPrintRef.current;
 
-			showNotification(t("SaleAddedSuccessfully"), "teal");
+			showNotification(editingSale ? t("SaleUpdatedSuccessfully") : t("SaleAddedSuccessfully"), "teal");
 
 			await window.dbAPI.deleteDataFromTable("temp_sales_products", { type: "sales" });
 			refetch();
@@ -228,6 +272,12 @@ export default function NewIndex() {
 				} else {
 					showNotification(t("PrinterNotSetup"), "red");
 				}
+			}
+
+			// =============== after editing, navigate back to sales list ===============
+			if (isEditMode) {
+				navigate(APP_NAVLINKS.SALES);
+				return;
 			}
 		} catch (error) {
 			console.error(error);
@@ -265,6 +315,8 @@ export default function NewIndex() {
 					onPosPrint={handlePosPrint}
 					onReset={handleReset}
 					resetKey={resetKey}
+					handleSubmit={handleSubmit}
+					isEditMode={isEditMode}
 				/>
 			</Box>
 		</Box>

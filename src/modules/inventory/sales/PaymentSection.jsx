@@ -47,6 +47,7 @@ export default function PaymentSection({
 	onPosPrint,
 	resetKey = 0,
 	isEditMode = false,
+	handleSubmit,
 }) {
 	const { t } = useTranslation();
 	const { transactionMode } = useTransactionMode();
@@ -204,6 +205,10 @@ export default function PaymentSection({
 			},
 		]);
 		itemsForm.setFieldValue("paymentAmount", grandTotal);
+	};
+
+	const handleHold = () => {
+		handleSubmit({ ...itemsForm.values, status: "hold" });
 	};
 
 	const shortcutActions = {
@@ -612,10 +617,10 @@ export default function PaymentSection({
 										radius={0}
 										size="sm"
 										form="itemsForm"
-										type="submit"
 										id="ItemsHoldFormSubmit"
 										leftSection={<IconPlayerPause size={16} />}
 										disabled={isAddingItem}
+										onClick={handleHold}
 									>
 										<Stack gap={0}>
 											<Text size="xs">{t("Hold")}</Text>

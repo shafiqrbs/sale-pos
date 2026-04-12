@@ -13,6 +13,7 @@ const salesOverviewInitialValues = {
 	payments: [],
 	splitPaymentDrawerOpened: false,
 	_grandTotal: 0,
+	status: "completed",
 };
 
 export const salesOverviewRequest = (t) => {

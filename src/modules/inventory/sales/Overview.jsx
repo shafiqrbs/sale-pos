@@ -14,6 +14,7 @@ export default function Overview({
 	onQuantityChange,
 	onPriceChange,
 	onDiscountChange,
+	handleSubmit,
 	onRemoveItem,
 	isEditMode = false,
 }) {
@@ -44,6 +45,7 @@ export default function Overview({
 				onReset={onReset}
 				resetKey={resetKey}
 				isEditMode={isEditMode}
+				handleSubmit={handleSubmit}
 			/>
 		</Box>
 	);

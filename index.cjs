@@ -137,6 +137,16 @@ ipcMain.handle("relaunch-app", async () => {
 	}
 });
 
+ipcMain.handle("reload-app", async (event) => {
+	try {
+		const win = BrowserWindow.fromWebContents(event.sender);
+		if (win) win.reload();
+	} catch (error) {
+		console.error("Error occurred on reloading app: ", error);
+		throw error;
+	}
+});
+
 let mainWindow;
 let splash;
 

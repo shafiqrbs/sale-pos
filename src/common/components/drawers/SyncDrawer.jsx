@@ -85,6 +85,7 @@ export default function SyncDrawer({
 
 	const buildSalesSyncPayload = (sale) => {
 		const items = [];
+
 		const salesItems = JSON.parse(sale?.sales_items || "[]");
 
 		salesItems?.forEach((item) => {
@@ -137,7 +138,7 @@ export default function SyncDrawer({
 		};
 
 		switch (syncType) {
-			case "sales":
+			case "sales": {
 				return {
 					...basePayload,
 					content: syncData.map((sale) => ({
@@ -193,6 +194,8 @@ export default function SyncDrawer({
 						})),
 					})),
 				};
+			}
+
 			case "purchases":
 			case "products":
 				return {
@@ -223,9 +226,12 @@ export default function SyncDrawer({
 			let syncData = null;
 
 			tableName = TABLE_MAPPING[syncOption] || syncOption;
-			syncData = await window.dbAPI.getDataFromTable(tableName);
+
+			const fetchOption = syncOption === "sales" ? { status: "completed" } : {};
+			syncData = await window.dbAPI.getDataFromTable(tableName, fetchOption);
 
 			const payload = buildSyncPayload({ syncType: syncOption, syncData: syncData || [] });
+
 			// return console.log({ syncType: syncOption, ...payload });
 			const response = await syncPos({ syncType: syncOption, ...payload }).unwrap();
 
@@ -244,11 +250,20 @@ export default function SyncDrawer({
 				});
 				setSyncRecords(nextSyncRecords);
 
-				// silently destroy the table data after successful sync
-				window.dbAPI.destroyTableData(tableName);
+				// silently destroy the table data after successful sync (preserve hold sales)
+				if (tableName === "sales") {
+					window.dbAPI.deleteDataFromTable(tableName, { status: "completed" });
+				} else {
+					window.dbAPI.destroyTableData(tableName);
+				}
+
+				showNotification(`Successfully synced ${syncOption} data`, "teal", "", "", true);
+
+				// reload the window to reflect synced state
+				setTimeout(() => window.location.reload(), 1000);
 
 				// overall platform sync
-				runSyncPlatform();
+				// runSyncPlatform();
 			}
 		} catch (error) {
 			console.error(`Error syncing ${syncOption} data:`, error);

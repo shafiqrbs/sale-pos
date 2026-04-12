@@ -509,7 +509,7 @@ export default function Transaction({ form, tableId = null }) {
 		});
 	};
 
-	const handlePrintAll = async () => {
+	const handleHold = async () => {
 		// =============== first save the sale with hold status ================
 		await handleSave({ withPos: false, status: "hold" });
 
@@ -554,7 +554,7 @@ export default function Transaction({ form, tableId = null }) {
 
 	useHotkeys([
 		["alt+s", () => handleSave({ withPos: false })],
-		["alt+h", () => handlePrintAll()],
+		["alt+h", () => handleHold()],
 		["alt+p", () => handleSave({ withPos: true })],
 		["alt+r", () => handleReset()],
 	]);
@@ -792,7 +792,7 @@ export default function Transaction({ form, tableId = null }) {
 							size="lg"
 							fullWidth={true}
 							leftSection={<IconHandStop size={18} />}
-							onClick={handlePrintAll}
+							onClick={handleHold}
 						>
 							<Stack gap={0}>
 								{t("Hold")}

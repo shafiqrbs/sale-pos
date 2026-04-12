@@ -40,6 +40,9 @@ try {
 		relaunchApp: () => {
 			return ipcRenderer.invoke("relaunch-app");
 		},
+		reloadApp: () => {
+			return ipcRenderer.invoke("reload-app");
+		},
 		onDBProgress: (callback) => {
 			ipcRenderer.on("db-progress", (event, progress) => {
 				callback(progress);

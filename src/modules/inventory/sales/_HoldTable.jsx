@@ -36,26 +36,24 @@ import { formatCurrency } from "@utils/index";
 import { showNotification } from "@components/ShowNotificationComponent";
 import { modals } from "@mantine/modals";
 import { setEditingSale } from "@features/checkout";
-import useLoggedInUser from "@hooks/useLoggedInUser";
+import useConfigData from "@hooks/useConfigData";
 
 const PER_PAGE = 25;
 
 export default function HoldTable() {
 	const dispatch = useDispatch();
 	const { t } = useTranslation();
-	const [ opened, { open, close } ] = useDisclosure(false);
+	const { is_pos } = useConfigData();
+	const [opened, { open, close }] = useDisclosure(false);
 	useDisclosure(false);
 	const navigate = useNavigate();
-	const [ page, setPage ] = useState(1);
-	const [ selectedRow, setSelectedRow ] = useState(null);
-	const [ loading, setLoading ] = useState(false);
-	const [ salesViewData, setSalesViewData ] = useState(null);
-	const [ deletedSaleIds, setDeletedSaleIds ] = useState(new Set());
-	const [ userChoice, setUserChoice ] = useState(null);
-	const { mainAreaHeight, isOnline } = useOutletContext();
-	const { isOnlinePermissionIncludes } = useLoggedInUser();
+	const [page, setPage] = useState(1);
+	const [selectedRow, setSelectedRow] = useState(null);
+	const [loading, setLoading] = useState(false);
+	const [salesViewData, setSalesViewData] = useState(null);
+	const [deletedSaleIds, setDeletedSaleIds] = useState(new Set());
+	const { mainAreaHeight } = useOutletContext();
 	// =============== when offline or user lacks permission, always use offline data ===============
-	const effectiveDataSource = isOnline && isOnlinePermissionIncludes ? (userChoice ?? "online") : "offline";
 	const form = useForm({
 		initialValues: {
 			term: "",
@@ -73,7 +71,7 @@ export default function HoldTable() {
 			offset: PER_PAGE,
 			status: "hold",
 		},
-		offlineFetch: effectiveDataSource === "offline",
+		offlineFetch: true,
 	});
 
 	const handleDeleteClick = (record) => {
@@ -89,51 +87,82 @@ export default function HoldTable() {
 
 	const handleConfirmDelete = async (record) => {
 		await window.dbAPI.deleteDataFromTable("sales", { id: record.id });
-		setDeletedSaleIds((previousIds) => new Set([ ...previousIds, record.id ]));
+		setDeletedSaleIds((previousIds) => new Set([...previousIds, record.id]));
 		showNotification(t("InvoiceDeletedSuccess", { invoice: record.invoice }), "teal");
 	};
 
 	const handleProcess = async (data) => {
 		try {
-			// Clear existing cart items
-			const existingItems = await window.dbAPI.getDataFromTable("invoice_table_item");
-			if (existingItems?.length) {
-				const ids = existingItems.map((item) => item.id);
-				await window.dbAPI.deleteManyFromTable("invoice_table_item", ids);
-			}
-
-			// Parse saved sale items and insert into invoice_table_item
 			const salesItems = JSON.parse(data.sales_items || "[]");
-			for (const item of salesItems) {
-				await window.dbAPI.upsertIntoTable("invoice_table_item", {
-					stock_item_id: item.stock_item_id,
-					display_name: item.display_name,
-					quantity: item.quantity,
-					quantity_limit: item.quantity_limit || 0,
-					purchase_price: item.purchase_price || 0,
-					sales_price: item.sales_price,
-					custom_price: item.custom_price || 0,
-					is_print: item.is_print || 0,
-					sub_total: item.sub_total,
-					batches: typeof item.batches === "string" ? item.batches : JSON.stringify(item.batches || []),
-				});
+
+			if (is_pos) {
+				// Clear existing cart items
+				const existingItems = await window.dbAPI.getDataFromTable("invoice_table_item");
+				if (existingItems?.length) {
+					const ids = existingItems.map((item) => item.id);
+					await window.dbAPI.deleteManyFromTable("invoice_table_item", ids);
+				}
+
+				// Insert into invoice_table_item for POS
+				for (const item of salesItems) {
+					await window.dbAPI.upsertIntoTable("invoice_table_item", {
+						stock_item_id: item.stock_item_id,
+						display_name: item.display_name,
+						quantity: item.quantity,
+						quantity_limit: item.quantity_limit || 0,
+						purchase_price: item.purchase_price || 0,
+						sales_price: item.sales_price,
+						custom_price: item.custom_price || 0,
+						is_print: item.is_print || 0,
+						sub_total: item.sub_total,
+						batches:
+							typeof item.batches === "string" ? item.batches : JSON.stringify(item.batches || []),
+					});
+				}
+			} else {
+				// Clear existing temp sales products
+				await window.dbAPI.deleteDataFromTable("temp_sales_products", { type: "sales" });
+
+				// Insert into temp_sales_products for new sales flow
+				for (const item of salesItems) {
+					await window.dbAPI.upsertIntoTable("temp_sales_products", {
+						product_id: item.product_id || item.stock_item_id,
+						display_name: item.display_name,
+						sales_price: Number(item.sales_price) || 0,
+						price: Number(item.mrp ?? item.sales_price) || 0,
+						mrp: Number(item.mrp ?? item.sales_price) || 0,
+						quantity: Number(item.quantity) || 0,
+						purchase_price: Number(item.purchase_price) || 0,
+						sub_total: Number(item.sub_total) || 0,
+						category_id: item.category_id ?? null,
+						category_name: item.category_name ?? "",
+						percent: 0,
+						stock: 0,
+						unit_name: item.unit_name ?? "",
+						average_price: 0,
+						unit_id: item.unit_id ?? null,
+						type: "sales",
+					});
+				}
 			}
 
-			// Store sale metadata in Redux for the POS page to restore
-			dispatch(setEditingSale({
-				id: data.id,
-				customerId: data.customerId,
-				customerName: data.customerName,
-				customerMobile: data.customerMobile,
-				customer_address: data.customer_address,
-				salesById: data.salesById,
-				discount: data.discount,
-				discount_type: data.discount_type,
-				payments: data.payments,
-				status: data.status,
-			}));
+			// Store sale metadata in Redux for the target page to restore
+			dispatch(
+				setEditingSale({
+					id: data.id,
+					customerId: data.customerId,
+					customerName: data.customerName,
+					customerMobile: data.customerMobile,
+					customer_address: data.customer_address,
+					salesById: data.salesById,
+					discount: data.discount,
+					discount_type: data.discount_type,
+					payments: data.payments,
+					status: data.status,
+				})
+			);
 
-			navigate(APP_NAVLINKS.BAKERY);
+			navigate(is_pos ? APP_NAVLINKS.BAKERY : APP_NAVLINKS.SALES_NEW);
 		} catch (err) {
 			console.error("Error loading hold sale into POS:", err);
 			showNotification(t("FailedToLoadSaleIntoPOS"), "red");
@@ -155,37 +184,7 @@ export default function HoldTable() {
 		<Box>
 			<Flex mb="xs" gap="sm" justify="space-between" align="center">
 				<KeywordSearch showStartEndDate form={form} />
-				<Group gap="sm" wrap="nowrap" >
-					{isOnline && isOnlinePermissionIncludes && (
-						<SegmentedControl
-							value={effectiveDataSource}
-							onChange={(value) => {
-								setUserChoice(value);
-								setPage(1);
-							}}
-							color={effectiveDataSource === "online" ? "green" : "red"}
-							data={[
-								{
-									value: "online",
-									label: (
-										<Group gap={4} wrap="nowrap">
-											<IconGlobe size={13} color={effectiveDataSource === "online" ? "white" : "var(--mantine-color-green-6)"} />
-											{t("Online")}
-										</Group>
-									),
-								},
-								{
-									value: "offline",
-									label: (
-										<Group gap={4} wrap="nowrap">
-											<IconGlobeOff size={13} color={effectiveDataSource === "offline" ? "white" : "var(--mantine-color-red-6)"} />
-											{t("Offline")}
-										</Group>
-									),
-								},
-							]}
-						/>
-					)}
+				<Group gap="sm" wrap="nowrap">
 					<Button
 						w={170}
 						size="md"
