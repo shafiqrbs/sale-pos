@@ -31,7 +31,6 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router";
 import axios from "axios";
 import { APP_NAVLINKS, MASTER_APIS } from "@/routes/routes";
-import commonDataStoreIntoLocalStorage from "@utils/local-storage/commonDataStoreIntoLocalStorage";
 import DatabaseInsertProgress from "@components/DatabaseInsertProgress";
 import { useTranslation } from "react-i18next";
 
@@ -43,7 +42,7 @@ const TABLE_MAPPING = {
 	vendors: "vendors",
 };
 
-const EXPORT_MODES = ["sales", "purchases", "customers", "vendors"];
+const EXPORT_MODES = [ "sales", "purchases", "customers", "vendors" ];
 
 const IMPORT_ITEMS = [
 	{ mode: "platform", label: "Platform Sync", description: "Sync all platform data from server" },
@@ -61,19 +60,19 @@ export default function SyncDrawer({
 	const { t } = useTranslation();
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
-	const [syncPos] = useSyncPosMutation();
-	const [syncRecords, setSyncRecords] = useState(() => getSyncRecordsFromLocalStorage());
-	const [loadingStates, setLoadingStates] = useState(() => {
+	const [ syncPos ] = useSyncPosMutation();
+	const [ syncRecords, setSyncRecords ] = useState(() => getSyncRecordsFromLocalStorage());
+	const [ loadingStates, setLoadingStates ] = useState(() => {
 		return SYNC_DATA.reduce((accumulator, item) => {
-			accumulator[item.mode] = false;
+			accumulator[ item.mode ] = false;
 			return accumulator;
 		}, {});
 	});
-	const [platformSyncing, setPlatformSyncing] = useState(false);
-	const [isInserting, setIsInserting] = useState(false);
-	const [insertProgress, setInsertProgress] = useState(null);
-	const [activeTab, setActiveTab] = useState("export");
-	const lastSyncRecord = useMemo(() => getLastSyncRecord(syncRecords), [syncRecords]);
+	const [ platformSyncing, setPlatformSyncing ] = useState(false);
+	const [ isInserting, setIsInserting ] = useState(false);
+	const [ insertProgress, setInsertProgress ] = useState(null);
+	const [ activeTab, setActiveTab ] = useState("export");
+	const lastSyncRecord = useMemo(() => getLastSyncRecord(syncRecords), [ syncRecords ]);
 
 	useEffect(() => {
 		if (quickPlatformSyncRequested) {
@@ -81,7 +80,7 @@ export default function SyncDrawer({
 			confirmAndSyncPlatform();
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [quickPlatformSyncRequested]);
+	}, [ quickPlatformSyncRequested ]);
 
 	const buildSalesSyncPayload = (sale) => {
 		const items = [];
@@ -200,7 +199,7 @@ export default function SyncDrawer({
 			case "products":
 				return {
 					...basePayload,
-					content: syncData.map((sale) => ({})),
+					content: syncData.map(() => ({})),
 				};
 			case "customers":
 			case "vendors":
@@ -218,14 +217,14 @@ export default function SyncDrawer({
 	const runSync = async (syncOption) => {
 		setLoadingStates((previousStates) => ({
 			...previousStates,
-			[syncOption]: true,
+			[ syncOption ]: true,
 		}));
 
 		try {
 			let tableName = syncOption;
 			let syncData = null;
 
-			tableName = TABLE_MAPPING[syncOption] || syncOption;
+			tableName = TABLE_MAPPING[ syncOption ] || syncOption;
 
 			const fetchOption = syncOption === "sales" ? { status: "completed" } : {};
 			syncData = await window.dbAPI.getDataFromTable(tableName, fetchOption);
@@ -259,8 +258,10 @@ export default function SyncDrawer({
 
 				showNotification(`Successfully synced ${syncOption} data`, "teal", "", "", true);
 
-				// reload the window to reflect synced state
-				setTimeout(() => window.location.reload(), 1000);
+				// reload the window to reflect synced state (main process reloads BrowserWindow)
+				setTimeout(() => {
+					void window.dbAPI.reloadApp();
+				}, 1000);
 
 				// overall platform sync
 				// runSyncPlatform();
@@ -271,7 +272,7 @@ export default function SyncDrawer({
 		} finally {
 			setLoadingStates((previousStates) => ({
 				...previousStates,
-				[syncOption]: false,
+				[ syncOption ]: false,
 			}));
 		}
 	};
@@ -354,12 +355,14 @@ export default function SyncDrawer({
 			setIsInserting(true);
 			setPlatformSyncing(false);
 
+			let is_pos = 0;
+
 			try {
 				// =============== insert tables one by one so progress displays per-table ================
-				for (const [table, property] of Object.entries(DATA_MAP)) {
-					const dataList = Array.isArray(response.data.data[property])
-						? response.data.data[property]
-						: [response.data.data[property]];
+				for (const [ table, property ] of Object.entries(DATA_MAP)) {
+					const dataList = Array.isArray(response.data.data[ property ])
+						? response.data.data[ property ]
+						: [ response.data.data[ property ] ];
 
 					// =============== config_data is a single object, format it before inserting ================
 					if (table === "config_data") {
@@ -367,6 +370,8 @@ export default function SyncDrawer({
 							id: 1,
 							data: JSON.stringify(data),
 						}));
+
+						is_pos = dataList[ 0 ]?.inventory_config?.is_pos ?? dataList[ 0 ]?.is_pos ?? 0;
 						await window.dbAPI.clearAndInsertBulk(table, formattedData, { batchSize: 500 });
 					} else {
 						await window.dbAPI.clearAndInsertBulk(table, dataList, { batchSize: 500 });
@@ -378,27 +383,21 @@ export default function SyncDrawer({
 				setInsertProgress(null);
 			}
 
-			// =============== clear tables that will be populated by commonDataStoreIntoLocalStorage ================
 			await window.dbAPI.destroyTableData("invoice_table");
 
-			// =============== get user id from users table and call common data store function ================
-			const userData = await window.dbAPI.getDataFromTable("users");
-			if (userData?.id) {
-				const navigationPathFromConfig = await commonDataStoreIntoLocalStorage(userData.id);
-				const targetPath = navigationPathFromConfig ?? APP_NAVLINKS.BAKERY;
-				// =============== HashRouter: read path when sync finishes (avoids stale closure) ================
-				const hashSegment = window.location.hash.replace(/^#/, "").split("?")[0];
-				const currentPathname = hashSegment === "" ? "/" : hashSegment;
-				// =============== only adjust route when user is on pos bakery or new sales entry (login-style routing) ================
-				const isSalesNewOrBakeryRoute =
-					currentPathname === APP_NAVLINKS.SALES_NEW ||
-					currentPathname === APP_NAVLINKS.BAKERY ||
-					currentPathname.startsWith(`${APP_NAVLINKS.SALES_NEW}/`) ||
-					currentPathname.startsWith(`${APP_NAVLINKS.BAKERY}/`);
+			const targetPath = is_pos ? APP_NAVLINKS.BAKERY : APP_NAVLINKS.SALES_NEW;
+			const hashSegment = window.location.hash.replace(/^#/, "").split("?")[ 0 ];
+			const currentPathname = hashSegment === "" ? "/" : hashSegment;
 
-				if (isSalesNewOrBakeryRoute && currentPathname !== targetPath) {
-					navigate(targetPath, { replace: true });
-				}
+			// =============== only adjust route when user is on pos bakery or new sales entry (login-style routing) ================
+			const isSalesNewOrBakeryRoute =
+				currentPathname === APP_NAVLINKS.SALES_NEW ||
+				currentPathname === APP_NAVLINKS.BAKERY ||
+				currentPathname.startsWith(`${APP_NAVLINKS.SALES_NEW}/`) ||
+				currentPathname.startsWith(`${APP_NAVLINKS.BAKERY}/`);
+
+			if (isSalesNewOrBakeryRoute && currentPathname !== targetPath) {
+				navigate(targetPath, { replace: true });
 			}
 
 			// =============== save sync record ================
@@ -410,15 +409,17 @@ export default function SyncDrawer({
 
 			showNotification(t("PlatformDataSyncedSuccessfully"), "teal", "lightgray", "", "", true);
 
-			dispatch(apiSlice.util.invalidateTags(["Sales"]));
+			dispatch(apiSlice.util.invalidateTags([ "Sales" ]));
 
-			setTimeout(() => window.location.reload(), 100);
+			setTimeout(() => {
+				void window.dbAPI.reloadApp();
+			}, 100);
 		} catch (error) {
 			console.error("Error syncing platform data:", error);
 			showNotification(
 				error?.response?.data?.message ||
-					error?.message ||
-					"Failed to sync platform data. Please try again.",
+				error?.message ||
+				"Failed to sync platform data. Please try again.",
 				"red",
 				"",
 				"",
@@ -519,7 +520,7 @@ export default function SyncDrawer({
 											</Text>
 										</Stack>
 										<ActionIcon
-											loading={loadingStates[item.mode] || false}
+											loading={loadingStates[ item.mode ] || false}
 											loaderProps={{
 												children: (
 													<Flex justify="center" align="center" h="100%">
