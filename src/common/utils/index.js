@@ -228,3 +228,13 @@ export const parseJsonArray = (value) => {
 		return [];
 	}
 };
+
+// =============== labels from t() must be escaped before embedding in nothingFoundHtml (innerHTML) ===============
+export function escapeHtmlForVirtualSelectEmptyState(text) {
+	if (text == null) {
+		return "";
+	}
+	const div = document.createElement("div");
+	div.textContent = String(text);
+	return div.innerHTML;
+}

@@ -8,7 +8,7 @@ import {
 	IconRefresh,
 	IconShoppingCart,
 } from "@tabler/icons-react";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import InputNumberForm from "@components/form-builders/InputNumberForm";
 import InputForm from "@components/form-builders/InputForm";
@@ -17,21 +17,24 @@ import useLocalProductList from "@hooks/useLocalProductList";
 import useGetCategories from "@hooks/useGetCategories";
 import useConfigData from "@hooks/useConfigData";
 import { useDisclosure, useHotkeys } from "@mantine/hooks";
-import { formatCurrency } from "@utils/index";
+import { escapeHtmlForVirtualSelectEmptyState, formatCurrency } from "@utils/index";
 import { showNotification } from "@components/ShowNotificationComponent";
 import { salesItemFormRequest } from "../helpers/request";
 import FormValidationWrapper from "@components/form-builders/FormValidationWrapper";
 import VirtualSearchSelect from "@components/form-builders/VirtualSearchSelect";
 import { useTranslation } from "react-i18next";
 
+const PRODUCT_EMPTY_BUTTON_STYLE =
+	"display:block;width:100%;padding:6px 10px;margin:0;border:1px solid #ced4da;border-radius:4px;background:#fff;cursor:pointer;font-size:13px;text-align:center;";
+
 export default function InvoiceForm({ refetch, onAddItem }) {
 	const { t } = useTranslation();
-	const [productResetKey, setProductResetKey] = useState(0);
+	const [ productResetKey, setProductResetKey ] = useState(0);
 	const { currencySymbol } = useConfigData();
 	const itemsForm = useForm(salesItemFormRequest(t));
 	const { categories } = useGetCategories();
 
-	const [isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer }] =
+	const [ isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer } ] =
 		useDisclosure(false);
 
 	// =============== declarative product list — fetches all products on mount ===============
@@ -128,7 +131,43 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 		requestAnimationFrame(() => document.getElementById("quantity").focus());
 	};
 
-	useHotkeys([["alt+a", () => document.getElementById("EntityFormSubmit")?.click()]]);
+	const productNothingFoundHtml = useMemo(() => {
+		const labelAdd = escapeHtmlForVirtualSelectEmptyState(t("AddProduct"));
+		const labelCustomer = escapeHtmlForVirtualSelectEmptyState(t("Customer"));
+		const labelPayment = escapeHtmlForVirtualSelectEmptyState(t("Payment"));
+		return (
+			`<div class="invoice-product-empty-markup" style="display:flex;gap:8px;padding:8px;">` +
+			`<button type="button" data-virtual-search-empty-action="addProduct" style="${PRODUCT_EMPTY_BUTTON_STYLE}">${labelAdd}</button>` +
+			`<button type="button" data-virtual-search-empty-action="selectCustomer" style="${PRODUCT_EMPTY_BUTTON_STYLE}">${labelCustomer}</button>` +
+			`<button type="button" data-virtual-search-empty-action="payment" style="${PRODUCT_EMPTY_BUTTON_STYLE}">${labelPayment}</button>` +
+			`</div>`
+		);
+	}, [ t ]);
+
+	const handleProductNothingFoundAction = useCallback(
+		(action) => {
+			const productHost = document.getElementById("productId");
+			const virtualSelectInstance = productHost?.virtualSelect;
+			if (virtualSelectInstance && typeof virtualSelectInstance.closeDropbox === "function") {
+				virtualSelectInstance.closeDropbox();
+			}
+
+			if (action === "addProduct") {
+				openProductDrawer();
+				return;
+			}
+			if (action === "selectCustomer") {
+				document.getElementById("customerSelect")?.focus();
+				return;
+			}
+			if (action === "payment") {
+				document.getElementById("paymentAmount")?.focus();
+			}
+		},
+		[ openProductDrawer ],
+	);
+
+	useHotkeys([ [ "alt+a", () => document.getElementById("EntityFormSubmit")?.click() ] ]);
 
 	return (
 		<>
@@ -191,6 +230,8 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 										searchable
 										showOptionsOnlyOnSearch={true}
 										nothingFoundMessage={t("ChangeSearchTermProduct")}
+										nothingFoundHtml={productNothingFoundHtml}
+										onNothingFoundAction={handleProductNothingFoundAction}
 										onChange={handleProductSelect}
 										id="productId"
 									/>
@@ -221,7 +262,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 							placeholder={t("QTY")}
 							nextField="salesPrice"
 							required={false}
-									tooltip={itemsForm.errors.quantity}
+							tooltip={itemsForm.errors.quantity}
 							rightIcon={
 								<Text fz="xs" fw={500}>
 									{itemsForm.values.unit || "Unit"}
@@ -313,7 +354,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 			<AddProductDrawer
 				productDrawer={isProductDrawerOpened}
 				closeProductDrawer={closeProductDrawer}
-				setStockProductRestore={() => {}}
+				setStockProductRestore={() => { }}
 				focusField="productId"
 				fieldPrefix=""
 			/>

@@ -1,4 +1,5 @@
 import { Box } from "@mantine/core";
+import { escapeHtmlForVirtualSelectEmptyState } from "@utils/index";
 import { useEffect, useMemo, useRef } from "react";
 
 // =============== load virtual-select-plugin once; script attaches VirtualSelect to window ===============
@@ -14,7 +15,9 @@ import "virtual-select-plugin/dist/virtual-select.min.js";
  * @param {string} [placeholder] - placeholder text
  * @param {boolean} [searchable] - enable search
  * @param {boolean} [disabled] - disable the select
- * @param {string} [nothingFoundMessage] - message when no options or no search results
+ * @param {string} [nothingFoundMessage] - plain message when nothingFoundHtml is omitted (escaped for innerHTML)
+ * @param {string} [nothingFoundHtml] - raw HTML for empty panels; overrides nothingFoundMessage when provided
+ * @param {(action: string) => void} [onNothingFoundAction] - receives the value of data-virtual-search-empty-action from a clicked node inside the empty panel
  * @param {(value: string, option: any) => void} [onChange] - called with (value, full option object)
  */
 export default function VirtualSearchSelect({
@@ -25,12 +28,27 @@ export default function VirtualSearchSelect({
 	disabled = false,
 	showOptionsOnlyOnSearch = false,
 	nothingFoundMessage = "No results found",
+	nothingFoundHtml,
+	onNothingFoundAction,
 	onChange,
 	id,
 	nextField,
 }) {
 	const containerRef = useRef(null);
 	const virtualSelectInstanceRef = useRef(null);
+
+	const emptyStateHtml = useMemo(() => {
+		if (typeof nothingFoundHtml === "string") {
+			return nothingFoundHtml;
+		}
+		return escapeHtmlForVirtualSelectEmptyState(nothingFoundMessage || "No results found");
+	}, [ nothingFoundHtml, nothingFoundMessage ]);
+
+	const emptyStateHtmlRef = useRef(emptyStateHtml);
+	emptyStateHtmlRef.current = emptyStateHtml;
+
+	const onNothingFoundActionRef = useRef(onNothingFoundAction);
+	onNothingFoundActionRef.current = onNothingFoundAction;
 
 	// =============== O(1) lookup for selected option when change fires ===============
 	const optionMap = useMemo(() => {
@@ -71,8 +89,8 @@ export default function VirtualSearchSelect({
 			maxWidth: "100%",
 			overflow: "hidden",
 			selectedValue: value != null ? String(value) : "",
-			noOptionsText: nothingFoundMessage || "No options found",
-			noSearchResultsText: nothingFoundMessage || "No results found",
+			noOptionsText: emptyStateHtmlRef.current,
+			noSearchResultsText: emptyStateHtmlRef.current,
 			disabled: !!disabled,
 		});
 
@@ -157,6 +175,37 @@ export default function VirtualSearchSelect({
 			}
 		}
 	}, [ disabled ]);
+
+	// =============== sync empty-state html and delegate action clicks; both care about the same panel nodes ===============
+	useEffect(() => {
+		const root = containerRef.current;
+		if (!root) {
+			return undefined;
+		}
+
+		const noSearchResults = root.querySelector(".vscomp-no-search-results");
+		const noOptions = root.querySelector(".vscomp-no-options");
+
+		if (noSearchResults) noSearchResults.innerHTML = emptyStateHtml;
+		if (noOptions) noOptions.innerHTML = emptyStateHtml;
+
+		const handleClick = (event) => {
+			const target = event.target;
+			if (!(target instanceof Element)) {
+				return;
+			}
+			const trigger = target.closest("[data-virtual-search-empty-action]");
+			if (!trigger) {
+				return;
+			}
+			event.preventDefault();
+			event.stopPropagation();
+			onNothingFoundActionRef.current?.(trigger.getAttribute("data-virtual-search-empty-action") || "");
+		};
+
+		root.addEventListener("click", handleClick);
+		return () => root.removeEventListener("click", handleClick);
+	}, [ emptyStateHtml ]);
 
 	return (
 		<Box ref={containerRef} id={id} className="virtual-search-select-wrapper" />
