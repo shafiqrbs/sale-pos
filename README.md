@@ -12,10 +12,16 @@ The repository [example-buildable-electronjs](https://github.com/Sharif-Minhaz/e
 
 **Project Structure (client):**
 
-- **`index.cjs`:** Main process script initializing the application, managing windows, and handling lifecycle events.
-- **`preload.cjs`:** Preload script that sets up a secure context bridge between the main and renderer processes.
+- **`index.cjs`:** Main process entry. Creates windows, sets CSP, and inside `app.whenReady()` calls `initSchema()` followed by `registerIpcHandlers()`.
+- **`preload.cjs`:** Context bridge between main and renderer. Exposes `window.dbAPI`, `window.deviceAPI`, `window.zoomAPI`, and `window.authAPI`.
 - **`App.jsx`:** React component serving as the entry point for the renderer process, managing UI and user interactions.
-- **`db.cjs`:** Module handling SQLite database operations, providing functions for data manipulation and retrieval.
+- **`electron/connection.cjs`:** Owns the single `better-sqlite3` `Database` instance. All main-process modules that touch SQLite import `db` from here.
+- **`electron/schema.cjs`:** Table and index DDL. Exports `initSchema()`, called once at startup.
+- **`electron/validators.cjs`:** SQL-injection guards — validates table names, column identifiers, search fields, and SQL operators before they reach any query.
+- **`electron/db.cjs`:** CRUD helpers only — `upsertIntoTable`, `getDataFromTable`, `updateDataInTable`, `deleteDataFromTable`, `clearAndInsertBulk`, `getJoinedTableData`, etc.
+- **`electron/auth.cjs`:** Offline authentication. Verifies `core_users` passwords with bcrypt (12 rounds) in the main process.
+- **`electron/pos.cjs`:** Thermal and kitchen printer integration.
+- **`electron/ipcHandlers.cjs`:** The only file that calls `ipcMain.handle()`. Split per concern: `registerDbHandlers` + `registerPosHandlers` + `registerAppHandlers` + `registerAuthHandlers`, all bundled into a single `registerIpcHandlers()` entry point.
 
 **Getting Started:**
 

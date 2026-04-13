@@ -22,13 +22,12 @@ import { isNotEmpty, useForm } from "@mantine/form";
 import { Navigate, useNavigate } from "react-router";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import axios from "axios";
-import orderProcessDropdownLocalDataStore from "@utils/local-storage/orderProcessDropdownLocalDataStore.js";
-import commonDataStoreIntoLocalStorage from "@utils/local-storage/commonDataStoreIntoLocalStorage.js";
-import { APP_NAVLINKS, MASTER_APIS } from "@/routes/routes";
+import { APP_NAVLINKS } from "@/routes/routes";
 import { APP_NAME, COVER_IMAGE } from "@/constants";
+import useConfigData from "@hooks/useConfigData";
 
 export default function Login() {
+	const { is_pos } = useConfigData();
 	const [user, setUser] = useState(null);
 	const [loading, setLoading] = useState(true);
 	const { t } = useTranslation();
@@ -109,30 +108,17 @@ export default function Login() {
 		setErrorMessage("");
 
 		try {
-			const response = await axios({
-				method: "POST",
-				url: MASTER_APIS.LOGIN,
-				headers: {
-					Accept: "application/json",
-					"Content-Type": "application/json",
-					"Access-Control-Allow-Origin": "*",
-					"X-Api-Key": import.meta.env.VITE_API_KEY,
-				},
-				data,
-			});
+			const response = await window.authAPI.loginUser(data);
 
-			if (response.data.status === 200) {
-				window.dbAPI.upsertIntoTable("users", response.data.data);
-				orderProcessDropdownLocalDataStore(response.data?.data?.id);
+			if (response?.status === 200) {
+				window.dbAPI.upsertIntoTable("users", response.data);
 
-				const navigationPath = await commonDataStoreIntoLocalStorage(response.data?.data?.id);
-
-				navigate(navigationPath ?? APP_NAVLINKS.BAKERY, { replace: true });
+				navigate(is_pos ? APP_NAVLINKS.BAKERY : APP_NAVLINKS.SALES_NEW, { replace: true });
 			} else {
-				setErrorMessage(response.data.message);
+				setErrorMessage(t(response?.message || "InvalidCredentials"));
 			}
 		} catch (error) {
-			setErrorMessage(error?.message || "Login failed");
+			setErrorMessage(t("LoginFailed"));
 			console.error(error);
 		} finally {
 			setSpinner(false);

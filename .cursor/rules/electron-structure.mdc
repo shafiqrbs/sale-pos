@@ -1,0 +1,38 @@
+---
+description: Enforce the main-process file layout under electron/ — single Database connection, centralized IPC, validated identifiers
+globs: ["electron/**/*.cjs", "index.cjs", "preload.cjs"]
+alwaysApply: true
+---
+
+# Electron Main-Process Structure
+
+The Electron main process is split into focused modules. Each file has one job — don't cross these boundaries.
+
+## File Responsibilities
+
+- `index.cjs` (project root) — entry point. Creates windows, sets CSP, and inside `app.whenReady()` calls `initSchema()` followed by `registerIpcHandlers()`. Nothing else.
+- `preload.cjs` (project root) — context-bridge definitions. Exposes `window.dbAPI`, `window.deviceAPI`, `window.zoomAPI`, `window.authAPI`.
+- `electron/connection.cjs` — owns the single `better-sqlite3` `Database` instance. Exports `{ db, close }`.
+- `electron/schema.cjs` — `CREATE TABLE` / `CREATE INDEX` DDL. Exports `initSchema()`.
+- `electron/validators.cjs` — SQL-injection guards (`validateTableName`, `validateIdentifier`, `validateSearchFields`, `VALID_SQL_OPERATORS`, `VALID_TABLES`).
+- `electron/db.cjs` — CRUD helpers only. No schema, no DDL, no auth.
+- `electron/auth.cjs` — authentication (bcrypt verify against `core_users`). Exports `registerAuthHandlers()`.
+- `electron/pos.cjs` — thermal/kitchen printing.
+- `electron/ipcHandlers.cjs` — the only file that calls `ipcMain.handle()`. Split per concern: `registerDbHandlers`, `registerPosHandlers`, `registerAppHandlers`, plus calls `registerAuthHandlers` from `auth.cjs`, bundled into one `registerIpcHandlers()`.
+
+## Hard Rules
+
+1. **One database connection.** Never call `new Database(...)` anywhere except `connection.cjs`. Other modules must `require("./connection.cjs")`.
+2. **All IPC in one place.** Never call `ipcMain.handle()` outside `ipcHandlers.cjs`. If a module needs handlers, export `registerXxxHandlers()` and wire it inside `registerIpcHandlers()`.
+3. **Every dynamic SQL identifier is validated.** Any table name or column name that comes from outside must pass through `validators.cjs` before reaching a SQL string. Never interpolate an unvalidated variable into `CREATE TABLE`, `SELECT`, `INSERT`, `UPDATE`, `DELETE`, or `PRAGMA`.
+4. **New table → update both places.** Adding a new table requires editing `schema.cjs` (the DDL) **and** `validators.cjs` (add the name to `VALID_TABLES`).
+5. **Bcrypt lives in main only.** `bcrypt` is a native Node addon — never import it in renderer code. Password verification happens in `auth.cjs` via IPC.
+6. **Strip `password` before returning.** `auth.cjs` must never return a bcrypt hash (or any sensitive column) across the context bridge.
+7. **Schema runs explicitly.** `initSchema()` is called once from `index.cjs` inside `app.whenReady()` — never as a require side-effect.
+
+## When Adding a New Main-Process Feature
+
+1. Decide which existing file it belongs in. If it's truly a new concern (not db, not pos, not auth), create a new `electron/<feature>.cjs` that exports a `registerXxxHandlers()` function.
+2. Wire `registerXxxHandlers()` into `registerIpcHandlers()` in `ipcHandlers.cjs`.
+3. If it needs to be callable from the renderer, add a matching `contextBridge.exposeInMainWorld(...)` binding in `preload.cjs`.
+4. Never widen the renderer surface by exposing raw `ipcRenderer` — always go through a named API on `window`.

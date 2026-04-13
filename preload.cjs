@@ -64,6 +64,13 @@ try {
 	});
 	console.info("deviceAPI exposed successfully");
 
+	contextBridge.exposeInMainWorld("authAPI", {
+		loginUser: (credentials) => {
+			return ipcRenderer.invoke("login-user", credentials);
+		},
+	});
+	console.info("authAPI exposed successfully");
+
 	contextBridge.exposeInMainWorld("zoomAPI", {
 		setZoomFactor: (factor) => {
 			webFrame.setZoomFactor(factor);

@@ -1,4 +1,4 @@
-import { BASE_URL, APP_NAVLINKS } from "@/routes/routes";
+import { BASE_URL } from "@/routes/routes";
 import axios from "axios";
 
 const tableMap = {
@@ -53,12 +53,6 @@ const commonDataStoreIntoLocalStorage = async (user_id) => {
 	});
 
 	await Promise.all(requests);
-	const configData = await window.dbAPI.getDataFromTable("config_data");
-	const parsedConfigData = JSON.parse(configData?.data);
-
-	return parsedConfigData?.inventory_config?.is_pos || parsedConfigData?.is_pos
-		? APP_NAVLINKS.BAKERY
-		: APP_NAVLINKS.SALES_NEW;
 };
 
 export default commonDataStoreIntoLocalStorage;

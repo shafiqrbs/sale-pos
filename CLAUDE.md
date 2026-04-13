@@ -22,6 +22,27 @@ Project-specific learnings and feedback are stored in [`.claude/memory.md`](.cla
 - `src/routes/routes.js` - Route definitions and `APP_APIS` / `APP_NAVLINKS` constants
 - `src/hooks/` - Custom hooks
 
+### Electron Main Process
+
+The Electron main process is split into focused modules under `electron/`. Each file has a single responsibility — don't cross these boundaries.
+
+- `index.cjs` (project root) — entry point. Creates windows, sets CSP, calls `initSchema()` then `registerIpcHandlers()` inside `app.whenReady()`.
+- `preload.cjs` (project root) — context-bridge definitions. Exposes `window.dbAPI`, `window.deviceAPI`, `window.zoomAPI`, `window.authAPI`.
+- `electron/connection.cjs` — owns the single `better-sqlite3` `Database` instance. Exports `{ db, close }`. Everything that touches the db imports from here.
+- `electron/schema.cjs` — `CREATE TABLE` / `CREATE INDEX` DDL. Exports `initSchema()`, called once at startup. When adding a new table, add it here **and** add its name to `VALID_TABLES` in `validators.cjs`.
+- `electron/validators.cjs` — SQL-injection guards (`validateTableName`, `validateIdentifier`, `validateSearchFields`, `VALID_SQL_OPERATORS`). Every dynamic table/column name must pass through these before reaching SQL.
+- `electron/db.cjs` — CRUD helpers only (`upsertIntoTable`, `getDataFromTable`, `updateDataInTable`, `deleteDataFromTable`, `deleteManyFromTable`, `destroyTableData`, `clearAndInsertBulk`, `resetDatabase`, `getJoinedTableData`, `getTableCount`). No schema, no DDL, no auth.
+- `electron/auth.cjs` — authentication (offline login, bcrypt verify against `core_users`). Exports `registerAuthHandlers()`.
+- `electron/pos.cjs` — thermal/kitchen printing.
+- `electron/ipcHandlers.cjs` — the only file that calls `ipcMain.handle()`. Split per concern: `registerDbHandlers`, `registerPosHandlers`, `registerAppHandlers`, plus calls `registerAuthHandlers` from `auth.cjs`. All wrapped in one `registerIpcHandlers()` that `index.cjs` calls.
+
+**Rules when editing main-process code:**
+
+- Never create a new `Database` instance — always import `db` from `connection.cjs`.
+- Never call `ipcMain.handle()` outside `ipcHandlers.cjs`. If a module needs its own handlers, export a `registerXxxHandlers()` function and call it from `ipcHandlers.cjs`.
+- Never build SQL with an unvalidated table or column name. Run it through `validators.cjs` first.
+- Never call `JSON.parse` on a bcrypt hash or any user-supplied value — bcrypt output is a plain string.
+
 ## Patterns & Conventions
 
 ### Modal/Drawer State
@@ -106,3 +127,11 @@ Never call `JSON.parse` directly inside components or hooks. Always use a util f
 - `parseJsonArray(value)` — parses a JSON string expected to be an array; returns `[]` on any failure or if the result is not an array.
 
 Add new parse helpers to `src/common/utils/index.js` whenever a new shape is needed.
+
+### Authentication
+
+Login is **offline only**. The renderer calls `window.authAPI.loginUser({ username, password })`, which invokes the `auth-login-user` IPC channel handled by `electron/auth.cjs`. The main process looks up the user in `core_users`, verifies the bcrypt hash (12 rounds, native `bcrypt` module), and on success returns the user row (password stripped) in the shape `{ status: 200, data: <user> }`. On failure it returns `{ status: 401, message: <reason> }`.
+
+- Bcrypt runs in the main process only — never import `bcrypt` in the renderer.
+- Password hashes never cross the context bridge; `auth.cjs` strips `password` before returning.
+- `core_users.password` is a bcrypt hash (12 rounds). Any seeding must hash passwords before insert — never store plaintext.

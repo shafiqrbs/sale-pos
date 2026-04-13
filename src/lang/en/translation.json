@@ -103,6 +103,8 @@
 	"Password": "Password",
 	"UserNameRequired": "User name field must be required",
 	"RequiredPassword": "Password is required",
+	"InvalidCredentials": "Invalid username or password",
+	"LoginFailed": "Login failed",
 	"ConfirmPassword": "Confirm Password",
 	"ConfirmPasswordValidateMessage": "Password must be similar",
 	"UpdateSuccessfully": "Updated Successfully",
