@@ -1357,5 +1357,10 @@
 	"Code": "কোড",
 	"Confirm": "নিশ্চিত করুন",
 	"DeleteFailed": "মুছে ফেলা ব্যর্থ",
-	"SettingNameRequired": "সেটিং নাম আবশ্যক"
+	"SettingNameRequired": "সেটিং নাম আবশ্যক",
+	"Slug": "স্লাগ",
+	"IsPrivate": "ব্যক্তিগত",
+	"SettingTypeSlug": "সেটিং টাইপ স্লাগ",
+	"Yes": "হ্যাঁ",
+	"No": "না"
 }

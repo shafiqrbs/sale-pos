@@ -6,18 +6,28 @@ export default function ParticularViewDrawer({ isLoading, opened, onClose, data 
 	const { t } = useTranslation();
 
 	const rows = [
+		{ label: t("ID"), value: data?.id },
 		{ label: t("SettingType"), value: data?.setting_type_name },
 		{ label: t("SettingName"), value: data?.name },
+		{ label: t("Slug"), value: data?.slug },
 		{ label: t("CreatedDate"), value: data?.created },
 		{
-			label: t("Status"),
+			label: t("IsPrivate"),
 			value: (
 				<Badge
-					color={data?.status === 1 ? "green" : "red"}
+					color={data?.is_private === 1 ? "blue" : "gray"}
 					variant="filled"
 					size="sm"
 					radius="sm"
 				>
+					{data?.is_private === 1 ? t("Yes") : t("No")}
+				</Badge>
+			),
+		},
+		{
+			label: t("Status"),
+			value: (
+				<Badge color={data?.status === 1 ? "green" : "red"} variant="filled" size="sm" radius="sm">
 					{data?.status === 1 ? t("Active") : t("Inactive")}
 				</Badge>
 			),
@@ -51,7 +61,7 @@ export default function ParticularViewDrawer({ isLoading, opened, onClose, data 
 									{typeof row.value === "string" || typeof row.value === "number" ? (
 										<Text size="sm">{row.value ?? "—"}</Text>
 									) : (
-										row.value ?? <Text size="sm">—</Text>
+										(row.value ?? <Text size="sm">—</Text>)
 									)}
 								</Table.Td>
 							</Table.Tr>

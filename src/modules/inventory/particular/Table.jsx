@@ -28,6 +28,7 @@ export default function Table() {
 
 	const [page, setPage] = useState(1);
 	const [particularId, setParticularId] = useState(null);
+	const [selectedParticular, setSelectedParticular] = useState(null);
 
 	const filterForm = useForm({
 		initialValues: {
@@ -63,7 +64,7 @@ export default function Table() {
 	const [updateDrawer, { open: openUpdateDrawer, close: closeUpdateDrawer }] = useDisclosure(false);
 
 	const handleShowData = (data) => {
-		setParticularId(data.id);
+		setSelectedParticular(data);
 		openViewDrawer();
 	};
 
@@ -215,10 +216,9 @@ export default function Table() {
 			</Box>
 
 			<ParticularViewDrawer
-				isLoading={isParticularLoading || isParticularFetching}
 				opened={viewDrawer}
 				onClose={closeViewDrawer}
-				data={particular?.data}
+				data={selectedParticular}
 			/>
 
 			<ParticularCreateDrawer opened={createDrawer} onClose={closeCreateDrawer} />

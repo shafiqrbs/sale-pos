@@ -48,8 +48,6 @@ export default function Table() {
 		offset: PER_PAGE,
 	});
 
-	console.log(categories);
-
 	const {
 		data: category,
 		isLoading: isCategoryLoading,

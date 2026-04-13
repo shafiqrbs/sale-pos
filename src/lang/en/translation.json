@@ -1347,5 +1347,10 @@
 	"Confirm": "Confirm",
 	"DeleteFailed": "Delete failed",
 	"AddCategory": "Add Category",
-	"SettingNameRequired": "Setting name is required"
+	"SettingNameRequired": "Setting name is required",
+	"Slug": "Slug",
+	"IsPrivate": "Is Private",
+	"SettingTypeSlug": "Setting Type Slug",
+	"Yes": "Yes",
+	"No": "No"
 }
