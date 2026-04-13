@@ -1,4 +1,4 @@
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const { db } = require("./connection.cjs");
 
 // Offline login: looks up a user in core_users by username, verifies the

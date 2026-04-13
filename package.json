@@ -22,11 +22,13 @@
 		"start": "electron-forge start",
 		"dev-app": "concurrently \"VITE_DEV_SERVER_URL=http://localhost:3000 SHOW_PROGRESS=false vite\" \"ELECTRON_START_URL=http://localhost:3000 electron-forge start\"",
 		"dev-mac": "concurrently \"cross-env VITE_DEV_SERVER_URL=http://localhost:3000 SHOW_PROGRESS=false vite\" \"cross-env ELECTRON_START_URL=http://localhost:3000 electron-forge start\"",
+		"dev-win": "concurrently \"cross-env VITE_DEV_SERVER_URL=http://localhost:3000 SHOW_PROGRESS=false vite\" \"cross-env ELECTRON_START_URL=http://localhost:3000 electron-forge start\"",
 		"package": "electron-forge package",
 		"make": "electron-forge make",
 		"make-win": "electron-forge make --platform=win32 --arch=x64",
 		"electron": "electron .",
-		"bin": "npm run build && npm start"
+		"bin": "npm run build && npm start",
+		"native-rebuild": "npx electron-rebuild -f"
 	},
 	"dependencies": {
 		"@mantine/carousel": "^8.3.12",
@@ -41,7 +43,7 @@
 		"@reduxjs/toolkit": "^2.11.2",
 		"@tabler/icons-react": "^3.36.1",
 		"axios": "^1.13.2",
-		"bcrypt": "^6.0.0",
+		"bcryptjs": "^3.0.3",
 		"better-sqlite3": "^12.6.2",
 		"clsx": "^2.1.1",
 		"dayjs": "^1.11.19",
