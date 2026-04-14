@@ -85,7 +85,6 @@ export default function NewIndex() {
 		const paymentAmount = Number(formValues.paymentAmount) || 0;
 		const dueAmount = Number(formValues.dueAmount) || 0;
 		const discountValue = Math.max(subTotal - paymentAmount - dueAmount, 0);
-		const total = subTotal;
 
 		// =============== get vendor info from local vendors table ===============
 		let vendorName = formValues.vendorName ?? "";
@@ -152,7 +151,8 @@ export default function NewIndex() {
 			discount: discountValue,
 			discount_calculation: 0,
 			//	vat,
-			total: Math.round(total),
+			total: Math.round(paymentAmount),
+			due: dueAmount,
 			payment: String(formValues.paymentAmount ?? ""),
 			process: "",
 			narration: formValues.purchaseNarration ?? "",

@@ -24,12 +24,12 @@ export default function NewIndex() {
 	const { user } = useLoggedInUser();
 	const { isOnline } = useOutletContext();
 	const { configData, is_sales_online } = useConfigData();
-	const [addSales] = useAddSalesMutation();
+	const [ addSales ] = useAddSalesMutation();
 	const shouldSubmitSalesOnline = isOnline && is_sales_online;
 	const itemsForm = useForm(salesOverviewRequest(t));
 	const { salesProducts: itemsProducts, refetch } = useTempSalesProducts({ type: "sales" });
-	const [resetKey, setResetKey] = useState(0);
-	const [isAddingItem, setIsAddingItem] = useState(false);
+	const [ resetKey, setResetKey ] = useState(0);
+	const [ isAddingItem, setIsAddingItem ] = useState(false);
 
 	const editingSale = useSelector((state) => state.checkout.editingSale);
 	const isEditMode = !!editingSale;
@@ -61,7 +61,7 @@ export default function NewIndex() {
 			}
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [editingSale]);
+	}, [ editingSale ]);
 
 	// =============== update product quantities and sales after successful sale (same as POS Transaction) ===============
 	const updateProductsAfterSale = async () => {
@@ -72,7 +72,7 @@ export default function NewIndex() {
 					id: productId,
 				});
 				const currentProductData = Array.isArray(currentProduct)
-					? currentProduct[0]
+					? currentProduct[ 0 ]
 					: currentProduct;
 
 				if (!currentProductData) {
@@ -109,7 +109,7 @@ export default function NewIndex() {
 			return;
 		}
 
-		if (!formValues.paymentAmount || Number(formValues.paymentAmount) <= 0) {
+		if (Number(formValues.paymentAmount) < 0) {
 			showNotification(t("PaymentAmountRequired"), "red");
 			return;
 		}
@@ -126,7 +126,7 @@ export default function NewIndex() {
 		const grandTotal = Math.max(subTotal - discountValue + vat, 0);
 		const fullAmount = Number(formValues.paymentAmount) || 0;
 		const isSplitPaymentActive = payments.length > 1;
-		const modeName = isSplitPaymentActive ? "Multiple" : (payments[0]?.transaction_mode_name ?? "");
+		const modeName = isSplitPaymentActive ? "Multiple" : (payments[ 0 ]?.transaction_mode_name ?? "");
 
 		// =============== get customer info from database ===============
 		let customerName = "";
@@ -136,7 +136,7 @@ export default function NewIndex() {
 			const customers = await window.dbAPI.getDataFromTable("core_customers", {
 				id: formValues.customer_id,
 			});
-			const customerData = Array.isArray(customers) ? customers[0] : customers;
+			const customerData = Array.isArray(customers) ? customers[ 0 ] : customers;
 			if (customerData) {
 				customerName = customerData.name ?? "";
 				customerMobile = customerData.mobile ?? "";
@@ -190,7 +190,7 @@ export default function NewIndex() {
 			status: formValues.status || "completed",
 		};
 
-		const primaryTransactionModeId = payments[0]?.transaction_mode_id;
+		const primaryTransactionModeId = payments[ 0 ]?.transaction_mode_id;
 
 		const buildSalesApiPayload = () => ({
 			customer_id: String(formValues.customer_id ?? ""),

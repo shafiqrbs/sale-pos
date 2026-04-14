@@ -7,7 +7,6 @@ import {
 	Flex,
 	Grid,
 	Group,
-	Kbd,
 	NumberInput,
 	Select,
 	SimpleGrid,
@@ -40,6 +39,8 @@ import SalesCustomerDrawer from "@components/drawers/SalesCustomerDrawer";
 import { DateInput } from "@mantine/dates";
 import KeyboardShortcut from "@components/KeyboardShortcut";
 
+const VAT_AMOUNT = 0;
+
 export default function PaymentSection({
 	itemsForm,
 	itemsTotal,
@@ -53,35 +54,33 @@ export default function PaymentSection({
 	const { transactionMode } = useTransactionMode();
 	const { configData, currencySymbol } = useConfigData();
 
-	const [customersDropdownData, setCustomersDropdownData] = useState([]);
-	const [discountMode, setDiscountMode] = useState("discount");
-	const [percentageValue, setPercentageValue] = useState(0);
-	const [customerDrawerOpened, { open: customerDrawerOpen, close: customerDrawerClose }] =
+	const [ customersDropdownData, setCustomersDropdownData ] = useState([]);
+	const [ discountMode, setDiscountMode ] = useState("discount");
+	const [ percentageValue, setPercentageValue ] = useState(0);
+	const [ customerDrawerOpened, { open: customerDrawerOpen, close: customerDrawerClose } ] =
 		useDisclosure(false);
 
 	const { discount_type, discount, coupon_code, salesNarration, paymentAmount } = itemsForm.values;
-
-	const vatAmount = 0;
 
 	// =============== discount value: when flat/percentage use form discount; when coupon use 0 ===============
 	const discountValue = useMemo(() => {
 		if (discount_type === "coupon") return 0;
 		return Number(discount) || 0;
-	}, [discount_type, discount]);
+	}, [ discount_type, discount ]);
 
 	const grandTotal = useMemo(
-		() => Math.max(itemsTotal - discountValue + vatAmount, 0),
-		[itemsTotal, discountValue]
+		() => Math.max(itemsTotal - discountValue + VAT_AMOUNT, 0),
+		[ itemsTotal, discountValue ]
 	);
 
 	const dueAmount = useMemo(
 		() => Math.max(grandTotal - (paymentAmount || 0), 0),
-		[grandTotal, paymentAmount]
+		[ grandTotal, paymentAmount ]
 	);
 
 	const returnAmount = useMemo(
 		() => Math.max((paymentAmount || 0) - grandTotal, 0),
-		[grandTotal, paymentAmount]
+		[ grandTotal, paymentAmount ]
 	);
 
 	const payments = itemsForm.values.payments ?? [];
@@ -92,7 +91,7 @@ export default function PaymentSection({
 	useEffect(() => {
 		if (transactionMode?.length > 0 && payments.length === 0) {
 			const cashMethod = transactionMode.find((mode) => mode.slug === "cash");
-			const defaultMethod = cashMethod || transactionMode[0];
+			const defaultMethod = cashMethod || transactionMode[ 0 ];
 			itemsForm.setFieldValue("payments", [
 				{
 					transaction_mode_id: defaultMethod.id,
@@ -103,13 +102,13 @@ export default function PaymentSection({
 			]);
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [transactionMode, resetKey]);
+	}, [ transactionMode, resetKey ]);
 
 	// =============== keep _grandTotal in sync so form-level validation can reference it ===============
 	useEffect(() => {
 		itemsForm.setFieldValue("_grandTotal", grandTotal);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [grandTotal]);
+	}, [ grandTotal ]);
 
 	// =============== auto-sync paymentAmount and single payment amount with grandTotal;
 	// skipped in edit mode because paymentAmount is pre-populated from the stored sale
@@ -125,7 +124,7 @@ export default function PaymentSection({
 			}
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [grandTotal, isSplitPaymentActive]);
+	}, [ grandTotal, isSplitPaymentActive ]);
 
 	// =============== fetch customers for drawer ===============
 	async function fetchCustomers() {
@@ -146,13 +145,13 @@ export default function PaymentSection({
 		if (!customerDrawerOpened) {
 			fetchCustomers();
 		}
-	}, [customerDrawerOpened]);
+	}, [ customerDrawerOpened ]);
 
 	// =============== reset local state when parent triggers reset ===============
 	useEffect(() => {
 		setDiscountMode("discount");
 		setPercentageValue(0);
-	}, [resetKey]);
+	}, [ resetKey ]);
 
 	const handleCustomerAdd = () => {
 		customerDrawerOpen();
@@ -195,7 +194,7 @@ export default function PaymentSection({
 
 	const clearSplitPayment = () => {
 		const cashMethod = transactionMode?.find((mode) => mode.slug === "cash");
-		const defaultMethod = cashMethod || transactionMode?.[0];
+		const defaultMethod = cashMethod || transactionMode?.[ 0 ];
 		itemsForm.setFieldValue("payments", [
 			{
 				transaction_mode_id: defaultMethod?.id,
@@ -224,17 +223,17 @@ export default function PaymentSection({
 
 	useHotkeys(
 		[
-			["alt+s", () => document.getElementById("ItemsFormSubmit")?.click()],
-			["alt+h", () => document.getElementById("ItemsHoldFormSubmit")?.click()],
-			["alt+p", () => document.getElementById("ItemsPrintFormSubmit")?.click()],
+			[ "alt+s", () => document.getElementById("ItemsFormSubmit")?.click() ],
+			[ "alt+h", () => document.getElementById("ItemsHoldFormSubmit")?.click() ],
+			[ "alt+p", () => document.getElementById("ItemsPrintFormSubmit")?.click() ],
 
-			["alt+f", shortcutActions.focusProduct],
-			["alt+n", shortcutActions.newProduct],
-			["alt+c", shortcutActions.focusCustomer],
-			["alt+d", shortcutActions.focusDiscount],
-			["alt+g", shortcutActions.digitalPayment],
-			["alt+m", shortcutActions.enterAmount],
-			["alt+o", shortcutActions.finalizePos],
+			[ "alt+f", shortcutActions.focusProduct ],
+			[ "alt+n", shortcutActions.newProduct ],
+			[ "alt+c", shortcutActions.focusCustomer ],
+			[ "alt+d", shortcutActions.focusDiscount ],
+			[ "alt+g", shortcutActions.digitalPayment ],
+			[ "alt+m", shortcutActions.enterAmount ],
+			[ "alt+o", shortcutActions.finalizePos ],
 		],
 		[]
 	);
@@ -657,7 +656,7 @@ export default function PaymentSection({
 									bg="red"
 									color="white"
 									radius={0}
-									id={'pos'}
+									id='pos'
 									size="lg"
 									type="button"
 									onClick={onPosPrint}
@@ -686,19 +685,19 @@ export default function PaymentSection({
 					a={'center'}
 				>
 					<Flex align="center" gap={4}>
-						<KeyboardShortcut keys={["alt", "f"]} />
+						<KeyboardShortcut keys={[ "alt", "f" ]} />
 						<Text fz="xs"> = Focus prod.</Text>
 					</Flex>
 				</Card>
 				<Card padding="0" px="2px" onClick={shortcutActions.newProduct} className="cursor-pointer">
 					<Flex align="center" gap={4}>
-						<KeyboardShortcut keys={["alt", "n"]} />
+						<KeyboardShortcut keys={[ "alt", "n" ]} />
 						<Text fz="xs"> = New prod.</Text>
 					</Flex>
 				</Card>
 				<Card padding="0" px="2px" onClick={shortcutActions.addProduct} className="cursor-pointer">
 					<Flex align="center" gap={4}>
-						<KeyboardShortcut keys={["alt", "a"]} />
+						<KeyboardShortcut keys={[ "alt", "a" ]} />
 						<Text fz="xs"> = Add prod.</Text>
 					</Flex>
 				</Card>
@@ -709,7 +708,7 @@ export default function PaymentSection({
 					className="cursor-pointer"
 				>
 					<Flex align="center" gap={4}>
-						<KeyboardShortcut keys={["alt", "c"]} />
+						<KeyboardShortcut keys={[ "alt", "c" ]} />
 						<Text fz="xs"> = Focus cus.</Text>
 					</Flex>
 				</Card>
@@ -720,7 +719,7 @@ export default function PaymentSection({
 					className="cursor-pointer"
 				>
 					<Flex align="center" gap={4}>
-						<KeyboardShortcut keys={["alt", "d"]} />
+						<KeyboardShortcut keys={[ "alt", "d" ]} />
 						<Text fz="xs"> = Focus dis.</Text>
 					</Flex>
 				</Card>
@@ -731,19 +730,19 @@ export default function PaymentSection({
 					className="cursor-pointer"
 				>
 					<Flex align="center" gap={4}>
-						<KeyboardShortcut keys={["alt", "g"]} />
+						<KeyboardShortcut keys={[ "alt", "g" ]} />
 						<Text fz="xs"> = Digital pay</Text>
 					</Flex>
 				</Card>
 				<Card padding="0" px="2px" onClick={shortcutActions.enterAmount} className="cursor-pointer">
 					<Flex align="center" gap={4}>
-						<KeyboardShortcut keys={["alt", "m"]} />
+						<KeyboardShortcut keys={[ "alt", "m" ]} />
 						<Text fz="xs"> = Enter amount</Text>
 					</Flex>
 				</Card>
 				<Card padding="0" px="2px" onClick={shortcutActions.finalizePos} className="cursor-pointer">
 					<Flex align="center" gap={4}>
-						<KeyboardShortcut keys={["alt", "o"]} />
+						<KeyboardShortcut keys={[ "alt", "o" ]} />
 						<Text fz="xs"> = Finalize POS</Text>
 					</Flex>
 				</Card>

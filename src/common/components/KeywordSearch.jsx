@@ -1,4 +1,4 @@
-import {ActionIcon, Flex, Select, TextInput, Button, Text, Box} from "@mantine/core";
+import { ActionIcon, Flex, TextInput, Button } from "@mantine/core";
 import { IconFileTypeXls, IconRestore, IconSearch, IconX } from "@tabler/icons-react";
 import AdvancedFilter from "@components/AdvancedFilter";
 import React, { useState, useEffect } from "react";
@@ -6,7 +6,6 @@ import { DateInput } from "@mantine/dates";
 import { formatDate, formatDateISO } from "@utils";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { parseDateString } from "@utils/index";
-import DateInputForm from "@components/form-builders/DateInputForm";
 import { useTranslation } from "react-i18next";
 
 export default function KeywordSearch({
@@ -14,7 +13,6 @@ export default function KeywordSearch({
 	onSearch,
 	onReset,
 	placeholder = "Keyword Search",
-	reportName,
 	tooltip = "Search by product name, unit, quantity, price, etc.",
 	showDatePicker = false,
 	showStartEndDate = false,
@@ -22,13 +20,13 @@ export default function KeywordSearch({
 	showKeywordSearch = true,
 	showReset = true,
 	className = "keyword-search-box",
-	handleCSVDownload = () => {},
+	handleCSVDownload = () => { },
 }) {
 	const { t } = useTranslation();
-	const [term, setTerm] = useState(form.values.term || "");
-	const [date, setDate] = useState(null);
-	const [startDate, setStartDate] = useState(null);
-	const [endDate, setEndDate] = useState(null);
+	const [ term, setTerm ] = useState(form.values.term || "");
+	const [ date, setDate ] = useState(null);
+	const [ startDate, setStartDate ] = useState(null);
+	const [ endDate, setEndDate ] = useState(null);
 	// =============== debounce keyword to control api calls via form state ================
 	const debouncedSetKeywordInForm = useDebouncedCallback((value) => {
 		form.setFieldValue("term", value);
@@ -60,14 +58,14 @@ export default function KeywordSearch({
 			searchData ||
 			(showStartEndDate
 				? {
-						term,
-						start_date: startDate ? formatDateISO(startDate) : "",
-						end_date: endDate ? formatDateISO(endDate) : "",
-					}
+					term,
+					start_date: startDate ? formatDateISO(startDate) : "",
+					end_date: endDate ? formatDateISO(endDate) : "",
+				}
 				: {
-						term,
-						created: date ? formatDate(date) : "",
-					});
+					term,
+					created: date ? formatDate(date) : "",
+				});
 
 		if (onSearch) {
 			onSearch(data);
@@ -153,7 +151,7 @@ export default function KeywordSearch({
 						placeholder={t("StartDate")}
 						value={startDate}
 						onChange={handleStartDateChange}
-						miw={200}
+						miw={150}
 					/>
 					<DateInput
 						clearable
@@ -161,31 +159,31 @@ export default function KeywordSearch({
 						placeholder={t("EndDate")}
 						value={endDate}
 						onChange={handleEndDateChange}
-						miw={200}
+						miw={150}
 					/>
 				</>
 			)}
-			{showKeywordSearch === true &&(
-			<TextInput
-				placeholder={placeholder}
-				tooltip={tooltip}
-				name="keywordSearch"
-				value={term}
-				leftSection={
-					term ? (
-						<IconX size={16} stroke={1.5} color="var(--theme-error-color)" onClick={handleReset} />
-					) : (
-						<IconSearch size={16} stroke={1.5} />
-					)
-				}
-				styles={{ root: { width: "100%" } }}
-				onChange={(event) => handleKeywordChange(event.target.value)}
-				onKeyDown={(event) => {
-					if (event.key === "Enter") {
-						handleSearch();
+			{showKeywordSearch === true && (
+				<TextInput
+					placeholder={placeholder}
+					tooltip={tooltip}
+					name="keywordSearch"
+					value={term}
+					leftSection={
+						term ? (
+							<IconX size={16} stroke={1.5} color="var(--theme-error-color)" onClick={handleReset} />
+						) : (
+							<IconSearch size={16} stroke={1.5} />
+						)
 					}
-				}}
-			/>
+					styles={{ root: { width: "100%" } }}
+					onChange={(event) => handleKeywordChange(event.target.value)}
+					onKeyDown={(event) => {
+						if (event.key === "Enter") {
+							handleSearch();
+						}
+					}}
+				/>
 			)}
 			<Flex gap="3xs" align="center">
 				<Button

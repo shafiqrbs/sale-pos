@@ -29,7 +29,7 @@ export const salesOverviewRequest = (t) => {
 			paymentAmount: (value, values) => {
 				const amount = Number(value) || 0;
 				const grandTotal = Number(values._grandTotal) || 0;
-				if (amount <= 0) {
+				if (amount < 0) {
 					return t("PaymentAmountRequired");
 				}
 				if (!values.customer_id && grandTotal > 0 && amount < grandTotal) {

@@ -1,15 +1,15 @@
-import { useLocation, useNavigate } from "react-router";
-import { useTranslation } from "react-i18next";
-import { IconArrowLeft } from "@tabler/icons-react";
+// import { useLocation, useNavigate } from "react-router";
+// import { useTranslation } from "react-i18next";
+// import { IconArrowLeft } from "@tabler/icons-react";
 import classes from "@assets/css/PageBreadcrumb.module.css";
-import { ActionIcon, Box, Text } from "@mantine/core";
+import { Box, Text } from "@mantine/core";
 
-export default function PageBreadcrumb({ label = "empty", showBack = true, h = 36 }) {
-	const { t } = useTranslation();
-	const location = useLocation();
-	const navigate = useNavigate();
+export default function PageBreadcrumb({ label = "empty", h = 36 }) {
+	// const { t } = useTranslation();
+	// const location = useLocation();
+	// const navigate = useNavigate();
 
-	const canGoBack = showBack && location.key !== "default";
+	// const canGoBack = showBack && location.key !== "default";
 
 	return (
 		<Box h={h} className={classes.breadcrumb}>

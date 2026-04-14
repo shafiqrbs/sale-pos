@@ -22,7 +22,7 @@ export const extendedInvoicePurchaseApiSlice = apiSlice.injectEndpoints({
           body,
         };
       },
-      invalidatesTags: [ "InvoicePurchase" ],
+      invalidatesTags: [ "InvoicePurchase", "Purchase" ],
     }),
 
     updateInvoicePurchase: builder.mutation({
@@ -33,7 +33,7 @@ export const extendedInvoicePurchaseApiSlice = apiSlice.injectEndpoints({
           body,
         };
       },
-      invalidatesTags: [ "InvoicePurchase" ],
+      invalidatesTags: [ "InvoicePurchase", "Purchase" ],
     }),
 
     deleteInvoicePurchase: builder.mutation({
@@ -44,7 +44,7 @@ export const extendedInvoicePurchaseApiSlice = apiSlice.injectEndpoints({
           id,
         };
       },
-      invalidatesTags: [ "InvoicePurchase" ],
+      invalidatesTags: [ "InvoicePurchase", "Purchase" ],
     }),
 
     getInvoicePurchaseById: builder.query({
@@ -64,7 +64,7 @@ export const extendedInvoicePurchaseApiSlice = apiSlice.injectEndpoints({
           method: "GET",
         };
       },
-      invalidatesTags: [ "InvoicePurchase" ],
+      invalidatesTags: [ "InvoicePurchase", "Purchase" ],
     }),
 
     copyInvoicePurchase: builder.mutation({
@@ -74,7 +74,7 @@ export const extendedInvoicePurchaseApiSlice = apiSlice.injectEndpoints({
           method: "GET",
         };
       },
-      invalidatesTags: [ "InvoicePurchase" ],
+      invalidatesTags: [ "InvoicePurchase", "Purchase" ],
     }),
 
     getItemsForDamageInvoicePurchase: builder.query({
@@ -94,7 +94,7 @@ export const extendedInvoicePurchaseApiSlice = apiSlice.injectEndpoints({
           body,
         };
       },
-      invalidatesTags: [ "InvoicePurchase" ],
+      invalidatesTags: [ "InvoicePurchase", "Purchase" ],
     }),
   }),
 });

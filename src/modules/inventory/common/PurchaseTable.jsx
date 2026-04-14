@@ -244,7 +244,7 @@ export default function PurchaseTable({ approveMutation, copyMutation, modalTitl
 						leftSection={<IconPlus size={20} />}
 						onClick={() => navigate(APP_NAVLINKS.PURCHASE_NEW)}
 					>
-						{t("NewPurchase")}
+						{t("Purchase")}
 					</Button>
 				</Group>
 			</Flex>
