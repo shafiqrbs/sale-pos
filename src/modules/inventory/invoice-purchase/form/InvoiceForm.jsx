@@ -366,14 +366,14 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 								/>
 							</Grid.Col>
 
-							<Grid.Col span={6}>
+							<Grid.Col span={12}>
 								<InputNumberForm
 									form={itemsForm}
 									name="total_mrp"
 									id="total_mrp"
 									label="Total MRP"
 									placeholder="0.00"
-									nextField="item_percent"
+									nextField="bonus_quantity"
 									disabled={!isProductSelected}
 									tooltip={itemsForm.errors.total_mrp}
 									leftSection={<IconCurrencyTaka size={16} opacity={0.6} />}
@@ -393,20 +393,20 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 									leftSection={<IconPercentage size={16} opacity={0.6} />}
 								/>
 							</Grid.Col> */}
-							<Grid.Col span={6}>
+							<Grid.Col span={12}>
 								<InputNumberForm
 									form={itemsForm}
 									name="bonus_quantity"
 									id="bonus_quantity"
 									label={t("BonusQuantity")}
 									placeholder="0"
-									nextField="purchase_price"
+									nextField="minimum_quantity"
 									disabled={!isProductSelected}
 									tooltip={itemsForm.errors.bonus_quantity}
 									leftSection={<IconSortAscendingNumbers size={16} opacity={0.6} />}
 								/>
 							</Grid.Col>
-							<Grid.Col span={6}>
+							<Grid.Col span={12}>
 								<InputNumberForm
 									form={itemsForm}
 									name="minimum_quantity"
@@ -419,7 +419,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 									leftSection={<IconSortAscendingNumbers size={16} opacity={0.6} />}
 								/>
 							</Grid.Col>
-							<Grid.Col span={6}>
+							<Grid.Col span={12}>
 								<Tooltip
 									label={itemsForm.errors.expired_date}
 									opened={!!itemsForm.errors.expired_date}
@@ -439,12 +439,26 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 										valueFormat="MM-YYYY"
 										placeholder="MM-YYYY"
 										clearable
+										nextField="barcode"
 										disabled={!isProductSelected}
 										value={itemsForm.values.expired_date || null}
 										onChange={(dateValue) => itemsForm.setFieldValue("expired_date", dateValue)}
 										error={itemsForm.errors.expired_date}
 									/>
 								</Tooltip>
+							</Grid.Col>
+							<Grid.Col span={12}>
+								<InputNumberForm
+									form={itemsForm}
+									name="barcode"
+									id="barcode"
+									label="Barcode/BatchNo"
+									placeholder="0"
+									nextField="EntityFormSubmit"
+									disabled={!isProductSelected}
+									tooltip={itemsForm.errors.barcode}
+									leftSection={<IconBarcode size={16} opacity={0.6} />}
+								/>
 							</Grid.Col>
 						</Grid>
 					</Box>

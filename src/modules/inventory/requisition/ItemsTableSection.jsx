@@ -20,7 +20,7 @@ export default function ItemsTableSection({ itemsProducts, refetch, itemsTotal, 
 	const navigate = useNavigate();
 	const { t } = useTranslation();
 	const { mainAreaHeight } = useMainAreaHeight();
-	const tableHeight = mainAreaHeight - 220;
+	const tableHeight = mainAreaHeight - 204;
 	const { currencySymbol } = useConfigData();
 
 	const handleQuantityChange = async (itemId, value) => {
@@ -76,6 +76,7 @@ export default function ItemsTableSection({ itemsProducts, refetch, itemsTotal, 
 				<Button
 					onClick={() => navigate(APP_NAVLINKS.REQUISITION)}
 					bg="red"
+					size="xs"
 					color="white"
 					leftSection={<IconList size={18} />}
 				>

@@ -12,6 +12,7 @@ import { APP_NAVLINKS } from "@/routes/routes";
 import { useTranslation } from "react-i18next";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import dayjs from "dayjs";
+import React from "react";
 
 dayjs.extend(customParseFormat);
 
@@ -28,7 +29,7 @@ export default function ItemsTableSection({
 	const navigate = useNavigate();
 	const { t } = useTranslation();
 	const { mainAreaHeight } = useMainAreaHeight();
-	const tableHeight = mainAreaHeight - 308;
+	const tableHeight = mainAreaHeight - 286;
 	const { currencySymbol } = useConfigData();
 
 	const handleQuantityChange = async (itemId, value) => {
@@ -87,24 +88,17 @@ export default function ItemsTableSection({
 	};
 
 	return (
-		<Box bd="1px solid #dee2e6" bg="gray.1" p="3xs" className="borderRadiusAll">
+		<Box  bg="gray.1" >
+
 			<Flex justify="space-between" align="center" mb="4xs">
 				<Box px="xs" fz="sm" fw={600} className="boxBackground textColor">
-					{t("PurchaseItems")}
+					{t("InvoicePurchase")}
 				</Box>
 				<Box>
 					<Button
-						onClick={() => navigate(APP_NAVLINKS.PURCHASE_NEW)}
-						bg="blue"
-						color="white"
-						leftSection={<IconPlus size={18} />}
-						mr="xs"
-					>
-						{t("ManualPurchase")}
-					</Button>
-					<Button
 						onClick={() => navigate(APP_NAVLINKS.PURCHASE)}
 						bg="red"
+						size="xs"
 						color="white"
 						leftSection={<IconList size={18} />}
 					>

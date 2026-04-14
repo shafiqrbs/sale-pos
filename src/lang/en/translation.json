@@ -1353,6 +1353,7 @@
 	"DeleteFailed": "Delete failed",
 	"AddCategory": "Add Category",
 	"SettingNameRequired": "Setting name is required",
+	"Barcode/BatchNo": "Barcode/Batch no",
 	"Slug": "Slug",
 	"IsPrivate": "Is Private",
 	"SettingTypeSlug": "Setting Type Slug",

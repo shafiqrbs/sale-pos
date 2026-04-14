@@ -1,6 +1,6 @@
-import { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import {
-	ActionIcon,
+	ActionIcon, Badge,
 	Box,
 	Button,
 	Card,
@@ -175,12 +175,20 @@ export default function PaymentSection({
 								</Text>
 								<Flex align="center" gap={4}>
 									<Text fz={11} fw={600}>
-										{discountPercent.toFixed(2)}%
+
 									</Text>
-									<Text fz={11} c="dimmed">
-										({currencySymbol}
-										{formatCurrency(discountValue)})
-									</Text>
+									<Badge size="md" bg={"yellow"}>
+										<Text fz="xs" fw={600}>
+											{discountPercent.toFixed(2)}%
+										</Text>
+									</Badge>
+									<Badge size="md" bg={"red"}>
+										<Text fz="xs" fw={600}>
+											({currencySymbol}
+											{formatCurrency(discountValue)})
+										</Text>
+									</Badge>
+
 								</Flex>
 							</Flex>
 						</Flex>
