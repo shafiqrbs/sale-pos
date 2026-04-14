@@ -1244,6 +1244,8 @@
 	"NewProduct": "New Product",
 	"SendToVendor": "Send to Vendor",
 	"DamageStockReport": "Damage Stock Report",
+	"DamageItemExpiryToDamageTooltip": "Click here for expiry to damage",
+	"DamageItemExpirySyncAriaLabel": "Sync expiry items to damage report",
 	"SearchByProductNameOrBarcode": "Search by product name or barcode",
 	"TotalSalesAfterDiscount": "Total Sales after Discount",
 	"Save": "Save",

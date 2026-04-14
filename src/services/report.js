@@ -37,6 +37,14 @@ export const extendedReportApiSlice = apiSlice.injectEndpoints({
 			},
 			providesTags: [ "Reports" ],
 		}),
+
+		damageItemExpiry: builder.mutation({
+			query: () => ({
+				url: APP_APIS.DAMAGE_ITEM_EXPIRY,
+				method: "GET",
+			}),
+			invalidatesTags: [ "Reports" ],
+		}),
 	}),
 });
 
@@ -44,4 +52,5 @@ export const {
 	useGetDailySummaryQuery,
 	useGetCategorySummaryQuery,
 	useGetDamageItemQuery,
+	useDamageItemExpiryMutation,
 } = extendedReportApiSlice;

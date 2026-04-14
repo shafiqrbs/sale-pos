@@ -7,7 +7,7 @@ import KeywordSearch from "@components/KeywordSearch";
 import { useForm } from "@mantine/form";
 import { formatCurrency } from "@utils/index";
 import useMainAreaHeight from "@hooks/useMainAreaHeight";
-import { useGetDamageItemQuery } from "@services/report";
+import { useGetDamageItemQuery, useDamageItemExpiryMutation } from "@services/report";
 import PageBreadcrumb from "@components/layout/PageBreadcrumb";
 import { IconCloudDown } from "@tabler/icons-react";
 
@@ -18,11 +18,16 @@ export default function Table() {
 	const [ page, setPage ] = useState(1);
 	const { mainAreaHeight } = useMainAreaHeight();
 
+	const [ triggerDamageItemExpiry, { isLoading: isDamageItemExpirySyncing } ] = useDamageItemExpiryMutation();
 
 	// =============== when offline, always use offline data (online segment disabled) ===============
 
 	const handleRefresh = async () => {
-
+		try {
+			await triggerDamageItemExpiry().unwrap();
+		} catch (error) {
+			console.error("damage item expiry sync failed", error);
+		}
 	};
 
 	const form = useForm({
@@ -48,7 +53,7 @@ export default function Table() {
 				<PageBreadcrumb label={t("Damages")} />
 				<KeywordSearch reportName={"Damage"} showStartEndDate form={form} w={"100%"} />
 				<Tooltip
-					label="Click here for expiry to damage"
+					label={t("DamageItemExpiryToDamageTooltip")}
 					c="white"
 					bg="red"
 					withArrow
@@ -59,7 +64,7 @@ export default function Table() {
 						bg="red"
 						onClick={handleRefresh}
 						size="md"
-						aria-label="Refresh"
+						aria-label={t("DamageItemExpirySyncAriaLabel")}
 					>
 						<IconCloudDown size={16} stroke={1.5} />
 					</ActionIcon>
@@ -146,7 +151,7 @@ export default function Table() {
 									render: (item) => <>{formatCurrency(item?.quantity * item?.price || 0)}</>,
 								},
 							]}
-							fetching={isLoading}
+							fetching={isLoading || isDamageItemExpirySyncing}
 							totalRecords={entities?.count || 0}
 							recordsPerPage={PER_PAGE}
 							loaderSize="xs"

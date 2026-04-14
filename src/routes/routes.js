@@ -72,6 +72,7 @@ export const APP_APIS = {
 	DAILY_SUMMARY: "/inventory/report/daily-summary",
 	CATEGORY_SUMMARY: "/inventory/report/category-summary",
 	DAMAGE_ITEM: "/inventory/report/damage-item",
+	DAMAGE_ITEM_EXPIRY: "/inventory/damage-item-expiry",
 	CATEGORY_GROUP: "/inventory/category-group",
 	PARENT_CATEGORIES: "/inventory/select/group-category",
 	CATEGORIES: "/inventory/select/category",
