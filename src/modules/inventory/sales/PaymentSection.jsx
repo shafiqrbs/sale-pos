@@ -654,9 +654,10 @@ export default function PaymentSection({
 
 								<Button
 									fullWidth
-									bg="var(--theme-pos-btn-color)"
+									bg="red"
 									color="white"
 									radius={0}
+									id={'pos'}
 									size="lg"
 									type="button"
 									onClick={onPosPrint}
@@ -675,13 +676,14 @@ export default function PaymentSection({
 				verticalSpacing="4px"
 				mt="2px"
 				p="3px"
-				bg="gray.4"
+				bg={'blue'}
 			>
 				<Card
 					padding="0"
 					px="2px"
 					onClick={shortcutActions.focusProduct}
 					className="cursor-pointer"
+					a={'center'}
 				>
 					<Flex align="center" gap={4}>
 						<KeyboardShortcut keys={["alt", "f"]} />

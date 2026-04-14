@@ -24,8 +24,20 @@ import FormValidationWrapper from "@components/form-builders/FormValidationWrapp
 import VirtualSearchSelect from "@components/form-builders/VirtualSearchSelect";
 import { useTranslation } from "react-i18next";
 
-const PRODUCT_EMPTY_BUTTON_STYLE =
-	"display:block;width:100%;padding:6px 10px;margin:0;border:1px solid #ced4da;border-radius:4px;background:#fff;cursor:pointer;font-size:13px;text-align:center;";
+const PRODUCT_POS_BUTTON_STYLE =
+	"display:block;width:100%;padding:6px 10px;margin:0;border:1px solid red;border-radius:4px;background:red;color:white;cursor:pointer;font-size:12px;text-align:center;";
+
+const PRODUCT_PRODUCT_BUTTON_STYLE =
+	"display:block;width:100%;padding:6px 10px;margin:0;border:1px solid blue;border-radius:4px;background:blue;color:white;cursor:pointer;font-size:12px;text-align:center;";
+
+const PRODUCT_CUSTOMER_BUTTON_STYLE =
+	"display:block;width:100%;padding:6px 10px;margin:0;border:1px solid gray;border-radius:4px;background:gray;color:white;cursor:pointer;font-size:12px;text-align:center;";
+
+const PRODUCT_DISCOUNT_BUTTON_STYLE =
+	"display:block;width:100%;padding:6px 10px;margin:0;border:1px solid orange;border-radius:4px;background:orange;color:white;cursor:pointer;font-size:12px;text-align:center;";
+
+const PRODUCT_PAYMENT_BUTTON_STYLE =
+	"display:block;width:100%;padding:6px 10px;margin:0;border:1px solid green;border-radius:4px;background:green;color:white;cursor:pointer;font-size:12px;text-align:center;";
 
 export default function InvoiceForm({ refetch, onAddItem }) {
 	const { t } = useTranslation();
@@ -132,14 +144,18 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 	};
 
 	const productNothingFoundHtml = useMemo(() => {
-		const labelAdd = escapeHtmlForVirtualSelectEmptyState(t("AddProduct"));
+		const labelAdd = escapeHtmlForVirtualSelectEmptyState(t("Product"));
 		const labelCustomer = escapeHtmlForVirtualSelectEmptyState(t("Customer"));
 		const labelPayment = escapeHtmlForVirtualSelectEmptyState(t("Payment"));
+		const labelDiscount = escapeHtmlForVirtualSelectEmptyState(t("Discount"));
+		const labelPos = escapeHtmlForVirtualSelectEmptyState(t("POS"));
 		return (
 			`<div class="invoice-product-empty-markup" style="display:flex;gap:8px;padding:8px;">` +
-			`<button type="button" data-virtual-search-empty-action="addProduct" style="${PRODUCT_EMPTY_BUTTON_STYLE}">${labelAdd}</button>` +
-			`<button type="button" data-virtual-search-empty-action="selectCustomer" style="${PRODUCT_EMPTY_BUTTON_STYLE}">${labelCustomer}</button>` +
-			`<button type="button" data-virtual-search-empty-action="payment" style="${PRODUCT_EMPTY_BUTTON_STYLE}">${labelPayment}</button>` +
+			`<button type="button" data-virtual-search-empty-action="addProduct" style="${PRODUCT_PRODUCT_BUTTON_STYLE}">${labelAdd}</button>` +
+			`<button type="button" data-virtual-search-empty-action="selectCustomer" style="${PRODUCT_CUSTOMER_BUTTON_STYLE}">${labelCustomer}</button>` +
+			`<button type="button" data-virtual-search-empty-action="payment" style="${PRODUCT_PAYMENT_BUTTON_STYLE}">${labelPayment}</button>` +
+			`<button type="button" data-virtual-search-empty-action="discount" style="${PRODUCT_DISCOUNT_BUTTON_STYLE}">${labelDiscount}</button>` +
+			`<button type="button" data-virtual-search-empty-action="pos" style="${PRODUCT_POS_BUTTON_STYLE}">${labelPos}</button>` +
 			`</div>`
 		);
 	}, [ t ]);
@@ -160,8 +176,15 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 				document.getElementById("customerSelect")?.focus();
 				return;
 			}
+
 			if (action === "payment") {
 				document.getElementById("paymentAmount")?.focus();
+			}
+			if (action === "discount") {
+				document.getElementById("discount-input")?.focus();
+			}
+			if (action === "pos") {
+				document.getElementById("pos")?.focus();
 			}
 		},
 		[ openProductDrawer ],
