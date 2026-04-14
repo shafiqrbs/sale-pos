@@ -23,6 +23,7 @@ export default function GlobalModal({
 			onClose={onClose}
 			padding={padding}
 			size={size}
+			closeOnClickOutside={false}
 			overlayProps={overlayProps}
 			title={title}
 			styles={styles}

@@ -27,7 +27,7 @@ export default function Form({ mode = "create", entityEditData = null, onSuccess
 	const { t } = useTranslation();
 	const { isOnline } = useOutletContext();
 	const { mainAreaHeight } = useMainAreaHeight();
-	const height = mainAreaHeight - 130;
+	const height = mainAreaHeight - 180;
 
 	const [locationData, setLocationData] = useState(null);
 	const [marketingExeData, setMarketingExeData] = useState(null);
