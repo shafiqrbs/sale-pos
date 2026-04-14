@@ -34,7 +34,7 @@ function SwitchForm(props) {
                             checked ? (
                                 <IconCheck
                                     style={{ width: rem(12), height: rem(12) }}
-                                    color={theme.colors.teal[6]}
+                                    color={theme.colors.red[6]}
                                     stroke={3}
                                 />
                             ) : (

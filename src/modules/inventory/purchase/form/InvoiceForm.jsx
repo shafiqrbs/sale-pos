@@ -397,12 +397,25 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 									name="purchase_price"
 									id="purchase_price"
 									label="Total Purchase"
-									nextField="expired_date"
+									nextField="minimum_quantity"
 									placeholder="0.00"
 									step={0.01}
 									disabled={!isProductSelected}
 									tooltip={itemsForm.errors.purchase_price}
 									leftSection={<IconCurrencyTaka size={16} opacity={0.6} />}
+								/>
+							</Grid.Col>
+							<Grid.Col span={12}>
+								<InputNumberForm
+									form={itemsForm}
+									name="minimum_quantity"
+									id="minimum_quantity"
+									label="Minimum Quantity"
+									placeholder="0"
+									nextField="expired_date"
+									disabled={!isProductSelected}
+									tooltip={itemsForm.errors.minimum_quantity}
+									leftSection={<IconSortAscendingNumbers size={16} opacity={0.6} />}
 								/>
 							</Grid.Col>
 							<Grid.Col span={12}>
@@ -425,6 +438,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 										valueFormat="MM-YYYY"
 										placeholder="MM-YYYY"
 										clearable
+										nextField="barcode"
 										disabled={!isProductSelected}
 										value={itemsForm.values.expired_date || null}
 										onChange={(dateValue) => itemsForm.setFieldValue("expired_date", dateValue)}
@@ -432,17 +446,18 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 									/>
 								</Tooltip>
 							</Grid.Col>
+
 							<Grid.Col span={12}>
 								<InputNumberForm
 									form={itemsForm}
-									name="minimum_quantity"
-									id="minimum_quantity"
-									label="Minimum Quantity"
+									name="barcode"
+									id="barcode"
+									label="Barcode/BatchNo"
 									placeholder="0"
 									nextField="EntityFormSubmit"
 									disabled={!isProductSelected}
-									tooltip={itemsForm.errors.minimum_quantity}
-									leftSection={<IconSortAscendingNumbers size={16} opacity={0.6} />}
+									tooltip={itemsForm.errors.barcode}
+									leftSection={<IconBarcode size={16} opacity={0.6} />}
 								/>
 							</Grid.Col>
 						</Grid>

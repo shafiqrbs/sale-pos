@@ -675,7 +675,7 @@ export default function PaymentSection({
 				verticalSpacing="4px"
 				mt="2px"
 				p="3px"
-				bg={'blue'}
+				bg={'#1e40af'}
 			>
 				<Card
 					padding="0"

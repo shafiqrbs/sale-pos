@@ -434,7 +434,7 @@ export default function PurchaseTable({ approveMutation, copyMutation, modalTitl
 							onPageChange={(p) => {
 								setPage(p);
 							}}
-							height={mainAreaHeight - 54}
+							height={mainAreaHeight - 48}
 							scrollAreaProps={{ type: "never" }}
 							rowStyle={(item) =>
 								item.invoice === selectedRow

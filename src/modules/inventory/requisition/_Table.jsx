@@ -174,7 +174,7 @@ export default function Table() {
 						</ActionIcon>
 					</Tooltip>
 					<Button
-						size="md"
+						size="xs"
 						color="red"
 						variant="filled"
 						leftSection={<IconPlus size={20} />}
@@ -353,7 +353,7 @@ export default function Table() {
 							onPageChange={(p) => {
 								setPage(p);
 							}}
-							height={mainAreaHeight - 54}
+							height={mainAreaHeight - 48}
 							scrollAreaProps={{ type: "never" }}
 							rowStyle={(item) =>
 								item.invoice === selectedRow

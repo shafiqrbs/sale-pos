@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useForm } from "@mantine/form";
 import { Group, Box, ActionIcon, Text, Menu, rem, Flex, Button } from "@mantine/core";
 import { useTranslation } from "react-i18next";
@@ -7,7 +7,7 @@ import {
 	IconDotsVertical,
 	IconPlus,
 	IconRefresh,
-	IconReload, IconInfoCircle, IconAdjustments, IconMap2, IconLetterMSmall, IconSettings,
+	IconReload, IconInfoCircle, IconAdjustments, IconMap2, IconLetterMSmall, IconSettings, IconReport,
 } from "@tabler/icons-react";
 import { DataTable } from "mantine-datatable";
 import { modals } from "@mantine/modals";
@@ -24,6 +24,8 @@ import KeywordSearch from "@components/KeywordSearch";
 import { useDisclosure } from "@mantine/hooks";
 import CustomerCreateModal from "./form/Create.jsx";
 import CustomerUpdateModal from "./form/Update.jsx";
+import PageBreadcrumb from "@components/layout/PageBreadcrumb";
+import ReceiveCreateModal from "/src/modules/accounts/customer/form/Create";
 
 const PER_PAGE = 25;
 
@@ -64,10 +66,10 @@ export default function Table() {
 	const [viewDrawer, { open: openViewDrawer, close: closeViewDrawer }] = useDisclosure(false);
 	const [createModal, { open: openCreateModal, close: closeCreateModal }] = useDisclosure(false);
 	const [updateModal, { open: openUpdateModal, close: closeUpdateModal }] = useDisclosure(false);
+	const [createReceiveModal, { open: openCreateReceiveModal, close: closeCreateReceiveModal }] = useDisclosure(false);
 
 	const handleShowData = (data) => {
 		setCustomerId(data.id);
-
 		openViewDrawer();
 	};
 
@@ -97,6 +99,7 @@ export default function Table() {
 	return (
 		<>
 			<Flex gap="sm" mb="2xs" justify="space-between" align="center">
+				<PageBreadcrumb label={t("Customers")} />
 				<KeywordSearch form={filterForm} />
 				<ActionIcon
 					bg="var(--theme-secondary-color-6)"
@@ -109,11 +112,20 @@ export default function Table() {
 				<Button
 					leftSection={<IconPlus size={16} stroke={1.5} />}
 					color="white"
+					w={'180'}
+					size={'xs'}
 					bg="var(--theme-primary-color-6)"
-					w="100px"
-					onClick={openCreateModal}
-				>
-					{t("Add")}
+					onClick={openCreateModal}>
+					{t("NewCustomer")}
+				</Button>
+				<Button
+					leftSection={<IconPlus size={16} stroke={1.5} />}
+					color="white"
+					w={'180'}
+					size={'xs'}
+					bg="red"
+					onClick={openCreateReceiveModal}>
+					{t("Receive")}
 				</Button>
 				<Menu withArrow arrowPosition="center" trigger="hover" openDelay={100} closeDelay={400}>
 					<Menu.Target>
@@ -172,18 +184,24 @@ export default function Table() {
 							textAlignment: "right",
 							render: (item) => customers?.data?.indexOf(item) + 1,
 						},
-						{ accessor: "id", title: t("ID"), width: 100 },
+						{ accessor: "created_date", title: t("Created"), width: 100 },
 						{ accessor: "name", title: t("Name"), width: 200 },
 						{ accessor: "mobile", title: t("Mobile"), width: 200 },
 						{ accessor: "customer_group", title: t("CustomerGroup") },
 						{ accessor: "credit_limit", title: t("CreditLimit") },
 						{ accessor: "discount_percent", title: t("Discount") + " %" },
+						{ accessor: "balance", title: t("Balance")},
 						{
 							accessor: "action",
 							title: t("Action"),
 							textAlign: "right",
 							render: (data) => (
+
 								<Group onClick={(e) => e.stopPropagation()} gap={4} justify="right" wrap="nowrap">
+									<Button
+										size={'xs'}
+										leftSection={<IconReport size={16} stroke={1.5} />}
+									>{t("Ledger")}</Button>
 									<Menu
 										position="bottom-end"
 										offset={3}
@@ -195,12 +213,11 @@ export default function Table() {
 										<Menu.Target>
 											<ActionIcon
 												size="sm"
-												variant="outline"
+												variant="transparent"
 												color="var(--theme-primary-color-6)"
-												radius="xl"
 												aria-label="Settings"
 											>
-												<IconDotsVertical height={"16"} width={"16"} stroke={1.5} />
+												<IconDotsVertical height={"24"} width={"24"} stroke={1.5} />
 											</ActionIcon>
 										</Menu.Target>
 										<Menu.Dropdown>
@@ -210,7 +227,7 @@ export default function Table() {
 											<Menu.Item onClick={() => selectEditCustomer(data)} w={"200"}>
 												{t("Edit")}
 											</Menu.Item>
-											<Menu.Item
+											{/*<Menu.Item
 												w={"200"}
 												mt={"2"}
 												bg={"red.1"}
@@ -219,7 +236,7 @@ export default function Table() {
 												rightSection={<IconTrashX style={{ width: rem(14), height: rem(14) }} />}
 											>
 												{t("Delete")}
-											</Menu.Item>
+											</Menu.Item>*/}
 										</Menu.Dropdown>
 									</Menu>
 								</Group>
@@ -246,7 +263,7 @@ export default function Table() {
 			/>
 
 			<CustomerCreateModal opened={createModal} onClose={closeCreateModal} />
-
+			<ReceiveCreateModal opened={createReceiveModal} onClose={closeCreateReceiveModal} />
 			<CustomerUpdateModal
 				isLoading={isCustomerLoading || isCustomerFetching}
 				opened={updateModal}
