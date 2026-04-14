@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Box, Center, Loader, Text } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useParams, useNavigate } from "react-router";

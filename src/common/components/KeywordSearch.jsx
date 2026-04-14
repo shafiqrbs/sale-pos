@@ -1,7 +1,7 @@
 import { ActionIcon, Flex, TextInput, Button } from "@mantine/core";
 import { IconFileTypeXls, IconRestore, IconSearch, IconX } from "@tabler/icons-react";
 import AdvancedFilter from "@components/AdvancedFilter";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { DateInput } from "@mantine/dates";
 import { formatDate, formatDateISO } from "@utils";
 import { useDebouncedCallback } from "@mantine/hooks";

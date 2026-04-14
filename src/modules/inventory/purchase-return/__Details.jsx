@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import SalesPrintThermal from '../common/SalesPrintThermal';
 import { Box, Grid, Text, LoadingOverlay, Button, ScrollArea, Table } from '@mantine/core';
 import { IconPrinter } from '@tabler/icons-react';
@@ -9,18 +9,16 @@ import useConfigData from '@hooks/useConfigData';
 
 export default function Details({ loading, viewData }) {
   const printRef = useRef();
-  const { isOnline, mainAreaHeight } = useOutletContext()
+  const { mainAreaHeight } = useOutletContext()
   const { t } = useTranslation();
   const [ printA4, setPrintA4 ] = useState(false);
   const { configData } = useConfigData();
 
+  const salesItems = Array.isArray(viewData?.purchase_return_items)
+    ? viewData?.purchase_return_items
+    : JSON.parse(viewData?.purchase_return_items || "[]");
 
-	const salesItems =  Array.isArray(viewData?.purchase_return_items)
-		? viewData?.purchase_return_items
-		: JSON.parse(viewData?.purchase_return_items || "[]");
-
-
-	console.log(salesItems);
+  console.log(salesItems);
   const rows =
     Array.isArray(salesItems) &&
     salesItems?.map((element, index) => (

@@ -1,4 +1,3 @@
-import React from "react";
 import {
     SimpleGrid, Text, Image, Center
 } from "@mantine/core";

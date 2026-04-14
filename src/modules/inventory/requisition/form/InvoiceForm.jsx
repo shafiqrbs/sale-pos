@@ -14,7 +14,7 @@ import { invoiceItemFormRequest } from "../helpers/request";
 import FormValidationWrapper from "@components/form-builders/FormValidationWrapper";
 import VirtualSearchSelect from "@components/form-builders/VirtualSearchSelect";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import SelectForm from "@components/form-builders/SelectForm";
 import useCoreVendors from "@hooks/useCoreVendors";
 import { useTranslation } from "react-i18next";

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useForm } from "@mantine/form";
 import { Group, Box, ActionIcon, Text, Menu, rem, Flex, Button } from "@mantine/core";
 import { useTranslation } from "react-i18next";
@@ -30,7 +30,7 @@ import ReceiveCreateModal from "/src/modules/accounts/customer/form/Create";
 const PER_PAGE = 25;
 
 export default function Table() {
-	const [customerId, setCustomerId] = useState(null);
+	const [ customerId, setCustomerId ] = useState(null);
 	const {
 		data: customer,
 		isLoading: isCustomerLoading,
@@ -38,8 +38,8 @@ export default function Table() {
 	} = useGetCustomerByIdQuery(customerId, {
 		skip: !customerId,
 	});
-	const [deleteCustomer, { isLoading: isCustomerDeleting }] = useDeleteCustomerMutation();
-	const [page, setPage] = useState(1);
+	const [ deleteCustomer, { isLoading: isCustomerDeleting } ] = useDeleteCustomerMutation();
+	const [ page, setPage ] = useState(1);
 
 	const filterForm = useForm({
 		initialValues: {
@@ -63,10 +63,10 @@ export default function Table() {
 	const { t } = useTranslation();
 	const { mainAreaHeight } = useMainAreaHeight();
 	const height = mainAreaHeight - 48;
-	const [viewDrawer, { open: openViewDrawer, close: closeViewDrawer }] = useDisclosure(false);
-	const [createModal, { open: openCreateModal, close: closeCreateModal }] = useDisclosure(false);
-	const [updateModal, { open: openUpdateModal, close: closeUpdateModal }] = useDisclosure(false);
-	const [createReceiveModal, { open: openCreateReceiveModal, close: closeCreateReceiveModal }] = useDisclosure(false);
+	const [ viewDrawer, { open: openViewDrawer, close: closeViewDrawer } ] = useDisclosure(false);
+	const [ createModal, { open: openCreateModal, close: closeCreateModal } ] = useDisclosure(false);
+	const [ updateModal, { open: openUpdateModal, close: closeUpdateModal } ] = useDisclosure(false);
+	const [ createReceiveModal, { open: openCreateReceiveModal, close: closeCreateReceiveModal } ] = useDisclosure(false);
 
 	const handleShowData = (data) => {
 		setCustomerId(data.id);
@@ -190,7 +190,7 @@ export default function Table() {
 						{ accessor: "customer_group", title: t("CustomerGroup") },
 						{ accessor: "credit_limit", title: t("CreditLimit") },
 						{ accessor: "discount_percent", title: t("Discount") + " %" },
-						{ accessor: "balance", title: t("Balance")},
+						{ accessor: "balance", title: t("Balance") },
 						{
 							accessor: "action",
 							title: t("Action"),

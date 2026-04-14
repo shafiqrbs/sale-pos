@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Box, Button, Grid, Stack, Text, Textarea } from "@mantine/core";
 import useTransactionMode from "@hooks/useTransactionMode";
 import { useHotkeys } from "@mantine/hooks";

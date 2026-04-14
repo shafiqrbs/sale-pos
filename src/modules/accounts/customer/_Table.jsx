@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Box, Grid, Text, Flex } from "@mantine/core";
 import { useNavigate, useOutletContext } from "react-router";
 import { DataTable } from "mantine-datatable";
@@ -28,8 +28,8 @@ const EMPTY_TOTALS = {
 export default function Table() {
 	const navigate = useNavigate();
 	const { t } = useTranslation();
-	const [opened, { open, close }] = useDisclosure(false);
-	const [page, setPage] = useState(1);
+	const [ opened, { open, close } ] = useDisclosure(false);
+	const [ page, setPage ] = useState(1);
 	const { mainAreaHeight, isOnline } = useOutletContext();
 
 	const form = useForm({
@@ -49,15 +49,15 @@ export default function Table() {
 	// Fix 1: Use correct field names matching actual API response
 	const totals = entities?.data?.entities?.reduce(
 		(acc, row) => {
-			acc.opening_balance  += row.opening_balance  || 0;
-			acc.purchase         += row.purchase         || 0;
-			acc.sales_return     += row.sales_return     || 0;
-			acc.receive_amount   += row.receive_amount   || 0;
-			acc.sales            += row.sales            || 0;
-			acc.purchase_return  += row.purchase_return  || 0;
-			acc.damage           += row.damage           || 0;
-			acc.issue_amount     += row.issue_amount     || 0;
-			acc.closing_balance  += row.closing_balance  || 0;
+			acc.opening_balance += row.opening_balance || 0;
+			acc.purchase += row.purchase || 0;
+			acc.sales_return += row.sales_return || 0;
+			acc.receive_amount += row.receive_amount || 0;
+			acc.sales += row.sales || 0;
+			acc.purchase_return += row.purchase_return || 0;
+			acc.damage += row.damage || 0;
+			acc.issue_amount += row.issue_amount || 0;
+			acc.closing_balance += row.closing_balance || 0;
 			return acc;
 		},
 		{ ...EMPTY_TOTALS }

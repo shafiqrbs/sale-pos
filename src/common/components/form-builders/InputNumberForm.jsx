@@ -1,4 +1,3 @@
-import React from "react";
 import { Tooltip, TextInput } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import { IconInfoCircle, IconX } from "@tabler/icons-react";

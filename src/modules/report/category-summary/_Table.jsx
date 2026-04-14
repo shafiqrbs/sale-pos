@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Box, Grid, Text, Flex } from "@mantine/core";
 import { useNavigate, useOutletContext } from "react-router";
 import { DataTable } from "mantine-datatable";

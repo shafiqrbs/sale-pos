@@ -36,7 +36,7 @@ import FormValidationWrapper from "@components/form-builders/FormValidationWrapp
 import VirtualSearchSelect from "@components/form-builders/VirtualSearchSelect";
 import { MonthPickerInput } from "@mantine/dates";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ALLOW_MEASUREMENT_PURCHASE } from "@constants/index";
 import useGetCategories from "@hooks/useGetCategories";

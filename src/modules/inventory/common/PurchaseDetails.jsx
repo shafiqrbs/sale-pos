@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Box, Grid, Text, LoadingOverlay, Button, ScrollArea, Table } from "@mantine/core";
 import { IconPrinter } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
@@ -10,7 +10,7 @@ export default function PurchaseDetails({ loading, viewData }) {
 	const printRef = useRef();
 	const { mainAreaHeight } = useOutletContext();
 	const { t } = useTranslation();
-	const [printA4, setPrintA4] = useState(false);
+	const [ printA4, setPrintA4 ] = useState(false);
 	const { configData } = useConfigData();
 
 	const salesItems = Array.isArray(viewData?.purchase_items)

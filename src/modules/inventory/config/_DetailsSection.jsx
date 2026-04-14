@@ -1,6 +1,5 @@
 import { Box, Title, ScrollArea, Grid } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import React from "react";
 import scrollbar from "@assets/css/Scrollbar.module.css";
 
 // =============== single label: value row used across all sections ===============

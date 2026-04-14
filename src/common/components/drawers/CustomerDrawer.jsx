@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Stack, Select, TextInput, Button, Divider, Group, Text, rem, Box } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useTranslation } from 'react-i18next';
@@ -130,7 +130,7 @@ export default function CustomerDrawer({ opened, onClose, form, customersDropdow
                             address: savedCustomer.address || '',
                         });
                     }
-                 //   showNotification(t('CustomerSavedSuccessfully') || 'Customer saved successfully', 'green', '', '', true, 50, true);
+                    //   showNotification(t('CustomerSavedSuccessfully') || 'Customer saved successfully', 'green', '', '', true, 50, true);
                     onClose();
                 }
             } catch (error) {

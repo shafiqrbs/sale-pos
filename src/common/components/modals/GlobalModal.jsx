@@ -1,4 +1,3 @@
-import React from "react";
 import { Modal, LoadingOverlay } from "@mantine/core";
 
 export default function GlobalModal({

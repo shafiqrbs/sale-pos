@@ -1,4 +1,3 @@
-import React from "react";
 import { Box, Grid, Skeleton, ScrollArea, Stack, Flex, Group } from "@mantine/core";
 import { useOutletContext } from "react-router";
 

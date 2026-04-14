@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { Grid, Box, Center, Group, Stack, Text, Flex } from "@mantine/core";
 import barCode from "@assets/images/frame.png";
 import { useReactToPrint } from "react-to-print";

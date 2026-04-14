@@ -1,7 +1,7 @@
 // import useGetInvoiceDetails from '@hooks/useGetInvoiceDetails';
 import { Box, Group, Text } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import CheckoutTable from "./CheckoutTable";
 import { useTranslation } from "react-i18next";

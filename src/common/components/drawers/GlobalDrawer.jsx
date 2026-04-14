@@ -1,4 +1,3 @@
-import React from "react";
 import { Drawer, LoadingOverlay } from "@mantine/core";
 
 export default function GlobalDrawer({

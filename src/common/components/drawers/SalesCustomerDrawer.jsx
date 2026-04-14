@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Stack, TextInput, Button, Divider, Group, Text, rem, Box } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useTranslation } from 'react-i18next';
@@ -87,7 +87,7 @@ export default function SalesCustomerDrawer({ opened, onClose, form }) {
 
     return (
         <GlobalDrawer
-			position='left'
+            position='left'
             opened={opened}
             onClose={onClose}
             title={t('CreateCustomer')}

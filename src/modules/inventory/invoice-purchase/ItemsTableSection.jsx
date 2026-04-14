@@ -1,7 +1,7 @@
 import { ActionIcon, Box, Flex, NumberInput, Text, Button, Badge } from "@mantine/core";
 import { MonthPickerInput } from "@mantine/dates";
 import { DataTable } from "mantine-datatable";
-import { IconList, IconPlus, IconTrashX } from "@tabler/icons-react";
+import { IconList, IconTrashX } from "@tabler/icons-react";
 import tableCss from "@assets/css/Table.module.css";
 import useConfigData from "@hooks/useConfigData";
 import useMainAreaHeight from "@hooks/useMainAreaHeight";
@@ -12,7 +12,6 @@ import { APP_NAVLINKS } from "@/routes/routes";
 import { useTranslation } from "react-i18next";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import dayjs from "dayjs";
-import React from "react";
 
 dayjs.extend(customParseFormat);
 
@@ -88,7 +87,7 @@ export default function ItemsTableSection({
 	};
 
 	return (
-		<Box  bg="gray.1" >
+		<Box bg="gray.1" >
 
 			<Flex justify="space-between" align="center" mb="4xs">
 				<Box px="xs" fz="sm" fw={600} className="boxBackground textColor">

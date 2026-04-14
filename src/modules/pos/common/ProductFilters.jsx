@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next';
 import { IconBarcode, IconBaselineDensitySmall, IconInfoCircle, IconLayoutGrid, IconListDetails, IconSearch, IconX } from '@tabler/icons-react'
 import { ActionIcon, Center, Grid, SegmentedControl, TextInput, Tooltip } from '@mantine/core';

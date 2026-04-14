@@ -16,7 +16,7 @@ import useMainAreaHeight from "@hooks/useMainAreaHeight";
 import { showNotification } from "@components/ShowNotificationComponent";
 import { useGetVendorWisePurchaseItemsQuery } from "@services/purchase-return";
 import { useTranslation } from "react-i18next";
-import React, { useState } from "react";
+import { useState } from "react";
 import useConfigData from "@hooks/useConfigData";
 
 export default function InvoiceForm({ onAddItem, onReturnTypeChange, onVendorChange }) {

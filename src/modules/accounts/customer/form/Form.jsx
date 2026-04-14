@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useMemo} from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useOutletContext } from "react-router";
 import {
 	Button,
@@ -15,7 +15,7 @@ import {
 	Image, ActionIcon
 } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import {IconCheck, IconDeviceFloppy, IconPercentage, IconPlusMinus, IconUserPlus, IconX} from "@tabler/icons-react";
+import { IconCheck, IconDeviceFloppy, IconPercentage, IconPlusMinus, IconUserPlus, IconX } from "@tabler/icons-react";
 import { useHotkeys } from "@mantine/hooks";
 import { useForm } from "@mantine/form";
 import { modals } from "@mantine/modals";
@@ -33,22 +33,22 @@ import SwitchForm from "@components/form-builders/SwitchForm";
 import FormValidationWrapper from "@components/form-builders/FormValidationWrapper";
 import useTransactionMode from "@hooks/useTransactionMode";
 
-export default function Form({ mode = "create", entityEditData = null, onSuccess,isEditMode = false,resetKey = 0,}) {
+export default function Form({ mode = "create", entityEditData = null, onSuccess, isEditMode = false, resetKey = 0, }) {
 	const { data: customerGroupData } = useGetDropdownDataQuery({
 		"dropdown-type": "customer-group",
 	});
-	const [createCustomer, { isLoading: isCreateCustomerLoading }] = useCreateCustomerMutation();
-	const [updateCustomer, { isLoading: isUpdateCustomerLoading }] = useUpdateCustomerMutation();
+	const [ createCustomer, { isLoading: isCreateCustomerLoading } ] = useCreateCustomerMutation();
+	const [ updateCustomer, { isLoading: isUpdateCustomerLoading } ] = useUpdateCustomerMutation();
 	const { t } = useTranslation();
 	const { isOnline } = useOutletContext();
 	const { mainAreaHeight } = useMainAreaHeight();
 	const height = mainAreaHeight - 130;
 	const { transactionMode } = useTransactionMode();
-	const [customersDropdownData, setCustomersDropdownData] = useState([]);
+	const [ customersDropdownData, setCustomersDropdownData ] = useState([]);
 
 	const form = useForm(customerRequest(t));
 
-	const [groupDrawer, setGroupDrawer] = useState(false);
+	const [ groupDrawer, setGroupDrawer ] = useState(false);
 
 	// =============== populate form for update mode ================
 	useEffect(() => {
@@ -68,7 +68,7 @@ export default function Form({ mode = "create", entityEditData = null, onSuccess
 			});
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [entityEditData, mode]);
+	}, [ entityEditData, mode ]);
 
 	useHotkeys(
 		[
@@ -175,21 +175,21 @@ export default function Form({ mode = "create", entityEditData = null, onSuccess
 		const groupsMap = {};
 		transactionMode.forEach((mode) => {
 			const methodName = mode.method_name || "Others";
-			if (!groupsMap[methodName]) {
-				groupsMap[methodName] = [];
+			if (!groupsMap[ methodName ]) {
+				groupsMap[ methodName ] = [];
 			}
-			groupsMap[methodName].push({
+			groupsMap[ methodName ].push({
 				value: String(mode.id),
 				label: mode.name,
 				path: mode.path,
 			});
 		});
 
-		return Object.entries(groupsMap).map(([group, items]) => ({
+		return Object.entries(groupsMap).map(([ group, items ]) => ({
 			group,
 			items,
 		}));
-	}, [transactionMode]);
+	}, [ transactionMode ]);
 
 	// =============== auto-set cash transaction mode on load ===============
 	useEffect(() => {
@@ -201,7 +201,7 @@ export default function Form({ mode = "create", entityEditData = null, onSuccess
 			form.setFieldValue("transactionModeId", String(cashMethod.id));
 			form.setFieldValue("transactionMode", cashMethod.name);
 		}
-	}, [transactionMode]);
+	}, [ transactionMode ]);
 	const iconProps = { stroke: 1.5, color: "currentColor", opacity: 0.6, size: 18 };
 	const renderTransactionModeOption = ({ option, checked }) => (
 		<Group flex="1" gap="xs">
@@ -235,7 +235,7 @@ export default function Form({ mode = "create", entityEditData = null, onSuccess
 		fetchCustomers();
 	}, []);
 
-	const { narration} =
+	const { narration } =
 		form.values;
 
 	return (

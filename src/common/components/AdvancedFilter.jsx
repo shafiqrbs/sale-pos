@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { ActionIcon, Box, Button, Flex, Grid, Popover, Text, Tooltip, ScrollArea } from "@mantine/core";
 import {
 	IconDeviceMobile,

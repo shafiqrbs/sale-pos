@@ -1,4 +1,3 @@
-import React from "react";
 import {ActionIcon, Box, Flex, NumberInput, Text, Button, Badge, Group} from "@mantine/core";
 import { DateInput } from "@mantine/dates";
 import { DataTable } from "mantine-datatable";

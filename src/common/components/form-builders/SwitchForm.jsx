@@ -1,4 +1,3 @@
-import React from "react";
 import { Tooltip, Switch, rem, useMantineTheme } from "@mantine/core";
 import { getHotkeyHandler } from "@mantine/hooks";
 import { IconX, IconCheck } from "@tabler/icons-react";

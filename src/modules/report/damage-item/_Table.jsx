@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import {Box, Grid, Text, Flex, ActionIcon, Tooltip} from "@mantine/core";
+import { useState } from "react";
+import { Box, Grid, Text, Flex, ActionIcon, Tooltip } from "@mantine/core";
 import { DataTable } from "mantine-datatable";
 import tableCss from "@assets/css/Table.module.css";
 import { useTranslation } from "react-i18next";
@@ -9,16 +9,14 @@ import { formatCurrency } from "@utils/index";
 import useMainAreaHeight from "@hooks/useMainAreaHeight";
 import { useGetDamageItemQuery } from "@services/report";
 import PageBreadcrumb from "@components/layout/PageBreadcrumb";
-import {IconCloudDown} from "@tabler/icons-react";
-import {useOutletContext} from "react-router";
+import { IconCloudDown } from "@tabler/icons-react";
 
 const PER_PAGE = 50;
 
 export default function Table() {
 	const { t } = useTranslation();
-	const [page, setPage] = useState(1);
+	const [ page, setPage ] = useState(1);
 	const { mainAreaHeight } = useMainAreaHeight();
-	const { isOnline } = useOutletContext();
 
 
 	// =============== when offline, always use offline data (online segment disabled) ===============

@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import {
-	ActionIcon, Badge,
+	Badge,
 	Box,
 	Button,
 	Card,
@@ -15,7 +15,7 @@ import {
 	Text,
 	Textarea,
 } from "@mantine/core";
-import { IconCheck, IconCurrencyTaka, IconNumber123, IconPercentage } from "@tabler/icons-react";
+import { IconCheck, IconCurrencyTaka, } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 import useConfigData from "@hooks/useConfigData";
 import VendorInfoSection from "./VendorInfoSection";
@@ -42,7 +42,7 @@ export default function PaymentSection({
 
 	const discountValue = useMemo(
 		() => Math.max(grandTotal - paymentAmount - dueAmountValue, 0),
-		[grandTotal, paymentAmount, dueAmountValue]
+		[ grandTotal, paymentAmount, dueAmountValue ]
 	);
 
 	const discountPercent = grandTotal > 0 ? (discountValue / grandTotal) * 100 : 0;
@@ -54,21 +54,21 @@ export default function PaymentSection({
 		const groupsMap = {};
 		transactionMode.forEach((mode) => {
 			const methodName = mode.method_name || "Others";
-			if (!groupsMap[methodName]) {
-				groupsMap[methodName] = [];
+			if (!groupsMap[ methodName ]) {
+				groupsMap[ methodName ] = [];
 			}
-			groupsMap[methodName].push({
+			groupsMap[ methodName ].push({
 				value: String(mode.id),
 				label: mode.name,
 				path: mode.path,
 			});
 		});
 
-		return Object.entries(groupsMap).map(([group, items]) => ({
+		return Object.entries(groupsMap).map(([ group, items ]) => ({
 			group,
 			items,
 		}));
-	}, [transactionMode]);
+	}, [ transactionMode ]);
 
 	// =============== auto-set cash transaction mode on load ===============
 	useEffect(() => {
@@ -80,13 +80,13 @@ export default function PaymentSection({
 			itemsForm.setFieldValue("transactionModeId", String(cashMethod.id));
 			itemsForm.setFieldValue("transactionMode", cashMethod.name);
 		}
-	}, [transactionMode]);
+	}, [ transactionMode ]);
 
 	// =============== auto-populate payment amount with grand total ===============
 	useEffect(() => {
 		if (isEditMode) return;
 		itemsForm.setFieldValue("paymentAmount", grandTotal);
-	}, [grandTotal]);
+	}, [ grandTotal ]);
 
 	// =============== render option with image and label ===============
 	const iconProps = { stroke: 1.5, color: "currentColor", opacity: 0.6, size: 18 };
@@ -108,10 +108,10 @@ export default function PaymentSection({
 	);
 
 	useHotkeys([
-		["alt+s", () => document.getElementById("ItemsFormSubmit")?.click()],
-		["alt+h", () => document.getElementById("ItemsHoldFormSubmit")?.click()],
-		["alt+p", () => document.getElementById("ItemsPrintFormSubmit")?.click()],
-		["alt+r", () => document.getElementById("ItemsResetFormSubmit")?.click()],
+		[ "alt+s", () => document.getElementById("ItemsFormSubmit")?.click() ],
+		[ "alt+h", () => document.getElementById("ItemsHoldFormSubmit")?.click() ],
+		[ "alt+p", () => document.getElementById("ItemsPrintFormSubmit")?.click() ],
+		[ "alt+r", () => document.getElementById("ItemsResetFormSubmit")?.click() ],
 	]);
 
 	return (

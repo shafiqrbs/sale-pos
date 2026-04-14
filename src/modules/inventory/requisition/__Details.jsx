@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import SalesPrintThermal from '../common/SalesPrintThermal';
 import { Box, Grid, Text, LoadingOverlay, Button, ScrollArea, Table } from '@mantine/core';
 import { IconPrinter } from '@tabler/icons-react';

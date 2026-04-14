@@ -1,4 +1,3 @@
-import React from "react";
 import {
     Tooltip,
     Textarea
@@ -9,7 +8,7 @@ import { getHotkeyHandler } from "@mantine/hooks";
 
 function TextAreaForm(props) {
     const { label, placeholder, required, nextField, name, form, tooltip, mt, id, minRows, autosize, maxRows, style } = props
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
     return (
         <>
             {
@@ -17,7 +16,7 @@ function TextAreaForm(props) {
                 <Tooltip
 
                     label={tooltip}
-                    opened={(name in form.errors) && !!form.errors[name]}
+                    opened={(name in form.errors) && !!form.errors[ name ]}
                     px={16}
                     py={2}
                     position="top-end"
@@ -29,7 +28,7 @@ function TextAreaForm(props) {
                     transitionProps={{ transition: "pop-bottom-left", duration: 500 }}
                 >
                     <Textarea
-                    styles={style ? { input: { height: 20 } } : {}}
+                        styles={style ? { input: { height: 20 } } : {}}
                         maxRows={maxRows}
                         autosize={autosize}
                         minRows={minRows}
@@ -41,12 +40,12 @@ function TextAreaForm(props) {
                         {...form.getInputProps(name && name)}
                         autoComplete="off"
                         onKeyDown={getHotkeyHandler([
-                            ['Enter', (e) => {
+                            [ 'Enter', (e) => {
                                 document.getElementById(nextField).focus();
-                            }],
+                            } ],
                         ])}
                         rightSection={
-                            form.values[name] ?
+                            form.values[ name ] ?
                                 <Tooltip
                                     label={t("Close")}
                                     withArrow
