@@ -20,15 +20,15 @@ import useCoreVendors from "@hooks/useCoreVendors";
 import { useTranslation } from "react-i18next";
 
 export default function InvoiceForm({ refetch, onAddItem, onVendorChange }) {
-	const [ productResetKey, setProductResetKey ] = useState(0);
-	const [ selectedCategoryId, setSelectedCategoryId ] = useState(null);
+	const [productResetKey, setProductResetKey] = useState(0);
+	const [selectedCategoryId, setSelectedCategoryId] = useState(null);
 	const { currencySymbol } = useConfigData();
 	const { t } = useTranslation();
 	const itemsForm = useForm(invoiceItemFormRequest(t));
 	const { categories: productCategoryData } = useGetCategories();
 	const { vendors } = useCoreVendors();
 	const { mainAreaHeight } = useMainAreaHeight();
-	const [ isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer } ] =
+	const [isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer }] =
 		useDisclosure(false);
 
 	// =============== declarative product list — auto-fetches on vendor/category change ===============
@@ -42,7 +42,7 @@ export default function InvoiceForm({ refetch, onAddItem, onVendorChange }) {
 
 	const productOptions = products?.map((product) => ({
 		value: String(product.id),
-		label: `${product.display_name} [${product.quantity}] ${product.unit_name} - ${currencySymbol}${product.purchase_price}`,
+		label: `${product.display_name} [${product.quantity}] ${product.unit_name ? product.unit_name : ""} - ${currencySymbol}${product.purchase_price}`,
 		purchase_price: product.purchase_price,
 		unit: product.unit_name,
 	}));
@@ -125,7 +125,7 @@ export default function InvoiceForm({ refetch, onAddItem, onVendorChange }) {
 		itemsForm.setFieldValue("unit", option?.unit);
 	};
 
-	useHotkeys([ [ "alt+a", () => document.getElementById("EntityFormSubmit")?.click() ] ]);
+	useHotkeys([["alt+a", () => document.getElementById("EntityFormSubmit")?.click()]]);
 
 	return (
 		<>
@@ -275,7 +275,7 @@ export default function InvoiceForm({ refetch, onAddItem, onVendorChange }) {
 			<AddProductDrawer
 				productDrawer={isProductDrawerOpened}
 				closeProductDrawer={closeProductDrawer}
-				setStockProductRestore={() => { }}
+				setStockProductRestore={() => {}}
 				focusField="productId"
 				fieldPrefix=""
 			/>

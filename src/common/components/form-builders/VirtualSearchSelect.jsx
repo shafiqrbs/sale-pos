@@ -60,9 +60,11 @@ export default function VirtualSearchSelect({
 	const onChangeRef = useRef(onChange);
 	const optionMapRef = useRef(optionMap);
 	const nextFieldRef = useRef(nextField);
+	const disabledRef = useRef(disabled);
 	onChangeRef.current = onChange;
 	optionMapRef.current = optionMap;
 	nextFieldRef.current = nextField;
+	disabledRef.current = disabled;
 
 	// =============== init on mount, destroy on unmount; single init with initial options/value ===============
 	useEffect(() => {
@@ -95,6 +97,17 @@ export default function VirtualSearchSelect({
 		});
 
 		virtualSelectInstanceRef.current = containerElement.virtualSelect;
+
+		// =============== guard programmatic .open() calls when disabled; plugin doesn't check ===============
+		const originalOpen = typeof containerElement.open === "function"
+			? containerElement.open.bind(containerElement)
+			: null;
+		if (originalOpen) {
+			containerElement.open = () => {
+				if (disabledRef.current) return;
+				originalOpen();
+			};
+		}
 
 		// =============== tracks whether a value was selected in the current open/close cycle;
 		// afterClose should only move focus when the user actually picked a value, not when
