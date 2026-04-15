@@ -87,8 +87,7 @@ export default function ItemsTableSection({
 	};
 
 	return (
-		<Box bg="gray.1" >
-
+		<Box bg="gray.1">
 			<Flex justify="space-between" align="center" mb="4xs">
 				<Box px="xs" fz="sm" fw={600} className="boxBackground textColor">
 					{t("InvoicePurchase")}
@@ -144,6 +143,7 @@ export default function ItemsTableSection({
 							</Text>
 						),
 					},
+
 					{
 						accessor: "expired_date",
 						title: t("Expiry"),
@@ -175,6 +175,17 @@ export default function ItemsTableSection({
 								hideControls
 								onChange={(value) => handleMrpChange(record.id, value)}
 							/>
+						),
+					},
+					{
+						accessor: "purchase_price",
+						title: t("PP."),
+						textAlign: "center",
+						width: 90,
+						render: (record) => (
+							<Text size="xs" c="dimmed">
+								{formatCurrency(record.purchase_price ?? 0)}
+							</Text>
 						),
 					},
 					{
