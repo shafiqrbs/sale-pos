@@ -41,12 +41,12 @@ const PRODUCT_PAYMENT_BUTTON_STYLE =
 
 export default function InvoiceForm({ refetch, onAddItem }) {
 	const { t } = useTranslation();
-	const [ productResetKey, setProductResetKey ] = useState(0);
+	const [productResetKey, setProductResetKey] = useState(0);
 	const { currencySymbol } = useConfigData();
 	const itemsForm = useForm(salesItemFormRequest(t));
 	const { categories } = useGetCategories();
 
-	const [ isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer } ] =
+	const [isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer }] =
 		useDisclosure(false);
 
 	// =============== declarative product list — fetches all products on mount ===============
@@ -56,7 +56,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 
 	const productOptions = products?.map((product) => ({
 		value: String(product.id),
-		label: `${product.display_name} [${product.quantity}] ${product.unit_name} - ${currencySymbol}${product.sales_price}`,
+		label: `${product.display_name} [${product.quantity}] ${product.unit_name ? product.unit_name : ""} - ${currencySymbol}${product.sales_price}`,
 		sales_price: product.sales_price,
 		purchase_price: product.purchase_price,
 		unit: product.unit_name,
@@ -89,8 +89,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 
 		// =============== resolve category_name from category_id using local categories ===============
 		const categoryId = selectedProduct.category_id ?? null;
-		const categoryName =
-			categories?.find((cat) => cat.id === categoryId)?.name ?? "";
+		const categoryName = categories?.find((cat) => cat.id === categoryId)?.name ?? "";
 
 		// =============== build item matching temp_sales_products NOT NULL columns ===============
 		const newItem = {
@@ -158,7 +157,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 			`<button type="button" data-virtual-search-empty-action="pos" style="${PRODUCT_POS_BUTTON_STYLE}">${labelPos}</button>` +
 			`</div>`
 		);
-	}, [ t ]);
+	}, [t]);
 
 	const handleProductNothingFoundAction = useCallback(
 		(action) => {
@@ -187,10 +186,10 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 				document.getElementById("pos")?.focus();
 			}
 		},
-		[ openProductDrawer ],
+		[openProductDrawer]
 	);
 
-	useHotkeys([ [ "alt+a", () => document.getElementById("EntityFormSubmit")?.click() ] ]);
+	useHotkeys([["alt+a", () => document.getElementById("EntityFormSubmit")?.click()]]);
 
 	return (
 		<>
@@ -201,7 +200,8 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 				className="borderRadiusAll"
 				px="sm"
 				py="xs"
-				bg="var(--theme-primary-card-color)">
+				bg="var(--theme-primary-card-color)"
+			>
 				<Flex gap="xs" align="flex-end" wrap="nowrap">
 					{/* =============== barcode input =============== */}
 					<Box w={200} style={{ flexShrink: 0 }}>
@@ -364,7 +364,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 					<Button
 						leftSection={<IconPlus size={16} />}
 						rightSection={<IconShoppingCart size={15} />}
-						bg={'red'}
+						bg={"red"}
 						radius="sm"
 						type="submit"
 						id="EntityFormSubmit"
@@ -377,7 +377,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 			<AddProductDrawer
 				productDrawer={isProductDrawerOpened}
 				closeProductDrawer={closeProductDrawer}
-				setStockProductRestore={() => { }}
+				setStockProductRestore={() => {}}
 				focusField="productId"
 				fieldPrefix=""
 			/>

@@ -229,6 +229,46 @@ export const parseJsonArray = (value) => {
 	}
 };
 
+// =============== checks if expired_date string is strictly before today (start of day, local time). Accepts DD-Mon-YYYY (e.g. 10-Mar-2026), YYYY-MM-DD, and DD-MM-YYYY. Returns false for empty/unparsable values so unknown dates are not treated as expired. ===============
+const MONTH_NAME_TO_INDEX = {
+	jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
+	jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11,
+};
+
+export const isExpiredDate = (value) => {
+	if (!value) return false;
+	const trimmed = String(value).trim();
+	let parsed = null;
+
+	const monMatch = trimmed.match(/^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/);
+	if (monMatch) {
+		const day = Number(monMatch[ 1 ]);
+		const monthIndex = MONTH_NAME_TO_INDEX[ monMatch[ 2 ].toLowerCase() ];
+		const year = Number(monMatch[ 3 ]);
+		if (monthIndex !== undefined) parsed = new Date(year, monthIndex, day);
+	}
+
+	if (!parsed) {
+		const isoMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+		if (isoMatch) {
+			parsed = new Date(Number(isoMatch[ 1 ]), Number(isoMatch[ 2 ]) - 1, Number(isoMatch[ 3 ]));
+		}
+	}
+
+	if (!parsed) {
+		const dmyMatch = trimmed.match(/^(\d{2})-(\d{2})-(\d{4})$/);
+		if (dmyMatch) {
+			parsed = new Date(Number(dmyMatch[ 3 ]), Number(dmyMatch[ 2 ]) - 1, Number(dmyMatch[ 1 ]));
+		}
+	}
+
+	if (!parsed || isNaN(parsed.getTime())) return false;
+
+	const today = new Date();
+	today.setHours(0, 0, 0, 0);
+	return parsed.getTime() < today.getTime();
+};
+
 // =============== labels from t() must be escaped before embedding in nothingFoundHtml (innerHTML) ===============
 export function escapeHtmlForVirtualSelectEmptyState(text) {
 	if (text == null) {

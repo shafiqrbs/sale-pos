@@ -43,14 +43,14 @@ import useGetCategories from "@hooks/useGetCategories";
 
 export default function InvoiceForm({ refetch, onAddItem }) {
 	const { t } = useTranslation();
-	const [ productResetKey, setProductResetKey ] = useState(0);
-	const [ selectedCategoryId, setSelectedCategoryId ] = useState(null);
+	const [productResetKey, setProductResetKey] = useState(0);
+	const [selectedCategoryId, setSelectedCategoryId] = useState(null);
 	const { currencySymbol } = useConfigData();
 	const itemsForm = useForm(invoiceItemFormRequest(t));
 
 	const { categories: productCategoryData } = useGetCategories();
 	const { mainAreaHeight } = useMainAreaHeight();
-	const [ isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer } ] =
+	const [isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer }] =
 		useDisclosure(false);
 
 	// =============== declarative product list — auto-fetches on category change ===============
@@ -64,11 +64,11 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 		() =>
 			products?.map((product) => ({
 				value: String(product.id),
-				label: `${product.display_name} [${product.quantity}] ${product.unit_name} - ${currencySymbol}${product.purchase_price}`,
+				label: `${product.display_name} [${product.quantity}] ${product.unit_name ? product.unit_name : ""} - ${currencySymbol}${product.purchase_price}`,
 				purchase_price: product.purchase_price,
 				unit: product.unit_name,
 			})),
-		[ products, currencySymbol ]
+		[products, currencySymbol]
 	);
 
 	const containerHeight = mainAreaHeight - 162;
@@ -82,7 +82,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 					null)
 				: null,
 		// eslint-disable-next-line react-hooks/exhaustive-deps -- isProductSelected is derived from itemsForm.values.productId which is already in deps
-		[ products, itemsForm.values.productId ]
+		[products, itemsForm.values.productId]
 	);
 
 	const productMeasurements = parseJsonArray(selectedProduct?.measurements);
@@ -114,7 +114,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 
 		itemsForm.setFieldValue("quantity", derivedQuantity > 0 ? String(derivedQuantity) : "");
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ itemsForm.values.measurement, itemsForm.values.measurement_quantity ]);
+	}, [itemsForm.values.measurement, itemsForm.values.measurement_quantity]);
 
 	useEffect(() => {
 		if (!showMeasurementFields) return;
@@ -122,7 +122,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 			"measurement",
 			measurementOptions.find((option) => option.is_purchase === 1)?.value?.toString()
 		);
-	}, [ showMeasurementFields ]);
+	}, [showMeasurementFields]);
 
 	// =============== ref flag: tells the mrp+discount effect to skip when quantity already computed both fields in one setValues call, collapsing 3 renders into 2 ===============
 	const quantityComputedBothFields = useRef(false);
@@ -140,7 +140,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 			purchase_price: (purchasePrice * quantity).toFixed(2) ?? "",
 		});
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ itemsForm.values.quantity, selectedProduct?.id ]);
+	}, [itemsForm.values.quantity, selectedProduct?.id]);
 
 	// =============== discount changed manually → update purchase_price; skipped when the quantity effect already handled it ===============
 	useEffect(() => {
@@ -157,7 +157,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 			(purchasePrice - (purchasePrice * discountPercent) / 100).toFixed(2) ?? ""
 		);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ itemsForm.values.item_percent, itemsForm.values.quantity ]);
+	}, [itemsForm.values.item_percent, itemsForm.values.quantity]);
 
 	const handleAddItemToPurchaseForm = async () => {
 		const { productId, purchase_price, total_mrp, quantity, expired_date } = itemsForm.values;
@@ -236,7 +236,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 		setTimeout(() => document.getElementById("quantity")?.focus(), 0);
 	};
 
-	useHotkeys([ [ "alt+a", () => document.getElementById("EntityFormSubmit")?.click() ] ]);
+	useHotkeys([["alt+a", () => document.getElementById("EntityFormSubmit")?.click()]]);
 
 	return (
 		<>
@@ -514,7 +514,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 			<AddProductDrawer
 				productDrawer={isProductDrawerOpened}
 				closeProductDrawer={closeProductDrawer}
-				setStockProductRestore={() => { }}
+				setStockProductRestore={() => {}}
 				focusField="productId"
 				fieldPrefix=""
 			/>

@@ -12,6 +12,7 @@ import {
 import { IconPlus, IconMinus } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
 import useConfigData from "@hooks/useConfigData";
+import { isExpiredDate } from "@utils/index";
 
 // purchase_item_for_sales structure:
 // [
@@ -112,71 +113,80 @@ export default function BatchProductModal({
 			<ScrollArea h={400}>
 				<Box>
 					{batchesWithStock.length > 0 ? (
-						batchesWithStock.map((item, index) => (
-							<Box key={item.purchase_item_id || index}>
-								<Group justify="space-between" py="md">
-									<Box>
-										<Text size="sm" fw={600}>
-											Batch #{item.purchase_item_id}
-										</Text>
-										<Text size="xs" c="dimmed">
-											Available: {item.remain_quantity} | Expires: {item.expired_date}
-										</Text>
-									</Box>
-									<Group gap={8}>
-										<ActionIcon
-											size="md"
-											variant="filled"
-											color="gray.7"
-											disabled={(selectedBatches[item.purchase_item_id] || 0) === 0}
-											onClick={() => handleQuantityChange(item.purchase_item_id, -1)}
-										>
-											<IconMinus height={16} width={16} />
-										</ActionIcon>
-										<NumberInput
-											size="xs"
-											ta="center"
-											fw={600}
-											w={60}
-											value={selectedBatches[item.purchase_item_id] || 0}
-											min={0}
-											max={!allowSalesZeroStock ? item.remain_quantity : undefined}
-											allowNegative={false}
-											clampBehavior="strict"
-											step={1}
-											decimalScale={3}
-											hideControls
-											onChange={(value) => {
-												handleDirectQuantityChange(
-													item.purchase_item_id,
-													value,
-													item.remain_quantity
-												);
-											}}
-											styles={{
-												input: {
-													textAlign: "center",
-													fontWeight: 600,
-													padding: "0 2px",
-												},
-											}}
-										/>
-										<ActionIcon
-											size="md"
-											variant="filled"
-											color="gray.7"
-											disabled={
-												(selectedBatches[item.purchase_item_id] || 0) >= item.remain_quantity
-											}
-											onClick={() => handleQuantityChange(item.purchase_item_id, 1)}
-										>
-											<IconPlus height={16} width={16} />
-										</ActionIcon>
+						batchesWithStock.map((item, index) => {
+							const expired = isExpiredDate(item.expired_date);
+							return (
+								<Box key={item.purchase_item_id || index}>
+									<Group justify="space-between" py="md">
+										<Box>
+											<Text size="sm" fw={600}>
+												Batch #{item.purchase_item_id}
+											</Text>
+											<Text size="xs" c={expired ? "red" : "dimmed"}>
+												Available: {item.remain_quantity} | Expires: {item.expired_date}
+												{expired ? " (Expired)" : ""}
+											</Text>
+										</Box>
+										<Group gap={8}>
+											<ActionIcon
+												size="md"
+												variant="filled"
+												color="gray.7"
+												disabled={
+													expired ||
+													(selectedBatches[item.purchase_item_id] || 0) === 0
+												}
+												onClick={() => handleQuantityChange(item.purchase_item_id, -1)}
+											>
+												<IconMinus height={16} width={16} />
+											</ActionIcon>
+											<NumberInput
+												size="xs"
+												ta="center"
+												fw={600}
+												w={60}
+												value={selectedBatches[item.purchase_item_id] || 0}
+												min={0}
+												max={!allowSalesZeroStock ? item.remain_quantity : undefined}
+												allowNegative={false}
+												clampBehavior="strict"
+												step={1}
+												decimalScale={3}
+												hideControls
+												disabled={expired}
+												onChange={(value) => {
+													handleDirectQuantityChange(
+														item.purchase_item_id,
+														value,
+														item.remain_quantity
+													);
+												}}
+												styles={{
+													input: {
+														textAlign: "center",
+														fontWeight: 600,
+														padding: "0 2px",
+													},
+												}}
+											/>
+											<ActionIcon
+												size="md"
+												variant="filled"
+												color="gray.7"
+												disabled={
+													expired ||
+													(selectedBatches[item.purchase_item_id] || 0) >= item.remain_quantity
+												}
+												onClick={() => handleQuantityChange(item.purchase_item_id, 1)}
+											>
+												<IconPlus height={16} width={16} />
+											</ActionIcon>
+										</Group>
 									</Group>
-								</Group>
-								{index < batchesWithStock.length - 1 && <Divider />}
-							</Box>
-						))
+									{index < batchesWithStock.length - 1 && <Divider />}
+								</Box>
+							);
+						})
 					) : (
 						<Text ta="center" c="dimmed" py="xl">
 							No batches available

@@ -64,7 +64,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 		() =>
 			products?.map((product) => ({
 				value: String(product.id),
-				label: `${product.display_name} [${product.quantity}] ${product.unit_name} - ${currencySymbol}${product.purchase_price}`,
+				label: `${product.display_name} [${product.quantity}] ${product.unit_name ? product.unit_name : ""} - ${currencySymbol}${product.purchase_price}`,
 				purchase_price: product.purchase_price,
 				unit: product.unit_name,
 			})),
