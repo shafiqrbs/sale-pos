@@ -10,6 +10,8 @@
 	"Logout": "Logout",
 	"Offline": "Offline",
 	"Online": "Online",
+	"Web": "Web",
+	"Local": "Local",
 	"CollapseRightSidebar": "Collapse right sidebar",
 	"ExpandRightSidebar": "Expand right sidebar",
 	"Fullscreen": "Full Screen",

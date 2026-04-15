@@ -20,8 +20,8 @@ import {
 	IconPlus,
 	IconRefresh,
 	IconTrashX,
-	IconGlobe,
-	IconGlobeOff,
+	IconWorld,
+	IconDeviceDesktop,
 } from "@tabler/icons-react";
 import { useNavigate, useOutletContext } from "react-router";
 import { DataTable } from "mantine-datatable";
@@ -189,10 +189,24 @@ export default function PurchaseTable({ approveMutation, copyMutation, modalTitl
 							color={effectiveDataSource === "online" ? "green" : "red"}
 							data={[
 								{
+									value: "offline",
+									label: (
+										<Group gap={4} wrap="nowrap">
+											<IconDeviceDesktop
+												size={13}
+												color={
+													effectiveDataSource === "offline" ? "white" : "var(--mantine-color-red-6)"
+												}
+											/>
+											{t("Local")}
+										</Group>
+									),
+								},
+								{
 									value: "online",
 									label: (
 										<Group gap={4} wrap="nowrap">
-											<IconGlobe
+											<IconWorld
 												size={13}
 												color={
 													effectiveDataSource === "online"
@@ -200,21 +214,7 @@ export default function PurchaseTable({ approveMutation, copyMutation, modalTitl
 														: "var(--mantine-color-green-6)"
 												}
 											/>
-											{t("Online")}
-										</Group>
-									),
-								},
-								{
-									value: "offline",
-									label: (
-										<Group gap={4} wrap="nowrap">
-											<IconGlobeOff
-												size={13}
-												color={
-													effectiveDataSource === "offline" ? "white" : "var(--mantine-color-red-6)"
-												}
-											/>
-											{t("Offline")}
+											{t("Web")}
 										</Group>
 									),
 								},

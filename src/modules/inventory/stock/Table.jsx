@@ -16,8 +16,8 @@ import {
 	IconPlus,
 	IconDotsVertical,
 	IconTruckReturn,
-	IconGlobe,
-	IconGlobeOff,
+	IconWorld,
+	IconDeviceDesktop,
 	IconCloudDown,
 	IconEdit,
 } from "@tabler/icons-react";
@@ -46,20 +46,21 @@ export default function Table() {
 	const { isOnlinePermissionIncludes } = useLoggedInUser();
 	const { mainAreaHeight } = useMainAreaHeight();
 	const { currencySymbol } = useConfigData();
-	const [ page, setPage ] = useState(1);
-	const [ userChoice, setUserChoice ] = useState(null);
-	const [ onlineSearchTerm, setOnlineSearchTerm ] = useState("");
-	const [ offlineSearchTerm, setOfflineSearchTerm ] = useState("");
+	const [page, setPage] = useState(1);
+	const [userChoice, setUserChoice] = useState(null);
+	const [onlineSearchTerm, setOnlineSearchTerm] = useState("");
+	const [offlineSearchTerm, setOfflineSearchTerm] = useState("");
 
-	const effectiveDataSource = isOnline && isOnlinePermissionIncludes ? (userChoice ?? "online") : "offline";
+	const effectiveDataSource =
+		isOnline && isOnlinePermissionIncludes ? (userChoice ?? "online") : "offline";
 
-	const [ productDrawer, { open: openProductDrawer, close: closeProductDrawer } ] =
+	const [productDrawer, { open: openProductDrawer, close: closeProductDrawer }] =
 		useDisclosure(false);
 
 	// =============== damage process ================
-	const [ damageOpened, { open: openDamage, close: closeDamage } ] = useDisclosure(false);
-	const [ selectedProduct, setSelectedProduct ] = useState(null);
-	const [ triggerGetItemsForDamage, { data: damageResponse, isFetching: isDamageLoading } ] =
+	const [damageOpened, { open: openDamage, close: closeDamage }] = useDisclosure(false);
+	const [selectedProduct, setSelectedProduct] = useState(null);
+	const [triggerGetItemsForDamage, { data: damageResponse, isFetching: isDamageLoading }] =
 		useLazyGetItemsForDamageQuery();
 
 	const handleDamage = async (record) => {
@@ -117,7 +118,7 @@ export default function Table() {
 		return () => {
 			window.removeEventListener("products-updated", refetchLocal);
 		};
-	}, [ refetchLocal ]);
+	}, [refetchLocal]);
 
 	// =============== search handler ================
 	const handleSearch = (data) => {
@@ -186,10 +187,24 @@ export default function Table() {
 							color={effectiveDataSource === "online" ? "green" : "red"}
 							data={[
 								{
+									value: "offline",
+									label: (
+										<Group gap={4} wrap="nowrap">
+											<IconDeviceDesktop
+												size={13}
+												color={
+													effectiveDataSource === "offline" ? "white" : "var(--mantine-color-red-6)"
+												}
+											/>
+											{t("Local")}
+										</Group>
+									),
+								},
+								{
 									value: "online",
 									label: (
 										<Group gap={4} wrap="nowrap">
-											<IconGlobe
+											<IconWorld
 												size={13}
 												color={
 													effectiveDataSource === "online"
@@ -197,21 +212,7 @@ export default function Table() {
 														: "var(--mantine-color-green-6)"
 												}
 											/>
-											{t("Online")}
-										</Group>
-									),
-								},
-								{
-									value: "offline",
-									label: (
-										<Group gap={4} wrap="nowrap">
-											<IconGlobeOff
-												size={13}
-												color={
-													effectiveDataSource === "offline" ? "white" : "var(--mantine-color-red-6)"
-												}
-											/>
-											{t("Offline")}
+											{t("Web")}
 										</Group>
 									),
 								},
@@ -273,7 +274,7 @@ export default function Table() {
 							accessor: "product_name",
 							title: t("Product"),
 							width: 220,
-							render: (record) => record.product_name || record.display_name || "—",
+							render: (record) => record.display_name || "—",
 						},
 						{
 							accessor: "barcode",
@@ -325,46 +326,46 @@ export default function Table() {
 						},
 						...(effectiveDataSource === "online"
 							? [
-								{
-									accessor: "action",
-									title: t("Action"),
-									textAlign: "right",
-									width: 80,
-									render: (record) => {
-										return (
-											<Group gap={4} justify="right" wrap="nowrap">
-												<Menu
-													position="bottom-end"
-													offset={3}
-													withArrow
-													trigger="hover"
-													openDelay={100}
-													closeDelay={400}
-												>
-													<Menu.Target>
-														<ActionIcon
-															size="sm"
-															variant="transparent"
-															color="red"
-															radius="xl"
-															aria-label="Actions"
-														>
-															<IconDotsVertical height={"18"} width={"18"} stroke={1.5} />
-														</ActionIcon>
-													</Menu.Target>
+									{
+										accessor: "action",
+										title: t("Action"),
+										textAlign: "right",
+										width: 80,
+										render: (record) => {
+											return (
+												<Group gap={4} justify="right" wrap="nowrap">
+													<Menu
+														position="bottom-end"
+														offset={3}
+														withArrow
+														trigger="hover"
+														openDelay={100}
+														closeDelay={400}
+													>
+														<Menu.Target>
+															<ActionIcon
+																size="sm"
+																variant="transparent"
+																color="red"
+																radius="xl"
+																aria-label="Actions"
+															>
+																<IconDotsVertical height={"18"} width={"18"} stroke={1.5} />
+															</ActionIcon>
+														</Menu.Target>
 
 														<Menu.Dropdown w="160">
 															{!record.vendor_id && (
-															<Menu.Item
-																onClick={(event) => {
-																	event.stopPropagation();
-																	handleEdit(record);
-																}}
-																leftSection={<IconEdit height={"18"} width={"18"} stroke={1.5} />}
-																color="yellow"
-															>
-																{t("Edit")}
-															</Menu.Item>
+																<Menu.Item
+																	onClick={(event) => {
+																		event.stopPropagation();
+																		handleEdit(record);
+																	}}
+																	leftSection={<IconEdit height={"18"} width={"18"} stroke={1.5} />}
+																	color="yellow"
+																>
+																	{t("Edit")}
+																</Menu.Item>
 															)}
 															{record.quantity > 0 && (
 																<Menu.Item
@@ -381,13 +382,12 @@ export default function Table() {
 																</Menu.Item>
 															)}
 														</Menu.Dropdown>
-
-												</Menu>
-											</Group>
-										);
+													</Menu>
+												</Group>
+											);
+										},
 									},
-								},
-							]
+								]
 							: []),
 					]}
 					fetching={isTableLoading}
