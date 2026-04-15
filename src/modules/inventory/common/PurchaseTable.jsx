@@ -47,17 +47,18 @@ export default function PurchaseTable({ approveMutation, copyMutation, modalTitl
 	const { syncOnlineProductsToLocal } = useSyncProducts();
 	const navigate = useNavigate();
 	const { t } = useTranslation();
-	const [ opened, { open, close } ] = useDisclosure(false);
-	const [ page, setPage ] = useState(1);
-	const [ selectedRow, setSelectedRow ] = useState(null);
-	const [ loading, setLoading ] = useState(false);
-	const [ viewData, setViewData ] = useState(null);
-	const [ deletedPurchaseIds, setDeletedPurchaseIds ] = useState(new Set());
-	const [ userChoice, setUserChoice ] = useState(null);
+	const [opened, { open, close }] = useDisclosure(false);
+	const [page, setPage] = useState(1);
+	const [selectedRow, setSelectedRow] = useState(null);
+	const [loading, setLoading] = useState(false);
+	const [viewData, setViewData] = useState(null);
+	const [deletedPurchaseIds, setDeletedPurchaseIds] = useState(new Set());
+	const [userChoice, setUserChoice] = useState(null);
 	const { mainAreaHeight, isOnline } = useOutletContext();
 	const { isOnlinePermissionIncludes } = useLoggedInUser();
 	// =============== when offline or user lacks permission, always use offline data ===============
-	const effectiveDataSource = isOnline && isOnlinePermissionIncludes ? (userChoice ?? "online") : "offline";
+	const effectiveDataSource =
+		isOnline && isOnlinePermissionIncludes ? (userChoice ?? "online") : "offline";
 
 	const form = useForm({
 		initialValues: {
@@ -168,7 +169,7 @@ export default function PurchaseTable({ approveMutation, copyMutation, modalTitl
 
 	const handleConfirmDelete = async (record) => {
 		await window.dbAPI.deleteDataFromTable("purchase", { id: record.id });
-		setDeletedPurchaseIds((previousIds) => new Set([ ...previousIds, record.id ]));
+		setDeletedPurchaseIds((previousIds) => new Set([...previousIds, record.id]));
 		showNotification(t("InvoiceDeletedSuccess", { invoice: record.invoice }), "teal");
 	};
 
@@ -308,6 +309,12 @@ export default function PurchaseTable({ approveMutation, copyMutation, modalTitl
 									render: (data) => <>{formatCurrency(data.total || 0)}</>,
 								},
 								{
+									accessor: "payment",
+									title: t("Payment"),
+									textAlign: "right",
+									render: (data) => <>{formatCurrency(data.payment || data.paymentAmount || 0)}</>,
+								},
+								{
 									accessor: "due",
 									title: t("Due"),
 									textAlign: "right",
@@ -326,7 +333,7 @@ export default function PurchaseTable({ approveMutation, copyMutation, modalTitl
 											Approved: "red",
 										};
 
-										const badgeColor = colorMap[ item.process ] || "gray";
+										const badgeColor = colorMap[item.process] || "gray";
 
 										return item.process && <Badge color={badgeColor}>{item.process}</Badge>;
 									},
@@ -439,9 +446,9 @@ export default function PurchaseTable({ approveMutation, copyMutation, modalTitl
 							rowStyle={(item) =>
 								item.invoice === selectedRow
 									? {
-										background: "var(--theme-primary-color-3)",
-										color: "#ffffff",
-									}
+											background: "var(--theme-primary-color-3)",
+											color: "#ffffff",
+										}
 									: undefined
 							}
 						/>

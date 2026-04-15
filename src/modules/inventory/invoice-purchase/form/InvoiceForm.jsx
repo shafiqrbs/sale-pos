@@ -15,7 +15,6 @@ import {
 	IconBarcode,
 	IconCurrencyTaka,
 	IconNumber,
-	IconPercentage,
 	IconPlus,
 	IconRefresh,
 	IconShoppingCart,
@@ -474,7 +473,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 					bg="var(--theme-primary-card-color)"
 				>
 					<Text fz="sm" fw={500} c="white">
-						Sub Total
+						{t("SubTotal")}
 					</Text>
 					<Flex align="center" gap="4" pr="md">
 						<Text fz="sm" c="white" fw={500}>
