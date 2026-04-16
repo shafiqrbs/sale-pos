@@ -234,6 +234,8 @@ export default function InvoiceForm({ onAddItem, onReturnTypeChange, onVendorCha
 											size="xs"
 											w={80}
 											min={0}
+											max={item.purchase_quantity}
+											clampBehavior="strict"
 											value={itemReturnQuantities[item.id] ?? ""}
 											disabled={item?.purchase_quantity < 1}
 											onChange={(value) => handleItemQuantityChange(item.id, value)}
