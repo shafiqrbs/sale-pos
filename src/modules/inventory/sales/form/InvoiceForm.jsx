@@ -1,4 +1,4 @@
-import { ActionIcon, Box, Button, Flex, NumberInput, Text } from "@mantine/core";
+import { ActionIcon, Box, Button, Flex, NumberInput, Text, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import {
 	IconBarcode,
@@ -11,11 +11,11 @@ import {
 import { useCallback, useMemo, useState } from "react";
 
 import InputNumberForm from "@components/form-builders/InputNumberForm";
-import InputForm from "@components/form-builders/InputForm";
 import AddProductDrawer from "@components/drawers/AddProductDrawer";
 import useLocalProductList from "@hooks/useLocalProductList";
 import useGetCategories from "@hooks/useGetCategories";
 import useConfigData from "@hooks/useConfigData";
+import useBarcodeProductSearch from "@hooks/useBarcodeProductSearch";
 import { useDisclosure, useHotkeys } from "@mantine/hooks";
 import { escapeHtmlForVirtualSelectEmptyState, formatCurrency } from "@utils/index";
 import { showNotification } from "@components/ShowNotificationComponent";
@@ -45,6 +45,8 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 	const { currencySymbol } = useConfigData();
 	const itemsForm = useForm(salesItemFormRequest(t));
 	const { categories } = useGetCategories();
+	const { barcodeValue, setBarcodeValue, foundProduct, isSearching, clearBarcode } =
+		useBarcodeProductSearch();
 
 	const [isProductDrawerOpened, { open: openProductDrawer, close: closeProductDrawer }] =
 		useDisclosure(false);
@@ -66,6 +68,43 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 	const baseMRP = Number(itemsForm.values.salesPrice) || 0;
 	const discountPercent = Number(itemsForm.values.discount) || 0;
 	const effectivePrice = baseMRP * (1 - discountPercent / 100);
+
+	// =============== add product found via barcode scan with quantity=1 and product's sales price ===============
+	const handleBarcodeAdd = async () => {
+		if (!foundProduct) return;
+
+		const salesPriceNumber = Number(foundProduct.sales_price ?? 0);
+		const categoryName = categories?.find((cat) => cat.id === foundProduct.category_id)?.name ?? "";
+
+		const newItem = {
+			product_id: foundProduct.id,
+			display_name: foundProduct.display_name,
+			sales_price: salesPriceNumber,
+			price: salesPriceNumber,
+			mrp: salesPriceNumber,
+			percent: 0,
+			stock: Number(foundProduct.quantity ?? 0),
+			quantity: 1,
+			unit_name: foundProduct.unit_name || "",
+			purchase_price: Number(foundProduct.purchase_price ?? 0),
+			average_price: Number(foundProduct.average_price ?? 0),
+			sub_total: 1 * salesPriceNumber,
+			unit_id: foundProduct.unit_id || null,
+			category_id: foundProduct.category_id ?? null,
+			category_name: categoryName,
+			type: "sales",
+		};
+
+		if (onAddItem) {
+			onAddItem(newItem);
+		} else {
+			await window.dbAPI.upsertIntoTable("temp_sales_products", newItem);
+			refetch();
+		}
+
+		clearBarcode();
+		showNotification(t("ItemAddedSuccessfully"), "teal");
+	};
 
 	const handleAddItemToSalesForm = async () => {
 		const { productId, salesPrice, quantity } = itemsForm.values;
@@ -202,20 +241,30 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 				py="xs"
 				bg="var(--theme-primary-card-color)"
 			>
-				<Flex gap="xs" align="flex-end" wrap="nowrap">
-					{/* =============== barcode input =============== */}
-					<Box w={200} style={{ flexShrink: 0 }}>
-						<InputForm
-							form={itemsForm}
-							name="barcode"
-							id="barcode"
-							label=""
-							placeholder={t("Barcode")}
-							required={false}
-							tooltip=""
-							leftSection={<IconBarcode size={16} opacity={0.6} />}
-						/>
-					</Box>
+			<Flex gap="xs" align="flex-end" wrap="nowrap">
+				{/* =============== barcode scanner input with add button =============== */}
+				<Box w={200} style={{ flexShrink: 0 }}>
+					<TextInput
+						id="barcodeSearch"
+						value={barcodeValue}
+						onChange={(event) => setBarcodeValue(event.currentTarget.value)}
+						placeholder={t("ScanOrTypeBarcode")}
+						autoComplete="off"
+						leftSection={<IconBarcode size={16} opacity={0.6} />}
+						rightSection={
+							<ActionIcon
+								size="sm"
+								variant="filled"
+								color="teal"
+								radius="sm"
+								disabled={!foundProduct || isSearching}
+								onClick={handleBarcodeAdd}
+							>
+								<IconPlus size={14} />
+							</ActionIcon>
+						}
+					/>
+				</Box>
 
 					{/* =============== category filter select =============== */}
 					{/* <Box w={160} style={{ flexShrink: 0 }}>

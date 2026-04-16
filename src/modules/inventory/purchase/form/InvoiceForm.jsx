@@ -8,6 +8,7 @@ import {
 	ScrollArea,
 	Select,
 	Text,
+	TextInput,
 	Tooltip,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
@@ -24,10 +25,10 @@ import {
 
 import useMainAreaHeight from "@hooks/useMainAreaHeight";
 import InputNumberForm from "@components/form-builders/InputNumberForm";
-import InputForm from "@components/form-builders/InputForm";
 import AddProductDrawer from "@components/drawers/AddProductDrawer";
 import useLocalProductList from "@hooks/useLocalProductList";
 import useConfigData from "@hooks/useConfigData";
+import useBarcodeProductSearch from "@hooks/useBarcodeProductSearch";
 import { useDisclosure, useHotkeys } from "@mantine/hooks";
 import { formatCurrency, parseJsonArray } from "@utils/index";
 import { showNotification } from "@components/ShowNotificationComponent";
@@ -47,6 +48,8 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 	const [selectedCategoryId, setSelectedCategoryId] = useState(null);
 	const { currencySymbol } = useConfigData();
 	const itemsForm = useForm(invoiceItemFormRequest(t));
+	const { barcodeValue, setBarcodeValue, foundProduct, isSearching, clearBarcode } =
+		useBarcodeProductSearch();
 
 	const { categories: productCategoryData } = useGetCategories();
 	const { mainAreaHeight } = useMainAreaHeight();
@@ -159,8 +162,44 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [itemsForm.values.item_percent, itemsForm.values.quantity]);
 
+	// =============== add product found via barcode scan with quantity=1 and product's own prices ===============
+	const handleBarcodeAdd = async () => {
+		if (!foundProduct) return;
+
+		const purchasePrice = Number(foundProduct.purchase_price ?? 0);
+		const salesPrice = Number(foundProduct.sales_price ?? 0);
+
+		const newItem = {
+			product_id: foundProduct.id,
+			display_name: foundProduct.display_name,
+			quantity: 1,
+			purchase_price: purchasePrice,
+			mrp: salesPrice,
+			average_price: Number(foundProduct.average_price ?? 0),
+			sales_price: salesPrice,
+			sub_total: 1 * purchasePrice,
+			unit_name: foundProduct.unit_name || "",
+			category_id: foundProduct.category_id ?? null,
+			category_name: foundProduct.category ?? "",
+			type: "purchase",
+			price: purchasePrice,
+			expired_date: null,
+		};
+
+		if (onAddItem) {
+			onAddItem(newItem);
+		} else {
+			await window.dbAPI.upsertIntoTable("temp_purchase_products", newItem);
+			refetch();
+		}
+
+		clearBarcode();
+		showNotification(t("ItemAddedSuccessfully"), "teal");
+	};
+
 	const handleAddItemToPurchaseForm = async () => {
-		const { productId, purchase_price, total_mrp, quantity, expired_date } = itemsForm.values;
+		const { productId, purchase_price, total_mrp, quantity, expired_date, barcode } =
+			itemsForm.values;
 
 		if (!productId || !quantity) {
 			showNotification(t("ProductAndQuantityRequired"), "red");
@@ -200,6 +239,7 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 			type: "purchase",
 			price: unitPurchasePrice,
 			expired_date,
+			barcode: barcode || null,
 			measurement: itemsForm.values.measurement,
 			measurement_quantity: itemsForm.values.measurement_quantity,
 		};
@@ -258,15 +298,25 @@ export default function InvoiceForm({ refetch, onAddItem }) {
 				<Divider />
 				<ScrollArea h={containerHeight} bg="#f0f4f83d" type="never">
 					<Box p="sm">
-						<InputForm
-							form={itemsForm}
-							name="barcode"
-							id="barcode"
-							label=""
-							placeholder={t("Barcode")}
-							required={false}
-							tooltip=""
+						<TextInput
+							id="barcodeSearch"
+							value={barcodeValue}
+							onChange={(event) => setBarcodeValue(event.currentTarget.value)}
+							placeholder={t("ScanOrTypeBarcode")}
+							autoComplete="off"
 							leftSection={<IconBarcode size={16} opacity={0.6} />}
+							rightSection={
+								<ActionIcon
+									size="sm"
+									variant="filled"
+									color="teal"
+									radius="sm"
+									disabled={!foundProduct || isSearching}
+									onClick={handleBarcodeAdd}
+								>
+									<IconPlus size={14} />
+								</ActionIcon>
+							}
 						/>
 						<Select
 							mt="xs"

@@ -385,6 +385,7 @@ const initSchema = () => {
 			warehouse_id INTEGER,
 			warehouse_name TEXT,
 			bonus_quantity REAL,
+			barcode TEXT,
 			measurement TEXT,
 			measurement_quantity REAL,
 			type TEXT CHECK(type IN ('purchase', 'invoice_purchase', 'purchase_return', 'requisition')) DEFAULT 'purchase',
@@ -392,6 +393,13 @@ const initSchema = () => {
 			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 		)`
 	).run();
+
+	// =============== migration: add barcode column to existing temp_purchase_products tables that predate this column ===============
+	try {
+		db.prepare("ALTER TABLE temp_purchase_products ADD COLUMN barcode TEXT").run();
+	} catch (_error) {
+		// column already exists — safe to ignore
+	}
 
 	// printer table
 	db.prepare(
