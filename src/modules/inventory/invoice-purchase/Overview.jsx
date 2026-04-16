@@ -22,12 +22,18 @@ export default function Overview({
 		);
 	}, [itemsProducts]);
 
+	const paymentAmount = Number(itemsForm.values.paymentAmount) || 0;
+	const dueAmountValue = Number(itemsForm.values.dueAmount) || 0;
+	const discountValue = Math.max(itemsTotal - paymentAmount - dueAmountValue, 0);
+	const discountPercent = itemsTotal > 0 ? (discountValue / itemsTotal) * 100 : 0;
+
 	return (
 		<Box bg="var(--theme-tertiary-color-0)" p="xs">
 			<ItemsTableSection
 				itemsProducts={itemsProducts || []}
 				refetch={refetch}
 				itemsTotal={itemsTotal}
+				discountPercent={discountPercent}
 				onQuantityChange={onQuantityChange}
 				onRemoveItem={onRemoveItem}
 				onMrpChange={onMrpChange}

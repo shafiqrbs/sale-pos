@@ -100,22 +100,29 @@ export default function NewIndex() {
 			}
 		}
 
-		const purchaseItemsForDb = itemsProducts.map((item) => ({
-			product_id: item.product_id,
-			display_name: item.display_name,
-			quantity: Number(item.quantity) || 0,
-			mrp: Number(item.mrp ?? item.purchase_price) || 0,
-			purchase_price: Number(item.purchase_price) || 0,
-			sales_price: Number(item.sales_price) || Number(item.purchase_price) || 0,
-			sub_total: (Number(item.quantity) || 0) * (Number(item.mrp) || 0),
-			category_id: item.category_id ?? null,
-			category_name: item.category_name ?? "",
-			unit_name: item.unit_name ?? "",
-			bonus_quantity: Number(item.bonus_quantity) || 0,
-			average_price: Number(item.average_price) || 0,
-			expired_date: item.expired_date ?? null,
-			sales_quantity: Number(item.sales_quantity) || 0,
-		}));
+		const discountMultiplier = 1 - discountPercent / 100;
+
+		const purchaseItemsForDb = itemsProducts.map((item) => {
+			const mrp = Number(item.mrp ?? item.purchase_price) || 0;
+			const discountedPurchasePrice = Math.round(mrp * discountMultiplier * 100) / 100;
+
+			return {
+				product_id: item.product_id,
+				display_name: item.display_name,
+				quantity: Number(item.quantity) || 0,
+				mrp,
+				purchase_price: discountedPurchasePrice,
+				sales_price: Number(item.sales_price) || Number(item.purchase_price) || 0,
+				sub_total: (Number(item.quantity) || 0) * mrp,
+				category_id: item.category_id ?? null,
+				category_name: item.category_name ?? "",
+				unit_name: item.unit_name ?? "",
+				bonus_quantity: Number(item.bonus_quantity) || 0,
+				average_price: Number(item.average_price) || 0,
+				expired_date: item.expired_date ?? null,
+				sales_quantity: Number(item.sales_quantity) || 0,
+			};
+		});
 
 		const localPurchaseRecord = {
 			invoice: generateInvoiceId(),
@@ -160,16 +167,21 @@ export default function NewIndex() {
 			narration: formValues.purchaseNarration ?? "",
 			warehouse_id: "",
 			invoice_date: formatDateISO(formValues.purchaseDate ?? new Date()),
-			items: itemsProducts.map((item) => ({
-				product_id: item.product_id,
-				warehouse_id: item.warehouse_id ?? null,
-				quantity: Number(item.quantity) || 0,
-				purchase_price: Number(item.purchase_price) || 0,
-				sales_price: Number(item.sales_price) || Number(item.purchase_price) || 0,
-				bonus_quantity: Number(item.bonus_quantity) || 0,
-				sub_total: Number(item.sub_total) || 0,
-				name: item.display_name ?? "",
-			})),
+			items: itemsProducts.map((item) => {
+				const mrp = Number(item.mrp ?? item.purchase_price) || 0;
+				const discountedPurchasePrice = Math.round(mrp * discountMultiplier * 100) / 100;
+
+				return {
+					product_id: item.product_id,
+					warehouse_id: item.warehouse_id ?? null,
+					quantity: Number(item.quantity) || 0,
+					purchase_price: discountedPurchasePrice,
+					sales_price: Number(item.sales_price) || Number(item.purchase_price) || 0,
+					bonus_quantity: Number(item.bonus_quantity) || 0,
+					sub_total: Number(item.sub_total) || 0,
+					name: item.display_name ?? "",
+				};
+			}),
 			purchase_mode: "invoice",
 		});
 

@@ -19,6 +19,7 @@ export default function ItemsTableSection({
 	itemsProducts,
 	refetch,
 	itemsTotal,
+	discountPercent = 0,
 	onQuantityChange,
 	onRemoveItem,
 	onMrpChange,
@@ -182,11 +183,15 @@ export default function ItemsTableSection({
 						title: t("PP."),
 						textAlign: "center",
 						width: 90,
-						render: (record) => (
-							<Text size="xs" c="dimmed">
-								{formatCurrency(record.purchase_price ?? 0)}
-							</Text>
-						),
+						render: (record) => {
+							const mrp = Number(record.mrp ?? record.purchase_price) || 0;
+							const discountedPP = Math.round(mrp * (1 - discountPercent / 100) * 100) / 100;
+							return (
+								<Text size="xs" c="dimmed">
+									{formatCurrency(discountedPP)}
+								</Text>
+							);
+						},
 					},
 					{
 						accessor: "quantity",
