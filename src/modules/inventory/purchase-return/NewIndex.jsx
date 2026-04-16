@@ -90,8 +90,7 @@ export default function NewIndex() {
 				purchase_quantity: Number(item.purchase_quantity) || 0,
 				unit_name: item.unit_name ?? "",
 				purchase_price: Number(item.purchase_price) || 0,
-				sub_total:
-					(Number(item.quantity) || 0) * (Number(item.purchase_price) || 0),
+				sub_total: (Number(item.quantity) || 0) * (Number(item.purchase_price) || 0),
 			})),
 			narration: formValues.purchaseNarration ?? "",
 			return_type: returnType,
@@ -116,29 +115,29 @@ export default function NewIndex() {
 
 	return (
 		<Box p="xs" bg="var(--mantine-color-gray-1)">
-		<Grid columns={24} gutter={0} >
-			<Grid.Col span={8}>
-				<Box>
-					<InvoiceForm
-						onAddItem={handleAddItem}
-						onReturnTypeChange={setReturnType}
-						onVendorChange={handleVendorChange}
-					/>
-				</Box>
-			</Grid.Col>
-			<Grid.Col span={16}>
-				<Box component="form" id="itemsForm" onSubmit={itemsForm.onSubmit(handleSubmit)}>
-					<VendorOverview
-						isAddingItem={isAddingItem}
-						itemsForm={itemsForm}
-						itemsProducts={purchaseItems}
-						onQuantityChange={handleQuantityChange}
-						onPriceChange={handlePriceChange}
-						onRemoveItem={handleRemoveItem}
-					/>
-				</Box>
-			</Grid.Col>
-		</Grid>
+			<Grid columns={24} gutter={0}>
+				<Grid.Col span={8}>
+					<Box>
+						<InvoiceForm
+							onAddItem={handleAddItem}
+							onReturnTypeChange={setReturnType}
+							onVendorChange={handleVendorChange}
+						/>
+					</Box>
+				</Grid.Col>
+				<Grid.Col span={16}>
+					<Box component="form" id="itemsForm" onSubmit={itemsForm.onSubmit(handleSubmit)}>
+						<VendorOverview
+							isAddingItem={isAddingItem}
+							itemsForm={itemsForm}
+							itemsProducts={purchaseItems}
+							onQuantityChange={handleQuantityChange}
+							onPriceChange={handlePriceChange}
+							onRemoveItem={handleRemoveItem}
+						/>
+					</Box>
+				</Grid.Col>
+			</Grid>
 		</Box>
 	);
 }

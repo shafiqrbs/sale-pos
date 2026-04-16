@@ -24,10 +24,10 @@ export default function InvoiceForm({ onAddItem, onReturnTypeChange, onVendorCha
 	const { t } = useTranslation();
 	const { mainAreaHeight } = useMainAreaHeight();
 	const { currencySymbol } = useConfigData();
-	const [ selectedReturnMode, setSelectedReturnMode ] = useState(null);
-	const [ selectedVendorId, setSelectedVendorId ] = useState(null);
-	const [ selectedPurchaseId, setSelectedPurchaseId ] = useState(null);
-	const [ itemReturnQuantities, setItemReturnQuantities ] = useState({});
+	const [selectedReturnMode, setSelectedReturnMode] = useState(null);
+	const [selectedVendorId, setSelectedVendorId] = useState(null);
+	const [selectedPurchaseId, setSelectedPurchaseId] = useState(null);
+	const [itemReturnQuantities, setItemReturnQuantities] = useState({});
 
 	const containerHeight = mainAreaHeight - 116;
 
@@ -63,7 +63,7 @@ export default function InvoiceForm({ onAddItem, onReturnTypeChange, onVendorCha
 	const selectedPurchaseItems = selectedPurchaseData?.items ?? [];
 
 	const handleAddSingleItem = (purchaseItem) => {
-		const returnQuantity = itemReturnQuantities[ purchaseItem.id ] || 0;
+		const returnQuantity = itemReturnQuantities[purchaseItem.id] || 0;
 		if (returnQuantity <= 0) {
 			showNotification(t("EnterReturnQuantityFirst"), "red");
 			return;
@@ -85,7 +85,7 @@ export default function InvoiceForm({ onAddItem, onReturnTypeChange, onVendorCha
 
 	const handleAddAllItems = () => {
 		const itemsWithQuantity = selectedPurchaseItems.filter(
-			(item) => (itemReturnQuantities[ item.id ] || 0) > 0
+			(item) => (itemReturnQuantities[item.id] || 0) > 0
 		);
 
 		if (!itemsWithQuantity.length) {
@@ -96,10 +96,10 @@ export default function InvoiceForm({ onAddItem, onReturnTypeChange, onVendorCha
 		for (const item of itemsWithQuantity) {
 			onAddItem({
 				display_name: item.item_name,
-				quantity: itemReturnQuantities[ item.id ],
+				quantity: itemReturnQuantities[item.id],
 				purchase_price: item.purchase_price,
 				purchase_quantity: item.purchase_quantity,
-				sub_total: itemReturnQuantities[ item.id ] * item.purchase_price,
+				sub_total: itemReturnQuantities[item.id] * item.purchase_price,
 				unit_name: item.unit_name,
 				// =============== purchase item id used as unique key for dedup in parent state ===============
 				purchase_item_id: item.id,
@@ -133,7 +133,7 @@ export default function InvoiceForm({ onAddItem, onReturnTypeChange, onVendorCha
 	const handleItemQuantityChange = (itemId, value) => {
 		setItemReturnQuantities((previous) => ({
 			...previous,
-			[ itemId ]: value,
+			[itemId]: value,
 		}));
 	};
 
@@ -155,7 +155,7 @@ export default function InvoiceForm({ onAddItem, onReturnTypeChange, onVendorCha
 					<Box mt="xs">
 						<Select
 							placeholder={t("ChooseReturnType")}
-							data={[ "General", "Requisition" ]}
+							data={["General", "Requisition"]}
 							value={selectedReturnMode}
 							onChange={handleReturnModeChange}
 							clearable
@@ -187,12 +187,7 @@ export default function InvoiceForm({ onAddItem, onReturnTypeChange, onVendorCha
 
 					{/* =============== items list from selected purchase with return quantity inputs =============== */}
 					<Box mt="xs">
-						<Flex
-							px="xs"
-							py="4xs"
-							bg="var(--theme-primary-color-6)"
-							justify="space-between"
-						>
+						<Flex px="xs" py="4xs" bg="var(--theme-primary-color-6)" justify="space-between">
 							<Text fz="xs" fw={600} c="white">
 								Product
 							</Text>
@@ -229,16 +224,19 @@ export default function InvoiceForm({ onAddItem, onReturnTypeChange, onVendorCha
 										>
 											{index + 1}. {item.item_name}
 										</Text>
-										<Text fz="xs"  ta="center">{currencySymbol} {item.purchase_price}</Text>
-										<Text fz="xs"  ta="center">{item.purchase_quantity} {item.unit_name}</Text>
+										<Text fz="xs" ta="center">
+											{currencySymbol} {item.purchase_price}
+										</Text>
+										<Text fz="xs" ta="center">
+											{item.purchase_quantity} {item.unit_name}
+										</Text>
 										<NumberInput
 											size="xs"
 											w={80}
 											min={0}
-											value={itemReturnQuantities[ item.id ] ?? ""}
-											onChange={(value) =>
-												handleItemQuantityChange(item.id, value)
-											}
+											value={itemReturnQuantities[item.id] ?? ""}
+											disabled={item?.purchase_quantity < 1}
+											onChange={(value) => handleItemQuantityChange(item.id, value)}
 											hideControls
 											placeholder={t("QTY")}
 										/>
