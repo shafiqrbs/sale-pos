@@ -9,12 +9,10 @@ import {
 	Flex,
 	Button,
 	Badge,
-	SegmentedControl,
 	Tooltip,
 } from "@mantine/core";
 import {
 	IconDotsVertical,
-	IconEdit,
 	IconEye,
 	IconPlus,
 	IconRefresh,
@@ -53,10 +51,8 @@ export default function Table() {
 	const [ loading, setLoading ] = useState(false);
 	const [ viewData, setViewData ] = useState(null);
 	const [ deletedPurchaseIds, setDeletedPurchaseIds ] = useState(new Set());
-	const [ userChoice, setUserChoice ] = useState(null);
-	const { mainAreaHeight, isOnline } = useOutletContext();
+	const { mainAreaHeight } = useOutletContext();
 	// =============== when offline, always use offline data (online segment disabled) ===============
-	const effectiveDataSource = isOnline ? (userChoice ?? "online") : "offline";
 
 	const form = useForm({
 		initialValues: {

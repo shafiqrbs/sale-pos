@@ -168,7 +168,7 @@ export default function ItemsTableSection({ itemsProducts, refetch, itemsTotal, 
 				/>
 
 			</Box>
-			<Box mt="les" px="xs" py="4xs" bg="var(--theme-tertiary-color-2)" className="borderRadiusAll">
+			<Box ml="xs" mt="les" px="xs" py="4xs" bg="var(--theme-tertiary-color-2)" className="borderRadiusAll">
 				<Flex justify="space-between" align="center">
 					<Badge size="xl" bg={"red"}>
 						<Text fz="sm" fw={600}>
