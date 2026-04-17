@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
 	Badge,
 	Box,
@@ -9,31 +10,51 @@ import {
 	Select,
 	Stack,
 	Text,
+	TextInput,
 } from "@mantine/core";
+import { DateInput } from "@mantine/dates";
+import { useDebouncedCallback } from "@mantine/hooks";
 import { useTranslation } from "react-i18next";
 import useConfigData from "@hooks/useConfigData";
 import useMainAreaHeight from "@hooks/useMainAreaHeight";
 import { formatCurrency } from "@utils/index";
 
 export default function InvoiceForm({
-	vendorOptions,
-	selectedReturnMode,
-	selectedVendorId,
-	filteredPurchases,
-	selectedPurchaseId,
-	onReturnTypeChange,
-	onVendorChange,
-	onPurchaseCardClick,
+	customerOptions,
+	selectedCustomerId,
+	filteredSales,
+	selectedSaleId,
+	onCustomerChange,
+	onDateChange,
+	onInvoiceSearchChange,
+	onSaleCardClick,
 }) {
 	const { t } = useTranslation();
 	const { mainAreaHeight } = useMainAreaHeight();
 	const { currencySymbol } = useConfigData();
-	const purchaseListScrollHeight = mainAreaHeight - 200;
+	const purchaseListScrollHeight = Math.max(mainAreaHeight - 6 - 280, 120);
 
-	const isSelectionReady = Boolean(selectedReturnMode && selectedVendorId);
-	const emptyMessage = !isSelectionReady
-		? t("SelectReturnTypeAndVendorFirst")
-		: t("NoPurchasesFound");
+	const [ invoiceInputValue, setInvoiceInputValue ] = useState("");
+	const [ selectedDate, setSelectedDate ] = useState(null);
+
+	const debouncedInvoiceSearch = useDebouncedCallback((value) => {
+		onInvoiceSearchChange(value);
+	}, 400);
+
+	const handleInvoiceInputChange = (event) => {
+		const value = event.currentTarget.value;
+		setInvoiceInputValue(value);
+		debouncedInvoiceSearch(value);
+	};
+
+	const handleDateChange = (dateValue) => {
+		setSelectedDate(dateValue);
+		onDateChange(dateValue);
+	};
+
+	const emptyMessage = !selectedCustomerId
+		? t("SelectCustomerFirst")
+		: t("NoSalesFound");
 
 	return (
 		<Box
@@ -56,30 +77,35 @@ export default function InvoiceForm({
 			<Box p="sm">
 				<Box mt="xs">
 					<Select
-						placeholder={t("ChooseReturnType")}
-						data={[ "General", "Requisition" ]}
-						value={selectedReturnMode}
-						onChange={onReturnTypeChange}
+						placeholder={t("Customer")}
+						data={customerOptions}
+						value={selectedCustomerId}
+						onChange={onCustomerChange}
 						clearable
 						searchable
 					/>
 				</Box>
 				<Box mt="xs">
-					<Select
-						placeholder={t("Vendor")}
-						data={vendorOptions}
-						value={selectedVendorId}
-						onChange={onVendorChange}
+					<DateInput
+						placeholder="DD-MM-YYYY"
+						valueFormat="DD-MM-YYYY"
+						value={selectedDate}
+						onChange={handleDateChange}
 						clearable
-						searchable
-						disabled={!selectedReturnMode}
+					/>
+				</Box>
+				<Box mt="xs">
+					<TextInput
+						placeholder={t("SearchByInvoice")}
+						value={invoiceInputValue}
+						onChange={handleInvoiceInputChange}
 					/>
 				</Box>
 			</Box>
 			<Divider />
 			<Box px="sm" py="sm">
 				<ScrollArea h={purchaseListScrollHeight} type="never">
-					{filteredPurchases.length === 0 ? (
+					{filteredSales.length === 0 ? (
 						<Center py="xl">
 							<Text fz="sm" c="dimmed">
 								{emptyMessage}
@@ -87,11 +113,11 @@ export default function InvoiceForm({
 						</Center>
 					) : (
 						<Stack gap="xs">
-							{filteredPurchases.map((purchase) => {
-								const isSelected = selectedPurchaseId === String(purchase.id);
+							{filteredSales.map((sale) => {
+								const isSelected = selectedSaleId === String(sale.id);
 								return (
 									<Card
-										key={purchase.id}
+										key={sale.id}
 										withBorder
 										radius="sm"
 										p="sm"
@@ -105,21 +131,21 @@ export default function InvoiceForm({
 												: "white",
 											transition: "background-color 0.15s ease, border-color 0.15s ease",
 										}}
-										onClick={() => onPurchaseCardClick(purchase)}
+										onClick={() => onSaleCardClick(sale)}
 									>
 										<Text
 											fz="sm"
 											fw={600}
 											c={isSelected ? "var(--theme-primary-color-6)" : undefined}
 										>
-											{purchase.invoice}
+											{sale.invoice}
 										</Text>
 										<Group justify="space-between" mt={4}>
 											<Text fz="xs" c="dimmed">
-												{purchase.created}
+												{sale.created}
 											</Text>
 											<Badge size="sm" color="teal">
-												{currencySymbol} {formatCurrency(purchase.total)}
+												{currencySymbol} {formatCurrency(sale.total)}
 											</Badge>
 										</Group>
 									</Card>

@@ -7,27 +7,25 @@ export default function Overview({
 	itemsForm,
 	isAddingItem,
 	itemsProducts,
-	refetch,
-	onQuantityChange,
-	onPriceChange,
+	onItemUpdate,
 	onRemoveItem,
 	isEditMode = false,
 }) {
 	const itemsTotal = useMemo(() => {
-		return (itemsProducts || []).reduce(
-			(accumulator, item) => accumulator + (item.quantity || 0) * (item.purchase_price || 0),
-			0
-		);
+		return (itemsProducts || []).reduce((accumulator, item) => {
+			const stockQty = item.stock_quantity || 0;
+			const damageQty = item.damage_quantity || 0;
+			const price = item.sales_price || 0;
+			return accumulator + (stockQty + damageQty) * price;
+		}, 0);
 	}, [itemsProducts]);
 
 	return (
 		<Box>
 			<ItemsTableSection
 				itemsProducts={itemsProducts || []}
-				refetch={refetch}
 				itemsTotal={itemsTotal}
-				onQuantityChange={onQuantityChange}
-				onPriceChange={onPriceChange}
+				onItemUpdate={onItemUpdate}
 				onRemoveItem={onRemoveItem}
 			/>
 

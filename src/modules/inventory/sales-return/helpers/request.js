@@ -1,12 +1,8 @@
 const vendorOverviewInitialValues = {
-	vendor_id: "",
-	vendorName: "",
-	vendorPhone: "+880",
-	vendorEmail: "",
+	customer_id: "",
 	items: [],
 	transactionMode: "cash",
 	transactionModeId: "",
-	purchaseDate: new Date(),
 	invoice_date: new Date(),
 	purchaseNarration: "",
 	discountAmount: 0,
@@ -24,9 +20,9 @@ export const vendorOverviewRequest = (t) => {
 				}
 				return null;
 			},
-			vendor_id: (value) => {
+			customer_id: (value) => {
 				if (!value) {
-					return t("VendorRequired");
+					return t("CustomerRequired");
 				}
 				return null;
 			},

@@ -1,45 +1,47 @@
 import { ActionIcon, Box, Flex, NumberInput, Text, Button, Badge, Group } from "@mantine/core";
 import { DataTable } from "mantine-datatable";
-import { IconList, IconPlus, IconTrashX } from "@tabler/icons-react";
+import { IconList, IconTrashX } from "@tabler/icons-react";
 import tableCss from "@assets/css/Table.module.css";
 import useConfigData from "@hooks/useConfigData";
 import useMainAreaHeight from "@hooks/useMainAreaHeight";
 import { formatCurrency } from "@utils/index";
-
 import { useNavigate } from "react-router";
 import { APP_NAVLINKS } from "@/routes/routes";
 import { useTranslation } from "react-i18next";
-import customParseFormat from "dayjs/plugin/customParseFormat";
-import dayjs from "dayjs";
 
-dayjs.extend(customParseFormat);
-
-export default function ItemsTableSection({ itemsProducts, refetch, itemsTotal, onQuantityChange, onRemoveItem }) {
+export default function ItemsTableSection({ itemsProducts, itemsTotal, onItemUpdate, onRemoveItem }) {
 	const navigate = useNavigate();
 	const { t } = useTranslation();
 	const { mainAreaHeight } = useMainAreaHeight();
 	const tableHeight = mainAreaHeight - 206;
 	const { currencySymbol } = useConfigData();
-	const handleQuantityChange = async (itemId, value) => {
-		const numericValue = parseFloat(value) || 0;
+
+	const handleStockQuantityChange = (itemId, value) => {
+		const stockQuantity = parseFloat(value) || 0;
 		const currentItem = itemsProducts.find((item) => item.id === itemId);
-		const newSubTotal = numericValue * (currentItem?.purchase_price || 0);
-		const updatedData = { quantity: numericValue, sub_total: newSubTotal };
-		if (onQuantityChange) {
-			onQuantityChange(itemId, updatedData);
-		} else {
-			await window.dbAPI.upsertIntoTable("temp_sales_products", { id: itemId, ...updatedData });
-			refetch();
-		}
+		const damageQuantity = currentItem?.damage_quantity || 0;
+		const salesQuantity = currentItem?.sales_quantity || 0;
+
+		// =============== clamp so stock + damage never exceeds sales quantity ===============
+		const clampedStock = Math.min(stockQuantity, Math.max(0, salesQuantity - damageQuantity));
+		const subTotal = (clampedStock + damageQuantity) * (currentItem?.sales_price || 0);
+		onItemUpdate(itemId, { stock_quantity: clampedStock, sub_total: subTotal });
 	};
 
-	const handleRemoveItem = async (itemId) => {
-		if (onRemoveItem) {
-			onRemoveItem(itemId);
-		} else {
-			await window.dbAPI.deleteDataFromTable("temp_sales_products", itemId);
-			refetch();
-		}
+	const handleDamageQuantityChange = (itemId, value) => {
+		const damageQuantity = parseFloat(value) || 0;
+		const currentItem = itemsProducts.find((item) => item.id === itemId);
+		const stockQuantity = currentItem?.stock_quantity || 0;
+		const salesQuantity = currentItem?.sales_quantity || 0;
+
+		// =============== clamp so stock + damage never exceeds sales quantity ===============
+		const clampedDamage = Math.min(damageQuantity, Math.max(0, salesQuantity - stockQuantity));
+		const subTotal = (stockQuantity + clampedDamage) * (currentItem?.sales_price || 0);
+		onItemUpdate(itemId, { damage_quantity: clampedDamage, sub_total: subTotal });
+	};
+
+	const handleRemoveItem = (itemId) => {
+		onRemoveItem(itemId);
 	};
 
 	return (
@@ -48,7 +50,7 @@ export default function ItemsTableSection({ itemsProducts, refetch, itemsTotal, 
 				<Box px="xs" fz="sm" fw={600} className="textColor">
 					{t("SalesReturnItems")}
 				</Box>
-				<Group gap="sm" wrap="nowrap" >
+				<Group gap="sm" wrap="nowrap">
 					<Button
 						size="xs"
 						color="red"
@@ -80,62 +82,93 @@ export default function ItemsTableSection({ itemsProducts, refetch, itemsTotal, 
 						{
 							accessor: "serial",
 							title: "S/N",
-							width: 60,
+							width: 50,
 							render: (_, index) => index + 1,
 						},
-
 						{
 							accessor: "display_name",
-							title: "Name",
-							render: (record) => <Text size="sm">{record.display_name}</Text>,
+							title: t("Name"),
+							render: (record) => <Text size="sm">{record.display_name || "empty"}</Text>,
 						},
 						{
 							accessor: "unit_name",
-							title: "UOM",
+							title: t("UOM"),
 							textAlign: "center",
-							width: 80,
+							width: 70,
 							render: (record) => (
 								<Text size="sm" c="dimmed">
-									{record.unit_name || "—"}
+									{record.unit_name || record.uom || "—"}
 								</Text>
 							),
 						},
 						{
-							accessor: "purchase_quantity",
-							title: "Purchase Qty.",
+							accessor: "sales_quantity",
+							title: t("SalesQty"),
 							textAlign: "center",
-							width: 120,
+							width: 90,
 							render: (record) => (
 								<Text size="sm" c="dimmed">
-									{record.purchase_quantity ?? "—"}
+									{record.sales_quantity ?? "—"}
 								</Text>
 							),
 						},
 						{
-							accessor: "quantity",
-							title: "Quantity",
+							accessor: "stock_quantity",
+							title: t("StockQty"),
 							textAlign: "left",
-							width: 120,
-							render: (record) => (
-								<NumberInput
-									size="xs"
-									value={record.quantity}
-									min={0}
-									max={record.purchase_quantity}
-									clampBehavior="strict"
-									step={1}
-									hideControls
-									onChange={(value) => handleQuantityChange(record.id, value)}
-								/>
-							),
+							width: 110,
+							render: (record) => {
+								const maxStock = Math.max(
+									0,
+									(record.sales_quantity || 0) - (record.damage_quantity || 0)
+								);
+								return (
+									<NumberInput
+										size="xs"
+										value={record.stock_quantity}
+										min={0}
+										max={maxStock}
+										clampBehavior="strict"
+										step={1}
+										hideControls
+										onChange={(value) => handleStockQuantityChange(record.id, value)}
+									/>
+								);
+							},
+						},
+						{
+							accessor: "damage_quantity",
+							title: t("DamageQty"),
+							textAlign: "left",
+							width: 110,
+							render: (record) => {
+								const maxDamage = Math.max(
+									0,
+									(record.sales_quantity || 0) - (record.stock_quantity || 0)
+								);
+								return (
+									<NumberInput
+										size="xs"
+										value={record.damage_quantity}
+										min={0}
+										max={maxDamage}
+										clampBehavior="strict"
+										step={1}
+										hideControls
+										onChange={(value) => handleDamageQuantityChange(record.id, value)}
+									/>
+								);
+							},
 						},
 						{
 							accessor: "subTotal",
-							title: "Sub Total",
+							title: t("SubTotal"),
 							textAlign: "right",
-							width: 120,
+							width: 110,
 							render: (record) => {
-								const subTotal = (record.quantity || 0) * (record.purchase_price || 0);
+								const subTotal =
+									((record.stock_quantity || 0) + (record.damage_quantity || 0)) *
+									(record.sales_price || 0);
 								return (
 									<Text size="sm" fw={600}>
 										{currencySymbol} {formatCurrency(subTotal)}
@@ -147,7 +180,7 @@ export default function ItemsTableSection({ itemsProducts, refetch, itemsTotal, 
 							accessor: "action",
 							title: "",
 							textAlign: "center",
-							width: 60,
+							width: 50,
 							render: (record) => (
 								<ActionIcon
 									size="sm"
@@ -163,11 +196,10 @@ export default function ItemsTableSection({ itemsProducts, refetch, itemsTotal, 
 					]}
 					height={tableHeight}
 					scrollAreaProps={{ type: "never" }}
-					noRecordsText="No items added"
+					noRecordsText={t("NoItemsAdded")}
 				/>
-
 			</Box>
-			<Box ml="xs" mt="les" px="xs" py="4xs" bg="var(--theme-tertiary-color-2)" className="borderRadiusAll">
+			<Box ml="xs" mt="xs" px="xs" py="4xs" bg="var(--theme-tertiary-color-2)" className="borderRadiusAll">
 				<Flex justify="space-between" align="center">
 					<Badge size="xl" bg={"red"}>
 						<Text fz="sm" fw={600}>

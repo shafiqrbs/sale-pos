@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Grid, Box } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import dayjs from "dayjs";
@@ -8,112 +8,114 @@ import { vendorOverviewRequest } from "./helpers/request";
 import { showNotification } from "@components/ShowNotificationComponent";
 import useLoggedInUser from "@hooks/useLoggedInUser";
 import useTransactionMode from "@hooks/useTransactionMode";
-import { useAddPurchaseReturnMutation, useGetVendorWisePurchaseItemsQuery } from "@services/purchase-return";
+import { useAddSalesReturnMutation, useGetSalesReturnItemsQuery } from "@services/sales-return";
 import { useTranslation } from "react-i18next";
 
 export default function NewIndex() {
 	const { t } = useTranslation();
 	const { user } = useLoggedInUser();
 	const itemsForm = useForm(vendorOverviewRequest(t));
-	const [ purchaseItems, setPurchaseItems ] = useState([]);
-	const [ isAddingItem, setIsAddingItem ] = useState(false);
-	const [ selectedReturnMode, setSelectedReturnMode ] = useState(null);
-	const [ selectedVendorId, setSelectedVendorId ] = useState(null);
-	const [ selectedPurchaseId, setSelectedPurchaseId ] = useState(null);
+	const [salesItems, setSalesItems] = useState([]);
+	const [isAddingItem, setIsAddingItem] = useState(false);
+	const [selectedCustomerId, setSelectedCustomerId] = useState(null);
+	const [selectedSaleId, setSelectedSaleId] = useState(null);
+	const [filterDate, setFilterDate] = useState(null);
+	const [filterInvoice, setFilterInvoice] = useState("");
+	const [customerOptions, setCustomerOptions] = useState([]);
 	const itemIdCounter = useRef(0);
-	const [ addPurchaseReturn ] = useAddPurchaseReturnMutation();
+	const [addSalesReturn] = useAddSalesReturnMutation();
 	const { transactionMode } = useTransactionMode();
 
-	const { data: vendorWisePurchaseItems } = useGetVendorWisePurchaseItemsQuery();
+	// =============== load customers from local sqlite on mount ===============
+	useEffect(() => {
+		const loadCustomers = async () => {
+			const customers = await window.dbAPI.getDataFromTable("core_customers");
+			const options = (Array.isArray(customers) ? customers : []).map((customer) => ({
+				value: String(customer.id),
+				label: customer.name ?? customer.mobile ?? String(customer.id),
+			}));
+			setCustomerOptions(options);
+		};
+		loadCustomers();
+	}, []);
 
-	// =============== build vendor options from api response ===============
-	const vendorOptions =
-		vendorWisePurchaseItems?.data?.map((vendor) => ({
-			value: String(vendor.vendor_id),
-			label: vendor.vendor_name,
-		})) ?? [];
-
-	// =============== find selected vendor object in api data ===============
-	const selectedVendorData = vendorWisePurchaseItems?.data?.find(
-		(vendor) => String(vendor.vendor_id) === selectedVendorId
-	);
-
-	// =============== filter purchases by return mode (requisition flag) ===============
-	const filteredPurchases =
-		selectedVendorData?.purchases?.filter((purchase) => {
-			if (selectedReturnMode === "Requisition") return purchase.is_requisition === 1;
-			if (selectedReturnMode === "General") return !purchase.is_requisition;
-			return true;
-		}) ?? [];
-
-	const handleQuantityChange = (itemId, updatedData) => {
-		setPurchaseItems((previous) =>
-			previous.map((item) => (item.id === itemId ? { ...item, ...updatedData } : item))
-		);
+	// =============== build query params; skip the query when no customer is selected ===============
+	const queryParams = {
+		...(selectedCustomerId && { customer_id: selectedCustomerId }),
+		...(filterDate && { date: dayjs(filterDate).format("YYYY-MM-DD") }),
+		...(filterInvoice.trim() && { invoice: filterInvoice.trim() }),
 	};
 
-	const handlePriceChange = (itemId, updatedData) => {
-		setPurchaseItems((previous) =>
+	const { data: salesReturnItemsData } = useGetSalesReturnItemsQuery(queryParams, {
+		skip: !selectedCustomerId,
+	});
+
+	const filteredSales = salesReturnItemsData?.data ?? [];
+
+	const handleCustomerChange = (customerId) => {
+		setSelectedCustomerId(customerId ?? null);
+		setSelectedSaleId(null);
+		setSalesItems([]);
+		itemIdCounter.current = 0;
+		itemsForm.setFieldValue("customer_id", customerId ?? "");
+	};
+
+	const handleDateChange = (dateValue) => {
+		setFilterDate(dateValue);
+		setSelectedSaleId(null);
+		setSalesItems([]);
+		itemIdCounter.current = 0;
+	};
+
+	const handleInvoiceSearchChange = (invoiceValue) => {
+		setFilterInvoice(invoiceValue);
+		setSelectedSaleId(null);
+		setSalesItems([]);
+		itemIdCounter.current = 0;
+	};
+
+	// =============== clicking a sale card loads all its items with stock=0 and damage=0 ===============
+	const handleSaleCardClick = (sale) => {
+		setSelectedSaleId(String(sale.id));
+		itemIdCounter.current = 0;
+
+		const newItems = (sale.sales_items ?? []).map((saleItem) => {
+			itemIdCounter.current += 1;
+			return {
+				id: itemIdCounter.current,
+				display_name: saleItem.item_name ?? saleItem.name ?? "",
+				sales_quantity: saleItem.available_return_qty,
+				sales_price: saleItem.sales_price,
+				stock_quantity: 0,
+				damage_quantity: 0,
+				sub_total: 0,
+				unit_name: saleItem.uom ?? "",
+				sale_item_id: saleItem.id,
+				warehouse_id: saleItem.warehouse_id,
+			};
+		});
+
+		setSalesItems(newItems);
+	};
+
+	const handleItemUpdate = (itemId, updatedData) => {
+		setSalesItems((previous) =>
 			previous.map((item) => (item.id === itemId ? { ...item, ...updatedData } : item))
 		);
 	};
 
 	const handleRemoveItem = (itemId) => {
-		setPurchaseItems((previous) => previous.filter((item) => item.id !== itemId));
-	};
-
-	const handleReturnModeChange = (value) => {
-		setSelectedReturnMode(value);
-		setSelectedVendorId(null);
-		setSelectedPurchaseId(null);
-		setPurchaseItems([]);
-		itemIdCounter.current = 0;
-		itemsForm.setFieldValue("vendor_id", "");
-	};
-
-	const handleVendorChange = (vendorId) => {
-		setSelectedVendorId(vendorId ?? null);
-		setSelectedPurchaseId(null);
-		setPurchaseItems([]);
-		itemIdCounter.current = 0;
-		itemsForm.setFieldValue("vendor_id", vendorId ?? "");
-	};
-
-	// =============== clicking a purchase card replaces the items table with all items from that purchase ===============
-	const handlePurchaseCardClick = (purchase) => {
-		setSelectedPurchaseId(String(purchase.id));
-		itemIdCounter.current = 0;
-
-		const newItems = (purchase.items ?? []).map((purchaseItem) => {
-			itemIdCounter.current += 1;
-			return {
-				id: itemIdCounter.current,
-				display_name: purchaseItem.item_name,
-				quantity: 0,
-				purchase_price: purchaseItem.purchase_price,
-				purchase_quantity: purchaseItem.purchase_quantity,
-				sub_total: 0,
-				unit_name: purchaseItem.unit_name ?? "",
-				purchase_item_id: purchaseItem.id,
-			};
-		});
-
-		setPurchaseItems(newItems);
+		setSalesItems((previous) => previous.filter((item) => item.id !== itemId));
 	};
 
 	const handleSubmit = async (formValues) => {
-		if (!purchaseItems.length) {
+		if (!salesItems.length) {
 			showNotification(t("AddMinimumOnePurchaseItemFirst"), "red");
 			return;
 		}
 
-		if (!formValues.vendor_id) {
-			showNotification(t("VendorRequired"), "red");
-			return;
-		}
-
-		if (!selectedReturnMode) {
-			showNotification(t("ReturnTypeRequired"), "red");
+		if (!formValues.customer_id) {
+			showNotification(t("CustomerRequired"), "red");
 			return;
 		}
 
@@ -124,31 +126,35 @@ export default function NewIndex() {
 		const payload = {
 			invoice_date: invoiceDate,
 			issue_by_id: String(user?.id ?? ""),
-			vendor_id: String(formValues.vendor_id),
-			items: purchaseItems.map((item) => ({
-				id: item.purchase_item_id,
+			customer_id: String(formValues.customer_id),
+			items: salesItems.map((item) => ({
+				id: item.sale_item_id,
 				display_name: item.display_name,
-				quantity: Number(item.quantity) || 0,
-				purchase_quantity: Number(item.purchase_quantity) || 0,
+				sales_quantity: Number(item.sales_quantity) || 0,
+				stock_quantity: Number(item.stock_quantity) || 0,
+				damage_quantity: Number(item.damage_quantity) || 0,
 				unit_name: item.unit_name ?? "",
-				purchase_price: Number(item.purchase_price) || 0,
-				sub_total: (Number(item.quantity) || 0) * (Number(item.purchase_price) || 0),
+				sales_price: Number(item.sales_price) || 0,
+				sub_total:
+					(Number(item.stock_quantity) || 0) * (Number(item.sales_price) || 0) +
+					(Number(item.damage_quantity) || 0) * (Number(item.sales_price) || 0),
+				warehouse_id: item.warehouse_id,
 			})),
 			narration: formValues.purchaseNarration ?? "",
-			return_type: selectedReturnMode,
 		};
 
 		setIsAddingItem(true);
 		try {
-			await addPurchaseReturn(payload).unwrap();
+			await addSalesReturn(payload).unwrap();
 
-			showNotification(t("PurchaseReturnSavedSuccessfully"), "teal");
-			setPurchaseItems([]);
+			showNotification(t("SalesReturnSavedSuccessfully"), "teal");
+			setSalesItems([]);
 			itemIdCounter.current = 0;
-			setSelectedPurchaseId(null);
+			setSelectedSaleId(null);
 			itemsForm.reset();
 
-			itemsForm.setFieldValue("vendor_id", selectedVendorId ?? "");
+			// =============== re-sync customer_id and transaction mode after reset ===============
+			itemsForm.setFieldValue("customer_id", selectedCustomerId ?? "");
 			const cashMethod = transactionMode.find((mode) => mode.slug === "cash");
 			if (cashMethod) {
 				itemsForm.setFieldValue("transactionModeId", String(cashMethod.id));
@@ -156,7 +162,7 @@ export default function NewIndex() {
 			}
 		} catch (error) {
 			console.error(error);
-			showNotification(error?.message || t("FailedToSavePurchaseReturn"), "red");
+			showNotification(error?.message || t("FailedToSaveSalesReturn"), "red");
 		} finally {
 			setIsAddingItem(false);
 		}
@@ -168,14 +174,14 @@ export default function NewIndex() {
 				<Grid.Col span={6}>
 					<Box>
 						<InvoiceForm
-							vendorOptions={vendorOptions}
-							selectedReturnMode={selectedReturnMode}
-							selectedVendorId={selectedVendorId}
-							filteredPurchases={filteredPurchases}
-							selectedPurchaseId={selectedPurchaseId}
-							onReturnTypeChange={handleReturnModeChange}
-							onVendorChange={handleVendorChange}
-							onPurchaseCardClick={handlePurchaseCardClick}
+							customerOptions={customerOptions}
+							selectedCustomerId={selectedCustomerId}
+							filteredSales={filteredSales}
+							selectedSaleId={selectedSaleId}
+							onCustomerChange={handleCustomerChange}
+							onDateChange={handleDateChange}
+							onInvoiceSearchChange={handleInvoiceSearchChange}
+							onSaleCardClick={handleSaleCardClick}
 						/>
 					</Box>
 				</Grid.Col>
@@ -184,9 +190,8 @@ export default function NewIndex() {
 						<VendorOverview
 							isAddingItem={isAddingItem}
 							itemsForm={itemsForm}
-							itemsProducts={purchaseItems}
-							onQuantityChange={handleQuantityChange}
-							onPriceChange={handlePriceChange}
+							itemsProducts={salesItems}
+							onItemUpdate={handleItemUpdate}
 							onRemoveItem={handleRemoveItem}
 						/>
 					</Box>

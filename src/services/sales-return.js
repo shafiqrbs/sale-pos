@@ -76,6 +76,17 @@ export const extendedSalesReturnApiSlice = apiSlice.injectEndpoints({
       },
       invalidatesTags: [ "SalesReturn" ],
     }),
+
+    getSalesReturnItems: builder.query({
+      query: (params) => {
+        return {
+          url: `${APP_APIS.SALES_RETURN}/sales-item`,
+          method: "GET",
+          params,
+        };
+      },
+      providesTags: [ "SalesReturn" ],
+    }),
   }),
 });
 
@@ -87,4 +98,5 @@ export const {
   useGetSalesReturnByIdQuery,
   useApproveSalesReturnMutation,
   useCopySalesReturnMutation,
+  useGetSalesReturnItemsQuery,
 } = extendedSalesReturnApiSlice;
