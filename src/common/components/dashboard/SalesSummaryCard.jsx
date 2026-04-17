@@ -5,7 +5,7 @@ import StatCard from "./StatCard";
 import { formatCurrency } from "@utils/index";
 import useConfigData from "@hooks/useConfigData";
 import { useOutletContext } from "react-router";
-
+import useLoggedInUser from "@hooks/useLoggedInUser";
 
 const STAT_ITEMS = [
 	{
@@ -80,6 +80,7 @@ export default function SalesSummaryCard({ dailyData, cardHeight, refetch }) {
 	const { t } = useTranslation();
 	const { currencySymbol } = useConfigData();
 	const { isOnline } = useOutletContext();
+	const { isOnlinePermissionIncludes } = useLoggedInUser();
 
 	return (
 		<Paper shadow="sm" p="lg" radius="md" withBorder h="100%">
@@ -87,7 +88,7 @@ export default function SalesSummaryCard({ dailyData, cardHeight, refetch }) {
 				<Text size="lg" fw={700}>
 					{t("Today's Stock & Sales Summary")}
 				</Text>
-				{isOnline && (
+				{isOnline && isOnlinePermissionIncludes && (
 					<ActionIcon onClick={refetch}>
 						<IconReload size={20} />
 					</ActionIcon>
@@ -99,8 +100,8 @@ export default function SalesSummaryCard({ dailyData, cardHeight, refetch }) {
 					{STAT_ITEMS.map((item) => {
 						const value =
 							item.format === "currency"
-								? `${currencySymbol} ${formatCurrency(dailyData[item.valueKey])}`
-								: dailyData[item.valueKey];
+								? `${currencySymbol} ${formatCurrency(dailyData[ item.valueKey ])}`
+								: dailyData[ item.valueKey ];
 						const IconComponent = item.icon;
 						return (
 							<Grid.Col key={item.labelKey} span={6}>

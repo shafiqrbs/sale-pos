@@ -14,7 +14,7 @@ import DashboardSkeleton from "@components/skeletons/DashboardSkeleton";
 export default function DashboardIndex() {
 	const { isOnline, mainAreaHeight } = useOutletContext();
 	const { isOnlinePermissionIncludes } = useLoggedInUser();
-	const { dailyData, isLoading, refetch } = useDailyMatrixData({ offlineFetch: !isOnline });
+	const { dailyData, isLoading, refetch } = useDailyMatrixData({ offlineFetch: !isOnline || !isOnlinePermissionIncludes });
 
 	// const toggleDashboardMode = () => {
 	// 	if (!dashboardOnline && !isOnline) {
