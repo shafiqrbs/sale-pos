@@ -3,7 +3,6 @@ import { Grid, Box } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import dayjs from "dayjs";
 import InvoiceForm from "./form/InvoiceForm";
-import PurchaseCardsPanel from "./PurchaseCardsPanel";
 import VendorOverview from "./Overview";
 import { vendorOverviewRequest } from "./helpers/request";
 import { showNotification } from "@components/ShowNotificationComponent";
@@ -16,13 +15,13 @@ export default function NewIndex() {
 	const { t } = useTranslation();
 	const { user } = useLoggedInUser();
 	const itemsForm = useForm(vendorOverviewRequest(t));
-	const [purchaseItems, setPurchaseItems] = useState([]);
-	const [isAddingItem, setIsAddingItem] = useState(false);
-	const [selectedReturnMode, setSelectedReturnMode] = useState(null);
-	const [selectedVendorId, setSelectedVendorId] = useState(null);
-	const [selectedPurchaseId, setSelectedPurchaseId] = useState(null);
+	const [ purchaseItems, setPurchaseItems ] = useState([]);
+	const [ isAddingItem, setIsAddingItem ] = useState(false);
+	const [ selectedReturnMode, setSelectedReturnMode ] = useState(null);
+	const [ selectedVendorId, setSelectedVendorId ] = useState(null);
+	const [ selectedPurchaseId, setSelectedPurchaseId ] = useState(null);
 	const itemIdCounter = useRef(0);
-	const [addPurchaseReturn] = useAddPurchaseReturnMutation();
+	const [ addPurchaseReturn ] = useAddPurchaseReturnMutation();
 	const { transactionMode } = useTransactionMode();
 
 	const { data: vendorWisePurchaseItems } = useGetVendorWisePurchaseItemsQuery();
@@ -166,27 +165,21 @@ export default function NewIndex() {
 	return (
 		<Box p="xs" bg="var(--mantine-color-gray-1)">
 			<Grid columns={24} gutter={0}>
-				<Grid.Col span={5}>
+				<Grid.Col span={6}>
 					<Box>
 						<InvoiceForm
 							vendorOptions={vendorOptions}
 							selectedReturnMode={selectedReturnMode}
 							selectedVendorId={selectedVendorId}
+							filteredPurchases={filteredPurchases}
+							selectedPurchaseId={selectedPurchaseId}
 							onReturnTypeChange={handleReturnModeChange}
 							onVendorChange={handleVendorChange}
+							onPurchaseCardClick={handlePurchaseCardClick}
 						/>
 					</Box>
 				</Grid.Col>
-				<Grid.Col span={5} pl="xs">
-					<PurchaseCardsPanel
-						filteredPurchases={filteredPurchases}
-						selectedPurchaseId={selectedPurchaseId}
-						selectedReturnMode={selectedReturnMode}
-						selectedVendorId={selectedVendorId}
-						onPurchaseCardClick={handlePurchaseCardClick}
-					/>
-				</Grid.Col>
-				<Grid.Col span={14}>
+				<Grid.Col span={18}>
 					<Box component="form" id="itemsForm" onSubmit={itemsForm.onSubmit(handleSubmit)}>
 						<VendorOverview
 							isAddingItem={isAddingItem}

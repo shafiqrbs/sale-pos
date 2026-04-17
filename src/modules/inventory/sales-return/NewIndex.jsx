@@ -3,7 +3,6 @@ import { Grid, Box } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import dayjs from "dayjs";
 import InvoiceForm from "./form/InvoiceForm";
-import PurchaseCardsPanel from "./PurchaseCardsPanel";
 import VendorOverview from "./Overview";
 import { vendorOverviewRequest } from "./helpers/request";
 import { showNotification } from "@components/ShowNotificationComponent";
@@ -166,25 +165,19 @@ export default function NewIndex() {
 	return (
 		<Box p="xs" bg="var(--mantine-color-gray-1)">
 			<Grid columns={24} gutter={0}>
-				<Grid.Col span={5}>
+				<Grid.Col span={10}>
 					<Box>
 						<InvoiceForm
 							vendorOptions={vendorOptions}
 							selectedReturnMode={selectedReturnMode}
 							selectedVendorId={selectedVendorId}
+							filteredPurchases={filteredPurchases}
+							selectedPurchaseId={selectedPurchaseId}
 							onReturnTypeChange={handleReturnModeChange}
 							onVendorChange={handleVendorChange}
+							onPurchaseCardClick={handlePurchaseCardClick}
 						/>
 					</Box>
-				</Grid.Col>
-				<Grid.Col span={5} pl="xs">
-					<PurchaseCardsPanel
-						filteredPurchases={filteredPurchases}
-						selectedPurchaseId={selectedPurchaseId}
-						selectedReturnMode={selectedReturnMode}
-						selectedVendorId={selectedVendorId}
-						onPurchaseCardClick={handlePurchaseCardClick}
-					/>
 				</Grid.Col>
 				<Grid.Col span={14}>
 					<Box component="form" id="itemsForm" onSubmit={itemsForm.onSubmit(handleSubmit)}>

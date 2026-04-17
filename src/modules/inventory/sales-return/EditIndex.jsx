@@ -3,7 +3,7 @@ import { Box, Center, Grid, Loader, Text } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useParams, useNavigate } from "react-router";
 
-import InvoiceForm from "./form/InvoiceForm";
+import EditInvoiceForm from "./form/EditInvoiceForm";
 import PurchaseOverview from "./Overview";
 import { vendorOverviewRequest } from "./helpers/request";
 import { showNotification } from "@components/ShowNotificationComponent";
@@ -275,7 +275,7 @@ export default function EditIndex() {
 		<Grid columns={24} gutter={0}>
 			<Grid.Col span={6}>
 				<Box p="xs" pr={0}>
-					<InvoiceForm refetch={() => {}} onAddItem={handleAddEditItem} />
+					<EditInvoiceForm onAddItem={handleAddEditItem} />
 				</Box>
 			</Grid.Col>
 			<Grid.Col span={18}>

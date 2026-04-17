@@ -103,7 +103,7 @@ export default function ItemsTableSection({ itemsProducts, refetch, itemsTotal, 
 						},
 						{
 							accessor: "purchase_quantity",
-							title: "Stock",
+							title: "Purchase Qty.",
 							textAlign: "center",
 							width: 120,
 							render: (record) => (
