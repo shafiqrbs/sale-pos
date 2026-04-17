@@ -32,7 +32,7 @@ export default function PurchaseCardsPanel({
 				c="white"
 				className="boxBackground textColor borderRadiusAll"
 			>
-				{t("PurchaseList")}
+				{t("SalesList")}
 			</Box>
 			<Divider />
 			<ScrollArea h={scrollAreaHeight} type="never">

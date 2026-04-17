@@ -1,6 +1,6 @@
 import { ActionIcon, Box, Flex, NumberInput, Text, Button, Badge, Group } from "@mantine/core";
 import { DataTable } from "mantine-datatable";
-import { IconPlus, IconTrashX } from "@tabler/icons-react";
+import { IconList, IconPlus, IconTrashX } from "@tabler/icons-react";
 import tableCss from "@assets/css/Table.module.css";
 import useConfigData from "@hooks/useConfigData";
 import useMainAreaHeight from "@hooks/useMainAreaHeight";
@@ -53,7 +53,7 @@ export default function ItemsTableSection({ itemsProducts, refetch, itemsTotal, 
 						size="xs"
 						color="red"
 						variant="filled"
-						leftSection={<IconPlus size={20} />}
+						leftSection={<IconList size={20} />}
 						onClick={() => navigate(APP_NAVLINKS.SALES_RETURN)}
 					>
 						{t("SalesReturn")}
