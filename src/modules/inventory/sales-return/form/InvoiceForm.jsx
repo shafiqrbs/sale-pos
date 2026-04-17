@@ -77,12 +77,7 @@ export default function InvoiceForm({
 				</Box>
 			</Box>
 			<Divider />
-			<Box px="sm" pt="xs" pb={4}>
-				<Text fz="sm" fw={600}>
-					{t("PurchaseList")}
-				</Text>
-			</Box>
-			<Box px="sm" pb="sm">
+			<Box px="sm" py="sm">
 				<ScrollArea h={purchaseListScrollHeight} type="never">
 					{filteredPurchases.length === 0 ? (
 						<Center py="xl">

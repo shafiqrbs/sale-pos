@@ -165,7 +165,7 @@ export default function NewIndex() {
 	return (
 		<Box p="xs" bg="var(--mantine-color-gray-1)">
 			<Grid columns={24} gutter={0}>
-				<Grid.Col span={10}>
+				<Grid.Col span={6}>
 					<Box>
 						<InvoiceForm
 							vendorOptions={vendorOptions}
@@ -179,7 +179,7 @@ export default function NewIndex() {
 						/>
 					</Box>
 				</Grid.Col>
-				<Grid.Col span={14}>
+				<Grid.Col span={18}>
 					<Box component="form" id="itemsForm" onSubmit={itemsForm.onSubmit(handleSubmit)}>
 						<VendorOverview
 							isAddingItem={isAddingItem}
