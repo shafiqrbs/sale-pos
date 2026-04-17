@@ -6,6 +6,7 @@ export const MASTER_APIS = {
 };
 
 export const APP_NAVLINKS = {
+	ACCOUNTING: "/accounting/voucher-entry",
 	BAKERY: "/pos/bakery",
 	SALES: "/inventory/sales",
 	HOLD_SALES: "/inventory/sales/hold",

@@ -28,6 +28,9 @@ import InvoicePurchaseEditIndex from "@modules/inventory/invoice-purchase/EditIn
 import PurchaseReturnIndex from "@modules/inventory/purchase-return";
 import PurchaseReturnNewIndex from "@modules/inventory/purchase-return/NewIndex";
 import PurchaseReturnEditIndex from "@modules/inventory/purchase-return/EditIndex";
+import SalesReturnIndex from "@modules/inventory/sales-return";
+import SalesReturnNewIndex from "@modules/inventory/sales-return/NewIndex";
+import SalesReturnEditIndex from "@modules/inventory/sales-return/EditIndex";
 import CategorySummary from "@modules/report/category-summary";
 import DamageItem from "@modules/report/damage-item";
 import ProtectedRoute from "./ProtectedRoute";
@@ -66,6 +69,11 @@ export default function AppRoutes() {
 						<Route index element={<InvoicePurchaseIndex />} />
 						<Route path="new" element={<InvoicePurchaseNewIndex />} />
 						<Route path="edit/:id" element={<InvoicePurchaseEditIndex />} />
+					</Route>
+					<Route path="sales-return">
+						<Route index element={<SalesReturnIndex />} />
+						<Route path="new" element={<SalesReturnNewIndex />} />
+						<Route path="edit/:id" element={<SalesReturnEditIndex />} />
 					</Route>
 					<Route path="purchase-return">
 						<Route index element={<PurchaseReturnIndex />} />

@@ -7,10 +7,10 @@ import { useState, useEffect } from "react";
 import { APP_NAVLINKS } from "@/routes/routes";
 import useLoggedInUser from "@hooks/useLoggedInUser";
 
-function Footer() {
+export default function Footer() {
 	const { t } = useTranslation();
 	const { isOnlinePermissionIncludes } = useLoggedInUser();
-	const [zoomLevel, setZoomLevel] = useState(() => {
+	const [ zoomLevel, setZoomLevel ] = useState(() => {
 		const initialZoom = window.zoomAPI.getZoomFactor();
 		return Math.round(initialZoom * 100);
 	});
@@ -22,7 +22,7 @@ function Footer() {
 		{ link: APP_NAVLINKS.PURCHASE_RETURN, label: t("PurchaseReturn") },
 		{ link: APP_NAVLINKS.SALES_RETURN, label: t("SalesReturn") },
 		{ link: APP_NAVLINKS.STOCK, label: t("Stock") },
-		{ link: "/accounting/voucher-entry", label: t("Accounting") },
+		{ link: APP_NAVLINKS.ACCOUNTING, label: t("Accounting") },
 	];
 
 	function zoomIn() {
@@ -69,7 +69,7 @@ function Footer() {
 		</NavLink>
 	));
 
-	const leftLinks = [{ link: "/", label: t("Home") }];
+	const leftLinks = [ { link: "/", label: t("Home") } ];
 
 	const leftItems = leftLinks.map((link) => (
 		<NavLink key={link.label} to={link.link} className={classes.link}>
@@ -116,4 +116,3 @@ function Footer() {
 		</Box>
 	);
 }
-export default Footer;
