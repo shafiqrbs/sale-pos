@@ -3,11 +3,13 @@ import { Grid, Box } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import dayjs from "dayjs";
 import InvoiceForm from "./form/InvoiceForm";
+import PurchaseCardsPanel from "./PurchaseCardsPanel";
 import VendorOverview from "./Overview";
 import { vendorOverviewRequest } from "./helpers/request";
 import { showNotification } from "@components/ShowNotificationComponent";
 import useLoggedInUser from "@hooks/useLoggedInUser";
-import { useAddPurchaseReturnMutation } from "@services/purchase-return";
+import useTransactionMode from "@hooks/useTransactionMode";
+import { useAddPurchaseReturnMutation, useGetVendorWisePurchaseItemsQuery } from "@services/purchase-return";
 import { useTranslation } from "react-i18next";
 
 export default function NewIndex() {
@@ -16,27 +18,34 @@ export default function NewIndex() {
 	const itemsForm = useForm(vendorOverviewRequest(t));
 	const [purchaseItems, setPurchaseItems] = useState([]);
 	const [isAddingItem, setIsAddingItem] = useState(false);
-	const [returnType, setReturnType] = useState(null);
+	const [selectedReturnMode, setSelectedReturnMode] = useState(null);
+	const [selectedVendorId, setSelectedVendorId] = useState(null);
+	const [selectedPurchaseId, setSelectedPurchaseId] = useState(null);
 	const itemIdCounter = useRef(0);
 	const [addPurchaseReturn] = useAddPurchaseReturnMutation();
+	const { transactionMode } = useTransactionMode();
 
-	// =============== add item to state; deduplicate by purchase_item_id (replace qty if same item added again) ===============
-	const handleAddItem = (newItem) => {
-		setPurchaseItems((previous) => {
-			const existingIndex = previous.findIndex(
-				(item) => item.purchase_item_id === newItem.purchase_item_id
-			);
-			if (existingIndex !== -1) {
-				return previous.map((item, index) =>
-					index === existingIndex
-						? { ...item, quantity: newItem.quantity, sub_total: newItem.sub_total }
-						: item
-				);
-			}
-			itemIdCounter.current += 1;
-			return [...previous, { ...newItem, id: itemIdCounter.current }];
-		});
-	};
+	const { data: vendorWisePurchaseItems } = useGetVendorWisePurchaseItemsQuery();
+
+	// =============== build vendor options from api response ===============
+	const vendorOptions =
+		vendorWisePurchaseItems?.data?.map((vendor) => ({
+			value: String(vendor.vendor_id),
+			label: vendor.vendor_name,
+		})) ?? [];
+
+	// =============== find selected vendor object in api data ===============
+	const selectedVendorData = vendorWisePurchaseItems?.data?.find(
+		(vendor) => String(vendor.vendor_id) === selectedVendorId
+	);
+
+	// =============== filter purchases by return mode (requisition flag) ===============
+	const filteredPurchases =
+		selectedVendorData?.purchases?.filter((purchase) => {
+			if (selectedReturnMode === "Requisition") return purchase.is_requisition === 1;
+			if (selectedReturnMode === "General") return !purchase.is_requisition;
+			return true;
+		}) ?? [];
 
 	const handleQuantityChange = (itemId, updatedData) => {
 		setPurchaseItems((previous) =>
@@ -54,9 +63,43 @@ export default function NewIndex() {
 		setPurchaseItems((previous) => previous.filter((item) => item.id !== itemId));
 	};
 
-	// =============== sync vendor_id into itemsForm when selected from InvoiceForm ===============
+	const handleReturnModeChange = (value) => {
+		setSelectedReturnMode(value);
+		setSelectedVendorId(null);
+		setSelectedPurchaseId(null);
+		setPurchaseItems([]);
+		itemIdCounter.current = 0;
+		itemsForm.setFieldValue("vendor_id", "");
+	};
+
 	const handleVendorChange = (vendorId) => {
+		setSelectedVendorId(vendorId ?? null);
+		setSelectedPurchaseId(null);
+		setPurchaseItems([]);
+		itemIdCounter.current = 0;
 		itemsForm.setFieldValue("vendor_id", vendorId ?? "");
+	};
+
+	// =============== clicking a purchase card replaces the items table with all items from that purchase ===============
+	const handlePurchaseCardClick = (purchase) => {
+		setSelectedPurchaseId(String(purchase.id));
+		itemIdCounter.current = 0;
+
+		const newItems = (purchase.items ?? []).map((purchaseItem) => {
+			itemIdCounter.current += 1;
+			return {
+				id: itemIdCounter.current,
+				display_name: purchaseItem.item_name,
+				quantity: 0,
+				purchase_price: purchaseItem.purchase_price,
+				purchase_quantity: purchaseItem.purchase_quantity,
+				sub_total: 0,
+				unit_name: purchaseItem.unit_name ?? "",
+				purchase_item_id: purchaseItem.id,
+			};
+		});
+
+		setPurchaseItems(newItems);
 	};
 
 	const handleSubmit = async (formValues) => {
@@ -70,7 +113,7 @@ export default function NewIndex() {
 			return;
 		}
 
-		if (!returnType) {
+		if (!selectedReturnMode) {
 			showNotification(t("ReturnTypeRequired"), "red");
 			return;
 		}
@@ -93,7 +136,7 @@ export default function NewIndex() {
 				sub_total: (Number(item.quantity) || 0) * (Number(item.purchase_price) || 0),
 			})),
 			narration: formValues.purchaseNarration ?? "",
-			return_type: returnType,
+			return_type: selectedReturnMode,
 		};
 
 		setIsAddingItem(true);
@@ -103,11 +146,18 @@ export default function NewIndex() {
 			showNotification(t("PurchaseReturnSavedSuccessfully"), "teal");
 			setPurchaseItems([]);
 			itemIdCounter.current = 0;
-			setReturnType(null);
+			setSelectedPurchaseId(null);
 			itemsForm.reset();
+
+			itemsForm.setFieldValue("vendor_id", selectedVendorId ?? "");
+			const cashMethod = transactionMode.find((mode) => mode.slug === "cash");
+			if (cashMethod) {
+				itemsForm.setFieldValue("transactionModeId", String(cashMethod.id));
+				itemsForm.setFieldValue("transactionMode", cashMethod.name);
+			}
 		} catch (error) {
 			console.error(error);
-			showNotification(error?.message || "Failed to save purchase return", "red");
+			showNotification(error?.message || t("FailedToSavePurchaseReturn"), "red");
 		} finally {
 			setIsAddingItem(false);
 		}
@@ -116,16 +166,27 @@ export default function NewIndex() {
 	return (
 		<Box p="xs" bg="var(--mantine-color-gray-1)">
 			<Grid columns={24} gutter={0}>
-				<Grid.Col span={8}>
+				<Grid.Col span={5}>
 					<Box>
 						<InvoiceForm
-							onAddItem={handleAddItem}
-							onReturnTypeChange={setReturnType}
+							vendorOptions={vendorOptions}
+							selectedReturnMode={selectedReturnMode}
+							selectedVendorId={selectedVendorId}
+							onReturnTypeChange={handleReturnModeChange}
 							onVendorChange={handleVendorChange}
 						/>
 					</Box>
 				</Grid.Col>
-				<Grid.Col span={16}>
+				<Grid.Col span={5} pl="xs">
+					<PurchaseCardsPanel
+						filteredPurchases={filteredPurchases}
+						selectedPurchaseId={selectedPurchaseId}
+						selectedReturnMode={selectedReturnMode}
+						selectedVendorId={selectedVendorId}
+						onPurchaseCardClick={handlePurchaseCardClick}
+					/>
+				</Grid.Col>
+				<Grid.Col span={14}>
 					<Box component="form" id="itemsForm" onSubmit={itemsForm.onSubmit(handleSubmit)}>
 						<VendorOverview
 							isAddingItem={isAddingItem}

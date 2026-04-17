@@ -121,6 +121,8 @@ export default function ItemsTableSection({ itemsProducts, refetch, itemsTotal, 
 									size="xs"
 									value={record.quantity}
 									min={0}
+									max={record.purchase_quantity}
+									clampBehavior="strict"
 									step={1}
 									hideControls
 									onChange={(value) => handleQuantityChange(record.id, value)}
