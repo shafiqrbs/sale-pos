@@ -1,7 +1,6 @@
 import { ActionIcon, Box, Flex, NumberInput, Text, Button, Badge, Group } from "@mantine/core";
-import { DateInput } from "@mantine/dates";
 import { DataTable } from "mantine-datatable";
-import { IconList, IconPlus, IconTrashX } from "@tabler/icons-react";
+import { IconPlus, IconTrashX } from "@tabler/icons-react";
 import tableCss from "@assets/css/Table.module.css";
 import useConfigData from "@hooks/useConfigData";
 import useMainAreaHeight from "@hooks/useMainAreaHeight";
@@ -12,7 +11,6 @@ import { APP_NAVLINKS } from "@/routes/routes";
 import { useTranslation } from "react-i18next";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import dayjs from "dayjs";
-import KeywordSearch from "@components/KeywordSearch";
 
 dayjs.extend(customParseFormat);
 
@@ -46,7 +44,6 @@ export default function ItemsTableSection({ itemsProducts, refetch, itemsTotal, 
 
 	return (
 		<Box>
-
 			<Flex mb="xs" gap="sm" justify="space-between" align="center">
 				<Box px="xs" fz="sm" fw={600} className="textColor">
 					{t("SalesReturnItems")}

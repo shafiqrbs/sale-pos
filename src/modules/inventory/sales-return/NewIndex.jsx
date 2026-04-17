@@ -8,6 +8,7 @@ import VendorOverview from "./Overview";
 import { vendorOverviewRequest } from "./helpers/request";
 import { showNotification } from "@components/ShowNotificationComponent";
 import useLoggedInUser from "@hooks/useLoggedInUser";
+import useTransactionMode from "@hooks/useTransactionMode";
 import { useAddPurchaseReturnMutation, useGetVendorWisePurchaseItemsQuery } from "@services/purchase-return";
 import { useTranslation } from "react-i18next";
 
@@ -22,6 +23,7 @@ export default function NewIndex() {
 	const [ selectedPurchaseId, setSelectedPurchaseId ] = useState(null);
 	const itemIdCounter = useRef(0);
 	const [ addPurchaseReturn ] = useAddPurchaseReturnMutation();
+	const { transactionMode } = useTransactionMode();
 
 	const { data: vendorWisePurchaseItems } = useGetVendorWisePurchaseItemsQuery();
 
@@ -88,10 +90,10 @@ export default function NewIndex() {
 			return {
 				id: itemIdCounter.current,
 				display_name: purchaseItem.item_name,
-				quantity: purchaseItem.purchase_quantity,
+				quantity: 0,
 				purchase_price: purchaseItem.purchase_price,
 				purchase_quantity: purchaseItem.purchase_quantity,
-				sub_total: purchaseItem.purchase_quantity * purchaseItem.purchase_price,
+				sub_total: 0,
 				unit_name: purchaseItem.unit_name ?? "",
 				purchase_item_id: purchaseItem.id,
 			};
@@ -144,10 +146,15 @@ export default function NewIndex() {
 			showNotification(t("PurchaseReturnSavedSuccessfully"), "teal");
 			setPurchaseItems([]);
 			itemIdCounter.current = 0;
-			setSelectedReturnMode(null);
-			setSelectedVendorId(null);
 			setSelectedPurchaseId(null);
 			itemsForm.reset();
+
+			itemsForm.setFieldValue("vendor_id", selectedVendorId ?? "");
+			const cashMethod = transactionMode.find((mode) => mode.slug === "cash");
+			if (cashMethod) {
+				itemsForm.setFieldValue("transactionModeId", String(cashMethod.id));
+				itemsForm.setFieldValue("transactionMode", cashMethod.name);
+			}
 		} catch (error) {
 			console.error(error);
 			showNotification(error?.message || t("FailedToSavePurchaseReturn"), "red");
