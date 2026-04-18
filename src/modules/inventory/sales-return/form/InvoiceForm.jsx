@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
+	ActionIcon,
 	Badge,
 	Box,
 	Card,
@@ -18,6 +19,9 @@ import { useTranslation } from "react-i18next";
 import useConfigData from "@hooks/useConfigData";
 import useMainAreaHeight from "@hooks/useMainAreaHeight";
 import { formatCurrency } from "@utils/index";
+import { IconX } from "@tabler/icons-react";
+
+const SEARCH_DEBOUNCE_MS = 400;
 
 export default function InvoiceForm({
 	customerOptions,
@@ -26,25 +30,60 @@ export default function InvoiceForm({
 	selectedSaleId,
 	onCustomerChange,
 	onDateChange,
+	onBarcodeChange,
 	onInvoiceSearchChange,
 	onSaleCardClick,
+	salesSearchActive,
 }) {
 	const { t } = useTranslation();
 	const { mainAreaHeight } = useMainAreaHeight();
 	const { currencySymbol } = useConfigData();
-	const purchaseListScrollHeight = Math.max(mainAreaHeight - 6 - 280, 120);
+	const purchaseListScrollHeight = Math.max(mainAreaHeight - 6 - 320, 120);
 
-	const [ invoiceInputValue, setInvoiceInputValue ] = useState("");
-	const [ selectedDate, setSelectedDate ] = useState(null);
+	const [barcodeInputValue, setBarcodeInputValue] = useState("");
+	const [invoiceInputValue, setInvoiceInputValue] = useState("");
+	const [selectedDate, setSelectedDate] = useState(null);
+
+	// =============== refs track latest input so debounced callbacks ignore stale fires after clear or fast edits ===============
+	const barcodeInputRef = useRef("");
+	const invoiceInputRef = useRef("");
+
+	const debouncedBarcodeChange = useDebouncedCallback((value) => {
+		if (barcodeInputRef.current !== value) return;
+		onBarcodeChange(value);
+	}, SEARCH_DEBOUNCE_MS);
 
 	const debouncedInvoiceSearch = useDebouncedCallback((value) => {
+		if (invoiceInputRef.current !== value) return;
 		onInvoiceSearchChange(value);
-	}, 400);
+	}, SEARCH_DEBOUNCE_MS);
+
+	const handleBarcodeInputChange = (event) => {
+		const value = event.currentTarget.value;
+		setBarcodeInputValue(value);
+		barcodeInputRef.current = value;
+		if (value === "") {
+			onBarcodeChange("");
+			return;
+		}
+		debouncedBarcodeChange(value);
+	};
 
 	const handleInvoiceInputChange = (event) => {
 		const value = event.currentTarget.value;
 		setInvoiceInputValue(value);
+		invoiceInputRef.current = value;
+		if (value === "") {
+			onInvoiceSearchChange("");
+			return;
+		}
 		debouncedInvoiceSearch(value);
+	};
+
+	const clearBarcode = () => {
+		setBarcodeInputValue("");
+		barcodeInputRef.current = "";
+		onBarcodeChange("");
 	};
 
 	const handleDateChange = (dateValue) => {
@@ -52,8 +91,8 @@ export default function InvoiceForm({
 		onDateChange(dateValue);
 	};
 
-	const emptyMessage = !selectedCustomerId
-		? t("SelectCustomerFirst")
+	const emptyMessage = !salesSearchActive
+		? t("ApplyAtLeastOneSalesFilter")
 		: t("NoSalesFound");
 
 	return (
@@ -75,6 +114,18 @@ export default function InvoiceForm({
 			</Box>
 			<Divider />
 			<Box p="sm">
+				<TextInput
+					rightSection={
+						barcodeInputValue ? (
+							<ActionIcon variant="subtle" onClick={clearBarcode}>
+								<IconX size={16} color="red" />
+							</ActionIcon>
+						) : null
+					}
+					placeholder={t("Barcode")}
+					value={barcodeInputValue}
+					onChange={handleBarcodeInputChange}
+				/>
 				<Box mt="xs">
 					<Select
 						placeholder={t("Customer")}

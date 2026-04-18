@@ -15,15 +15,17 @@ export default function NewIndex() {
 	const { t } = useTranslation();
 	const { user } = useLoggedInUser();
 	const itemsForm = useForm(vendorOverviewRequest(t));
-	const [salesItems, setSalesItems] = useState([]);
-	const [isAddingItem, setIsAddingItem] = useState(false);
-	const [selectedCustomerId, setSelectedCustomerId] = useState(null);
-	const [selectedSaleId, setSelectedSaleId] = useState(null);
-	const [filterDate, setFilterDate] = useState(null);
-	const [filterInvoice, setFilterInvoice] = useState("");
-	const [customerOptions, setCustomerOptions] = useState([]);
+	const [ salesItems, setSalesItems ] = useState([]);
+	const [ isAddingItem, setIsAddingItem ] = useState(false);
+	const [ selectedCustomerId, setSelectedCustomerId ] = useState(null);
+	const [ selectedSaleId, setSelectedSaleId ] = useState(null);
+	const [ selectedSaleSummary, setSelectedSaleSummary ] = useState(null);
+	const [ filterDate, setFilterDate ] = useState(null);
+	const [ filterBarcode, setFilterBarcode ] = useState("");
+	const [ filterInvoice, setFilterInvoice ] = useState("");
+	const [ customerOptions, setCustomerOptions ] = useState([]);
 	const itemIdCounter = useRef(0);
-	const [addSalesReturn] = useAddSalesReturnMutation();
+	const [ addSalesReturn ] = useAddSalesReturnMutation();
 	const { transactionMode } = useTransactionMode();
 
 	// =============== load customers from local sqlite on mount ===============
@@ -39,22 +41,30 @@ export default function NewIndex() {
 		loadCustomers();
 	}, []);
 
-	// =============== build query params; skip the query when no customer is selected ===============
+	// =============== build query params; fetch when any filter is set (not only customer) ===============
+	// =============== invoice search wins over barcode when both set; avoids barcode stale state blocking invoice ===============
+	const invoiceFilterValue = filterInvoice.trim() || filterBarcode.trim();
+
+	const hasAnySalesFilter = Boolean(
+		selectedCustomerId || filterDate || filterBarcode.trim() || filterInvoice.trim()
+	);
+
 	const queryParams = {
 		...(selectedCustomerId && { customer_id: selectedCustomerId }),
 		...(filterDate && { date: dayjs(filterDate).format("YYYY-MM-DD") }),
-		...(filterInvoice.trim() && { invoice: filterInvoice.trim() }),
+		...(invoiceFilterValue && { invoice: invoiceFilterValue }),
 	};
 
 	const { data: salesReturnItemsData } = useGetSalesReturnItemsQuery(queryParams, {
-		skip: !selectedCustomerId,
+		skip: !hasAnySalesFilter,
 	});
 
-	const filteredSales = salesReturnItemsData?.data ?? [];
+	const filteredSales = hasAnySalesFilter ? (salesReturnItemsData?.data ?? []) : [];
 
 	const handleCustomerChange = (customerId) => {
 		setSelectedCustomerId(customerId ?? null);
 		setSelectedSaleId(null);
+		setSelectedSaleSummary(null);
 		setSalesItems([]);
 		itemIdCounter.current = 0;
 		itemsForm.setFieldValue("customer_id", customerId ?? "");
@@ -63,6 +73,15 @@ export default function NewIndex() {
 	const handleDateChange = (dateValue) => {
 		setFilterDate(dateValue);
 		setSelectedSaleId(null);
+		setSelectedSaleSummary(null);
+		setSalesItems([]);
+		itemIdCounter.current = 0;
+	};
+
+	const handleBarcodeChange = (barcodeValue) => {
+		setFilterBarcode(barcodeValue);
+		setSelectedSaleId(null);
+		setSelectedSaleSummary(null);
 		setSalesItems([]);
 		itemIdCounter.current = 0;
 	};
@@ -70,6 +89,7 @@ export default function NewIndex() {
 	const handleInvoiceSearchChange = (invoiceValue) => {
 		setFilterInvoice(invoiceValue);
 		setSelectedSaleId(null);
+		setSelectedSaleSummary(null);
 		setSalesItems([]);
 		itemIdCounter.current = 0;
 	};
@@ -77,6 +97,7 @@ export default function NewIndex() {
 	// =============== clicking a sale card loads all its items with stock=0 and damage=0 ===============
 	const handleSaleCardClick = (sale) => {
 		setSelectedSaleId(String(sale.id));
+		setSelectedSaleSummary(sale);
 		itemIdCounter.current = 0;
 
 		const newItems = (sale.sales_items ?? []).map((saleItem) => {
@@ -114,32 +135,42 @@ export default function NewIndex() {
 			return;
 		}
 
-		if (!formValues.customer_id) {
-			showNotification(t("CustomerRequired"), "red");
+		if (!selectedSaleId) {
+			showNotification(t("SalesReturnSelectInvoiceFirst"), "red");
 			return;
 		}
+
+		// if (!formValues.customer_id) {
+		// 	showNotification(t("CustomerRequired"), "red");
+		// 	return;
+		// }
 
 		const invoiceDate = formValues.invoice_date
 			? dayjs(formValues.invoice_date).format("YYYY-MM-DD")
 			: dayjs().format("YYYY-MM-DD");
 
 		const payload = {
+			sales_id: Number(selectedSaleId),
 			invoice_date: invoiceDate,
 			issue_by_id: String(user?.id ?? ""),
 			customer_id: String(formValues.customer_id),
-			items: salesItems.map((item) => ({
-				id: item.sale_item_id,
-				display_name: item.display_name,
-				sales_quantity: Number(item.sales_quantity) || 0,
-				stock_quantity: Number(item.stock_quantity) || 0,
-				damage_quantity: Number(item.damage_quantity) || 0,
-				unit_name: item.unit_name ?? "",
-				sales_price: Number(item.sales_price) || 0,
-				sub_total:
-					(Number(item.stock_quantity) || 0) * (Number(item.sales_price) || 0) +
-					(Number(item.damage_quantity) || 0) * (Number(item.sales_price) || 0),
-				warehouse_id: item.warehouse_id,
-			})),
+			items: salesItems.map((item) => {
+				const stockQuantity = Number(item.stock_quantity) || 0;
+				const damageQuantity = Number(item.damage_quantity) || 0;
+				const returnQuantity = stockQuantity + damageQuantity;
+				return {
+					sales_item_id: item.sale_item_id,
+					display_name: item.display_name,
+					sales_quantity: Number(item.sales_quantity) || 0,
+					quantity: returnQuantity,
+					stock_entry_quantity: stockQuantity,
+					damage_entry_quantity: damageQuantity,
+					unit_name: item.unit_name ?? "",
+					sales_price: Number(item.sales_price) || 0,
+					sub_total: Number(item.sub_total) || 0,
+					warehouse_id: item.warehouse_id,
+				};
+			}),
 			narration: formValues.purchaseNarration ?? "",
 		};
 
@@ -151,6 +182,7 @@ export default function NewIndex() {
 			setSalesItems([]);
 			itemIdCounter.current = 0;
 			setSelectedSaleId(null);
+			setSelectedSaleSummary(null);
 			itemsForm.reset();
 
 			// =============== re-sync customer_id and transaction mode after reset ===============
@@ -178,8 +210,10 @@ export default function NewIndex() {
 							selectedCustomerId={selectedCustomerId}
 							filteredSales={filteredSales}
 							selectedSaleId={selectedSaleId}
+							salesSearchActive={hasAnySalesFilter}
 							onCustomerChange={handleCustomerChange}
 							onDateChange={handleDateChange}
+							onBarcodeChange={handleBarcodeChange}
 							onInvoiceSearchChange={handleInvoiceSearchChange}
 							onSaleCardClick={handleSaleCardClick}
 						/>
@@ -191,6 +225,7 @@ export default function NewIndex() {
 							isAddingItem={isAddingItem}
 							itemsForm={itemsForm}
 							itemsProducts={salesItems}
+							selectedSaleSummary={selectedSaleSummary}
 							onItemUpdate={handleItemUpdate}
 							onRemoveItem={handleRemoveItem}
 						/>

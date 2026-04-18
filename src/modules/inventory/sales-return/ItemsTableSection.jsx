@@ -1,4 +1,4 @@
-import { ActionIcon, Box, Flex, NumberInput, Text, Button, Badge, Group } from "@mantine/core";
+import { ActionIcon, Box, Flex, NumberInput, Text, Button, Badge, Group, SimpleGrid } from "@mantine/core";
 import { DataTable } from "mantine-datatable";
 import { IconList, IconTrashX } from "@tabler/icons-react";
 import tableCss from "@assets/css/Table.module.css";
@@ -9,12 +9,68 @@ import { useNavigate } from "react-router";
 import { APP_NAVLINKS } from "@/routes/routes";
 import { useTranslation } from "react-i18next";
 
-export default function ItemsTableSection({ itemsProducts, itemsTotal, onItemUpdate, onRemoveItem }) {
+function formatMoneyOrDash(value, currencySymbol, formatCurrency) {
+	if (value === null || value === undefined || value === "") {
+		return "—";
+	}
+	const numericValue = Number(value);
+	if (!Number.isFinite(numericValue)) {
+		return "—";
+	}
+	return `${currencySymbol} ${formatCurrency(numericValue)}`;
+}
+
+function computeDueAmount(sale) {
+	const balance = sale.balance;
+	if (balance !== null && balance !== undefined && String(balance).trim() !== "") {
+		const numericBalance = Number(balance);
+		if (Number.isFinite(numericBalance)) {
+			return numericBalance;
+		}
+	}
+	const total = Number(sale.total) || 0;
+	const payment = Number(sale.payment) || 0;
+	return total - payment;
+}
+
+function InlineLabelValue({ label, children }) {
+	return (
+		<Box style={{ minWidth: 0, width: "100%" }}>
+			<Text size="xs" lineClamp={1}>
+				<Text component="span" c="dimmed">
+					{label}
+					{": "}
+				</Text>
+				<Text component="span" fw={500}>
+					{children}
+				</Text>
+			</Text>
+		</Box>
+	);
+}
+
+export default function ItemsTableSection({
+	itemsProducts,
+	itemsTotal,
+	selectedSaleSummary,
+	onItemUpdate,
+	onRemoveItem,
+}) {
 	const navigate = useNavigate();
 	const { t } = useTranslation();
 	const { mainAreaHeight } = useMainAreaHeight();
-	const tableHeight = mainAreaHeight - 206;
+	const summaryBlockHeight = selectedSaleSummary ? 72 : 0;
+	const tableHeight = mainAreaHeight - 206 - summaryBlockHeight;
 	const { currencySymbol } = useConfigData();
+
+	// =============== line amount from returned qty × unit price (2dp); qty fields drive this ===============
+	const computeLineSubTotalFromQuantities = (stockQuantity, damageQuantity, salesPrice) => {
+		const returnedQuantity =
+			(Number(stockQuantity) || 0) + (Number(damageQuantity) || 0);
+		const unitPrice = Number(salesPrice) || 0;
+		const raw = Math.max(0, returnedQuantity * unitPrice);
+		return Math.round(raw * 100) / 100;
+	};
 
 	const handleStockQuantityChange = (itemId, value) => {
 		const stockQuantity = parseFloat(value) || 0;
@@ -24,7 +80,11 @@ export default function ItemsTableSection({ itemsProducts, itemsTotal, onItemUpd
 
 		// =============== clamp so stock + damage never exceeds sales quantity ===============
 		const clampedStock = Math.min(stockQuantity, Math.max(0, salesQuantity - damageQuantity));
-		const subTotal = (clampedStock + damageQuantity) * (currentItem?.sales_price || 0);
+		const subTotal = computeLineSubTotalFromQuantities(
+			clampedStock,
+			damageQuantity,
+			currentItem?.sales_price
+		);
 		onItemUpdate(itemId, { stock_quantity: clampedStock, sub_total: subTotal });
 	};
 
@@ -36,8 +96,18 @@ export default function ItemsTableSection({ itemsProducts, itemsTotal, onItemUpd
 
 		// =============== clamp so stock + damage never exceeds sales quantity ===============
 		const clampedDamage = Math.min(damageQuantity, Math.max(0, salesQuantity - stockQuantity));
-		const subTotal = (stockQuantity + clampedDamage) * (currentItem?.sales_price || 0);
+		const subTotal = computeLineSubTotalFromQuantities(
+			stockQuantity,
+			clampedDamage,
+			currentItem?.sales_price
+		);
 		onItemUpdate(itemId, { damage_quantity: clampedDamage, sub_total: subTotal });
+	};
+
+	const handleLineSubTotalChange = (itemId, value) => {
+		const numericValue = value === "" || value === undefined ? 0 : parseFloat(value);
+		const safeValue = Number.isFinite(numericValue) ? Math.max(0, numericValue) : 0;
+		onItemUpdate(itemId, { sub_total: safeValue });
 	};
 
 	const handleRemoveItem = (itemId) => {
@@ -62,6 +132,43 @@ export default function ItemsTableSection({ itemsProducts, itemsTotal, onItemUpd
 					</Button>
 				</Group>
 			</Flex>
+			{selectedSaleSummary ? (
+				<Box
+					mb="xs"
+					ml="xs"
+					p="xs"
+					bg="var(--mantine-color-gray-0)"
+					className="borderRadiusAll"
+					bd="1px solid #dee2e6"
+				>
+					<SimpleGrid cols={5} spacing="6px" verticalSpacing="4px">
+						<InlineLabelValue label={t("Created")}>{selectedSaleSummary.created ?? "—"}</InlineLabelValue>
+						<InlineLabelValue label={t("Invoice")}>{selectedSaleSummary.invoice ?? "—"}</InlineLabelValue>
+						<InlineLabelValue label={t("Name")}>
+							{selectedSaleSummary.customerName ?? "—"}
+						</InlineLabelValue>
+						<InlineLabelValue label={t("Mobile")}>{selectedSaleSummary.customerMobile ?? "—"}</InlineLabelValue>
+						<InlineLabelValue label={t("SubTotal")}>
+							{formatMoneyOrDash(selectedSaleSummary.sub_total, currencySymbol, formatCurrency)}
+						</InlineLabelValue>
+						<InlineLabelValue label={t("Balance")}>
+							{formatMoneyOrDash(selectedSaleSummary.balance, currencySymbol, formatCurrency)}
+						</InlineLabelValue>
+						<InlineLabelValue label={t("Total")}>
+							{formatMoneyOrDash(selectedSaleSummary.total, currencySymbol, formatCurrency)}
+						</InlineLabelValue>
+						<InlineLabelValue label={t("Discount")}>
+							{formatMoneyOrDash(selectedSaleSummary.discount, currencySymbol, formatCurrency)}
+						</InlineLabelValue>
+						<InlineLabelValue label={t("Receive")}>
+							{formatMoneyOrDash(selectedSaleSummary.payment, currencySymbol, formatCurrency)}
+						</InlineLabelValue>
+						<InlineLabelValue label={t("Due")}>
+							{formatMoneyOrDash(computeDueAmount(selectedSaleSummary), currencySymbol, formatCurrency)}
+						</InlineLabelValue>
+					</SimpleGrid>
+				</Box>
+			) : null}
 			<Box pl="xs">
 				<DataTable
 					classNames={{
@@ -88,7 +195,9 @@ export default function ItemsTableSection({ itemsProducts, itemsTotal, onItemUpd
 						{
 							accessor: "display_name",
 							title: t("Name"),
-							render: (record) => <Text size="sm">{record.display_name || "empty"}</Text>,
+							render: (record) => (
+								<Text size="sm">{record.display_name || "—"}</Text>
+							),
 						},
 						{
 							accessor: "unit_name",
@@ -164,17 +273,21 @@ export default function ItemsTableSection({ itemsProducts, itemsTotal, onItemUpd
 							accessor: "subTotal",
 							title: t("SubTotal"),
 							textAlign: "right",
-							width: 110,
-							render: (record) => {
-								const subTotal =
-									((record.stock_quantity || 0) + (record.damage_quantity || 0)) *
-									(record.sales_price || 0);
-								return (
-									<Text size="sm" fw={600}>
-										{currencySymbol} {formatCurrency(subTotal)}
-									</Text>
-								);
-							},
+							width: 120,
+							render: (record) => (
+								<NumberInput
+									size="xs"
+									value={record.sub_total ?? 0}
+									min={0}
+									decimalScale={2}
+									fixedDecimalScale
+									hideControls
+									styles={{ input: { textAlign: "right", fontWeight: 600 } }}
+									leftSection={currencySymbol}
+									leftSectionWidth={28}
+									onChange={(value) => handleLineSubTotalChange(record.id, value)}
+								/>
+							),
 						},
 						{
 							accessor: "action",

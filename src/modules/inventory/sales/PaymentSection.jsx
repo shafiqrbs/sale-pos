@@ -110,22 +110,6 @@ export default function PaymentSection({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ grandTotal ]);
 
-	// =============== auto-sync paymentAmount and single payment amount with grandTotal;
-	// skipped in edit mode because paymentAmount is pre-populated from the stored sale
-	// and overwriting it on every grandTotal change would reset the stored value to 0
-	// on the initial render before editItems are loaded ===============
-	useEffect(() => {
-		if (isEditMode) return;
-
-		if (!isSplitPaymentActive) {
-			itemsForm.setFieldValue("paymentAmount", grandTotal);
-			if (payments.length === 1) {
-				itemsForm.setFieldValue("payments.0.amount", grandTotal);
-			}
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ grandTotal, isSplitPaymentActive ]);
-
 	// =============== fetch customers for drawer ===============
 	async function fetchCustomers() {
 		const data = await window.dbAPI.getDataFromTable("core_customers");
@@ -203,7 +187,7 @@ export default function PaymentSection({
 				remark: "",
 			},
 		]);
-		itemsForm.setFieldValue("paymentAmount", grandTotal);
+		itemsForm.setFieldValue("paymentAmount", 0);
 	};
 
 	const handleHold = () => {

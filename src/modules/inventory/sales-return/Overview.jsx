@@ -7,16 +7,14 @@ export default function Overview({
 	itemsForm,
 	isAddingItem,
 	itemsProducts,
+	selectedSaleSummary = null,
 	onItemUpdate,
 	onRemoveItem,
 	isEditMode = false,
 }) {
 	const itemsTotal = useMemo(() => {
 		return (itemsProducts || []).reduce((accumulator, item) => {
-			const stockQty = item.stock_quantity || 0;
-			const damageQty = item.damage_quantity || 0;
-			const price = item.sales_price || 0;
-			return accumulator + (stockQty + damageQty) * price;
+			return accumulator + (Number(item.sub_total) || 0);
 		}, 0);
 	}, [itemsProducts]);
 
@@ -25,6 +23,7 @@ export default function Overview({
 			<ItemsTableSection
 				itemsProducts={itemsProducts || []}
 				itemsTotal={itemsTotal}
+				selectedSaleSummary={selectedSaleSummary}
 				onItemUpdate={onItemUpdate}
 				onRemoveItem={onRemoveItem}
 			/>

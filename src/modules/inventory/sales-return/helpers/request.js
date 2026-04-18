@@ -20,12 +20,12 @@ export const vendorOverviewRequest = (t) => {
 				}
 				return null;
 			},
-			customer_id: (value) => {
-				if (!value) {
-					return t("CustomerRequired");
-				}
-				return null;
-			},
+			// customer_id: (value) => {
+			// 	if (!value) {
+			// 		return t("CustomerRequired");
+			// 	}
+			// 	return null;
+			// },
 			paymentAmount: (value) => {
 				if (Number(value) <= 0) {
 					return t("PaymentAmountRequired");
