@@ -1,5 +1,17 @@
 import { ActionIcon, Divider, Flex, Grid, Paper, ScrollArea, Text } from "@mantine/core";
-import { IconCurrencyTaka, IconDiscount, IconReceipt, IconReload } from "@tabler/icons-react";
+import {
+	IconArrowBackUp,
+	IconCashRegister,
+	IconDiscount,
+	IconFileInvoice,
+	IconPackages,
+	IconReload,
+	IconShoppingCart,
+	IconSum,
+	IconTrash,
+	IconTruckDelivery,
+	IconWallet,
+} from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 import StatCard from "./StatCard";
 import { formatCurrency } from "@utils/index";
@@ -9,68 +21,75 @@ import useLoggedInUser from "@hooks/useLoggedInUser";
 
 const STAT_ITEMS = [
 	{
-		icon: IconCurrencyTaka,
+		icon: IconWallet,
 		labelKey: "OpeningBalance",
 		valueKey: "totalOpeningBalance",
 		format: "currency",
 		color: "blue",
 	},
 	{
-		icon: IconCurrencyTaka,
+		icon: IconTruckDelivery,
 		labelKey: "PurchaseReceive",
 		valueKey: "totalPurchase",
 		format: "currency",
 		color: "green",
 	},
 	{
-		icon: IconDiscount,
+		icon: IconPackages,
 		labelKey: "TotalStock",
 		valueKey: "totalStock",
 		format: "currency",
 		color: "orange",
 	},
 	{
-		icon: IconReceipt,
+		icon: IconShoppingCart,
 		labelKey: "TotalSales",
 		valueKey: "totalSales",
 		format: "currency",
 		color: "grape",
 	},
 	{
-		icon: IconReceipt,
+		icon: IconDiscount,
 		labelKey: "Discount",
 		valueKey: "totalDiscount",
 		format: "currency",
 		color: "yellow",
 	},
 	{
-		icon: IconReceipt,
+		icon: IconSum,
 		labelKey: "TotalSalesAfterDiscount",
 		valueKey: "total",
 		format: "currency",
 		color: "indigo",
 	},
-	{ icon: IconReceipt, labelKey: "Return", valueKey: "return", format: "currency", color: "gray" },
 	{
-		icon: IconReceipt,
+		icon: IconArrowBackUp,
+		labelKey: "Return",
+		valueKey: "return",
+		format: "currency",
+		color: "gray",
+	},
+	{
+		icon: IconTrash,
 		labelKey: "Wastage/Leftover",
 		valueKey: "wastage",
 		format: "currency",
-		color: "teal",
+		color: "red",
+
 	},
 	{
-		icon: IconReceipt,
+		icon: IconCashRegister,
 		labelKey: "ClosingBalance",
 		valueKey: "totalClosingBalance",
 		format: "currency",
 		color: "violet",
 	},
 	{
-		icon: IconReceipt,
+		icon: IconFileInvoice,
 		labelKey: "TotalInvoices",
 		valueKey: "totalInvoices",
 		format: "currency",
-		color: "red",
+		color: "teal",
 	},
 ];
 

@@ -13,6 +13,7 @@ function getTodayFormatted() {
 const INITIAL_DATA = {
 	totalSales: 0,
 	totalDiscount: 0,
+	total: 0,
 	totalPayment: 0,
 	totalDue: 0,
 	totalInvoices: 0,
@@ -78,8 +79,8 @@ export default function useDailyMatrixData({ offlineFetch = true } = {}) {
 				return;
 			}
 
-			let totalPurchase = 0;
 			let totalSales = 0;
+			let totalAfterDiscount = 0;
 			let totalDiscount = 0;
 			let totalPayment = 0;
 			let totalDue = 0;
@@ -87,12 +88,16 @@ export default function useDailyMatrixData({ offlineFetch = true } = {}) {
 			const productMap = {};
 
 			salesData.forEach((sale) => {
-				const saleTotal = Number(sale.total) || 0;
+				const netAfterDiscount = Number(sale.total) || 0;
 				const saleDiscount = Number(sale.discount) || 0;
+				const subTotal = Number(sale.sub_total) || 0;
+				const grossBeforeDiscount =
+					subTotal > 0 ? subTotal : netAfterDiscount + saleDiscount;
 				const salePayment = Number(sale.payment) || 0;
-				const saleDue = saleTotal - salePayment;
+				const saleDue = netAfterDiscount - salePayment;
 
-				totalSales += saleTotal;
+				totalSales += grossBeforeDiscount;
+				totalAfterDiscount += netAfterDiscount;
 				totalDiscount += saleDiscount;
 				totalPayment += salePayment;
 				totalDue += saleDue;
@@ -169,6 +174,7 @@ export default function useDailyMatrixData({ offlineFetch = true } = {}) {
 			setOfflineData({
 				totalSales,
 				totalDiscount,
+				total: totalAfterDiscount,
 				totalPayment,
 				totalDue,
 				totalInvoices: salesData.length,
