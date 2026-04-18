@@ -197,49 +197,46 @@ export default function ItemsTableSection({
 							),
 						},
 						{
-							accessor: "unit_name",
-							title: t("UOM"),
-							textAlign: "center",
-							width: 70,
-							render: (record) => (
-								<Text size="sm" c="dimmed">
-									{record.unit_name || record.uom || "—"}
-								</Text>
-							),
-						},
-						{
 							accessor: "sales_quantity",
-							title: t("SalesQty"),
+							title: t("Quantity"),
 							textAlign: "center",
 							width: 90,
 							render: (record) => (
 								<Text size="sm" c="dimmed">
-									{record.sales_quantity ?? "—"}
+									{record.sales_quantity ?? "—"}/{record.unit_name || record.uom || "—"}
 								</Text>
+
 							),
 						},
 						{
-							accessor: "current_price",
+							accessor: "sales_price",
 							title: t("Price"),
-							textAlign: "left",
-							width: 115,
+							textAlign: "center",
+							width: 90,
 							render: (record) => (
-								<NumberInput
-									size="xs"
-									value={record.current_price ?? record.sales_price ?? 0}
-									min={0}
-									decimalScale={2}
-									fixedDecimalScale
-									hideControls
-									onChange={(value) => handlePriceChange(record.id, value)}
-								/>
+								<Text size="sm" c="dimmed">
+									{record.sales_price}
+								</Text>
+
+							),
+						},
+						{
+							accessor: "sub_total",
+							title: t("SubTotal"),
+							textAlign: "right",
+							width: 100,
+							render: (record) => (
+								// =============== always reflects original sales_price × qty; never user-editable ===============
+								<Text size="sm" fw={600} c="dimmed">
+									{currencySymbol}&nbsp;{formatCurrency((record?.sales_price * record?.sales_quantity) ?? 0)}
+								</Text>
 							),
 						},
 						{
 							accessor: "stock_quantity",
 							title: t("Stock"),
 							textAlign: "left",
-							width: 110,
+							width: 100,
 							render: (record) => {
 								const maxStock = Math.max(
 									0,
@@ -263,7 +260,7 @@ export default function ItemsTableSection({
 							accessor: "damage_quantity",
 							title: t("Damage"),
 							textAlign: "left",
-							width: 110,
+							width: 100,
 							render: (record) => {
 								const maxDamage = Math.max(
 									0,
@@ -283,37 +280,37 @@ export default function ItemsTableSection({
 								);
 							},
 						},
-
 						{
-							accessor: "subTotal",
-							title: t("SubTotal"),
-							textAlign: "right",
-							width: 120,
+							accessor: "current_price",
+							title: t("Price"),
+							textAlign: "left",
+							width: 115,
 							render: (record) => (
-								// =============== always reflects original sales_price × qty; never user-editable ===============
-								<Text size="sm" fw={600} c="dimmed">
-									{currencySymbol}&nbsp;{formatCurrency(record.sub_total ?? 0)}
-								</Text>
+								<NumberInput
+									size="xs"
+									value={record.current_price ?? record.sales_price ?? 0}
+									min={record.sales_price ?? 0}
+									decimalScale={2}
+									fixedDecimalScale
+									hideControls
+									onChange={(value) => {
+										const minPrice = record.sales_price ?? 0;
+										handlePriceChange(record.id, value < minPrice ? minPrice : value);
+									}}
+								/>
 							),
 						},
+
+
 						{
 							accessor: "total",
 							title: t("Total"),
 							textAlign: "right",
-							width: 130,
+							width: 100,
 							render: (record) => (
-								<NumberInput
-									size="xs"
-									value={record.total ?? 0}
-									min={0}
-									decimalScale={2}
-									fixedDecimalScale
-									hideControls
-									styles={{ input: { textAlign: "right", fontWeight: 600 } }}
-									leftSection={currencySymbol}
-									leftSectionWidth={28}
-									onChange={(value) => handleTotalChange(record.id, value)}
-								/>
+								<Text size="sm" fw={600} c="dimmed">
+									{currencySymbol}&nbsp;{record.total ?? 0}
+								</Text>
 							),
 						},
 

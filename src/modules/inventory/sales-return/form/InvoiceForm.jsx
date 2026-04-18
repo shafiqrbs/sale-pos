@@ -40,7 +40,7 @@ export default function InvoiceForm({
 	const { t } = useTranslation();
 	const { mainAreaHeight } = useMainAreaHeight();
 	const { currencySymbol } = useConfigData();
-	const purchaseListScrollHeight = Math.max(mainAreaHeight - 6 - 320, 120);
+	const purchaseListScrollHeight = Math.max(mainAreaHeight - 6 - 280, 120);
 
 	const [ barcodeInputValue, setBarcodeInputValue ] = useState("");
 	const [ invoiceInputValue, setInvoiceInputValue ] = useState("");
@@ -115,7 +115,7 @@ export default function InvoiceForm({
 				{t("SalesReturn")}
 			</Box>
 			<Divider />
-			<Box p="sm">
+			<Box p="sm" bg={'gray.1'}>
 				<TextInput
 					rightSection={
 						barcodeInputValue ? (
