@@ -7,6 +7,7 @@ import {
 	Center,
 	Divider,
 	Group,
+	LoadingOverlay,
 	ScrollArea,
 	Select,
 	Stack,
@@ -34,15 +35,16 @@ export default function InvoiceForm({
 	onInvoiceSearchChange,
 	onSaleCardClick,
 	salesSearchActive,
+	salesSearchLoading,
 }) {
 	const { t } = useTranslation();
 	const { mainAreaHeight } = useMainAreaHeight();
 	const { currencySymbol } = useConfigData();
 	const purchaseListScrollHeight = Math.max(mainAreaHeight - 6 - 320, 120);
 
-	const [barcodeInputValue, setBarcodeInputValue] = useState("");
-	const [invoiceInputValue, setInvoiceInputValue] = useState("");
-	const [selectedDate, setSelectedDate] = useState(null);
+	const [ barcodeInputValue, setBarcodeInputValue ] = useState("");
+	const [ invoiceInputValue, setInvoiceInputValue ] = useState("");
+	const [ selectedDate, setSelectedDate ] = useState(null);
 
 	// =============== refs track latest input so debounced callbacks ignore stale fires after clear or fast edits ===============
 	const barcodeInputRef = useRef("");
@@ -154,7 +156,13 @@ export default function InvoiceForm({
 				</Box>
 			</Box>
 			<Divider />
-			<Box px="sm" py="sm">
+			<Box px="sm" py="sm" pos="relative">
+				<LoadingOverlay
+					visible={salesSearchLoading}
+					zIndex={1000}
+					overlayProps={{ radius: "sm", blur: 2 }}
+					loaderProps={{ color: "blue" }}
+				/>
 				<ScrollArea h={purchaseListScrollHeight} type="never">
 					{filteredSales.length === 0 ? (
 						<Center py="xl">

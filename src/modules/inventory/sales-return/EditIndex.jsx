@@ -82,8 +82,18 @@ export default function EditIndex() {
 		);
 	};
 
-	const handleEditRemoveItem = (itemId) => {
-		setEditItems((previousItems) => previousItems.filter((item) => item.id !== itemId));
+	const handleEditResetItemRow = (itemId) => {
+		setEditItems((previousItems) =>
+			previousItems.map((item) =>
+				item.id === itemId
+					? {
+							...item,
+							quantity: 0,
+							sub_total: 0,
+						}
+					: item
+			)
+		);
 	};
 
 	// =============== add new item to local state without touching temp_purchase_products table ===============
@@ -287,7 +297,7 @@ export default function EditIndex() {
 						refetch={() => {}}
 						onQuantityChange={handleEditItemUpdate}
 						onPriceChange={handleEditItemUpdate}
-						onRemoveItem={handleEditRemoveItem}
+						onResetItemRow={handleEditResetItemRow}
 						isEditMode={true}
 					/>
 				</Box>

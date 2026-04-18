@@ -1,6 +1,6 @@
 import { ActionIcon, Box, Flex, NumberInput, Text, Button, Badge, Group, SimpleGrid } from "@mantine/core";
 import { DataTable } from "mantine-datatable";
-import { IconList, IconTrashX } from "@tabler/icons-react";
+import { IconList, IconRefresh } from "@tabler/icons-react";
 import tableCss from "@assets/css/Table.module.css";
 import useConfigData from "@hooks/useConfigData";
 import useMainAreaHeight from "@hooks/useMainAreaHeight";
@@ -54,7 +54,7 @@ export default function ItemsTableSection({
 	itemsTotal,
 	selectedSaleSummary,
 	onItemUpdate,
-	onRemoveItem,
+	onResetItemRow,
 }) {
 	const navigate = useNavigate();
 	const { t } = useTranslation();
@@ -63,12 +63,10 @@ export default function ItemsTableSection({
 	const tableHeight = mainAreaHeight - 206 - summaryBlockHeight;
 	const { currencySymbol } = useConfigData();
 
-	// =============== line amount from returned qty × unit price (2dp); qty fields drive this ===============
-	const computeLineSubTotalFromQuantities = (stockQuantity, damageQuantity, salesPrice) => {
-		const returnedQuantity =
-			(Number(stockQuantity) || 0) + (Number(damageQuantity) || 0);
-		const unitPrice = Number(salesPrice) || 0;
-		const raw = Math.max(0, returnedQuantity * unitPrice);
+	// =============== (stock + damage) × price, rounded to 2dp ===============
+	const computeLineAmount = (stockQuantity, damageQuantity, unitPrice) => {
+		const returnedQuantity = (Number(stockQuantity) || 0) + (Number(damageQuantity) || 0);
+		const raw = Math.max(0, returnedQuantity * (Number(unitPrice) || 0));
 		return Math.round(raw * 100) / 100;
 	};
 
@@ -80,12 +78,9 @@ export default function ItemsTableSection({
 
 		// =============== clamp so stock + damage never exceeds sales quantity ===============
 		const clampedStock = Math.min(stockQuantity, Math.max(0, salesQuantity - damageQuantity));
-		const subTotal = computeLineSubTotalFromQuantities(
-			clampedStock,
-			damageQuantity,
-			currentItem?.sales_price
-		);
-		onItemUpdate(itemId, { stock_quantity: clampedStock, sub_total: subTotal });
+		const subTotal = computeLineAmount(clampedStock, damageQuantity, currentItem?.sales_price);
+		const total = computeLineAmount(clampedStock, damageQuantity, currentItem?.current_price ?? currentItem?.sales_price);
+		onItemUpdate(itemId, { stock_quantity: clampedStock, sub_total: subTotal, total });
 	};
 
 	const handleDamageQuantityChange = (itemId, value) => {
@@ -96,22 +91,24 @@ export default function ItemsTableSection({
 
 		// =============== clamp so stock + damage never exceeds sales quantity ===============
 		const clampedDamage = Math.min(damageQuantity, Math.max(0, salesQuantity - stockQuantity));
-		const subTotal = computeLineSubTotalFromQuantities(
-			stockQuantity,
-			clampedDamage,
-			currentItem?.sales_price
-		);
-		onItemUpdate(itemId, { damage_quantity: clampedDamage, sub_total: subTotal });
+		const subTotal = computeLineAmount(stockQuantity, clampedDamage, currentItem?.sales_price);
+		const total = computeLineAmount(stockQuantity, clampedDamage, currentItem?.current_price ?? currentItem?.sales_price);
+		onItemUpdate(itemId, { damage_quantity: clampedDamage, sub_total: subTotal, total });
 	};
 
-	const handleLineSubTotalChange = (itemId, value) => {
+	// =============== price edit: recompute total using new price; sub_total stays on original sales_price ===============
+	const handlePriceChange = (itemId, value) => {
+		const numericValue = parseFloat(value) || 0;
+		const currentItem = itemsProducts.find((item) => item.id === itemId);
+		const total = computeLineAmount(currentItem?.stock_quantity || 0, currentItem?.damage_quantity || 0, numericValue);
+		onItemUpdate(itemId, { current_price: numericValue, total });
+	};
+
+	// =============== user directly edits the total field; nothing else recalculates ===============
+	const handleTotalChange = (itemId, value) => {
 		const numericValue = value === "" || value === undefined ? 0 : parseFloat(value);
 		const safeValue = Number.isFinite(numericValue) ? Math.max(0, numericValue) : 0;
-		onItemUpdate(itemId, { sub_total: safeValue });
-	};
-
-	const handleRemoveItem = (itemId) => {
-		onRemoveItem(itemId);
+		onItemUpdate(itemId, { total: safeValue });
 	};
 
 	return (
@@ -222,8 +219,25 @@ export default function ItemsTableSection({
 							),
 						},
 						{
+							accessor: "current_price",
+							title: t("Price"),
+							textAlign: "left",
+							width: 115,
+							render: (record) => (
+								<NumberInput
+									size="xs"
+									value={record.current_price ?? record.sales_price ?? 0}
+									min={0}
+									decimalScale={2}
+									fixedDecimalScale
+									hideControls
+									onChange={(value) => handlePriceChange(record.id, value)}
+								/>
+							),
+						},
+						{
 							accessor: "stock_quantity",
-							title: t("StockQty"),
+							title: t("Stock"),
 							textAlign: "left",
 							width: 110,
 							render: (record) => {
@@ -247,7 +261,7 @@ export default function ItemsTableSection({
 						},
 						{
 							accessor: "damage_quantity",
-							title: t("DamageQty"),
+							title: t("Damage"),
 							textAlign: "left",
 							width: 110,
 							render: (record) => {
@@ -269,15 +283,28 @@ export default function ItemsTableSection({
 								);
 							},
 						},
+
 						{
 							accessor: "subTotal",
 							title: t("SubTotal"),
 							textAlign: "right",
 							width: 120,
 							render: (record) => (
+								// =============== always reflects original sales_price × qty; never user-editable ===============
+								<Text size="sm" fw={600} c="dimmed">
+									{currencySymbol}&nbsp;{formatCurrency(record.sub_total ?? 0)}
+								</Text>
+							),
+						},
+						{
+							accessor: "total",
+							title: t("Total"),
+							textAlign: "right",
+							width: 130,
+							render: (record) => (
 								<NumberInput
 									size="xs"
-									value={record.sub_total ?? 0}
+									value={record.total ?? 0}
 									min={0}
 									decimalScale={2}
 									fixedDecimalScale
@@ -285,10 +312,11 @@ export default function ItemsTableSection({
 									styles={{ input: { textAlign: "right", fontWeight: 600 } }}
 									leftSection={currencySymbol}
 									leftSectionWidth={28}
-									onChange={(value) => handleLineSubTotalChange(record.id, value)}
+									onChange={(value) => handleTotalChange(record.id, value)}
 								/>
 							),
 						},
+
 						{
 							accessor: "action",
 							title: "",
@@ -300,9 +328,9 @@ export default function ItemsTableSection({
 									variant="light"
 									color="var(--theme-delete-color)"
 									radius="sm"
-									onClick={() => handleRemoveItem(record.id)}
+									onClick={() => onResetItemRow(record.id)}
 								>
-									<IconTrashX size={16} />
+									<IconRefresh size={16} />
 								</ActionIcon>
 							),
 						},

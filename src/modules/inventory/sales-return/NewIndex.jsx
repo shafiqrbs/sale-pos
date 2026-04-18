@@ -55,7 +55,7 @@ export default function NewIndex() {
 		...(invoiceFilterValue && { invoice: invoiceFilterValue }),
 	};
 
-	const { data: salesReturnItemsData } = useGetSalesReturnItemsQuery(queryParams, {
+	const { data: salesReturnItemsData, isLoading: salesSearchLoading, isFetching } = useGetSalesReturnItemsQuery(queryParams, {
 		skip: !hasAnySalesFilter,
 	});
 
@@ -107,9 +107,11 @@ export default function NewIndex() {
 				display_name: saleItem.item_name ?? saleItem.name ?? "",
 				sales_quantity: saleItem.available_return_qty,
 				sales_price: saleItem.sales_price,
+				current_price: saleItem.sales_price,
 				stock_quantity: 0,
 				damage_quantity: 0,
 				sub_total: 0,
+				total: 0,
 				unit_name: saleItem.uom ?? "",
 				sale_item_id: saleItem.id,
 				warehouse_id: saleItem.warehouse_id,
@@ -125,8 +127,21 @@ export default function NewIndex() {
 		);
 	};
 
-	const handleRemoveItem = (itemId) => {
-		setSalesItems((previous) => previous.filter((item) => item.id !== itemId));
+	const handleResetItemRow = (itemId) => {
+		setSalesItems((previous) =>
+			previous.map((item) =>
+				item.id === itemId
+					? {
+							...item,
+							stock_quantity: 0,
+							damage_quantity: 0,
+							sub_total: 0,
+							total: 0,
+							current_price: item.sales_price,
+						}
+					: item
+			)
+		);
 	};
 
 	const handleSubmit = async (formValues) => {
@@ -167,7 +182,7 @@ export default function NewIndex() {
 					damage_entry_quantity: damageQuantity,
 					unit_name: item.unit_name ?? "",
 					sales_price: Number(item.sales_price) || 0,
-					sub_total: Number(item.sub_total) || 0,
+					sub_total: Number(item.total) || 0,
 					warehouse_id: item.warehouse_id,
 				};
 			}),
@@ -206,6 +221,7 @@ export default function NewIndex() {
 				<Grid.Col span={6}>
 					<Box>
 						<InvoiceForm
+							salesSearchLoading={salesSearchLoading || isFetching}
 							customerOptions={customerOptions}
 							selectedCustomerId={selectedCustomerId}
 							filteredSales={filteredSales}
@@ -227,7 +243,7 @@ export default function NewIndex() {
 							itemsProducts={salesItems}
 							selectedSaleSummary={selectedSaleSummary}
 							onItemUpdate={handleItemUpdate}
-							onRemoveItem={handleRemoveItem}
+							onResetItemRow={handleResetItemRow}
 						/>
 					</Box>
 				</Grid.Col>

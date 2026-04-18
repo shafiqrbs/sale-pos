@@ -9,12 +9,12 @@ export default function Overview({
 	itemsProducts,
 	selectedSaleSummary = null,
 	onItemUpdate,
-	onRemoveItem,
+	onResetItemRow,
 	isEditMode = false,
 }) {
 	const itemsTotal = useMemo(() => {
 		return (itemsProducts || []).reduce((accumulator, item) => {
-			return accumulator + (Number(item.sub_total) || 0);
+			return accumulator + (Number(item.total) || 0);
 		}, 0);
 	}, [itemsProducts]);
 
@@ -25,7 +25,7 @@ export default function Overview({
 				itemsTotal={itemsTotal}
 				selectedSaleSummary={selectedSaleSummary}
 				onItemUpdate={onItemUpdate}
-				onRemoveItem={onRemoveItem}
+				onResetItemRow={onResetItemRow}
 			/>
 
 			<PaymentSection
