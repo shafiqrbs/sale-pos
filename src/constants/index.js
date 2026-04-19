@@ -58,7 +58,7 @@ export const SYNC_DATA = [
 		description: "Sync sales data to cloud",
 	},
 	{
-		mode: "purchases",
+		mode: "purchase",
 		description: "Sync purchase records",
 	},
 	{

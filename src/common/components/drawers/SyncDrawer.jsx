@@ -36,19 +36,21 @@ import { useTranslation } from "react-i18next";
 
 const TABLE_MAPPING = {
 	sales: "sales",
-	purchases: "purchases",
+	purchase: "purchase",
 	products: "products",
 	customers: "customers",
 	vendors: "vendors",
 };
 
-const EXPORT_MODES = [ "sales", "purchases", "customers", "vendors" ];
+const EXPORT_MODES = ["sales", "purchase", "customers", "vendors"];
 
 const IMPORT_ITEMS = [
 	{ mode: "platform", label: "Platform Sync", description: "Sync all platform data from server" },
 	{ mode: "customers", label: "Customers", description: "Import customer data from server" },
 	{ mode: "vendors", label: "Vendors", description: "Import vendor data from server" },
 ];
+
+const HOLDABLE_TABLES = ["sales"];
 
 export default function SyncDrawer({
 	configData,
@@ -60,19 +62,19 @@ export default function SyncDrawer({
 	const { t } = useTranslation();
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
-	const [ syncPos ] = useSyncPosMutation();
-	const [ syncRecords, setSyncRecords ] = useState(() => getSyncRecordsFromLocalStorage());
-	const [ loadingStates, setLoadingStates ] = useState(() => {
+	const [syncPos] = useSyncPosMutation();
+	const [syncRecords, setSyncRecords] = useState(() => getSyncRecordsFromLocalStorage());
+	const [loadingStates, setLoadingStates] = useState(() => {
 		return SYNC_DATA.reduce((accumulator, item) => {
-			accumulator[ item.mode ] = false;
+			accumulator[item.mode] = false;
 			return accumulator;
 		}, {});
 	});
-	const [ platformSyncing, setPlatformSyncing ] = useState(false);
-	const [ isInserting, setIsInserting ] = useState(false);
-	const [ insertProgress, setInsertProgress ] = useState(null);
-	const [ activeTab, setActiveTab ] = useState("export");
-	const lastSyncRecord = useMemo(() => getLastSyncRecord(syncRecords), [ syncRecords ]);
+	const [platformSyncing, setPlatformSyncing] = useState(false);
+	const [isInserting, setIsInserting] = useState(false);
+	const [insertProgress, setInsertProgress] = useState(null);
+	const [activeTab, setActiveTab] = useState("export");
+	const lastSyncRecord = useMemo(() => getLastSyncRecord(syncRecords), [syncRecords]);
 
 	useEffect(() => {
 		if (quickPlatformSyncRequested) {
@@ -80,7 +82,7 @@ export default function SyncDrawer({
 			confirmAndSyncPlatform();
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ quickPlatformSyncRequested ]);
+	}, [quickPlatformSyncRequested]);
 
 	const buildSalesSyncPayload = (sale) => {
 		const items = [];
@@ -128,6 +130,27 @@ export default function SyncDrawer({
 		});
 
 		return items;
+	};
+
+	const buildPurchasesSyncPayload = (purchase) => {
+		const purchaseItems = JSON.parse(purchase?.purchase_items || "[]");
+
+		return purchaseItems.map((item) => ({
+			product_id: item?.product_id ?? null,
+			display_name: item?.display_name ?? "",
+			quantity: item?.quantity ?? 0,
+			mrp: item?.mrp ?? 0,
+			purchase_price: item?.purchase_price ?? 0,
+			sales_price: item?.sales_price ?? 0,
+			sub_total: item?.sub_total ?? 0,
+			category_id: item?.category_id ?? null,
+			category_name: item?.category_name ?? "",
+			unit_name: item?.unit_name ?? "",
+			bonus_quantity: item?.bonus_quantity ?? 0,
+			average_price: item?.average_price ?? 0,
+			expired_date: item?.expired_date ?? "",
+			sales_quantity: item?.sales_quantity ?? 0,
+		}));
 	};
 
 	const buildSyncPayload = ({ syncType, syncData }) => {
@@ -192,10 +215,47 @@ export default function SyncDrawer({
 							remark: payment?.remark ?? "",
 						})),
 					})),
+					syn_type: "sales",
 				};
 			}
 
-			case "purchases":
+			case "purchase": {
+				return {
+					...basePayload,
+					content: syncData.map((purchase) => ({
+						id: purchase?.id ?? null,
+						created: purchase?.created ?? "",
+						invoice: purchase?.invoice ?? "",
+
+						sub_total: purchase?.sub_total ?? 0,
+						total: purchase?.total ?? 0,
+						payment: purchase?.payment ?? 0,
+						due: purchase?.due ?? 0,
+						discount: purchase?.discount ?? 0,
+						discount_calculation: purchase?.discount_calculation ?? 0,
+						discount_type: purchase?.discount_type ?? "",
+
+						approved_by_id: purchase?.approved_by_id ?? null,
+
+						vendor_id: purchase?.vendor_id ?? null,
+						vendor_name: purchase?.vendor_name ?? "",
+
+						createdByUser: purchase?.createdByUser ?? "",
+						createdByName: purchase?.createdByName ?? "",
+						createdById: purchase?.createdById ?? null,
+
+						process: purchase?.process ?? "",
+						mode_name: purchase?.mode_name ?? "",
+						transaction_mode_id: purchase?.transaction_mode_id ?? null,
+
+						purchase_mode: purchase?.purchase_mode ?? "manual",
+						balance: purchase?.balance ?? 0,
+
+						purchase_items: buildPurchasesSyncPayload(purchase),
+					})),
+					syn_type: "purchase",
+				};
+			}
 			case "products":
 				return {
 					...basePayload,
@@ -217,16 +277,16 @@ export default function SyncDrawer({
 	const runSync = async (syncOption) => {
 		setLoadingStates((previousStates) => ({
 			...previousStates,
-			[ syncOption ]: true,
+			[syncOption]: true,
 		}));
 
 		try {
 			let tableName = syncOption;
 			let syncData = null;
 
-			tableName = TABLE_MAPPING[ syncOption ] || syncOption;
+			tableName = TABLE_MAPPING[syncOption] || syncOption;
 
-			const fetchOption = syncOption === "sales" ? { status: "completed" } : {};
+			const fetchOption = HOLDABLE_TABLES.includes(syncOption) ? { status: "completed" } : {};
 			syncData = await window.dbAPI.getDataFromTable(tableName, fetchOption);
 
 			const payload = buildSyncPayload({ syncType: syncOption, syncData: syncData || [] });
@@ -250,7 +310,7 @@ export default function SyncDrawer({
 				setSyncRecords(nextSyncRecords);
 
 				// silently destroy the table data after successful sync (preserve hold sales)
-				if (tableName === "sales") {
+				if (HOLDABLE_TABLES.includes(tableName)) {
 					window.dbAPI.deleteDataFromTable(tableName, { status: "completed" });
 				} else {
 					window.dbAPI.destroyTableData(tableName);
@@ -272,7 +332,7 @@ export default function SyncDrawer({
 		} finally {
 			setLoadingStates((previousStates) => ({
 				...previousStates,
-				[ syncOption ]: false,
+				[syncOption]: false,
 			}));
 		}
 	};
@@ -359,10 +419,10 @@ export default function SyncDrawer({
 
 			try {
 				// =============== insert tables one by one so progress displays per-table ================
-				for (const [ table, property ] of Object.entries(DATA_MAP)) {
-					const dataList = Array.isArray(response.data.data[ property ])
-						? response.data.data[ property ]
-						: [ response.data.data[ property ] ];
+				for (const [table, property] of Object.entries(DATA_MAP)) {
+					const dataList = Array.isArray(response.data.data[property])
+						? response.data.data[property]
+						: [response.data.data[property]];
 
 					// =============== config_data is a single object, format it before inserting ================
 					if (table === "config_data") {
@@ -371,7 +431,7 @@ export default function SyncDrawer({
 							data: JSON.stringify(data),
 						}));
 
-						is_pos = dataList[ 0 ]?.inventory_config?.is_pos ?? dataList[ 0 ]?.is_pos ?? 0;
+						is_pos = dataList[0]?.inventory_config?.is_pos ?? dataList[0]?.is_pos ?? 0;
 						await window.dbAPI.clearAndInsertBulk(table, formattedData, { batchSize: 500 });
 					} else {
 						await window.dbAPI.clearAndInsertBulk(table, dataList, { batchSize: 500 });
@@ -386,7 +446,7 @@ export default function SyncDrawer({
 			await window.dbAPI.destroyTableData("invoice_table");
 
 			const targetPath = is_pos ? APP_NAVLINKS.BAKERY : APP_NAVLINKS.SALES_NEW;
-			const hashSegment = window.location.hash.replace(/^#/, "").split("?")[ 0 ];
+			const hashSegment = window.location.hash.replace(/^#/, "").split("?")[0];
 			const currentPathname = hashSegment === "" ? "/" : hashSegment;
 
 			// =============== only adjust route when user is on pos bakery or new sales entry (login-style routing) ================
@@ -409,7 +469,7 @@ export default function SyncDrawer({
 
 			showNotification(t("PlatformDataSyncedSuccessfully"), "teal", "lightgray", "", "", true);
 
-			dispatch(apiSlice.util.invalidateTags([ "Sales" ]));
+			dispatch(apiSlice.util.invalidateTags(["Sales"]));
 
 			setTimeout(() => {
 				void window.dbAPI.reloadApp();
@@ -418,8 +478,8 @@ export default function SyncDrawer({
 			console.error("Error syncing platform data:", error);
 			showNotification(
 				error?.response?.data?.message ||
-				error?.message ||
-				"Failed to sync platform data. Please try again.",
+					error?.message ||
+					"Failed to sync platform data. Please try again.",
 				"red",
 				"",
 				"",
@@ -520,7 +580,7 @@ export default function SyncDrawer({
 											</Text>
 										</Stack>
 										<ActionIcon
-											loading={loadingStates[ item.mode ] || false}
+											loading={loadingStates[item.mode] || false}
 											loaderProps={{
 												children: (
 													<Flex justify="center" align="center" h="100%">
