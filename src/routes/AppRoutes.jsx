@@ -34,6 +34,7 @@ import SalesReturnEditIndex from "@modules/inventory/sales-return/EditIndex";
 import CategorySummary from "@modules/report/category-summary";
 import DamageItem from "@modules/report/damage-item";
 import ProtectedRoute from "./ProtectedRoute";
+import AccountsIndex from "@modules/accounts";
 
 export default function AppRoutes() {
 	return (
@@ -41,6 +42,7 @@ export default function AppRoutes() {
 			<Route path="/activate" element={<Activate />} />
 			<Route path="/login" element={<Login />} />
 			<Route path="/" element={<Layout />}>
+				<Route path="accounting" element={<AccountsIndex />} />
 				<Route path="core">
 					<Route index path="customers" element={<CustomersIndex />} />
 				</Route>
