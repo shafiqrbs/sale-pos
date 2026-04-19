@@ -15,17 +15,17 @@ export default function NewIndex() {
 	const { t } = useTranslation();
 	const { user } = useLoggedInUser();
 	const itemsForm = useForm(vendorOverviewRequest(t));
-	const [ salesItems, setSalesItems ] = useState([]);
-	const [ isAddingItem, setIsAddingItem ] = useState(false);
-	const [ selectedCustomerId, setSelectedCustomerId ] = useState(null);
-	const [ selectedSaleId, setSelectedSaleId ] = useState(null);
-	const [ selectedSaleSummary, setSelectedSaleSummary ] = useState(null);
-	const [ filterDate, setFilterDate ] = useState(null);
-	const [ filterBarcode, setFilterBarcode ] = useState("");
-	const [ filterInvoice, setFilterInvoice ] = useState("");
-	const [ customerOptions, setCustomerOptions ] = useState([]);
+	const [salesItems, setSalesItems] = useState([]);
+	const [isAddingItem, setIsAddingItem] = useState(false);
+	const [selectedCustomerId, setSelectedCustomerId] = useState(null);
+	const [selectedSaleId, setSelectedSaleId] = useState(null);
+	const [selectedSaleSummary, setSelectedSaleSummary] = useState(null);
+	const [filterDate, setFilterDate] = useState(null);
+	const [filterBarcode, setFilterBarcode] = useState("");
+	const [filterInvoice, setFilterInvoice] = useState("");
+	const [customerOptions, setCustomerOptions] = useState([]);
 	const itemIdCounter = useRef(0);
-	const [ addSalesReturn ] = useAddSalesReturnMutation();
+	const [addSalesReturn] = useAddSalesReturnMutation();
 	const { transactionMode } = useTransactionMode();
 
 	// =============== load customers from local sqlite on mount ===============
@@ -55,7 +55,11 @@ export default function NewIndex() {
 		...(invoiceFilterValue && { invoice: invoiceFilterValue }),
 	};
 
-	const { data: salesReturnItemsData, isLoading: salesSearchLoading, isFetching } = useGetSalesReturnItemsQuery(queryParams, {
+	const {
+		data: salesReturnItemsData,
+		isLoading: salesSearchLoading,
+		isFetching,
+	} = useGetSalesReturnItemsQuery(queryParams, {
 		skip: !hasAnySalesFilter,
 	});
 

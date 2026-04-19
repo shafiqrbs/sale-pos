@@ -1,4 +1,14 @@
-import { ActionIcon, Box, Flex, NumberInput, Text, Button, Badge, Group, SimpleGrid } from "@mantine/core";
+import {
+	ActionIcon,
+	Box,
+	Flex,
+	NumberInput,
+	Text,
+	Button,
+	Badge,
+	Group,
+	SimpleGrid,
+} from "@mantine/core";
 import { DataTable } from "mantine-datatable";
 import { IconList, IconRefresh } from "@tabler/icons-react";
 import tableCss from "@assets/css/Table.module.css";
@@ -79,7 +89,11 @@ export default function ItemsTableSection({
 		// =============== clamp so stock + damage never exceeds sales quantity ===============
 		const clampedStock = Math.min(stockQuantity, Math.max(0, salesQuantity - damageQuantity));
 		const subTotal = computeLineAmount(clampedStock, damageQuantity, currentItem?.sales_price);
-		const total = computeLineAmount(clampedStock, damageQuantity, currentItem?.current_price ?? currentItem?.sales_price);
+		const total = computeLineAmount(
+			clampedStock,
+			damageQuantity,
+			currentItem?.current_price ?? currentItem?.sales_price
+		);
 		onItemUpdate(itemId, { stock_quantity: clampedStock, sub_total: subTotal, total });
 	};
 
@@ -92,7 +106,11 @@ export default function ItemsTableSection({
 		// =============== clamp so stock + damage never exceeds sales quantity ===============
 		const clampedDamage = Math.min(damageQuantity, Math.max(0, salesQuantity - stockQuantity));
 		const subTotal = computeLineAmount(stockQuantity, clampedDamage, currentItem?.sales_price);
-		const total = computeLineAmount(stockQuantity, clampedDamage, currentItem?.current_price ?? currentItem?.sales_price);
+		const total = computeLineAmount(
+			stockQuantity,
+			clampedDamage,
+			currentItem?.current_price ?? currentItem?.sales_price
+		);
 		onItemUpdate(itemId, { damage_quantity: clampedDamage, sub_total: subTotal, total });
 	};
 
@@ -100,7 +118,11 @@ export default function ItemsTableSection({
 	const handlePriceChange = (itemId, value) => {
 		const numericValue = parseFloat(value) || 0;
 		const currentItem = itemsProducts.find((item) => item.id === itemId);
-		const total = computeLineAmount(currentItem?.stock_quantity || 0, currentItem?.damage_quantity || 0, numericValue);
+		const total = computeLineAmount(
+			currentItem?.stock_quantity || 0,
+			currentItem?.damage_quantity || 0,
+			numericValue
+		);
 		onItemUpdate(itemId, { current_price: numericValue, total });
 	};
 
@@ -139,12 +161,18 @@ export default function ItemsTableSection({
 					bd="1px solid #dee2e6"
 				>
 					<SimpleGrid cols={5} spacing="6px" verticalSpacing="4px">
-						<InlineLabelValue label={t("Created")}>{selectedSaleSummary.created ?? "—"}</InlineLabelValue>
-						<InlineLabelValue label={t("Invoice")}>{selectedSaleSummary.invoice ?? "—"}</InlineLabelValue>
+						<InlineLabelValue label={t("Created")}>
+							{selectedSaleSummary.created ?? "—"}
+						</InlineLabelValue>
+						<InlineLabelValue label={t("Invoice")}>
+							{selectedSaleSummary.invoice ?? "—"}
+						</InlineLabelValue>
 						<InlineLabelValue label={t("Name")}>
 							{selectedSaleSummary.customerName ?? "—"}
 						</InlineLabelValue>
-						<InlineLabelValue label={t("Mobile")}>{selectedSaleSummary.customerMobile ?? "—"}</InlineLabelValue>
+						<InlineLabelValue label={t("Mobile")}>
+							{selectedSaleSummary.customerMobile ?? "—"}
+						</InlineLabelValue>
 						<InlineLabelValue label={t("SubTotal")}>
 							{formatMoneyOrDash(selectedSaleSummary.sub_total, currencySymbol, formatCurrency)}
 						</InlineLabelValue>
@@ -161,7 +189,11 @@ export default function ItemsTableSection({
 							{formatMoneyOrDash(selectedSaleSummary.payment, currencySymbol, formatCurrency)}
 						</InlineLabelValue>
 						<InlineLabelValue label={t("Due")}>
-							{formatMoneyOrDash(computeDueAmount(selectedSaleSummary), currencySymbol, formatCurrency)}
+							{formatMoneyOrDash(
+								computeDueAmount(selectedSaleSummary),
+								currencySymbol,
+								formatCurrency
+							)}
 						</InlineLabelValue>
 					</SimpleGrid>
 				</Box>
@@ -192,9 +224,7 @@ export default function ItemsTableSection({
 						{
 							accessor: "display_name",
 							title: t("Name"),
-							render: (record) => (
-								<Text size="sm">{record.display_name || "—"}</Text>
-							),
+							render: (record) => <Text size="sm">{record.display_name || "—"}</Text>,
 						},
 						{
 							accessor: "sales_quantity",
@@ -205,19 +235,17 @@ export default function ItemsTableSection({
 								<Text size="sm" c="dimmed">
 									{record.sales_quantity ?? "—"}/{record.unit_name || record.uom || "—"}
 								</Text>
-
 							),
 						},
 						{
 							accessor: "sales_price",
-							title: t("Price"),
+							title: t("S. Price"),
 							textAlign: "center",
 							width: 90,
 							render: (record) => (
 								<Text size="sm" c="dimmed">
 									{record.sales_price}
 								</Text>
-
 							),
 						},
 						{
@@ -228,7 +256,8 @@ export default function ItemsTableSection({
 							render: (record) => (
 								// =============== always reflects original sales_price × qty; never user-editable ===============
 								<Text size="sm" fw={600} c="dimmed">
-									{currencySymbol}&nbsp;{formatCurrency((record?.sales_price * record?.sales_quantity) ?? 0)}
+									{currencySymbol}&nbsp;
+									{formatCurrency(record?.sales_price * record?.sales_quantity)}
 								</Text>
 							),
 						},
@@ -289,18 +318,16 @@ export default function ItemsTableSection({
 								<NumberInput
 									size="xs"
 									value={record.current_price ?? record.sales_price ?? 0}
-									min={record.sales_price ?? 0}
+									min={0}
+									max={record.sales_price}
+									clampBehavior="strict"
 									decimalScale={2}
 									fixedDecimalScale
 									hideControls
-									onChange={(value) => {
-										const minPrice = record.sales_price ?? 0;
-										handlePriceChange(record.id, value < minPrice ? minPrice : value);
-									}}
+									onChange={(value) => handlePriceChange(record.id, value)}
 								/>
 							),
 						},
-
 
 						{
 							accessor: "total",
@@ -337,7 +364,14 @@ export default function ItemsTableSection({
 					noRecordsText={t("NoItemsAdded")}
 				/>
 			</Box>
-			<Box ml="xs" mt="xs" px="xs" py="4xs" bg="var(--theme-tertiary-color-2)" className="borderRadiusAll">
+			<Box
+				ml="xs"
+				mt="xs"
+				px="xs"
+				py="4xs"
+				bg="var(--theme-tertiary-color-2)"
+				className="borderRadiusAll"
+			>
 				<Flex justify="space-between" align="center">
 					<Badge size="xl" bg={"red"}>
 						<Text fz="sm" fw={600}>
