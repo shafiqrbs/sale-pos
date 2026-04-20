@@ -23,6 +23,7 @@ const BOOLEAN_FIELDS = [
 	"is_bonus_quantity",
 	"is_purchase_by_purchase_price",
 	"item_percent",
+	"purchase_online",
 	"is_warehouse",
 ];
 
@@ -37,8 +38,10 @@ const PurchaseForm = ({ height }) => {
 		"dropdown-type": "product-type",
 	});
 
-	const config_purchase = configData?.config_purchase;
-	const domainId = configData?.domain_id;
+	const config_purchase = configData?.inventory_config?.config_purchase;
+	const domainId = configData?.id;
+
+	 console.log(config_purchase);
 
 	useEffect(() => {
 		if (!config_purchase) return;
@@ -70,6 +73,7 @@ const PurchaseForm = ({ height }) => {
 				is_bonus_quantity: config_purchase.is_bonus_quantity || 0,
 				is_purchase_by_purchase_price: config_purchase.is_purchase_by_purchase_price || 0,
 				item_percent: config_purchase.item_percent || 0,
+				purchase_online: config_purchase.purchase_online || 0,
 			},
 			...natureValues,
 		});
@@ -99,7 +103,6 @@ const PurchaseForm = ({ height }) => {
 
 		try {
 			const result = await updatePurchaseConfig({ ...values, domain_id: domainId }).unwrap();
-
 			if (result.data) {
 				showNotification(t("UpdateSuccessfully"), "teal");
 			} else {
@@ -197,6 +200,12 @@ const PurchaseForm = ({ height }) => {
 						</Text>
 					</Box>
 					<Box pl="sm">
+						<InputCheckboxForm
+							form={form}
+							label={t("PurchaseOnline")}
+							field="purchase_online"
+							name="purchase_online"
+						/>
 						<InputCheckboxForm
 							form={form}
 							label={t("PurchaseByPurchasePrice")}

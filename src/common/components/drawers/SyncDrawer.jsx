@@ -215,7 +215,7 @@ export default function SyncDrawer({
 							remark: payment?.remark ?? "",
 						})),
 					})),
-					syn_type: "sales",
+					sync_type: "sales",
 				};
 			}
 
@@ -253,7 +253,7 @@ export default function SyncDrawer({
 
 						purchase_items: buildPurchasesSyncPayload(purchase),
 					})),
-					syn_type: "purchase",
+					sync_type: "purchase",
 				};
 			}
 			case "products":
